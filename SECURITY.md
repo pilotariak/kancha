@@ -17,7 +17,7 @@ As there is no stable release yet, users are encouraged to always update to the 
 | Version              | Supported        |
 | -------------------- | ---------------- |
 | Latest (main branch) | ✅               |
-| Tagged pre-releases  | ⚠️ Best effort   |
+| Tagged pre-releases  | ⚠️ Best effort    |
 | Older commits        | ❌ Not supported |
 
 ## Reporting a Vulnerability
