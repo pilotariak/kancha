@@ -17,6 +17,12 @@ export interface Match {
   id: string;
   tournamentId?: string;
   tournamentName?: string;
+  competitionId?: string;
+  specialty?: string;
+  category?: string;
+  phase?: string;
+  ville?: string;
+  club?: string;
   date: string;
   modality: Modality;
   homeTeam: Team;
