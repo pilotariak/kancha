@@ -6,6 +6,12 @@ interface MatchListParams {
   tournamentId?: string;
   status?: MatchStatus;
   modality?: string;
+  competitionId?: string;
+  specialty?: string;
+  category?: string;
+  phase?: string;
+  ville?: string;
+  club?: string;
 }
 
 export const matchKeys = {
