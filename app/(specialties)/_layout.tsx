@@ -1,7 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { Stack } from "expo-router/stack";
 
-export default function TournamentsLayout() {
+export default function SpecialtiesLayout() {
   return (
     <Stack
       screenOptions={{
@@ -17,9 +17,7 @@ export default function TournamentsLayout() {
         headerBackButtonDisplayMode: "minimal",
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Tournaments" }} />
-      <Stack.Screen name="results" options={{ title: "Results", headerLargeTitle: false }} />
-      <Stack.Screen name="[id]" options={{ headerLargeTitle: false }} />
+      <Stack.Screen name="index" options={{ title: "Specialties" }} />
     </Stack>
   );
 }

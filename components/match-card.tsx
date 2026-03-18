@@ -1,26 +1,27 @@
-import type { Match } from "@/types/match";
-import { MODALITY_LABELS } from "@/types/tournament";
+import { Colors } from "@/constants/theme";
+import type { Result } from "@/types/competition";
 import * as Haptics from "expo-haptics";
 import { type Href, Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { ScoreBadge } from "./score-badge";
 
-const STATUS_STYLES: Record<
-  Match["status"],
-  { color: string; label: string }
-> = {
-  scheduled: { color: "#6B7280", label: "Scheduled" },
-  live: { color: "#EF4444", label: "● Live" },
-  completed: { color: "#10B981", label: "Final" },
-};
-
 interface MatchCardProps {
-  match: Match;
+  match: Result;
   segment: string;
 }
 
+function lineupNames(lineup: Result["clubALineup"]): string | null {
+  if (!lineup) return null;
+  const names = [lineup.player1?.name, lineup.player2?.name].filter(Boolean);
+  return names.length > 0 ? names.join(" / ") : null;
+}
+
 export function MatchCard({ match, segment }: MatchCardProps) {
-  const status = STATUS_STYLES[match.status];
+  const hasScore = match.scoreA !== null && match.scoreA !== undefined
+    && match.scoreB !== null && match.scoreB !== undefined;
+
+  const lineupA = lineupNames(match.clubALineup);
+  const lineupB = lineupNames(match.clubBLineup);
 
   return (
     <Link href={`/${segment}/${match.id}` as Href} asChild>
@@ -34,30 +35,44 @@ export function MatchCard({ match, segment }: MatchCardProps) {
       >
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: Colors.cardBackground,
             borderRadius: 14,
             borderCurve: "continuous",
+            borderWidth: 1,
+            borderColor: Colors.cardBorder,
             padding: 16,
-            gap: 12,
-            boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
+            gap: 10,
           }}
         >
+          {/* Phase + date row */}
           <View
             style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
           >
-            <Text style={{ fontSize: 12, color: status.color, fontWeight: "600" }}>
-              {status.label}
-            </Text>
-            <Text style={{ fontSize: 12, color: "#9CA3AF" }}>
-              {new Date(match.date).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </Text>
+            {match.phase
+              ? (
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: Colors.rojo,
+                    fontWeight: "700",
+                    letterSpacing: 0.8,
+                  }}
+                >
+                  {match.phase.toUpperCase()}
+                </Text>
+              )
+              : <View />}
+            {match.dateMatch && (
+              <Text style={{ fontSize: 11, color: Colors.textMuted }}>
+                {new Date(match.dateMatch).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </Text>
+            )}
           </View>
 
+          {/* Score row */}
           <View
             style={{
               flexDirection: "row",
@@ -66,29 +81,61 @@ export function MatchCard({ match, segment }: MatchCardProps) {
               gap: 8,
             }}
           >
-            <Text
-              style={{ flex: 1, fontSize: 15, fontWeight: "600" }}
-              numberOfLines={1}
-            >
-              {match.homeTeam.name}
-            </Text>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text
+                style={{ fontSize: 15, fontWeight: "700", color: Colors.textPrimary }}
+                numberOfLines={1}
+              >
+                {match.clubA.name}
+              </Text>
+              {lineupA && (
+                <Text style={{ fontSize: 11, color: Colors.textMuted }} numberOfLines={1}>
+                  {lineupA}
+                </Text>
+              )}
+            </View>
 
-            {match.score
-              ? <ScoreBadge score={match.score} size="sm" />
-              : <Text style={{ fontSize: 13, color: "#9CA3AF", fontWeight: "500" }}>vs</Text>}
+            {hasScore
+              ? (
+                <ScoreBadge
+                  scoreA={match.scoreA as number}
+                  scoreB={match.scoreB as number}
+                  size="sm"
+                />
+              )
+              : (
+                <Text style={{ fontSize: 13, color: Colors.textMuted, fontWeight: "500" }}>
+                  vs
+                </Text>
+              )}
 
-            <Text
-              style={{ flex: 1, fontSize: 15, fontWeight: "600", textAlign: "right" }}
-              numberOfLines={1}
-            >
-              {match.awayTeam.name}
-            </Text>
+            <View style={{ flex: 1, gap: 2, alignItems: "flex-end" }}>
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: "700",
+                  textAlign: "right",
+                  color: Colors.textPrimary,
+                }}
+                numberOfLines={1}
+              >
+                {match.clubB.name}
+              </Text>
+              {lineupB && (
+                <Text
+                  style={{ fontSize: 11, color: Colors.textMuted, textAlign: "right" }}
+                  numberOfLines={1}
+                >
+                  {lineupB}
+                </Text>
+              )}
+            </View>
           </View>
 
-          <Text style={{ fontSize: 12, color: "#9CA3AF" }}>
-            {MODALITY_LABELS[match.modality]}
-            {match.tournamentName ? ` · ${match.tournamentName}` : ""}
-            {match.court ? ` · ${match.court}` : ""}
+          {/* Specialty + category */}
+          <Text style={{ fontSize: 11, color: Colors.textMuted, letterSpacing: 0.3 }}>
+            {match.specialty.name}
+            {match.category ? ` · ${match.category}` : ""}
           </Text>
         </View>
       </Pressable>

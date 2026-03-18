@@ -1,6 +1,7 @@
 import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
 import { TournamentCard } from "@/components/tournament-card";
+import { Colors } from "@/constants/theme";
 import { useTournaments } from "@/hooks/use-tournaments";
 import { Link, useSegments } from "expo-router";
 import { FlatList, Pressable, Text, View } from "react-native";
@@ -13,7 +14,7 @@ export default function TournamentsScreen() {
   if (error) return <ErrorState message={error.message} onRetry={refetch} />;
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.ink }}>
       <FlatList
         data={tournaments}
         keyExtractor={(item) => item.id}
@@ -23,22 +24,23 @@ export default function TournamentsScreen() {
           <Link href={`/${segment}/results`} asChild>
             <Pressable
               style={({ pressed }) => ({
-                backgroundColor: "#1D4ED8",
+                backgroundColor: Colors.verde,
                 padding: 14,
                 borderRadius: 12,
+                borderCurve: "continuous",
                 flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
                 marginBottom: 8,
-                opacity: pressed ? 0.9 : 1,
+                opacity: pressed ? 0.85 : 1,
               })}
             >
-              <Text style={{ fontSize: 40, marginRight: 12 }}>🏆</Text>
+              <Text style={{ fontSize: 36, marginRight: 12 }}>🏆</Text>
               <View>
                 <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
                   View All Results
                 </Text>
-                <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>
+                <Text style={{ color: "rgba(255,255,255,0.65)", fontSize: 13 }}>
                   Search by competition, specialty...
                 </Text>
               </View>
@@ -49,7 +51,7 @@ export default function TournamentsScreen() {
         ListEmptyComponent={
           <View style={{ alignItems: "center", paddingTop: 48, gap: 8 }}>
             <Text style={{ fontSize: 40 }}>🏆</Text>
-            <Text style={{ fontSize: 16, color: "#9CA3AF" }}>No tournaments found</Text>
+            <Text style={{ fontSize: 16, color: Colors.textMuted }}>No tournaments found</Text>
           </View>
         }
       />

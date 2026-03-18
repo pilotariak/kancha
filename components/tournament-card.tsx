@@ -1,26 +1,15 @@
-import { MODALITY_LABELS } from "@/types/tournament";
-import type { Tournament } from "@/types/tournament";
+import { Colors } from "@/constants/theme";
+import type { Competition } from "@/types/competition";
 import * as Haptics from "expo-haptics";
 import { type Href, Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
-const STATUS_STYLES: Record<
-  Tournament["status"],
-  { bg: string; text: string; label: string }
-> = {
-  upcoming: { bg: "#EFF6FF", text: "#3B82F6", label: "Upcoming" },
-  active: { bg: "#ECFDF5", text: "#10B981", label: "Active" },
-  completed: { bg: "#F3F4F6", text: "#6B7280", label: "Completed" },
-};
-
 interface TournamentCardProps {
-  tournament: Tournament;
+  tournament: Competition;
   segment: string;
 }
 
 export function TournamentCard({ tournament, segment }: TournamentCardProps) {
-  const status = STATUS_STYLES[tournament.status];
-
   return (
     <Link href={`/${segment}/${tournament.id}` as Href} asChild>
       <Pressable
@@ -33,12 +22,13 @@ export function TournamentCard({ tournament, segment }: TournamentCardProps) {
       >
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: Colors.cardBackground,
             borderRadius: 14,
             borderCurve: "continuous",
+            borderWidth: 1,
+            borderColor: Colors.cardBorder,
             padding: 16,
             gap: 10,
-            boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
           }}
         >
           <View
@@ -49,40 +39,31 @@ export function TournamentCard({ tournament, segment }: TournamentCardProps) {
               gap: 8,
             }}
           >
-            <Text style={{ fontSize: 16, fontWeight: "700", flex: 1 }} numberOfLines={2}>
+            <Text
+              style={{ fontSize: 16, fontWeight: "700", flex: 1, color: Colors.textPrimary }}
+              numberOfLines={2}
+            >
               {tournament.name}
             </Text>
             <View
               style={{
-                backgroundColor: status.bg,
+                backgroundColor: Colors.verdeGlow,
+                borderWidth: 1,
+                borderColor: "rgba(26, 102, 64, 0.35)",
                 paddingHorizontal: 8,
                 paddingVertical: 3,
                 borderRadius: 20,
               }}
             >
-              <Text style={{ fontSize: 11, fontWeight: "600", color: status.text }}>
-                {status.label}
+              <Text style={{ fontSize: 11, fontWeight: "700", color: Colors.verdeBright }}>
+                {tournament.year}
               </Text>
             </View>
           </View>
 
-          <Text style={{ fontSize: 13, color: "#6B7280", fontWeight: "500" }}>
-            {MODALITY_LABELS[tournament.modality]}
-          </Text>
-
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={{ fontSize: 12, color: "#9CA3AF" }}>
-              {new Date(tournament.startDate).toLocaleDateString()} –{" "}
-              {new Date(tournament.endDate).toLocaleDateString()}
-            </Text>
-            <Text style={{ fontSize: 12, color: "#9CA3AF" }}>
-              {tournament.location}
-            </Text>
-          </View>
-
-          {tournament.teamsCount !== undefined && (
-            <Text style={{ fontSize: 12, color: "#9CA3AF" }}>
-              {tournament.teamsCount} teams
+          {tournament.level && (
+            <Text style={{ fontSize: 13, color: Colors.textMuted, fontWeight: "500" }}>
+              {tournament.level}
             </Text>
           )}
         </View>

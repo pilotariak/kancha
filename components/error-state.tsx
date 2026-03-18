@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/theme";
 import { Pressable, Text, View } from "react-native";
 
 interface ErrorStateProps {
@@ -7,9 +8,18 @@ interface ErrorStateProps {
 
 export function ErrorState({ message = "Something went wrong", onRetry }: ErrorStateProps) {
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 16, padding: 24 }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 16,
+        padding: 24,
+        backgroundColor: Colors.ink,
+      }}
+    >
       <Text style={{ fontSize: 40 }}>⚠️</Text>
-      <Text selectable style={{ color: "#EF4444", fontSize: 15, textAlign: "center" }}>
+      <Text selectable style={{ color: Colors.rojo, fontSize: 15, textAlign: "center" }}>
         {message}
       </Text>
       {onRetry && (
@@ -17,7 +27,7 @@ export function ErrorState({ message = "Something went wrong", onRetry }: ErrorS
           onPress={onRetry}
           style={({ pressed }) => ({
             opacity: pressed ? 0.7 : 1,
-            backgroundColor: "#3B82F6",
+            backgroundColor: Colors.verde,
             paddingHorizontal: 20,
             paddingVertical: 10,
             borderRadius: 8,
