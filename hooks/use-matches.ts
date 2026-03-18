@@ -1,26 +1,20 @@
 import { matchesApi } from "@/api/matches";
-import type { MatchStatus } from "@/types/match";
 import { useQuery } from "@tanstack/react-query";
 
-interface MatchListParams {
-  tournamentId?: string;
-  status?: MatchStatus;
-  modality?: string;
+interface ResultListParams {
   competitionId?: string;
-  specialty?: string;
+  specialtyId?: string;
   category?: string;
   phase?: string;
-  ville?: string;
-  club?: string;
 }
 
 export const matchKeys = {
-  all: ["matches"] as const,
-  list: (params?: MatchListParams) => [...matchKeys.all, "list", params] as const,
+  all: ["results"] as const,
+  list: (params?: ResultListParams) => [...matchKeys.all, "list", params] as const,
   detail: (id: string) => [...matchKeys.all, "detail", id] as const,
 };
 
-export function useMatches(params?: MatchListParams) {
+export function useMatches(params?: ResultListParams) {
   return useQuery({
     queryKey: matchKeys.list(params),
     queryFn: () => matchesApi.list(params),

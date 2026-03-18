@@ -1,8 +1,9 @@
-import type { Score } from "@/types/match";
+import { Colors } from "@/constants/theme";
 import { Text, View } from "react-native";
 
 interface ScoreBadgeProps {
-  score: Score;
+  scoreA: number;
+  scoreB: number;
   size?: "sm" | "md" | "lg";
 }
 
@@ -12,7 +13,7 @@ const SIZES = {
   lg: { fontSize: 28, gap: 12 },
 };
 
-export function ScoreBadge({ score, size = "md" }: ScoreBadgeProps) {
+export function ScoreBadge({ scoreA, scoreB, size = "md" }: ScoreBadgeProps) {
   const { fontSize, gap } = SIZES[size];
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap }}>
@@ -20,28 +21,32 @@ export function ScoreBadge({ score, size = "md" }: ScoreBadgeProps) {
         selectable
         style={{
           fontSize,
-          fontWeight: "800",
+          fontWeight: "700",
           fontVariant: ["tabular-nums"],
+          fontFamily: "Courier New",
           minWidth: fontSize * 1.2,
           textAlign: "center",
+          color: Colors.oro,
         }}
       >
-        {score.home}
+        {scoreA}
       </Text>
-      <Text style={{ fontSize: fontSize * 0.7, color: "#9CA3AF", fontWeight: "300" }}>
-        –
+      <Text style={{ fontSize: fontSize * 0.7, color: Colors.rojo, fontWeight: "700" }}>
+        —
       </Text>
       <Text
         selectable
         style={{
           fontSize,
-          fontWeight: "800",
+          fontWeight: "700",
           fontVariant: ["tabular-nums"],
+          fontFamily: "Courier New",
           minWidth: fontSize * 1.2,
           textAlign: "center",
+          color: Colors.oro,
         }}
       >
-        {score.away}
+        {scoreB}
       </Text>
     </View>
   );

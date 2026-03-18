@@ -1,51 +1,94 @@
 import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
 import { ScoreBadge } from "@/components/score-badge";
+import { Colors } from "@/constants/theme";
 import { useMatch } from "@/hooks/use-matches";
-import { MODALITY_LABELS } from "@/types/tournament";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
-const STATUS_STYLES = {
-  scheduled: { color: "#6B7280", label: "Scheduled" },
-  live: { color: "#EF4444", label: "● Live" },
-  completed: { color: "#10B981", label: "Final" },
-};
+function PlayerRow({
+  label,
+  name,
+  number,
+}: { label: string; name?: string; number?: string | null }) {
+  if (!name) return null;
+  return (
+    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <Text style={{ fontSize: 13, color: Colors.textMuted }}>{label}</Text>
+      <Text selectable style={{ fontSize: 13, fontWeight: "500", color: Colors.textSecondary }}>
+        {number ? `#${number} ` : ""}
+        {name}
+      </Text>
+    </View>
+  );
+}
+
+function SectionCard({ children }: { children: React.ReactNode }) {
+  return (
+    <View
+      style={{
+        backgroundColor: Colors.cardBackground,
+        borderRadius: 14,
+        borderCurve: "continuous",
+        borderWidth: 1,
+        borderColor: Colors.cardBorder,
+        padding: 16,
+        gap: 12,
+      }}
+    >
+      {children}
+    </View>
+  );
+}
 
 export default function MatchDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: match, isLoading, error, refetch } = useMatch(id);
+  const { data: result, isLoading, error, refetch } = useMatch(id);
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState message={error.message} onRetry={refetch} />;
-  if (!match) return null;
+  if (!result) return null;
 
-  const status = STATUS_STYLES[match.status];
+  const hasScore = result.scoreA !== null && result.scoreA !== undefined
+    && result.scoreB !== null && result.scoreB !== undefined;
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: `${match.homeTeam.name} vs ${match.awayTeam.name}`,
+          title: `${result.clubA.name} vs ${result.clubB.name}`,
         }}
       />
-      <ScrollView contentInsetAdjustmentBehavior="automatic">
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        style={{ backgroundColor: Colors.ink }}
+      >
         <View style={{ padding: 16, gap: 16 }}>
           {/* Score card */}
           <View
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: Colors.cardBackground,
               borderRadius: 16,
               borderCurve: "continuous",
+              borderWidth: 1,
+              borderColor: Colors.cardBorder,
               padding: 24,
               alignItems: "center",
               gap: 16,
-              boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
             }}
           >
-            <Text style={{ fontSize: 12, color: status.color, fontWeight: "600" }}>
-              {status.label}
-            </Text>
+            {result.phase && (
+              <Text
+                style={{
+                  fontSize: 10,
+                  color: Colors.rojo,
+                  fontWeight: "700",
+                  letterSpacing: 1,
+                }}
+              >
+                {result.phase.toUpperCase()}
+              </Text>
+            )}
 
             <View
               style={{
@@ -56,101 +99,140 @@ export default function MatchDetailScreen() {
               }}
             >
               <Text
-                style={{ flex: 1, fontSize: 18, fontWeight: "700", textAlign: "center" }}
+                style={{
+                  flex: 1,
+                  fontSize: 18,
+                  fontWeight: "700",
+                  textAlign: "center",
+                  color: Colors.textPrimary,
+                }}
                 numberOfLines={2}
               >
-                {match.homeTeam.name}
+                {result.clubA.name}
               </Text>
 
-              {match.score
-                ? <ScoreBadge score={match.score} size="lg" />
-                : <Text style={{ fontSize: 18, color: "#9CA3AF" }}>vs</Text>}
+              {hasScore
+                ? (
+                  <ScoreBadge
+                    scoreA={result.scoreA as number}
+                    scoreB={result.scoreB as number}
+                    size="lg"
+                  />
+                )
+                : <Text style={{ fontSize: 18, color: Colors.textMuted }}>vs</Text>}
 
               <Text
-                style={{ flex: 1, fontSize: 18, fontWeight: "700", textAlign: "center" }}
+                style={{
+                  flex: 1,
+                  fontSize: 18,
+                  fontWeight: "700",
+                  textAlign: "center",
+                  color: Colors.textPrimary,
+                }}
                 numberOfLines={2}
               >
-                {match.awayTeam.name}
+                {result.clubB.name}
               </Text>
             </View>
 
-            <Text style={{ fontSize: 13, color: "#9CA3AF" }}>
-              {MODALITY_LABELS[match.modality]}
+            <Text style={{ fontSize: 13, color: Colors.textMuted }}>
+              {result.specialty.name}
+              {result.category ? ` · ${result.category}` : ""}
             </Text>
           </View>
 
-          {/* Set-by-set scores */}
-          {match.sets && match.sets.length > 0 && (
-            <View
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: 14,
-                borderCurve: "continuous",
-                padding: 16,
-                gap: 12,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
-              }}
-            >
-              <Text style={{ fontSize: 15, fontWeight: "700" }}>Sets</Text>
-              {match.sets.map((set, index) => (
-                <View
-                  key={index}
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={{ fontSize: 14, color: "#6B7280" }}>Set {index + 1}</Text>
-                  <ScoreBadge score={set} size="sm" />
-                </View>
-              ))}
-            </View>
-          )}
-
           {/* Match details */}
-          <View
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 14,
-              borderCurve: "continuous",
-              padding: 16,
-              gap: 12,
-              boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
-            }}
-          >
-            <Text style={{ fontSize: 15, fontWeight: "700" }}>Details</Text>
+          <SectionCard>
+            <Text style={{ fontSize: 15, fontWeight: "700", color: Colors.textPrimary }}>
+              Details
+            </Text>
 
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={{ fontSize: 13, color: "#9CA3AF" }}>Date</Text>
-              <Text selectable style={{ fontSize: 13, fontWeight: "500" }}>
-                {new Date(match.date).toLocaleString(undefined, {
-                  weekday: "short",
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-            </View>
-
-            {match.court && (
+            {result.dateMatch && (
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Text style={{ fontSize: 13, color: "#9CA3AF" }}>Court</Text>
-                <Text selectable style={{ fontSize: 13, fontWeight: "500" }}>{match.court}</Text>
-              </View>
-            )}
-
-            {match.tournamentName && (
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Text style={{ fontSize: 13, color: "#9CA3AF" }}>Tournament</Text>
-                <Text selectable style={{ fontSize: 13, fontWeight: "500" }}>
-                  {match.tournamentName}
+                <Text style={{ fontSize: 13, color: Colors.textMuted }}>Date</Text>
+                <Text
+                  selectable
+                  style={{ fontSize: 13, fontWeight: "500", color: Colors.textSecondary }}
+                >
+                  {new Date(result.dateMatch).toLocaleDateString(undefined, {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </Text>
               </View>
             )}
-          </View>
+
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Text style={{ fontSize: 13, color: Colors.textMuted }}>Competition</Text>
+              <Text
+                selectable
+                style={{ fontSize: 13, fontWeight: "500", color: Colors.textSecondary }}
+              >
+                {result.competition.name} {result.competition.year}
+              </Text>
+            </View>
+          </SectionCard>
+
+          {/* Lineups */}
+          {(result.clubALineup || result.clubBLineup) && (
+            <SectionCard>
+              <Text style={{ fontSize: 15, fontWeight: "700", color: Colors.textPrimary }}>
+                Lineups
+              </Text>
+
+              {result.clubALineup && (
+                <View style={{ gap: 6 }}>
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      color: Colors.textMuted,
+                      fontWeight: "700",
+                      letterSpacing: 0.8,
+                    }}
+                  >
+                    {result.clubA.name.toUpperCase()}
+                  </Text>
+                  <PlayerRow
+                    label="Player 1"
+                    name={result.clubALineup.player1?.name}
+                    number={result.clubALineup.player1?.number}
+                  />
+                  <PlayerRow
+                    label="Player 2"
+                    name={result.clubALineup.player2?.name}
+                    number={result.clubALineup.player2?.number}
+                  />
+                </View>
+              )}
+
+              {result.clubBLineup && (
+                <View style={{ gap: 6 }}>
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      color: Colors.textMuted,
+                      fontWeight: "700",
+                      letterSpacing: 0.8,
+                    }}
+                  >
+                    {result.clubB.name.toUpperCase()}
+                  </Text>
+                  <PlayerRow
+                    label="Player 1"
+                    name={result.clubBLineup.player1?.name}
+                    number={result.clubBLineup.player1?.number}
+                  />
+                  <PlayerRow
+                    label="Player 2"
+                    name={result.clubBLineup.player2?.name}
+                    number={result.clubBLineup.player2?.number}
+                  />
+                </View>
+              )}
+            </SectionCard>
+          )}
         </View>
       </ScrollView>
     </>

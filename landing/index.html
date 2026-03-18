@@ -1,0 +1,1543 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Track Basque pelota tournaments, match results, and live scores — for iOS and Android."
+    />
+    <title>Kancha · Basque Pelota Tracker</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --ink: #0b0e0f;
+        --paper: #f4ede0;
+        --verde: #1a6640;
+        --verde-bright: #22844f;
+        --verde-glow: rgba(26, 102, 64, 0.15);
+        --rojo: #c82020;
+        --oro: #c9a227;
+        --muted: #707878;
+        --border: rgba(244, 237, 224, 0.1);
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+        background: var(--ink);
+        color: var(--paper);
+        overflow-x: hidden;
+      }
+
+      /* ═══════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════ */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        padding: 22px 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background 0.4s;
+      }
+      nav.scrolled {
+        background: rgba(11, 14, 15, 0.92);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .wordmark {
+        font-family:
+          Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: var(--paper);
+        text-decoration: none;
+      }
+      .wordmark .k {
+        color: var(--rojo);
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+
+      .nav-link {
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(244, 237, 224, 0.5);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        transition: color 0.2s;
+      }
+      .nav-link:hover {
+        color: var(--paper);
+      }
+
+      .btn-nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 20px;
+        background: var(--verde);
+        color: #fff;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        border-radius: 6px;
+        transition:
+          background 0.2s,
+          transform 0.15s;
+      }
+      .btn-nav:hover {
+        background: var(--verde-bright);
+        transform: translateY(-1px);
+      }
+
+      /* ═══════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════ */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding: 140px 60px 100px;
+      }
+
+      .hero-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(26, 102, 64, 0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(26, 102, 64, 0.07) 1px, transparent 1px);
+        background-size: 72px 72px;
+        pointer-events: none;
+      }
+
+      .hero-stripe {
+        position: absolute;
+        top: -30%;
+        right: -8%;
+        width: 48%;
+        height: 160%;
+        background: linear-gradient(160deg, var(--verde) 0%, #082a18 100%);
+        clip-path: polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.2;
+        pointer-events: none;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 680px;
+      }
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: rgba(26, 102, 64, 0.15);
+        border: 1px solid rgba(26, 102, 64, 0.4);
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #4eca80;
+        margin-bottom: 32px;
+        opacity: 0;
+        animation: slideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+      }
+
+      .badge-dot {
+        width: 6px;
+        height: 6px;
+        background: #4eca80;
+        border-radius: 50%;
+        animation: pulse-dot 2.2s ease infinite;
+      }
+
+      .hero-title {
+        font-family:
+          Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+        font-size: clamp(80px, 13vw, 168px);
+        font-weight: 900;
+        line-height: 0.88;
+        letter-spacing: -0.025em;
+        color: var(--paper);
+        margin-bottom: 36px;
+        opacity: 0;
+        animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
+      }
+      .hero-title .accent {
+        color: var(--rojo);
+      }
+
+      .hero-scoreboard {
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 20px;
+        background: rgba(244, 237, 224, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 36px;
+        opacity: 0;
+        animation: slideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+      }
+      .sc-club {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: rgba(244, 237, 224, 0.5);
+      }
+      .sc-num {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--oro);
+        min-width: 22px;
+        text-align: center;
+      }
+      .sc-sep {
+        color: var(--rojo);
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .sc-live {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--rojo);
+        background: rgba(200, 32, 32, 0.1);
+        border: 1px solid rgba(200, 32, 32, 0.3);
+        border-radius: 4px;
+        padding: 2px 7px;
+      }
+
+      .hero-tagline {
+        font-size: clamp(15px, 1.8vw, 20px);
+        line-height: 1.65;
+        color: rgba(244, 237, 224, 0.52);
+        max-width: 460px;
+        margin-bottom: 52px;
+        opacity: 0;
+        animation: slideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards;
+      }
+
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        opacity: 0;
+        animation: slideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
+      }
+
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 32px;
+        background: var(--rojo);
+        color: #fff;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        border-radius: 6px;
+        transition:
+          background 0.2s,
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .btn-primary:hover {
+        background: #d92424;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(200, 32, 32, 0.4);
+      }
+
+      .btn-ghost {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 32px;
+        border: 1.5px solid var(--border);
+        color: rgba(244, 237, 224, 0.6);
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 6px;
+        transition:
+          border-color 0.2s,
+          color 0.2s,
+          transform 0.2s;
+      }
+      .btn-ghost:hover {
+        border-color: var(--verde);
+        color: #4eca80;
+        transform: translateY(-2px);
+      }
+
+      /* Pelota ball */
+      .pelota-wrap {
+        position: absolute;
+        right: 7%;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0;
+        animation: ballAppear 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1s forwards;
+      }
+
+      .pelota {
+        width: clamp(220px, 26vw, 420px);
+        height: clamp(220px, 26vw, 420px);
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 32% 28%,
+          #f5f0e2 0%,
+          #d4c9b0 42%,
+          #a89a7c 100%
+        );
+        box-shadow:
+          inset -28px -28px 70px rgba(0, 0, 0, 0.42),
+          inset 10px 10px 28px rgba(255, 255, 255, 0.18),
+          0 36px 90px rgba(0, 0, 0, 0.58),
+          0 0 0 1px rgba(255, 255, 255, 0.04);
+        position: relative;
+        animation: floatBall 9s ease-in-out infinite 1s;
+      }
+
+      .pelota::before,
+      .pelota::after {
+        content: "";
+        position: absolute;
+        border: 3.5px solid rgba(110, 82, 44, 0.22);
+        border-radius: 50%;
+      }
+      .pelota::before {
+        width: 62%;
+        height: 62%;
+        top: -14%;
+        left: 22%;
+        transform: rotate(25deg);
+      }
+      .pelota::after {
+        width: 62%;
+        height: 62%;
+        bottom: -14%;
+        right: 22%;
+        transform: rotate(-25deg);
+      }
+
+      .pelota-shadow {
+        position: absolute;
+        bottom: -48px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 68%;
+        height: 22px;
+        background: radial-gradient(
+          ellipse,
+          rgba(0, 0, 0, 0.38) 0%,
+          transparent 72%
+        );
+        animation: shadowPulse 9s ease-in-out infinite 1s;
+      }
+
+      /* ═══════════════════════════════════════
+       MARQUEE
+    ═══════════════════════════════════════ */
+      .marquee-strip {
+        background: var(--verde);
+        padding: 15px 0;
+        overflow: hidden;
+      }
+      .marquee-track {
+        display: flex;
+        width: max-content;
+        animation: scrollLeft 28s linear infinite;
+      }
+      .marquee-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 24px;
+        padding: 0 24px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.82);
+        white-space: nowrap;
+      }
+      .marquee-dot {
+        display: inline-block;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.32);
+        border-radius: 50%;
+      }
+
+      /* ═══════════════════════════════════════
+       FEATURES
+    ═══════════════════════════════════════ */
+      .features-section {
+        background: var(--paper);
+        padding: 120px 60px;
+      }
+
+      .eyebrow {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--verde);
+        margin-bottom: 14px;
+      }
+
+      .section-title {
+        font-family: Palatino, "Palatino Linotype", Georgia, serif;
+        font-size: clamp(34px, 4.5vw, 52px);
+        font-weight: 700;
+        line-height: 1.1;
+        color: var(--ink);
+        margin-bottom: 72px;
+        max-width: 540px;
+      }
+
+      .feat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+        background: rgba(0, 0, 0, 0.08);
+      }
+
+      .feat {
+        background: #fff;
+        padding: 44px 40px;
+        position: relative;
+        transition:
+          transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 0.3s;
+      }
+      .feat:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 52px rgba(0, 0, 0, 0.12);
+        z-index: 1;
+      }
+
+      .feat-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--verde);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .feat:hover .feat-bar {
+        transform: scaleX(1);
+      }
+
+      .feat-num {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        color: var(--rojo);
+        margin-bottom: 24px;
+      }
+
+      .feat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 24px;
+      }
+      .feat-icon.v {
+        background: rgba(26, 102, 64, 0.1);
+      }
+      .feat-icon.r {
+        background: rgba(200, 32, 32, 0.08);
+      }
+      .feat-icon.o {
+        background: rgba(201, 162, 39, 0.1);
+      }
+
+      .feat-title {
+        font-family: Palatino, "Palatino Linotype", Georgia, serif;
+        font-size: 21px;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 12px;
+      }
+      .feat-body {
+        font-size: 14px;
+        line-height: 1.72;
+        color: #5c5c5c;
+      }
+
+      /* ═══════════════════════════════════════
+       SHOWCASE
+    ═══════════════════════════════════════ */
+      .showcase-section {
+        background: var(--ink);
+        padding: 120px 60px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .showcase-orb {
+        position: absolute;
+        bottom: -30%;
+        left: -8%;
+        width: 55%;
+        padding-bottom: 55%;
+        background: radial-gradient(
+          circle,
+          rgba(26, 102, 64, 0.12) 0%,
+          transparent 65%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .showcase-text .eyebrow {
+        color: var(--oro);
+      }
+      .showcase-text .section-title {
+        color: var(--paper);
+        margin-bottom: 24px;
+      }
+
+      .showcase-body {
+        font-size: 16px;
+        line-height: 1.75;
+        color: rgba(244, 237, 224, 0.48);
+        margin-bottom: 36px;
+      }
+
+      .check-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .check-list li {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 14px;
+        color: rgba(244, 237, 224, 0.7);
+      }
+      .check-dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: rgba(26, 102, 64, 0.2);
+        border: 1.5px solid rgba(26, 102, 64, 0.45);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .check-dot svg {
+        width: 10px;
+        height: 10px;
+        stroke: #4eca80;
+        fill: none;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* Phone mockups */
+      .phones {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: flex-end;
+        position: relative;
+        z-index: 1;
+      }
+      .phone-tilt-l {
+        transform: translateY(48px) rotate(-2.5deg);
+      }
+      .phone-tilt-r {
+        transform: rotate(2deg);
+      }
+
+      .phone {
+        width: 188px;
+        background: #0f0f0f;
+        border-radius: 38px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        box-shadow:
+          0 48px 80px rgba(0, 0, 0, 0.65),
+          0 0 0 1px rgba(255, 255, 255, 0.04);
+        position: relative;
+      }
+      .phone-inner {
+        padding-bottom: 216%;
+        position: relative;
+      }
+      .phone-content {
+        position: absolute;
+        inset: 0;
+      }
+
+      .phone-island {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 86px;
+        height: 27px;
+        background: #000;
+        border-radius: 20px;
+        z-index: 10;
+      }
+
+      .phone-screen {
+        position: absolute;
+        inset: 0;
+        background: #0d0d0d;
+        padding: 54px 14px 58px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        overflow: hidden;
+      }
+
+      .ps-h {
+        font-family: Palatino, "Palatino Linotype", Georgia, serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--paper);
+        margin-bottom: 8px;
+      }
+
+      .ps-chip {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--verde-bright);
+        background: rgba(26, 102, 64, 0.15);
+        border: 1px solid rgba(26, 102, 64, 0.3);
+        border-radius: 4px;
+        padding: 2px 7px;
+        margin-bottom: 10px;
+      }
+
+      .ps-card {
+        background: rgba(244, 237, 224, 0.04);
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid rgba(244, 237, 224, 0.06);
+        margin-bottom: 2px;
+      }
+      .ps-card-label {
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(244, 237, 224, 0.3);
+        margin-bottom: 7px;
+      }
+      .ps-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .ps-club {
+        font-size: 10px;
+        font-weight: 600;
+        color: rgba(244, 237, 224, 0.72);
+        max-width: 90px;
+      }
+      .ps-score {
+        font-family: "Courier New", monospace;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--oro);
+      }
+
+      .ps-t {
+        background: rgba(244, 237, 224, 0.04);
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid rgba(244, 237, 224, 0.06);
+        margin-bottom: 4px;
+      }
+      .ps-t-name {
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(244, 237, 224, 0.78);
+        margin-bottom: 3px;
+      }
+      .ps-t-meta {
+        font-size: 9px;
+        color: rgba(244, 237, 224, 0.32);
+      }
+      .ps-badge {
+        display: inline-block;
+        margin-top: 5px;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+      .ps-badge.active {
+        color: #4eca80;
+        background: rgba(26, 102, 64, 0.18);
+      }
+      .ps-badge.finals {
+        color: var(--oro);
+        background: rgba(201, 162, 39, 0.12);
+      }
+      .ps-badge.ended {
+        color: rgba(244, 237, 224, 0.3);
+        background: rgba(244, 237, 224, 0.04);
+      }
+
+      .phone-tabbar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 54px;
+        background: rgba(18, 18, 18, 0.98);
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+      }
+      .tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        flex: 1;
+      }
+      .tab-bar {
+        width: 20px;
+        height: 3px;
+        background: rgba(244, 237, 224, 0.2);
+        border-radius: 2px;
+      }
+      .tab-label {
+        font-size: 8px;
+        font-weight: 500;
+        color: rgba(244, 237, 224, 0.3);
+      }
+      .tab.on .tab-bar {
+        background: var(--verde-bright);
+      }
+      .tab.on .tab-label {
+        color: var(--verde-bright);
+      }
+
+      /* ═══════════════════════════════════════
+       DOWNLOAD
+    ═══════════════════════════════════════ */
+      .download-section {
+        background: var(--rojo);
+        padding: 120px 60px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .download-section::before {
+        content: "";
+        position: absolute;
+        top: -60%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        height: 200%;
+        background: radial-gradient(
+          ellipse 70% 60%,
+          rgba(255, 255, 255, 0.09) 0%,
+          transparent 65%
+        );
+        pointer-events: none;
+      }
+
+      .dl-eyebrow {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 18px;
+        position: relative;
+        z-index: 1;
+      }
+      .dl-title {
+        font-family: Palatino, "Palatino Linotype", Georgia, serif;
+        font-size: clamp(40px, 6vw, 72px);
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.05;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+      }
+      .dl-sub {
+        font-size: 17px;
+        color: rgba(255, 255, 255, 0.62);
+        margin-bottom: 56px;
+        position: relative;
+        z-index: 1;
+        max-width: 440px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+      }
+
+      .store-row {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+      }
+
+      .store-btn {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 28px;
+        background: rgba(0, 0, 0, 0.28);
+        border: 1.5px solid rgba(255, 255, 255, 0.18);
+        border-radius: 14px;
+        text-decoration: none;
+        color: #fff;
+        min-width: 188px;
+        transition:
+          background 0.2s,
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .store-btn:hover {
+        background: rgba(0, 0, 0, 0.45);
+        transform: translateY(-4px);
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+      }
+      .store-logo {
+        font-size: 30px;
+        line-height: 1;
+      }
+      .store-info {
+        text-align: left;
+      }
+      .store-small {
+        display: block;
+        font-size: 10px;
+        opacity: 0.6;
+        letter-spacing: 0.04em;
+        margin-bottom: 2px;
+      }
+      .store-big {
+        display: block;
+        font-size: 17px;
+        font-weight: 700;
+      }
+
+      /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+      footer {
+        background: #07090a;
+        padding: 48px 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid rgba(244, 237, 224, 0.05);
+      }
+      .footer-links {
+        display: flex;
+        gap: 28px;
+      }
+      .footer-link {
+        font-size: 12px;
+        color: rgba(244, 237, 224, 0.32);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .footer-link:hover {
+        color: rgba(244, 237, 224, 0.7);
+      }
+      .footer-copy {
+        font-size: 12px;
+        color: rgba(244, 237, 224, 0.22);
+      }
+
+      /* ═══════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════ */
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(28px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes floatBall {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        30% {
+          transform: translateY(-28px) rotate(6deg);
+        }
+        65% {
+          transform: translateY(18px) rotate(-4deg);
+        }
+      }
+
+      @keyframes shadowPulse {
+        0%,
+        100% {
+          transform: translateX(-50%) scaleX(1);
+          opacity: 0.4;
+        }
+        30% {
+          transform: translateX(-50%) scaleX(0.78);
+          opacity: 0.2;
+        }
+        65% {
+          transform: translateX(-50%) scaleX(1.1);
+          opacity: 0.5;
+        }
+      }
+
+      @keyframes ballAppear {
+        from {
+          opacity: 0;
+          transform: translateY(calc(-50% + 60px));
+        }
+        to {
+          opacity: 1;
+          transform: translateY(-50%);
+        }
+      }
+
+      @keyframes scrollLeft {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.65);
+        }
+      }
+
+      /* Scroll reveal */
+      .reveal {
+        opacity: 0;
+        transform: translateY(36px);
+        transition:
+          opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .reveal-d1 {
+        transition-delay: 0.1s;
+      }
+      .reveal-d2 {
+        transition-delay: 0.2s;
+      }
+      .reveal-d3 {
+        transition-delay: 0.3s;
+      }
+
+      /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+      @media (max-width: 1024px) {
+        .hero {
+          padding: 130px 40px 100px;
+        }
+        .pelota-wrap {
+          right: 2%;
+        }
+        .showcase-section {
+          grid-template-columns: 1fr;
+          padding: 80px 40px;
+        }
+        .phones {
+          order: -1;
+        }
+        .features-section,
+        .download-section {
+          padding: 80px 40px;
+        }
+        footer {
+          padding: 40px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        nav {
+          padding: 18px 24px;
+        }
+        .nav-link {
+          display: none;
+        }
+        .hero {
+          padding: 110px 24px 80px;
+        }
+        .pelota-wrap {
+          display: none;
+        }
+        .features-section {
+          padding: 80px 24px;
+        }
+        .feat-grid {
+          grid-template-columns: 1fr;
+          background: none;
+          gap: 12px;
+        }
+        .feat {
+          border-radius: 12px;
+        }
+        .showcase-section {
+          padding: 80px 24px;
+          gap: 48px;
+        }
+        .phones {
+          flex-direction: column;
+          align-items: center;
+        }
+        .phone-tilt-l,
+        .phone-tilt-r {
+          transform: none;
+        }
+        .phone {
+          width: 200px;
+        }
+        .download-section {
+          padding: 80px 24px;
+        }
+        footer {
+          flex-direction: column;
+          gap: 24px;
+          padding: 36px 24px;
+          text-align: center;
+        }
+        .footer-links {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .hero-actions {
+          flex-direction: column;
+        }
+        .btn-primary,
+        .btn-ghost {
+          text-align: center;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ════════════════════════════════════════
+       NAV
+  ════════════════════════════════════════ -->
+    <nav id="nav">
+      <a href="#" class="wordmark"><span class="k">K</span>ANCHA</a>
+      <div class="nav-right">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#app" class="nav-link">The App</a>
+        <a href="#download" class="nav-link">Download</a>
+        <a href="#download" class="btn-nav">Get the App ↗</a>
+      </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════
+       HERO
+  ════════════════════════════════════════ -->
+    <section class="hero">
+      <div class="hero-grid"></div>
+      <div class="hero-stripe"></div>
+
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          Basque Pelota &nbsp;·&nbsp; Pilotariak
+        </div>
+
+        <h1 class="hero-title"><span class="accent">K</span>ANCHA</h1>
+
+        <div class="hero-scoreboard" aria-label="Example live score">
+          <span class="sc-club">Ategorrieta</span>
+          <span class="sc-num">7</span>
+          <span class="sc-sep">—</span>
+          <span class="sc-num">5</span>
+          <span class="sc-club">Biarritz</span>
+          <span class="sc-live">Live</span>
+        </div>
+
+        <p class="hero-tagline">
+          Track every tournament, follow every match, and never miss a score —
+          Basque pelota in the palm of your hand.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#download" class="btn-primary">
+            Download Free
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 8h10M9 4l4 4-4 4" />
+            </svg>
+          </a>
+          <a href="#features" class="btn-ghost">Explore features</a>
+        </div>
+      </div>
+
+      <!-- Floating pelota ball -->
+      <div class="pelota-wrap" aria-hidden="true">
+        <div class="pelota"></div>
+        <div class="pelota-shadow"></div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+       MARQUEE
+  ════════════════════════════════════════ -->
+    <div class="marquee-strip" aria-hidden="true">
+      <div class="marquee-track">
+        <!-- duplicated for seamless loop -->
+        <span class="marquee-item"
+          >Tournaments <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Live Scores <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Clubs <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Specialties <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Pelota Mano <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Cesta Punta <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Remonte <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Pala Corta <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Pilota Eskuz <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Tournaments <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Live Scores <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Clubs <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Specialties <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Pelota Mano <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Cesta Punta <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Remonte <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Pala Corta <span class="marquee-dot"></span
+        ></span>
+        <span class="marquee-item"
+          >Pilota Eskuz <span class="marquee-dot"></span
+        ></span>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+       FEATURES
+  ════════════════════════════════════════ -->
+    <section class="features-section" id="features">
+      <p class="eyebrow reveal">Everything you need</p>
+      <h2 class="section-title reveal">Built for the true<br />pelota fan.</h2>
+
+      <div class="feat-grid">
+        <div class="feat reveal reveal-d1">
+          <div class="feat-bar"></div>
+          <div class="feat-num">01</div>
+          <div class="feat-icon v">🏆</div>
+          <h3 class="feat-title">Tournaments</h3>
+          <p class="feat-body">Browse all competitions by season and league.</p>
+        </div>
+        <div class="feat reveal reveal-d2">
+          <div class="feat-bar"></div>
+          <div class="feat-num">02</div>
+          <div class="feat-icon r">📊</div>
+          <h3 class="feat-title">Matches &amp; Scores</h3>
+          <p class="feat-body">
+            Full match results with scores, club lineups, phases, and
+            categories. Filter by competition, specialty, or phase to find
+            exactly what you need.
+          </p>
+        </div>
+        <div class="feat reveal reveal-d3">
+          <div class="feat-bar"></div>
+          <div class="feat-num">03</div>
+          <div class="feat-icon o">🎾</div>
+          <h3 class="feat-title">Specialties</h3>
+          <p class="feat-body">
+            Paleta Goma, Pala Ancha, Pala Corta, ... — explore all pelota
+            disciplines and discover what makes each one unique.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+       SHOWCASE
+  ════════════════════════════════════════ -->
+    <section class="showcase-section" id="app">
+      <div class="showcase-orb"></div>
+
+      <div class="showcase-text reveal">
+        <p class="eyebrow">Designed for mobile</p>
+        <h2 class="section-title">Every match,<br />in your pocket.</h2>
+        <p class="showcase-body">
+          Kancha is a native iOS and Android app built with Expo — fast, fluid,
+          and designed to feel right at home on your device.
+        </p>
+        <ul class="check-list">
+          <li>
+            <span class="check-dot">
+              <svg viewBox="0 0 10 10" aria-hidden="true">
+                <polyline points="1.5,5 4,7.5 8.5,2.5" />
+              </svg>
+            </span>
+            Real-time data via GraphQL
+          </li>
+          <li>
+            <span class="check-dot">
+              <svg viewBox="0 0 10 10" aria-hidden="true">
+                <polyline points="1.5,5 4,7.5 8.5,2.5" />
+              </svg>
+            </span>
+            Offline-ready with intelligent caching
+          </li>
+          <li>
+            <span class="check-dot">
+              <svg viewBox="0 0 10 10" aria-hidden="true">
+                <polyline points="1.5,5 4,7.5 8.5,2.5" />
+              </svg>
+            </span>
+            Native tab navigation on iOS &amp; Android
+          </li>
+          <li>
+            <span class="check-dot">
+              <svg viewBox="0 0 10 10" aria-hidden="true">
+                <polyline points="1.5,5 4,7.5 8.5,2.5" />
+              </svg>
+            </span>
+            Full club lineups and player details
+          </li>
+          <li>
+            <span class="check-dot">
+              <svg viewBox="0 0 10 10" aria-hidden="true">
+                <polyline points="1.5,5 4,7.5 8.5,2.5" />
+              </svg>
+            </span>
+            Open source · Apache 2.0 licensed
+          </li>
+        </ul>
+      </div>
+
+      <!-- Phone mockups -->
+      <div class="phones reveal reveal-d2" aria-hidden="true">
+        <!-- Phone 1: Matches screen -->
+        <div class="phone-tilt-l">
+          <div class="phone">
+            <div class="phone-inner">
+              <div class="phone-content">
+                <div class="phone-island"></div>
+                <div class="phone-screen">
+                  <div class="ps-h">Matches</div>
+                  <span class="ps-chip">LCAPB 2025</span>
+                  <div class="ps-card">
+                    <div class="ps-card-label">Pelota Mano · Final</div>
+                    <div class="ps-row">
+                      <span class="ps-club">Ategorrieta</span
+                      ><span class="ps-score">7</span>
+                    </div>
+                    <div class="ps-row" style="margin-top: 5px">
+                      <span class="ps-club">Biarritz</span
+                      ><span class="ps-score">5</span>
+                    </div>
+                  </div>
+                  <div class="ps-card">
+                    <div class="ps-card-label">Cesta Punta · Semi</div>
+                    <div class="ps-row">
+                      <span class="ps-club">Villabona</span
+                      ><span class="ps-score">6</span>
+                    </div>
+                    <div class="ps-row" style="margin-top: 5px">
+                      <span class="ps-club">Rentería</span
+                      ><span class="ps-score">4</span>
+                    </div>
+                  </div>
+                  <div class="ps-card">
+                    <div class="ps-card-label">Pala Corta · Quarter</div>
+                    <div class="ps-row">
+                      <span class="ps-club">Hernani</span
+                      ><span class="ps-score">5</span>
+                    </div>
+                    <div class="ps-row" style="margin-top: 5px">
+                      <span class="ps-club">Irún</span
+                      ><span class="ps-score">3</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="phone-tabbar">
+                  <div class="tab">
+                    <div class="tab-bar"></div>
+                    <span class="tab-label">Torneo</span>
+                  </div>
+                  <div class="tab">
+                    <div class="tab-bar"></div>
+                    <span class="tab-label">Clubs</span>
+                  </div>
+                  <div class="tab on">
+                    <div class="tab-bar"></div>
+                    <span class="tab-label">Matches</span>
+                  </div>
+                  <div class="tab">
+                    <div class="tab-bar"></div>
+                    <span class="tab-label">Esp.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 2: Tournaments screen -->
+        <div class="phone-tilt-r">
+          <div class="phone">
+            <div class="phone-inner">
+              <div class="phone-content">
+                <div class="phone-island"></div>
+                <div class="phone-screen">
+                  <div class="ps-h">Tournaments</div>
+                  <div class="ps-t">
+                    <div class="ps-t-name">Txapelketa Nagusia</div>
+                    <div class="ps-t-meta">2025 · LCAPB</div>
+                    <span class="ps-badge active">Active</span>
+                  </div>
+                  <div class="ps-t">
+                    <div class="ps-t-name">Copa del Rey Pelota</div>
+                    <div class="ps-t-meta">2025 · National</div>
+                    <span class="ps-badge finals">Finals</span>
+                  </div>
+                  <div class="ps-t">
+                    <div class="ps-t-name">Championnat de France</div>
+                    <div class="ps-t-meta">2024 · FFP</div>
+                    <span class="ps-badge ended">Ended</span>
+                  </div>
+                  <div class="ps-t">
+                    <div class="ps-t-name">Mundialito Infantil</div>
+                    <div class="ps-t-meta">2024 · Regional</div>
+                    <span class="ps-badge ended">Ended</span>
+                  </div>
+                </div>
+                <div class="phone-tabbar">
+                  <div class="tab on">
+                    <div class="tab-bar"></div>
+                    <span class="tab-label">Torneo</span>
+                  </div>
+                  <div class="tab">
+                    <div class="tab-bar"></div>
+                    <span class="tab-label">Clubs</span>
+                  </div>
+                  <div class="tab">
+                    <div class="tab-bar"></div>
+                    <span class="tab-label">Matches</span>
+                  </div>
+                  <div class="tab">
+                    <div class="tab-bar"></div>
+                    <span class="tab-label">Esp.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+       DOWNLOAD
+  ════════════════════════════════════════ -->
+    <section class="download-section" id="download">
+      <p class="dl-eyebrow reveal">Available now</p>
+      <h2 class="dl-title reveal">Ready to play?</h2>
+      <p class="dl-sub reveal">
+        Free to download. No account required.<br />Just open and follow the
+        game you love.
+      </p>
+      <div class="store-row reveal">
+        <a href="#" class="store-btn" aria-label="Download on the App Store">
+          <span class="store-logo">🍎</span>
+          <div class="store-info">
+            <span class="store-small">Download on the</span>
+            <span class="store-big">App Store</span>
+          </div>
+        </a>
+        <a href="#" class="store-btn" aria-label="Get it on Google Play">
+          <span class="store-logo" style="font-size: 26px">▶</span>
+          <div class="store-info">
+            <span class="store-small">Get it on</span>
+            <span class="store-big">Google Play</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════ -->
+    <footer>
+      <a href="#" class="wordmark" style="font-size: 18px"
+        ><span class="k">K</span>ANCHA</a
+      >
+      <div class="footer-links">
+        <a href="#features" class="footer-link">Features</a>
+        <a href="#" class="footer-link">Privacy</a>
+        <a href="https://github.com/Pilotariak/kancha" class="footer-link"
+          >GitHub</a
+        >
+        <a href="#" class="footer-link">Contact</a>
+      </div>
+      <p class="footer-copy">© 2025 Pilotariak · Open source</p>
+    </footer>
+
+    <script>
+      // Sticky nav background on scroll
+      const nav = document.getElementById("nav");
+      window.addEventListener(
+        "scroll",
+        () => {
+          nav.classList.toggle("scrolled", window.scrollY > 40);
+        },
+        { passive: true },
+      );
+
+      // Scroll-reveal with IntersectionObserver
+      const observer = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          }),
+        { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+      );
+      document
+        .querySelectorAll(".reveal")
+        .forEach((el) => observer.observe(el));
+
+      // Smooth scroll for in-page anchors
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          const id = a.getAttribute("href").slice(1);
+          const target = id && document.getElementById(id);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
