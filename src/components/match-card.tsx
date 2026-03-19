@@ -7,7 +7,6 @@ import { ScoreBadge } from "./score-badge";
 
 interface MatchCardProps {
   match: Result;
-  segment: string;
 }
 
 function lineupNames(lineup: Result["clubALineup"]): string | null {
@@ -16,7 +15,7 @@ function lineupNames(lineup: Result["clubALineup"]): string | null {
   return names.length > 0 ? names.join(" / ") : null;
 }
 
-export function MatchCard({ match, segment }: MatchCardProps) {
+export function MatchCard({ match }: MatchCardProps) {
   const hasScore = match.scoreA !== null && match.scoreA !== undefined
     && match.scoreB !== null && match.scoreB !== undefined;
 
@@ -24,7 +23,7 @@ export function MatchCard({ match, segment }: MatchCardProps) {
   const lineupB = lineupNames(match.clubBLineup);
 
   return (
-    <Link href={`/${segment}/${match.id}` as Href} asChild>
+    <Link href={`/(tournaments)/result/${match.id}` as Href} asChild>
       <Pressable
         onPress={() => {
           if (process.env.EXPO_OS === "ios") {
