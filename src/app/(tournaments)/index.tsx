@@ -17,12 +17,26 @@ export default function TournamentsScreen() {
         data={tournaments}
         keyExtractor={(item) => item.id}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ padding: 16, gap: 12 }}
+        contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 10 }}
+        ListHeaderComponent={tournaments && tournaments.length > 0
+          ? (
+            <View style={{ paddingBottom: 4 }}>
+              <Text style={{ fontSize: 13, color: Colors.textMuted, fontWeight: "500" }}>
+                {tournaments.length} tournament{tournaments.length !== 1 ? "s" : ""}
+              </Text>
+            </View>
+          )
+          : null}
         renderItem={({ item }) => <TournamentCard tournament={item} />}
         ListEmptyComponent={
-          <View style={{ alignItems: "center", paddingTop: 48, gap: 8 }}>
-            <Text style={{ fontSize: 40 }}>🏆</Text>
-            <Text style={{ fontSize: 16, color: Colors.textMuted }}>No tournaments found</Text>
+          <View style={{ alignItems: "center", paddingTop: 64, gap: 12 }}>
+            <Text style={{ fontSize: 48 }}>🏆</Text>
+            <Text style={{ fontSize: 17, fontWeight: "600", color: Colors.textSecondary }}>
+              No tournaments yet
+            </Text>
+            <Text style={{ fontSize: 14, color: Colors.textMuted, textAlign: "center" }}>
+              Check back later for upcoming competitions
+            </Text>
           </View>
         }
       />

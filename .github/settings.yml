@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Copyright (C) Nicolas Lamirault <nicolas.lamirault@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+---
+_extends: .github:.github/settings.yml
+
+# repo-specific settings
+
+repository:
+  name: kancha
+  description: An iOS and Android application for Pilotariak in React Native
+  topics: react-native, android, ios, pilotaria
+
+labels:
+  ## AREA
+
+  - name: "area/ios"
+    description: "The iOS platform"
+    color: "cc317c"
+
+  - name: "area/android"
+    description: "The Android platform"
+    color: "cc317c"
+
+  ## DEPENDENCY
+
+  - name: "dependency/typescript"
+    description: "Dependency Typescript"
+    color: "6fcb70"

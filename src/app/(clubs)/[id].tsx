@@ -4,14 +4,12 @@ import { MatchCard } from "@/components/match-card";
 import { Colors } from "@/constants/theme";
 import { useClub } from "@/hooks/use-clubs";
 import { useMatches } from "@/hooks/use-matches";
-import { Stack, useLocalSearchParams, useSegments } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
 import { FlatList, Text, View } from "react-native";
 
 export default function ClubDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const segment = useSegments()[0] ?? "(clubs)";
-
   const { data: club, isLoading: clubLoading, error: clubError, refetch } = useClub(id);
   const { data: allMatches, isLoading: matchesLoading } = useMatches();
 
@@ -84,7 +82,7 @@ export default function ClubDetailScreen() {
             </Text>
           </View>
         }
-        renderItem={({ item }) => <MatchCard match={item} segment={segment} />}
+        renderItem={({ item }) => <MatchCard match={item} />}
         ListEmptyComponent={
           <View style={{ alignItems: "center", paddingTop: 32, gap: 8 }}>
             <Text style={{ fontSize: 32 }}>🏟️</Text>
