@@ -11,7 +11,7 @@ const RESULT_SUMMARY_FIELDS = `
   clubA { id name }
   clubB { id name }
   specialty { id name }
-  competition { id name year level }
+  competition { id name }
   clubALineup {
     player1 { name }
     player2 { name }

@@ -20,9 +20,7 @@ export interface ClubLineup {
 
 export interface Competition {
   id: string;
-  year: number;
   name: string;
-  level?: string | null;
 }
 
 export interface Result {

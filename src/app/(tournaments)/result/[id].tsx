@@ -55,9 +55,7 @@ export default function MatchDetailScreen() {
   return (
     <>
       <Stack.Screen
-        options={{
-          title: `${result.clubA.name} vs ${result.clubB.name}`,
-        }}
+        options={{ title: `${result.clubA.name} vs ${result.clubB.name}` }}
       />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
@@ -170,7 +168,7 @@ export default function MatchDetailScreen() {
                 selectable
                 style={{ fontSize: 13, fontWeight: "500", color: Colors.textSecondary }}
               >
-                {result.competition.name} {result.competition.year}
+                {result.competition.name}
               </Text>
             </View>
           </SectionCard>

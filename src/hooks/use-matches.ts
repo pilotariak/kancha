@@ -14,10 +14,11 @@ export const matchKeys = {
   detail: (id: string) => [...matchKeys.all, "detail", id] as const,
 };
 
-export function useMatches(params?: ResultListParams) {
+export function useMatches(params?: ResultListParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: matchKeys.list(params),
     queryFn: () => matchesApi.list(params),
+    enabled: options?.enabled ?? true,
   });
 }
 

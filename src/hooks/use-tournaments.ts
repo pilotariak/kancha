@@ -3,14 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 
 export const tournamentKeys = {
   all: ["competitions"] as const,
-  list: (params?: { year?: number }) => [...tournamentKeys.all, "list", params] as const,
+  list: () => [...tournamentKeys.all, "list"] as const,
   detail: (id: string) => [...tournamentKeys.all, "detail", id] as const,
 };
 
-export function useTournaments(params?: { year?: number }) {
+export function useTournaments() {
   return useQuery({
-    queryKey: tournamentKeys.list(params),
-    queryFn: () => tournamentsApi.list(params),
+    queryKey: tournamentKeys.list(),
+    queryFn: () => tournamentsApi.list(),
   });
 }
 

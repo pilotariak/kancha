@@ -3,14 +3,12 @@ import { graphqlRequest } from "./client";
 
 const COMPETITION_FIELDS = `
   id
-  year
   name
-  level
 `;
 
 const LIST_COMPETITIONS = `
-  query ListCompetitions($year: Int) {
-    competitions(year: $year) {
+  query ListCompetitions {
+    competitions {
       ${COMPETITION_FIELDS}
     }
   }
@@ -25,11 +23,10 @@ const GET_COMPETITION = `
 `;
 
 export const tournamentsApi = {
-  list: (params?: { year?: number }): Promise<Competition[]> =>
-    graphqlRequest<{ competitions: Competition[] }, { year?: number }>(
-      LIST_COMPETITIONS,
-      params?.year !== undefined ? { year: params.year } : undefined,
-    ).then((d) => d.competitions),
+  list: (): Promise<Competition[]> =>
+    graphqlRequest<{ competitions: Competition[] }>(LIST_COMPETITIONS).then(
+      (d) => d.competitions,
+    ),
 
   get: (id: string): Promise<Competition> =>
     graphqlRequest<{ competition: Competition }, { id: string }>(GET_COMPETITION, { id }).then(

@@ -18,8 +18,8 @@ export default function TournamentsLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Tournaments" }} />
-      <Stack.Screen name="results" options={{ title: "Results", headerLargeTitle: false }} />
       <Stack.Screen name="[id]" options={{ headerLargeTitle: false }} />
+      <Stack.Screen name="result/[id]" options={{ headerLargeTitle: false }} />
     </Stack>
   );
 }
