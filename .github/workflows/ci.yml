@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ---
-name: CI
+name: Build / Typescript
 
 on: # yamllint disable-line rule:truthy
   push:
