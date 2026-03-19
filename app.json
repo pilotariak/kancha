@@ -8,11 +8,6 @@
     "scheme": "kancha",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./src/assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "io.pilotariak.kancha",
@@ -35,6 +30,19 @@
     },
     "plugins": [
       ["expo-router", { "root": "src/app" }],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0b0e0f",
+          "image": "./src/assets/images/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#0b0e0f",
+            "image": "./src/assets/images/splash-icon.png"
+          }
+        }
+      ],
       "expo-secure-store"
     ],
     "experiments": {

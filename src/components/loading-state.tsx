@@ -12,13 +12,15 @@ export function LoadingState({ message = "Loading..." }: LoadingStateProps) {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        gap: 12,
+        gap: 14,
         padding: 24,
         backgroundColor: Colors.ink,
       }}
     >
-      <ActivityIndicator size="large" color={Colors.verde} />
-      <Text style={{ color: Colors.textMuted, fontSize: 14 }}>{message}</Text>
+      <ActivityIndicator size="large" color={Colors.verdeBright} />
+      <Text style={{ color: Colors.textSecondary, fontSize: 14, fontWeight: "500" }}>
+        {message}
+      </Text>
     </View>
   );
 }

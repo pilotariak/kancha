@@ -46,6 +46,20 @@ export const Colors = {
   inputBackground: "rgba(244, 237, 224, 0.06)",
   inputText: "#f4ede0",
   inputPlaceholder: "rgba(244, 237, 224, 0.3)",
+
+  // Score / match card
+  scoreBg: "rgba(201, 162, 39, 0.12)",
+  scoreBorder: "rgba(201, 162, 39, 0.25)",
+  /** Winner team highlight */
+  winnerText: "#f4ede0",
+  winnerDot: "#22844f",
+  /** Phase pill */
+  phaseBg: "rgba(200, 32, 32, 0.15)",
+  phaseBorder: "rgba(200, 32, 32, 0.3)",
+
+  // Card left accent bar
+  accentBar: "#1a6640",
+  divider: "rgba(244, 237, 224, 0.06)",
 } as const;
 
 export const Typography = {
