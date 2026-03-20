@@ -132,13 +132,13 @@ export default function HomeScreen() {
 
             <PressableScale
               style={styles.featuredCard}
-              onPress={() => router.push("/(tabs)/tournaments/details")}
+              onPress={() => router.push("/(tabs)/competitions/details")}
               testID="home-featured-tournament"
             >
               <View style={styles.featuredHeader}>
                 <View>
                   <Text style={styles.featuredEyebrow}>
-                    Featured tournament
+                    Featured competition
                   </Text>
                   <Text style={styles.featuredTitle}>
                     {featuredTournament.name}
@@ -266,11 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#B70F2A",
     paddingVertical: 18,
     paddingHorizontal: 8,
-    shadowColor: KanchaColors.shadow,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 1,
-    shadowRadius: 22,
-    elevation: 8,
+    boxShadow: "0 12px 22px rgba(103, 18, 31, 0.14)",
   },
   metricItem: {
     flex: 1,

@@ -22,7 +22,7 @@ const GET_COMPETITION = `
   }
 `;
 
-export const tournamentsApi = {
+export const competitionsApi = {
   list: (): Promise<Competition[]> =>
     graphqlRequest<{ competitions: Competition[] }>(LIST_COMPETITIONS).then(
       (d) => d.competitions,

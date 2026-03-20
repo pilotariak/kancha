@@ -30,7 +30,7 @@ const formats = [
   "Round robin",
 ] as const;
 
-export default function NewTournamentScreen() {
+export default function NewCompetitionScreen() {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [name, setName] = useState<string>("Txapelketa Bayonne 2026");
   const [date, setDate] = useState<string>("12/04/2026");
@@ -41,7 +41,7 @@ export default function NewTournamentScreen() {
   const [playerCount] = useState<string>("14 teams");
 
   const nextLabel = useMemo(
-    () => currentStep === stepTitles.length - 1 ? "Tournament ready" : "Continue",
+    () => currentStep === stepTitles.length - 1 ? "Competition ready" : "Continue",
     [currentStep],
   );
 
@@ -56,10 +56,10 @@ export default function NewTournamentScreen() {
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
-          testID="new-tournament-screen"
+          testID="new-competition-screen"
         >
           <View style={styles.hero}>
-            <Text style={styles.title}>New tournament</Text>
+            <Text style={styles.title}>New competition</Text>
             <Text style={styles.subtitle}>
               A guided setup flow for format, players, scheduling, and standings.
             </Text>
@@ -97,12 +97,12 @@ export default function NewTournamentScreen() {
           </View>
 
           <View style={styles.formCard}>
-            <Text style={styles.label}>Tournament name</Text>
+            <Text style={styles.label}>Competition name</Text>
             <TextInput
               value={name}
               onChangeText={setName}
               style={styles.input}
-              testID="input-tournament-name"
+              testID="input-competition-name"
             />
 
             <Text style={styles.label}>Start date</Text>
@@ -111,7 +111,7 @@ export default function NewTournamentScreen() {
                 value={date}
                 onChangeText={setDate}
                 style={styles.inputFlexible}
-                testID="input-tournament-date"
+                testID="input-competition-date"
               />
               <CalendarDays color={KanchaColors.ink} size={18} />
             </View>
@@ -121,7 +121,7 @@ export default function NewTournamentScreen() {
               value={venue}
               onChangeText={setVenue}
               style={styles.input}
-              testID="input-tournament-venue"
+              testID="input-competition-venue"
             />
 
             <Text style={styles.label}>Discipline</Text>
@@ -210,7 +210,7 @@ export default function NewTournamentScreen() {
               </Text>
             </View>
 
-            <PressableScale onPress={goNext} testID="new-tournament-continue">
+            <PressableScale onPress={goNext} testID="new-competition-continue">
               <View style={styles.ctaButton}>
                 <Text style={styles.ctaText}>{nextLabel}</Text>
                 <ChevronRight color={KanchaColors.ink} size={18} />
