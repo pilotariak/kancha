@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ChevronRight, Plus, Trophy } from "lucide-react-native";
+import { ChevronRight, Trophy } from "lucide-react-native";
 import React from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,23 +24,12 @@ export default function CompetitionsScreen() {
           showsVerticalScrollIndicator={false}
           testID="competitions-screen"
         >
-          <View style={styles.heroRow}>
-            <View style={styles.heroCopy}>
-              <Text style={styles.eyebrow}>Competition desk</Text>
-              <Text style={styles.title}>Competitions</Text>
-              <Text style={styles.subtitle}>
-                Plan formats, manage player pools, and monitor standings.
-              </Text>
-            </View>
-            <PressableScale
-              style={styles.createButtonWrap}
-              onPress={() => router.push("/(tabs)/competitions/new")}
-              testID="competitions-new-button"
-            >
-              <View style={styles.createButton}>
-                <Plus color={KanchaColors.white} size={18} />
-              </View>
-            </PressableScale>
+          <View style={styles.hero}>
+            <Text style={styles.eyebrow}>Competition desk</Text>
+            <Text style={styles.title}>Competitions</Text>
+            <Text style={styles.subtitle}>
+              Plan formats, manage player pools, and monitor standings.
+            </Text>
           </View>
 
           {isPending && (
@@ -123,13 +112,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
     gap: 22,
   },
-  heroRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 16,
-  },
-  heroCopy: { flex: 1, gap: 6 },
+  hero: { gap: 6 },
   eyebrow: {
     color: "rgba(255,255,255,0.78)",
     fontSize: 12,
@@ -139,15 +122,6 @@ const styles = StyleSheet.create({
   },
   title: { color: KanchaColors.white, fontSize: 34, fontWeight: "900" },
   subtitle: { color: "rgba(255,255,255,0.82)", fontSize: 14, lineHeight: 20 },
-  createButtonWrap: { borderRadius: 18 },
-  createButton: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: "#171717",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   centered: {
     paddingVertical: 60,
     alignItems: "center",
