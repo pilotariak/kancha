@@ -5,7 +5,7 @@ import { KanchaColors } from "@/constants/colors";
 
 interface StatusPillProps {
   label: string;
-  tone: "red" | "green" | "dark" | "soft";
+  tone: "red" | "green" | "dark" | "soft" | "amber";
 }
 
 const toneStyles = {
@@ -24,6 +24,10 @@ const toneStyles = {
   soft: {
     backgroundColor: "#EFE8DE",
     color: "#5D5145",
+  },
+  amber: {
+    backgroundColor: "#FFF3DC",
+    color: "#8A5E00",
   },
 } as const;
 

@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { CalendarRange, Swords, Trophy, UserCircle2 } from "lucide-react-native";
+import { CalendarClock, CalendarRange, Swords, Trophy, UserCircle2 } from "lucide-react-native";
 import React from "react";
 
 import Colors, { KanchaColors } from "@/constants/colors";
@@ -42,6 +42,13 @@ export default function TabLayout() {
         options={{
           title: "Matches",
           tabBarIcon: ({ color, size }) => <CalendarRange color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="slot"
+        options={{
+          title: "Slot",
+          tabBarIcon: ({ color, size }) => <CalendarClock color={color} size={size} />,
         }}
       />
       <Tabs.Screen
