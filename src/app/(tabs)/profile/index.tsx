@@ -20,7 +20,7 @@ export default function ProfileScreen() {
         >
           <View style={styles.heroCard}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>PM</Text>
+              <Text style={styles.avatarText}>Kancha</Text>
             </View>
             <Text style={styles.name}>Pilotariak Team</Text>
             <Text style={styles.role}>Club operations · Bayonne</Text>
