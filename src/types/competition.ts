@@ -25,11 +25,16 @@ export interface ClubLineup {
   player2?: Player;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+}
+
 export interface Result {
   id: string;
   competition: Competition;
   specialty: Specialty;
-  category?: string;
+  category?: Category;
   dateMatch?: string;
   clubA: Club;
   clubB: Club;

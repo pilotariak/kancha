@@ -8,8 +8,10 @@ import { KanchaBackground } from "@/components/KanchaBackground";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StatusPill } from "@/components/StatusPill";
 import { KanchaColors } from "@/constants/colors";
+import { useCategories } from "@/hooks/use-categories";
 import { useCompetition } from "@/hooks/use-competitions";
 import { useResultsByCompetition } from "@/hooks/use-matches";
+import { useSpecialties } from "@/hooks/use-specialties";
 import { Temporal } from "@js-temporal/polyfill";
 
 import type { Result } from "@/types/competition";
@@ -49,7 +51,8 @@ function ResultCard({ result }: { result: Result }) {
   const hasScore = result.scoreA != null && result.scoreB != null;
   const lineupA = formatLineup(result.clubALineup);
   const lineupB = formatLineup(result.clubBLineup);
-  const stageMeta = [result.specialty?.name, result.phase].filter(Boolean).join(" · ");
+  const stageMeta = [result.specialty?.name, result.category?.name, result.phase].filter(Boolean)
+    .join(" · ");
   const pillLabel = formatDate(result.dateMatch);
   const pillTone = dateTone(result.dateMatch);
 
@@ -100,15 +103,21 @@ function ResultCard({ result }: { result: Result }) {
 }
 
 export default function CompetitionDetailsScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, specialtyId, categoryId } = useLocalSearchParams<{
+    id: string;
+    specialtyId: string;
+    categoryId: string;
+  }>();
 
   const { data: competition, isPending: loadingComp } = useCompetition(id ?? "");
+  const { data: specialties } = useSpecialties();
+  const { data: categories } = useCategories();
   const {
     data: results,
     isPending: loadingResults,
     isError,
     error,
-  } = useResultsByCompetition(id ?? "");
+  } = useResultsByCompetition(id ?? "", specialtyId, categoryId);
 
   const sortedResults = results
     ? [...results].sort((a, b) => {
@@ -134,7 +143,7 @@ export default function CompetitionDetailsScreen() {
             <>
               <Pressable style={styles.backButton} onPress={() => router.back()}>
                 <ArrowLeft color={KanchaColors.white} size={20} />
-                <Text style={styles.backLabel}>Competitions</Text>
+                <Text style={styles.backLabel}>Category</Text>
               </Pressable>
 
               <View style={styles.heroCard}>
@@ -154,6 +163,25 @@ export default function CompetitionDetailsScreen() {
                   </>
                 )}
               </View>
+
+              {(specialtyId || categoryId) && (
+                <View style={styles.badgeRow}>
+                  {specialtyId && specialties && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>
+                        {specialties.find((s) => s.id === specialtyId)?.name ?? specialtyId}
+                      </Text>
+                    </View>
+                  )}
+                  {categoryId && categories && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>
+                        {categories.find((c) => c.id === categoryId)?.name ?? categoryId}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
 
               {isError && (
                 <View style={styles.errorBox}>
@@ -283,4 +311,16 @@ const styles = StyleSheet.create({
   metaRow: { gap: 8 },
   metaItem: { flexDirection: "row", alignItems: "center", gap: 8 },
   metaText: { color: KanchaColors.muted, fontSize: 13 },
+  badgeRow: { flexDirection: "row", gap: 8 },
+  badge: {
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: KanchaColors.white,
+  },
+  badgeText: {
+    color: KanchaColors.red,
+    fontSize: 13,
+    fontWeight: "800",
+  },
 });

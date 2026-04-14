@@ -49,7 +49,7 @@ export default function CompetitionsScreen() {
           {featured && (
             <PressableScale
               style={styles.featuredCard}
-              onPress={() => router.push(`/(tabs)/competitions/details?id=${featured.id}`)}
+              onPress={() => router.push(`/(tabs)/competitions/specialty?id=${featured.id}`)}
               testID="competition-featured-card"
             >
               <View style={styles.featuredTop}>
@@ -85,7 +85,7 @@ export default function CompetitionsScreen() {
                   <PressableScale
                     key={item.id}
                     style={styles.card}
-                    onPress={() => router.push(`/(tabs)/competitions/details?id=${item.id}`)}
+                    onPress={() => router.push(`/(tabs)/competitions/specialty?id=${item.id}`)}
                     testID={`competition-card-${item.id}`}
                   >
                     <View style={styles.rowBetween}>
