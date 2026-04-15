@@ -1,6 +1,8 @@
-export interface Specialty {
+export interface Competition {
   id: string;
   name: string;
+  year?: number;
+  level?: string;
 }
 
 export interface Club {
@@ -8,17 +10,22 @@ export interface Club {
   name: string;
 }
 
+export interface Specialty {
+  id: string;
+  name: string;
+}
+
 export interface Player {
   name: string;
-  number?: string | null;
+  number?: string;
 }
 
 export interface ClubLineup {
-  player1?: Player | null;
-  player2?: Player | null;
+  player1?: Player;
+  player2?: Player;
 }
 
-export interface Competition {
+export interface Category {
   id: string;
   name: string;
 }
@@ -27,13 +34,13 @@ export interface Result {
   id: string;
   competition: Competition;
   specialty: Specialty;
-  category?: string | null;
-  dateMatch?: string | null;
+  category?: Category;
+  dateMatch?: string;
   clubA: Club;
   clubB: Club;
-  scoreA?: number | null;
-  scoreB?: number | null;
-  phase?: string | null;
-  clubALineup?: ClubLineup | null;
-  clubBLineup?: ClubLineup | null;
+  scoreA?: number;
+  scoreB?: number;
+  phase?: string;
+  clubALineup?: ClubLineup;
+  clubBLineup?: ClubLineup;
 }

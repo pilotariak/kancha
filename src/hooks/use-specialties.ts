@@ -1,15 +1,10 @@
-import { specialtiesApi } from "@/api/specialties";
 import { useQuery } from "@tanstack/react-query";
 
-export const specialtyKeys = {
-  all: ["specialties"] as const,
-  list: () => [...specialtyKeys.all, "list"] as const,
-};
+import { specialtiesApi } from "@/api/specialties";
 
 export function useSpecialties() {
   return useQuery({
-    queryKey: specialtyKeys.list(),
-    queryFn: () => specialtiesApi.list(),
-    staleTime: Infinity, // specialties rarely change
+    queryKey: ["specialties"],
+    queryFn: specialtiesApi.list,
   });
 }

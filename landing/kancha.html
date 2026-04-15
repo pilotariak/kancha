@@ -1,0 +1,4406 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kancha — L'app de la pelote basque</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ── RESET & BASE ── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: #0d0d0b;
+        color: #f0ede8;
+        overflow-x: hidden;
+      }
+
+      /* ── CSS VARIABLES ── */
+      :root {
+        --red: #ce1126;
+        --red-dark: #99001c;
+        --red-light: rgba(206, 17, 38, 0.12);
+        --gold: #ef9f27;
+        --green: #085041;
+        --green-mid: #1d9e75;
+        --white: #f0ede8;
+        --gray: #888;
+        --bg: #0d0d0b;
+        --bg2: #141412;
+        --bg3: #1c1c19;
+        --border: rgba(240, 237, 232, 0.08);
+      }
+
+      /* ── TEXTURE GRAIN ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0.4;
+      }
+
+      /* ── TYPOGRAPHY ── */
+      .syne {
+        font-family: "Syne", sans-serif;
+      }
+
+      /* ── NAV ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 48px;
+        background: rgba(13, 13, 11, 0.85);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 18px;
+        letter-spacing: 2px;
+        color: var(--white);
+        text-decoration: none;
+      }
+      .nav-logo svg {
+        flex-shrink: 0;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .nav-links a {
+        font-size: 14px;
+        color: rgba(240, 237, 232, 0.55);
+        text-decoration: none;
+        transition: color 0.2s;
+        font-weight: 400;
+      }
+      .nav-links a:hover {
+        color: var(--white);
+      }
+      .nav-cta {
+        background: var(--red);
+        color: white;
+        padding: 9px 22px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
+        font-family: "DM Sans", sans-serif;
+      }
+      .nav-cta:hover {
+        background: var(--red-dark);
+      }
+
+      /* ── HERO ── */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 120px 48px 80px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-bg-circle {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .hero-bg-1 {
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(206, 17, 38, 0.18) 0%,
+          transparent 70%
+        );
+        top: -100px;
+        left: -100px;
+      }
+      .hero-bg-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(
+          circle,
+          rgba(239, 159, 39, 0.08) 0%,
+          transparent 70%
+        );
+        bottom: 0;
+        right: 200px;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+      }
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--red-light);
+        border: 1px solid rgba(206, 17, 38, 0.3);
+        border-radius: 999px;
+        padding: 5px 14px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #ff6b7a;
+        margin-bottom: 24px;
+      }
+      .hero-eyebrow span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--red);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+      .hero-title {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(48px, 6vw, 80px);
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -2px;
+        margin-bottom: 24px;
+      }
+      .hero-title em {
+        font-style: normal;
+        color: var(--red);
+      }
+      .hero-title .line2 {
+        color: rgba(240, 237, 232, 0.4);
+      }
+      .hero-desc {
+        font-size: 17px;
+        line-height: 1.7;
+        color: rgba(240, 237, 232, 0.6);
+        max-width: 480px;
+        margin-bottom: 40px;
+        font-weight: 300;
+      }
+      .hero-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      /* Store buttons */
+      .store-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--white);
+        color: #0d0d0b;
+        padding: 12px 22px;
+        border-radius: 14px;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+      }
+      .store-btn:hover {
+        background: #fff;
+        transform: translateY(-2px);
+      }
+      .store-btn.dark {
+        background: var(--bg3);
+        color: var(--white);
+        border: 1px solid var(--border);
+      }
+      .store-btn.dark:hover {
+        border-color: rgba(240, 237, 232, 0.2);
+        transform: translateY(-2px);
+      }
+      .store-btn-text {
+        display: flex;
+        flex-direction: column;
+      }
+      .store-btn-sub {
+        font-size: 10px;
+        font-weight: 400;
+        opacity: 0.6;
+        line-height: 1;
+        margin-bottom: 2px;
+      }
+      .store-btn-name {
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .hero-stats {
+        display: flex;
+        gap: 32px;
+        margin-top: 48px;
+        padding-top: 40px;
+        border-top: 1px solid var(--border);
+      }
+      .hero-stat-val {
+        font-family: "Syne", sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--white);
+        line-height: 1;
+      }
+      .hero-stat-val span {
+        color: var(--red);
+      }
+      .hero-stat-lbl {
+        font-size: 12px;
+        color: rgba(240, 237, 232, 0.45);
+        margin-top: 4px;
+      }
+
+      /* ── PHONES MOCKUP ── */
+      .hero-phones {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: -20px;
+        position: relative;
+        height: 580px;
+      }
+      .phone-wrap {
+        position: absolute;
+        transition: transform 0.4s ease;
+      }
+      .phone-wrap:hover {
+        transform: translateY(-8px) !important;
+      }
+      .phone-center {
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3;
+      }
+      .phone-left {
+        bottom: 40px;
+        left: 10%;
+        transform: rotate(-8deg) translateX(0);
+        z-index: 2;
+        opacity: 0.85;
+      }
+      .phone-right {
+        bottom: 40px;
+        right: 10%;
+        transform: rotate(8deg);
+        z-index: 2;
+        opacity: 0.85;
+      }
+      .phone-shadow {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        height: 30px;
+        background: radial-gradient(
+          ellipse,
+          rgba(206, 17, 38, 0.3) 0%,
+          transparent 70%
+        );
+        filter: blur(10px);
+      }
+
+      /* Phone frame */
+      .p-frame {
+        border-radius: 36px;
+        overflow: hidden;
+        border: 6px solid #2a2a28;
+        background: #0d0d0b;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+        position: relative;
+      }
+      .p-frame-lg {
+        width: 220px;
+      }
+      .p-frame-sm {
+        width: 180px;
+      }
+
+      .p-sbar {
+        background: #ce1126;
+        height: 32px;
+        display: flex;
+        align-items: flex-end;
+        padding: 0 14px 6px;
+        justify-content: space-between;
+      }
+      .p-sbar-t {
+        font-size: 9px;
+        color: white;
+        font-weight: 700;
+        font-family: "Syne", sans-serif;
+      }
+
+      /* Screen 1 — Accueil */
+      .p-nav {
+        background: #ce1126;
+        padding: 8px 14px 12px;
+      }
+      .p-nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .p-title {
+        font-size: 12px;
+        font-weight: 800;
+        color: white;
+        letter-spacing: 1px;
+        font-family: "Syne", sans-serif;
+      }
+      .p-sub {
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.65);
+      }
+      .p-stat-band {
+        background: rgba(0, 0, 0, 0.18);
+        border-radius: 9px;
+        padding: 8px 10px;
+        margin: 0 0 0;
+        display: flex;
+        justify-content: space-around;
+      }
+      .p-stat-n {
+        font-size: 15px;
+        font-weight: 800;
+        color: white;
+        font-family: "Syne", sans-serif;
+      }
+      .p-stat-l {
+        font-size: 7px;
+        color: rgba(255, 255, 255, 0.55);
+        margin-top: 2px;
+      }
+      .p-content {
+        background: #f7f7f5;
+        padding: 8px 0 0;
+      }
+      .p-sec {
+        font-size: 7px;
+        font-weight: 800;
+        color: #888;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 5px 10px 3px;
+      }
+      .p-card {
+        background: white;
+        border-radius: 9px;
+        border: 0.5px solid #e8e8e8;
+        padding: 8px 10px;
+        margin: 0 10px 6px;
+      }
+      .p-card-title {
+        font-size: 10px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 1px;
+      }
+      .p-card-sub {
+        font-size: 8px;
+        color: #888;
+      }
+      .p-badge {
+        border-radius: 20px;
+        font-size: 7px;
+        font-weight: 800;
+        padding: 2px 6px;
+      }
+      .p-tbar {
+        background: white;
+        border-top: 0.5px solid #e0e0e0;
+        display: flex;
+        justify-content: space-around;
+        padding: 5px 0 8px;
+      }
+      .p-ti {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .p-ti-lbl {
+        font-size: 7px;
+        font-family: "DM Sans", sans-serif;
+      }
+
+      /* Screen 2 — Score Live */
+      .live-score-big {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 0 4px;
+      }
+      .ls-num {
+        font-size: 36px;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        font-family: "Syne", sans-serif;
+      }
+      .ls-sep {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.3);
+        font-weight: 300;
+      }
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #4ade80;
+        animation: pulse 1.5s infinite;
+      }
+      .score-btn-row {
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 14px;
+        background: #f7f7f5;
+      }
+      .sc-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 800;
+        color: white;
+        font-family: "Syne", sans-serif;
+      }
+
+      /* Screen 3 — Profil */
+      .profile-header {
+        background: #ce1126;
+        padding: 10px 14px 14px;
+      }
+      .prof-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 14px;
+        color: white;
+        font-family: "Syne", sans-serif;
+      }
+      .prof-name {
+        font-size: 13px;
+        font-weight: 800;
+        color: white;
+        font-family: "Syne", sans-serif;
+      }
+      .prof-meta {
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 2px;
+      }
+      .skill-bar-bg {
+        background: #f0f0f0;
+        border-radius: 3px;
+        height: 5px;
+        flex: 1;
+        overflow: hidden;
+      }
+      .skill-bar-fill {
+        height: 5px;
+        border-radius: 3px;
+        background: #ce1126;
+      }
+
+      /* ── FEATURES ── */
+      .features {
+        padding: 120px 48px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .section-tag {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--red);
+        margin-bottom: 16px;
+        font-family: "Syne", sans-serif;
+      }
+      .section-title {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(32px, 4vw, 52px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -1px;
+        margin-bottom: 64px;
+        max-width: 600px;
+      }
+      .section-title em {
+        font-style: normal;
+        color: rgba(240, 237, 232, 0.3);
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+      }
+      .feat-card {
+        background: var(--bg2);
+        padding: 36px 32px;
+        position: relative;
+        overflow: hidden;
+        transition: background 0.3s;
+      }
+      .feat-card:hover {
+        background: var(--bg3);
+      }
+      .feat-card:first-child {
+        border-radius: 20px 0 0 0;
+      }
+      .feat-card:nth-child(3) {
+        border-radius: 0 20px 0 0;
+      }
+      .feat-card:nth-child(4) {
+        border-radius: 0 0 0 20px;
+      }
+      .feat-card:last-child {
+        border-radius: 0 0 20px 0;
+      }
+
+      .feat-num {
+        font-family: "Syne", sans-serif;
+        font-size: 60px;
+        font-weight: 800;
+        color: rgba(206, 17, 38, 0.08);
+        position: absolute;
+        top: 16px;
+        right: 24px;
+        line-height: 1;
+      }
+      .feat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--red-light);
+        border: 1px solid rgba(206, 17, 38, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .feat-title {
+        font-family: "Syne", sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        line-height: 1.2;
+      }
+      .feat-desc {
+        font-size: 14px;
+        line-height: 1.7;
+        color: rgba(240, 237, 232, 0.45);
+        font-weight: 300;
+      }
+      .feat-tag {
+        display: inline-block;
+        margin-top: 16px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--red);
+        opacity: 0.7;
+      }
+
+      /* ── SCREENSHOTS SECTION ── */
+      .screenshots {
+        padding: 100px 0;
+        background: var(--bg2);
+        overflow: hidden;
+      }
+      .screenshots-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 48px;
+      }
+      .screens-scroll {
+        display: flex;
+        gap: 24px;
+        margin-top: 64px;
+        padding: 20px 48px 40px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .screens-scroll::-webkit-scrollbar {
+        display: none;
+      }
+
+      .screen-item {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+      .screen-item .s-frame {
+        border-radius: 30px;
+        overflow: hidden;
+        border: 5px solid #252522;
+        background: #0d0d0b;
+        box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.5),
+          0 0 0 1px rgba(255, 255, 255, 0.04);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .screen-item:hover .s-frame {
+        transform: translateY(-8px);
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.6),
+          0 0 0 1px rgba(255, 255, 255, 0.07),
+          0 -4px 30px rgba(206, 17, 38, 0.12);
+      }
+      .s-lbl {
+        font-size: 12px;
+        color: rgba(240, 237, 232, 0.35);
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+      .s-num {
+        font-family: "Syne", sans-serif;
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--red);
+        background: var(--red-light);
+        border-radius: 999px;
+        padding: 2px 8px;
+        letter-spacing: 1px;
+      }
+
+      /* ── TESTIMONIALS ── */
+      .testimonials {
+        padding: 100px 48px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .testim-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 56px;
+      }
+      .testim-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 28px;
+        transition: border-color 0.3s;
+      }
+      .testim-card:hover {
+        border-color: rgba(206, 17, 38, 0.3);
+      }
+      .testim-stars {
+        display: flex;
+        gap: 3px;
+        margin-bottom: 16px;
+      }
+      .star {
+        width: 14px;
+        height: 14px;
+      }
+      .testim-text {
+        font-size: 15px;
+        line-height: 1.7;
+        color: rgba(240, 237, 232, 0.75);
+        margin-bottom: 20px;
+        font-weight: 300;
+        font-style: italic;
+      }
+      .testim-text::before {
+        content: '"';
+      }
+      .testim-text::after {
+        content: '"';
+      }
+      .testim-author {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .testim-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .testim-name {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .testim-role {
+        font-size: 11px;
+        color: var(--gray);
+        margin-top: 1px;
+      }
+
+      /* ── CTA SECTION ── */
+      .cta-section {
+        padding: 80px 48px 100px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .cta-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 300px;
+        background: radial-gradient(
+          ellipse,
+          rgba(206, 17, 38, 0.15) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .cta-inner {
+        position: relative;
+        z-index: 2;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      .cta-title {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(36px, 5vw, 64px);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -2px;
+        margin-bottom: 20px;
+      }
+      .cta-title em {
+        font-style: normal;
+        color: var(--red);
+      }
+      .cta-sub {
+        font-size: 17px;
+        color: rgba(240, 237, 232, 0.5);
+        margin-bottom: 40px;
+        font-weight: 300;
+      }
+      .cta-buttons {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .cta-free {
+        font-size: 12px;
+        color: rgba(240, 237, 232, 0.35);
+        margin-top: 16px;
+      }
+
+      /* ── FOOTER ── */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 40px 48px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .footer-logo {
+        font-family: "Syne", sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: rgba(240, 237, 232, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .footer-links {
+        display: flex;
+        gap: 24px;
+      }
+      .footer-links a {
+        font-size: 12px;
+        color: rgba(240, 237, 232, 0.3);
+        text-decoration: none;
+      }
+      .footer-links a:hover {
+        color: rgba(240, 237, 232, 0.6);
+      }
+      .footer-copy {
+        font-size: 12px;
+        color: rgba(240, 237, 232, 0.2);
+      }
+
+      /* ── ANIMATIONS ── */
+      .fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        transition:
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+      .fade-up.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .fade-up-delay-1 {
+        transition-delay: 0.1s;
+      }
+      .fade-up-delay-2 {
+        transition-delay: 0.2s;
+      }
+      .fade-up-delay-3 {
+        transition-delay: 0.3s;
+      }
+      .fade-up-delay-4 {
+        transition-delay: 0.4s;
+      }
+      .fade-up-delay-5 {
+        transition-delay: 0.5s;
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 900px) {
+        nav {
+          padding: 16px 24px;
+        }
+        .nav-links {
+          display: none;
+        }
+        .hero {
+          padding: 100px 24px 60px;
+        }
+        .hero-grid {
+          grid-template-columns: 1fr;
+          gap: 60px;
+        }
+        .hero-phones {
+          height: 440px;
+        }
+        .p-frame-lg {
+          width: 180px;
+        }
+        .p-frame-sm {
+          width: 150px;
+        }
+        .features {
+          padding: 80px 24px;
+        }
+        .features-grid {
+          grid-template-columns: 1fr;
+          gap: 2px;
+        }
+        .feat-card:first-child {
+          border-radius: 20px 20px 0 0;
+        }
+        .feat-card:nth-child(3) {
+          border-radius: 0;
+        }
+        .feat-card:nth-child(4) {
+          border-radius: 0;
+        }
+        .feat-card:last-child {
+          border-radius: 0 0 20px 20px;
+        }
+        .screenshots-inner {
+          padding: 0 24px;
+        }
+        .screens-scroll {
+          padding: 20px 24px 40px;
+        }
+        .testimonials {
+          padding: 80px 24px;
+        }
+        .testim-grid {
+          grid-template-columns: 1fr;
+        }
+        .cta-section {
+          padding: 60px 24px 80px;
+        }
+        footer {
+          padding: 32px 24px;
+          flex-direction: column;
+          gap: 20px;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── NAVIGATION ── -->
+    <nav>
+      <a href="#" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 120 120">
+          <rect width="120" height="120" rx="22" fill="#CE1126" />
+          <path
+            d="M20 95 L20 35 Q20 25 30 25 L100 25"
+            fill="none"
+            stroke="white"
+            stroke-width="9"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <line
+            x1="20"
+            y1="95"
+            x2="100"
+            y2="95"
+            stroke="white"
+            stroke-width="9"
+            stroke-linecap="round"
+          />
+          <circle cx="84" cy="52" r="20" fill="white" />
+          <line
+            x1="84"
+            y1="32"
+            x2="84"
+            y2="72"
+            stroke="#CE1126"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          />
+          <path
+            d="M74 45 C77 39 91 39 94 45"
+            fill="none"
+            stroke="#CE1126"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          />
+          <path
+            d="M74 59 C77 65 91 65 94 59"
+            fill="none"
+            stroke="#CE1126"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          />
+        </svg>
+        Kancha
+      </a>
+      <div class="nav-links">
+        <a href="#features">Fonctionnalités</a>
+        <a href="#screenshots">Captures</a>
+        <a href="#temoignages">Avis</a>
+      </div>
+      <a href="#download" class="nav-cta">Télécharger</a>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section class="hero" id="hero">
+      <div class="hero-bg-circle hero-bg-1"></div>
+      <div class="hero-bg-circle hero-bg-2"></div>
+
+      <div class="hero-grid">
+        <!-- LEFT — TEXT -->
+        <div>
+          <div class="hero-eyebrow fade-up">
+            <span></span>
+            Disponible sur iOS & Android
+          </div>
+          <h1 class="hero-title syne fade-up fade-up-delay-1">
+            La pelote basque<br />
+            <em>dans ta poche.</em><br />
+            <span class="line2">Enfin.</span>
+          </h1>
+          <p class="hero-desc fade-up fade-up-delay-2">
+            Gère tes matchs, organise des tournois, suis tes statistiques.
+            Kancha est l'app officielle de la communauté pelote basque — du
+            fronton au championnat.
+          </p>
+          <div class="hero-actions fade-up fade-up-delay-3" id="download">
+            <!-- App Store -->
+            <a href="#" class="store-btn">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.2.04 2.02.54 2.78.55.97-.19 1.87-.72 2.94-.65 1.27.09 2.19.62 2.82 1.56-2.52 1.52-1.87 4.84.75 5.79-.52 1.44-1.2 2.87-2.29 3.63zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
+                  fill="#1a1a1a"
+                />
+              </svg>
+              <div class="store-btn-text">
+                <span class="store-btn-sub">Télécharger sur</span>
+                <span class="store-btn-name">App Store</span>
+              </div>
+            </a>
+            <!-- Google Play -->
+            <a href="#" class="store-btn dark">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M3.18 23.76c.36.2.76.24 1.15.1L14.84 12 11.84 9 3.18 23.76z"
+                  fill="#EA4335"
+                />
+                <path
+                  d="M20.66 10.42L17.5 8.62 14.15 12l3.35 3.38 3.16-1.8a1.77 1.77 0 000-3.16z"
+                  fill="#FBBC04"
+                />
+                <path
+                  d="M4.33.14a1.77 1.77 0 00-1.15.1L11.84 12l3-3L4.33.14z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M3.18.24L11.84 12l3-3L4.33.14A1.8 1.8 0 003.18.24z"
+                  fill="#34A853"
+                />
+              </svg>
+              <div class="store-btn-text">
+                <span class="store-btn-sub">Disponible sur</span>
+                <span class="store-btn-name">Google Play</span>
+              </div>
+            </a>
+          </div>
+          <div class="hero-stats fade-up fade-up-delay-4">
+            <div>
+              <div class="hero-stat-val syne">12<span>k+</span></div>
+              <div class="hero-stat-lbl">Joueurs actifs</div>
+            </div>
+            <div>
+              <div class="hero-stat-val syne">4<span>.8</span></div>
+              <div class="hero-stat-lbl">Note moyenne</div>
+            </div>
+            <div>
+              <div class="hero-stat-val syne">850<span>+</span></div>
+              <div class="hero-stat-lbl">Tournois créés</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT — PHONES -->
+        <div class="hero-phones">
+          <!-- Phone Left — Score Live -->
+          <div class="phone-wrap phone-left">
+            <div class="p-frame p-frame-sm">
+              <div class="p-sbar"><span class="p-sbar-t">9:41</span></div>
+              <div class="p-nav" style="padding: 7px 12px 10px">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    margin-bottom: 8px;
+                  "
+                >
+                  <span
+                    style="
+                      font-size: 9px;
+                      font-weight: 700;
+                      color: white;
+                      font-family: &quot;Syne&quot;, sans-serif;
+                    "
+                    >Match en direct</span
+                  >
+                  <div
+                    style="
+                      margin-left: auto;
+                      display: flex;
+                      align-items: center;
+                      gap: 4px;
+                    "
+                  >
+                    <div class="live-dot" style="width: 5px; height: 5px"></div>
+                    <span
+                      style="
+                        font-size: 7px;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-weight: 700;
+                      "
+                      >LIVE</span
+                    >
+                  </div>
+                </div>
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.18);
+                    border-radius: 8px;
+                    padding: 8px 10px;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 7px;
+                      color: rgba(255, 255, 255, 0.55);
+                      margin-bottom: 6px;
+                      text-align: center;
+                    "
+                  >
+                    Txapelketa 2026 · 1/4
+                  </div>
+                  <div class="live-score-big">
+                    <div style="text-align: center">
+                      <div
+                        style="
+                          font-size: 8px;
+                          color: rgba(255, 255, 255, 0.65);
+                          margin-bottom: 3px;
+                        "
+                      >
+                        Mikel E.
+                      </div>
+                      <span class="ls-num" style="font-size: 28px">22</span>
+                    </div>
+                    <span class="ls-sep">—</span>
+                    <div style="text-align: center">
+                      <div
+                        style="
+                          font-size: 8px;
+                          color: rgba(255, 255, 255, 0.65);
+                          margin-bottom: 3px;
+                        "
+                      >
+                        Jon U.
+                      </div>
+                      <span
+                        class="ls-num"
+                        style="
+                          font-size: 28px;
+                          color: rgba(255, 255, 255, 0.45);
+                        "
+                        >18</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="score-btn-row">
+                <div
+                  class="sc-btn"
+                  style="background: #ce1126; font-size: 18px"
+                >
+                  +
+                </div>
+                <div
+                  style="
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    background: #1a1a1a;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 120 120">
+                    <path
+                      d="M20 95L20 35Q20 25 30 25L100 25"
+                      fill="none"
+                      stroke="white"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <line
+                      x1="20"
+                      y1="95"
+                      x2="100"
+                      y2="95"
+                      stroke="white"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                    />
+                    <circle cx="84" cy="52" r="17" fill="white" />
+                  </svg>
+                </div>
+                <div
+                  class="sc-btn"
+                  style="background: #1a1a1a; font-size: 18px"
+                >
+                  +
+                </div>
+              </div>
+              <div style="padding: 0 10px 8px">
+                <div
+                  style="
+                    background: white;
+                    border-radius: 8px;
+                    border: 0.5px solid #e8e8e8;
+                    padding: 7px 9px;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 7px;
+                      font-weight: 800;
+                      color: #888;
+                      letter-spacing: 0.8px;
+                      text-transform: uppercase;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    Derniers points
+                  </div>
+                  <div
+                    style="
+                      font-size: 9px;
+                      color: #555;
+                      display: flex;
+                      justify-content: space-between;
+                      padding: 2px 0;
+                    "
+                  >
+                    <span>Mikel E. marque</span
+                    ><span style="font-weight: 700; color: #ce1126">21—18</span>
+                  </div>
+                  <div
+                    style="
+                      font-size: 9px;
+                      color: #555;
+                      display: flex;
+                      justify-content: space-between;
+                      padding: 2px 0;
+                    "
+                  >
+                    <span>Jon U. marque</span
+                    ><span style="font-weight: 700; color: #555">20—18</span>
+                  </div>
+                </div>
+              </div>
+              <div class="p-tbar">
+                <div class="p-ti">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="3"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span class="p-ti-lbl" style="color: #bbb">Accueil</span>
+                </div>
+                <div class="p-ti">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" fill="#CE1126" />
+                    <line
+                      x1="12"
+                      y1="7"
+                      x2="12"
+                      y2="13"
+                      stroke="white"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                    <line
+                      x1="12"
+                      y1="16"
+                      x2="12"
+                      y2="17"
+                      stroke="white"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    /></svg
+                  ><span
+                    class="p-ti-lbl"
+                    style="color: #ce1126; font-weight: 700"
+                    >Matchs</span
+                  >
+                </div>
+                <div class="p-ti">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2L15 9H22L16.5 13.5L18.5 21L12 16.5L5.5 21L7.5 13.5L2 9H9Z"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    /></svg
+                  ><span class="p-ti-lbl" style="color: #bbb">Tournois</span>
+                </div>
+              </div>
+            </div>
+            <div class="phone-shadow"></div>
+          </div>
+
+          <!-- Phone Center — Accueil -->
+          <div class="phone-wrap phone-center">
+            <div class="p-frame p-frame-lg">
+              <div class="p-sbar">
+                <span class="p-sbar-t">9:41</span
+                ><svg width="18" height="8" viewBox="0 0 24 11">
+                  <rect
+                    x="0"
+                    y="1"
+                    width="20"
+                    height="9"
+                    rx="2.5"
+                    fill="none"
+                    stroke="white"
+                    stroke-width="1.2"
+                  />
+                  <rect
+                    x="1.5"
+                    y="2.5"
+                    width="14"
+                    height="6"
+                    rx="1.5"
+                    fill="white"
+                  />
+                </svg>
+              </div>
+              <div class="p-nav">
+                <div class="p-nav-logo" style="margin-bottom: 8px">
+                  <svg width="22" height="22" viewBox="0 0 120 120">
+                    <rect
+                      width="120"
+                      height="120"
+                      rx="22"
+                      fill="rgba(255,255,255,0.2)"
+                    />
+                    <path
+                      d="M20 95L20 35Q20 25 30 25L100 25"
+                      fill="none"
+                      stroke="white"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <line
+                      x1="20"
+                      y1="95"
+                      x2="100"
+                      y2="95"
+                      stroke="white"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                    />
+                    <circle cx="84" cy="52" r="18" fill="white" />
+                  </svg>
+                  <div>
+                    <div class="p-title">Kancha</div>
+                    <div class="p-sub">Bonjour, Mikel</div>
+                  </div>
+                  <div
+                    style="
+                      margin-left: auto;
+                      width: 24px;
+                      height: 24px;
+                      border-radius: 50%;
+                      background: rgba(255, 255, 255, 0.2);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                      <circle
+                        cx="12"
+                        cy="8"
+                        r="4"
+                        stroke="white"
+                        stroke-width="1.8"
+                      />
+                      <path
+                        d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
+                        stroke="white"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-stat-band">
+                  <div style="text-align: center">
+                    <div class="p-stat-n">12</div>
+                    <div class="p-stat-l">Matchs</div>
+                  </div>
+                  <div
+                    style="width: 0.5px; background: rgba(255, 255, 255, 0.25)"
+                  ></div>
+                  <div style="text-align: center">
+                    <div class="p-stat-n">3</div>
+                    <div class="p-stat-l">Tournois</div>
+                  </div>
+                  <div
+                    style="width: 0.5px; background: rgba(255, 255, 255, 0.25)"
+                  ></div>
+                  <div style="text-align: center">
+                    <div class="p-stat-n">8</div>
+                    <div class="p-stat-l">Victoires</div>
+                  </div>
+                </div>
+              </div>
+              <div class="p-content">
+                <div class="p-sec">Prochains matchs</div>
+                <div class="p-card">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                    "
+                  >
+                    <div>
+                      <div class="p-card-title">Mikel E. vs Jon U.</div>
+                      <div class="p-card-sub">Fronton Biarritz · 15h00</div>
+                    </div>
+                    <span
+                      class="p-badge"
+                      style="background: #fef0f0; color: #a32d2d"
+                      >Demain</span
+                    >
+                  </div>
+                </div>
+                <div class="p-card">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                    "
+                  >
+                    <div>
+                      <div class="p-card-title">Txapelketa 2026</div>
+                      <div class="p-card-sub">Bayonne · 14 équipes</div>
+                    </div>
+                    <span
+                      class="p-badge"
+                      style="background: #e8f5ee; color: #085041"
+                      >En cours</span
+                    >
+                  </div>
+                </div>
+                <div class="p-sec">Résultats récents</div>
+                <div class="p-card" style="margin-bottom: 4px">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                    "
+                  >
+                    <div>
+                      <div class="p-card-title">Mikel E. 40 — 32 Iker L.</div>
+                      <div class="p-card-sub">Main nue · 18 mars</div>
+                    </div>
+                    <span
+                      class="p-badge"
+                      style="background: #e8f5ee; color: #085041"
+                      >V</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="p-tbar">
+                <div class="p-ti">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      fill="#CE1126"
+                    />
+                    <rect
+                      x="14"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="3"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span
+                    class="p-ti-lbl"
+                    style="color: #ce1126; font-weight: 700"
+                    >Accueil</span
+                  >
+                </div>
+                <div class="p-ti">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span class="p-ti-lbl" style="color: #bbb">Matchs</span>
+                </div>
+                <div class="p-ti">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2L15 9H22L16.5 13.5L18.5 21L12 16.5L5.5 21L7.5 13.5L2 9H9Z"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    /></svg
+                  ><span class="p-ti-lbl" style="color: #bbb">Tournois</span>
+                </div>
+                <div class="p-ti">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <polyline
+                      points="4,11 7,8 11,10 14,6"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    /></svg
+                  ><span class="p-ti-lbl" style="color: #bbb">Stats</span>
+                </div>
+              </div>
+            </div>
+            <div class="phone-shadow" style="width: 90%"></div>
+          </div>
+
+          <!-- Phone Right — Profil -->
+          <div class="phone-wrap phone-right">
+            <div class="p-frame p-frame-sm">
+              <div class="p-sbar"><span class="p-sbar-t">9:41</span></div>
+              <div class="profile-header">
+                <div
+                  style="
+                    font-size: 8px;
+                    font-weight: 700;
+                    color: white;
+                    font-family: &quot;Syne&quot;, sans-serif;
+                    margin-bottom: 10px;
+                  "
+                >
+                  Profil joueur
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 10px;
+                  "
+                >
+                  <div class="prof-avatar">ME</div>
+                  <div>
+                    <div class="prof-name">Mikel Etxeberria</div>
+                    <div class="prof-meta">Bayonne · #4 Euskadi</div>
+                    <div style="margin-top: 4px">
+                      <span
+                        class="p-badge"
+                        style="
+                          background: rgba(255, 255, 255, 0.2);
+                          color: white;
+                        "
+                        >Main nue</span
+                      >
+                      <span
+                        class="p-badge"
+                        style="
+                          background: #ef9f27;
+                          color: #412402;
+                          margin-left: 3px;
+                        "
+                        >#4</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.18);
+                    border-radius: 7px;
+                    padding: 6px 8px;
+                    display: flex;
+                    justify-content: space-around;
+                  "
+                >
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 13px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      67%
+                    </div>
+                    <div class="p-stat-l">Victoires</div>
+                  </div>
+                  <div
+                    style="width: 0.5px; background: rgba(255, 255, 255, 0.2)"
+                  ></div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 13px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      48
+                    </div>
+                    <div class="p-stat-l">Matchs</div>
+                  </div>
+                  <div
+                    style="width: 0.5px; background: rgba(255, 255, 255, 0.2)"
+                  ></div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 13px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      7
+                    </div>
+                    <div class="p-stat-l">Titres</div>
+                  </div>
+                </div>
+              </div>
+              <div style="background: #f7f7f5; padding: 8px 10px 4px">
+                <div
+                  style="
+                    font-size: 7px;
+                    font-weight: 800;
+                    color: #888;
+                    letter-spacing: 0.8px;
+                    text-transform: uppercase;
+                    margin-bottom: 7px;
+                  "
+                >
+                  Compétences
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px">
+                  <div style="display: flex; align-items: center; gap: 6px">
+                    <span style="font-size: 8px; color: #555; min-width: 40px"
+                      >Attaque</span
+                    >
+                    <div class="skill-bar-bg">
+                      <div class="skill-bar-fill" style="width: 88%"></div>
+                    </div>
+                    <span
+                      style="font-size: 8px; font-weight: 700; color: #ce1126"
+                      >88</span
+                    >
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 6px">
+                    <span style="font-size: 8px; color: #555; min-width: 40px"
+                      >Précision</span
+                    >
+                    <div class="skill-bar-bg">
+                      <div class="skill-bar-fill" style="width: 82%"></div>
+                    </div>
+                    <span
+                      style="font-size: 8px; font-weight: 700; color: #ce1126"
+                      >82</span
+                    >
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 6px">
+                    <span style="font-size: 8px; color: #555; min-width: 40px"
+                      >Endurance</span
+                    >
+                    <div class="skill-bar-bg">
+                      <div class="skill-bar-fill" style="width: 91%"></div>
+                    </div>
+                    <span
+                      style="font-size: 8px; font-weight: 700; color: #ce1126"
+                      >91</span
+                    >
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 6px">
+                    <span style="font-size: 8px; color: #555; min-width: 40px"
+                      >Défense</span
+                    >
+                    <div class="skill-bar-bg">
+                      <div class="skill-bar-fill" style="width: 74%"></div>
+                    </div>
+                    <span
+                      style="font-size: 8px; font-weight: 700; color: #ce1126"
+                      >74</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="p-tbar">
+                <div class="p-ti">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="3"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span class="p-ti-lbl" style="color: #bbb">Accueil</span>
+                </div>
+                <div class="p-ti">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span class="p-ti-lbl" style="color: #bbb">Matchs</span>
+                </div>
+                <div class="p-ti">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <circle cx="8" cy="6" r="3" fill="#CE1126" />
+                    <path
+                      d="M2 20c0-3 2.7-5.5 6-5.5s6 2.5 6 5.5"
+                      stroke="#CE1126"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    /></svg
+                  ><span
+                    class="p-ti-lbl"
+                    style="color: #ce1126; font-weight: 700"
+                    >Profil</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="phone-shadow"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section class="features" id="features">
+      <div class="section-tag fade-up">Fonctionnalités</div>
+      <h2 class="section-title syne fade-up fade-up-delay-1">
+        Tout ce dont tu as besoin,<br />
+        <em>rien de plus.</em>
+      </h2>
+      <div class="features-grid">
+        <div class="feat-card fade-up">
+          <div class="feat-num">01</div>
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="#CE1126"
+                stroke-width="1.8"
+              />
+              <line
+                x1="12"
+                y1="7"
+                x2="12"
+                y2="13"
+                stroke="#CE1126"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <line
+                x1="12"
+                y1="16"
+                x2="12"
+                y2="17"
+                stroke="#CE1126"
+                stroke-width="2.2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <h3 class="feat-title syne">Score en direct</h3>
+          <p class="feat-desc">
+            Saisie ultra-rapide d'un tap. Historique des échanges, chronomètre
+            intégré, annulation instantanée. Conçu pour le rythme du match.
+          </p>
+          <span class="feat-tag">Live · Temps réel</span>
+        </div>
+        <div class="feat-card fade-up fade-up-delay-1">
+          <div class="feat-num">02</div>
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2L15 9H22L16.5 13.5L18.5 21L12 16.5L5.5 21L7.5 13.5L2 9H9Z"
+                stroke="#CE1126"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <h3 class="feat-title syne">Tournois complets</h3>
+          <p class="feat-desc">
+            Créé ton tournoi en 4 étapes. Poules, élimination directe ou
+            championnat. Tirage au sort automatique. Notifications push pour
+            chaque match.
+          </p>
+          <span class="feat-tag">Organisation · Tableau</span>
+        </div>
+        <div class="feat-card fade-up fade-up-delay-2">
+          <div class="feat-num">03</div>
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <polyline
+                points="4,17 9,12 13,15 20,7"
+                stroke="#CE1126"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <h3 class="feat-title syne">Statistiques avancées</h3>
+          <p class="feat-desc">
+            Taux de victoire, progression saison, compétences par discipline.
+            Visualise ta courbe de performance et identifie tes points forts.
+          </p>
+          <span class="feat-tag">Analytics · Performance</span>
+        </div>
+        <div class="feat-card fade-up fade-up-delay-3">
+          <div class="feat-num">04</div>
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="8" cy="7" r="4" stroke="#CE1126" stroke-width="1.8" />
+              <path
+                d="M2 21c0-4 2.7-7 6-7s6 3 6 7"
+                stroke="#CE1126"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+              <circle
+                cx="17"
+                cy="10"
+                r="3"
+                stroke="#CE1126"
+                stroke-width="1.8"
+              />
+              <path
+                d="M21 21c0-3-1.8-5.5-4-6"
+                stroke="#CE1126"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <h3 class="feat-title syne">Profils joueurs</h3>
+          <p class="feat-desc">
+            Fiche complète par joueur — palmarès, historique des matchs,
+            classement régional. Cherche n'importe quel joueur dans l'annuaire
+            FFPB.
+          </p>
+          <span class="feat-tag">Profils · Classement</span>
+        </div>
+        <div class="feat-card fade-up fade-up-delay-4">
+          <div class="feat-num">05</div>
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <rect
+                x="3"
+                y="4"
+                width="18"
+                height="18"
+                rx="3"
+                stroke="#CE1126"
+                stroke-width="1.8"
+              />
+              <line
+                x1="3"
+                y1="10"
+                x2="21"
+                y2="10"
+                stroke="#CE1126"
+                stroke-width="1.8"
+              />
+              <line
+                x1="8"
+                y1="2"
+                x2="8"
+                y2="6"
+                stroke="#CE1126"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+              <line
+                x1="16"
+                y1="2"
+                x2="16"
+                y2="6"
+                stroke="#CE1126"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <h3 class="feat-title syne">Calendrier intégré</h3>
+          <p class="feat-desc">
+            Tous tes matchs et tournois dans un seul endroit. Rappels
+            automatiques. Synchronisation avec le calendrier de ton téléphone en
+            un tap.
+          </p>
+          <span class="feat-tag">Planning · Rappels</span>
+        </div>
+        <div class="feat-card fade-up fade-up-delay-5">
+          <div class="feat-num">06</div>
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2L15 9H22L16.5 13.5L18.5 21L12 16.5L5.5 21L7.5 13.5L2 9H9Z"
+                fill="rgba(239,159,39,0.3)"
+                stroke="#EF9F27"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <h3 class="feat-title syne">Palmarès & titres</h3>
+          <p class="feat-desc">
+            Chaque victoire est enregistrée. Médailles, trophées, records
+            personnels. Ton palmarès complet depuis ta première partie jusqu'au
+            championnat.
+          </p>
+          <span class="feat-tag">Awards · Historique</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SCREENSHOTS ── -->
+    <section class="screenshots" id="screenshots">
+      <div class="screenshots-inner">
+        <div class="section-tag fade-up">Captures d'écran</div>
+        <h2 class="section-title syne fade-up fade-up-delay-1">
+          Conçu pour les<br />
+          <em>vrais joueurs.</em>
+        </h2>
+      </div>
+      <div class="screens-scroll">
+        <!-- Screen 1 -->
+        <div class="screen-item">
+          <div class="s-num">01</div>
+          <div class="s-frame" style="width: 200px">
+            <div style="background: #f7f7f5">
+              <div style="background: #ce1126; padding: 0 14px">
+                <div
+                  style="
+                    height: 28px;
+                    display: flex;
+                    align-items: flex-end;
+                    padding-bottom: 5px;
+                    justify-content: space-between;
+                  "
+                >
+                  <span style="font-size: 8px; color: white; font-weight: 700"
+                    >9:41</span
+                  ><svg width="16" height="7" viewBox="0 0 24 11">
+                    <rect
+                      x="0"
+                      y="1"
+                      width="20"
+                      height="9"
+                      rx="2.5"
+                      fill="none"
+                      stroke="white"
+                      stroke-width="1.2"
+                    />
+                    <rect
+                      x="1.5"
+                      y="2.5"
+                      width="14"
+                      height="6"
+                      rx="1.5"
+                      fill="white"
+                    />
+                  </svg>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    margin-bottom: 8px;
+                    padding-top: 4px;
+                  "
+                >
+                  <svg width="20" height="20" viewBox="0 0 120 120">
+                    <rect
+                      width="120"
+                      height="120"
+                      rx="22"
+                      fill="rgba(255,255,255,0.2)"
+                    />
+                    <path
+                      d="M20 95L20 35Q20 25 30 25L100 25"
+                      fill="none"
+                      stroke="white"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <line
+                      x1="20"
+                      y1="95"
+                      x2="100"
+                      y2="95"
+                      stroke="white"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                    />
+                    <circle cx="84" cy="52" r="18" fill="white" />
+                  </svg>
+                  <div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                        letter-spacing: 1px;
+                      "
+                    >
+                      Kancha
+                    </div>
+                    <div
+                      style="font-size: 7px; color: rgba(255, 255, 255, 0.65)"
+                    >
+                      Bonjour, Mikel
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.18);
+                    border-radius: 8px;
+                    padding: 9px 10px;
+                    margin-bottom: 10px;
+                    display: flex;
+                    justify-content: space-around;
+                  "
+                >
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 16px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      12
+                    </div>
+                    <div
+                      style="font-size: 7px; color: rgba(255, 255, 255, 0.55)"
+                    >
+                      Matchs
+                    </div>
+                  </div>
+                  <div
+                    style="width: 0.5px; background: rgba(255, 255, 255, 0.2)"
+                  ></div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 16px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      3
+                    </div>
+                    <div
+                      style="font-size: 7px; color: rgba(255, 255, 255, 0.55)"
+                    >
+                      Tournois
+                    </div>
+                  </div>
+                  <div
+                    style="width: 0.5px; background: rgba(255, 255, 255, 0.2)"
+                  ></div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 16px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      8
+                    </div>
+                    <div
+                      style="font-size: 7px; color: rgba(255, 255, 255, 0.55)"
+                    >
+                      Victoires
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="padding: 8px 0 0">
+                <div
+                  style="
+                    font-size: 7px;
+                    font-weight: 800;
+                    color: #888;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    padding: 4px 10px;
+                  "
+                >
+                  Prochains matchs
+                </div>
+                <div
+                  style="
+                    background: white;
+                    border-radius: 9px;
+                    border: 0.5px solid #e8e8e8;
+                    padding: 8px 10px;
+                    margin: 0 10px 6px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <div>
+                    <div
+                      style="font-size: 10px; font-weight: 700; color: #1a1a1a"
+                    >
+                      Mikel E. vs Jon U.
+                    </div>
+                    <div style="font-size: 7px; color: #888">
+                      Biarritz · 15h00
+                    </div>
+                  </div>
+                  <span
+                    style="
+                      background: #fef0f0;
+                      color: #a32d2d;
+                      border-radius: 20px;
+                      font-size: 7px;
+                      font-weight: 800;
+                      padding: 2px 6px;
+                    "
+                    >Demain</span
+                  >
+                </div>
+                <div
+                  style="
+                    background: white;
+                    border-radius: 9px;
+                    border: 0.5px solid #e8e8e8;
+                    padding: 8px 10px;
+                    margin: 0 10px 6px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <div>
+                    <div
+                      style="font-size: 10px; font-weight: 700; color: #1a1a1a"
+                    >
+                      Txapelketa 2026
+                    </div>
+                    <div style="font-size: 7px; color: #888">
+                      Bayonne · 14 équipes
+                    </div>
+                  </div>
+                  <span
+                    style="
+                      background: #e8f5ee;
+                      color: #085041;
+                      border-radius: 20px;
+                      font-size: 7px;
+                      font-weight: 800;
+                      padding: 2px 6px;
+                    "
+                    >En cours</span
+                  >
+                </div>
+                <div
+                  style="
+                    font-size: 7px;
+                    font-weight: 800;
+                    color: #888;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    padding: 6px 10px 3px;
+                  "
+                >
+                  Résultats récents
+                </div>
+                <div
+                  style="
+                    background: white;
+                    border-radius: 9px;
+                    border: 0.5px solid #e8e8e8;
+                    padding: 8px 10px;
+                    margin: 0 10px 4px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <div>
+                    <div
+                      style="font-size: 10px; font-weight: 700; color: #1a1a1a"
+                    >
+                      Mikel 40 — 32 Iker
+                    </div>
+                    <div style="font-size: 7px; color: #888">
+                      Main nue · 18 mars
+                    </div>
+                  </div>
+                  <span
+                    style="
+                      background: #e8f5ee;
+                      color: #085041;
+                      border-radius: 20px;
+                      font-size: 7px;
+                      font-weight: 800;
+                      padding: 2px 6px;
+                    "
+                    >V</span
+                  >
+                </div>
+              </div>
+              <div
+                style="
+                  background: white;
+                  border-top: 0.5px solid #e0e0e0;
+                  display: flex;
+                  justify-content: space-around;
+                  padding: 6px 0 10px;
+                  margin-top: 6px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      fill="#CE1126"
+                    />
+                    <rect
+                      x="14"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="3"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span
+                    style="font-size: 7px; color: #ce1126; font-weight: 700"
+                    >Accueil</span
+                  >
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Matchs</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2L15 9H22L16.5 13.5L18.5 21L12 16.5L5.5 21L7.5 13.5L2 9H9Z"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Tournois</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <polyline
+                      points="4,11 7,8 11,10 14,6"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Stats</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="s-lbl">Accueil</span>
+        </div>
+
+        <!-- Screen 2 — Score Live -->
+        <div class="screen-item">
+          <div class="s-num">02</div>
+          <div class="s-frame" style="width: 200px">
+            <div style="background: #f7f7f5">
+              <div style="background: #ce1126; padding: 0 14px 12px">
+                <div
+                  style="
+                    height: 28px;
+                    display: flex;
+                    align-items: flex-end;
+                    padding-bottom: 5px;
+                    justify-content: space-between;
+                  "
+                >
+                  <span style="font-size: 8px; color: white; font-weight: 700"
+                    >9:41</span
+                  >
+                  <div style="display: flex; align-items: center; gap: 4px">
+                    <div class="live-dot" style="width: 6px; height: 6px"></div>
+                    <span
+                      style="
+                        font-size: 7px;
+                        color: rgba(255, 255, 255, 0.85);
+                        font-weight: 700;
+                      "
+                      >EN DIRECT</span
+                    >
+                  </div>
+                </div>
+                <div
+                  style="
+                    font-size: 9px;
+                    font-weight: 700;
+                    color: white;
+                    font-family: &quot;Syne&quot;, sans-serif;
+                    margin-bottom: 8px;
+                  "
+                >
+                  Match en direct
+                </div>
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.18);
+                    border-radius: 8px;
+                    padding: 10px 12px;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 7px;
+                      color: rgba(255, 255, 255, 0.55);
+                      text-align: center;
+                      margin-bottom: 6px;
+                    "
+                  >
+                    Txapelketa 2026 · 1/4 finale
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                    "
+                  >
+                    <div style="text-align: center; flex: 1">
+                      <div
+                        style="
+                          width: 26px;
+                          height: 26px;
+                          border-radius: 50%;
+                          background: rgba(255, 255, 255, 0.2);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          margin: 0 auto 3px;
+                        "
+                      >
+                        <span
+                          style="
+                            font-size: 9px;
+                            font-weight: 800;
+                            color: white;
+                            font-family: &quot;Syne&quot;, sans-serif;
+                          "
+                          >ME</span
+                        >
+                      </div>
+                      <span
+                        style="font-size: 8px; color: rgba(255, 255, 255, 0.8)"
+                        >Mikel E.</span
+                      >
+                    </div>
+                    <div style="text-align: center">
+                      <div style="display: flex; align-items: center; gap: 6px">
+                        <span
+                          style="
+                            font-size: 32px;
+                            font-weight: 800;
+                            color: white;
+                            line-height: 1;
+                            font-family: &quot;Syne&quot;, sans-serif;
+                          "
+                          >22</span
+                        ><span
+                          style="
+                            font-size: 14px;
+                            color: rgba(255, 255, 255, 0.35);
+                          "
+                          >—</span
+                        ><span
+                          style="
+                            font-size: 32px;
+                            font-weight: 800;
+                            color: rgba(255, 255, 255, 0.45);
+                            line-height: 1;
+                            font-family: &quot;Syne&quot;, sans-serif;
+                          "
+                          >18</span
+                        >
+                      </div>
+                      <div
+                        style="
+                          font-size: 7px;
+                          color: rgba(255, 255, 255, 0.4);
+                          text-align: center;
+                          margin-top: 2px;
+                        "
+                      >
+                        MANCHE 2/3
+                      </div>
+                    </div>
+                    <div style="text-align: center; flex: 1">
+                      <div
+                        style="
+                          width: 26px;
+                          height: 26px;
+                          border-radius: 50%;
+                          background: rgba(255, 255, 255, 0.2);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          margin: 0 auto 3px;
+                        "
+                      >
+                        <span
+                          style="
+                            font-size: 9px;
+                            font-weight: 800;
+                            color: white;
+                            font-family: &quot;Syne&quot;, sans-serif;
+                          "
+                          >JU</span
+                        >
+                      </div>
+                      <span
+                        style="font-size: 8px; color: rgba(255, 255, 255, 0.8)"
+                        >Jon U.</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="padding: 10px 12px">
+                <div
+                  style="
+                    font-size: 7px;
+                    font-weight: 800;
+                    color: #888;
+                    letter-spacing: 0.8px;
+                    text-transform: uppercase;
+                    margin-bottom: 8px;
+                  "
+                >
+                  Saisie du point
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-around;
+                    align-items: center;
+                    margin-bottom: 10px;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      gap: 5px;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 42px;
+                        height: 42px;
+                        border-radius: 50%;
+                        background: #ce1126;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <line
+                          x1="12"
+                          y1="5"
+                          x2="12"
+                          y2="19"
+                          stroke="white"
+                          stroke-width="2.5"
+                          stroke-linecap="round"
+                        />
+                        <line
+                          x1="5"
+                          y1="12"
+                          x2="19"
+                          y2="12"
+                          stroke="white"
+                          stroke-width="2.5"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                    </div>
+                    <span
+                      style="font-size: 8px; font-weight: 700; color: #ce1126"
+                      >+ Mikel</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      width: 30px;
+                      height: 30px;
+                      border-radius: 50%;
+                      background: #1a1a1a;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <svg width="12" height="12" viewBox="0 0 120 120">
+                      <path
+                        d="M20 95L20 35Q20 25 30 25L100 25"
+                        fill="none"
+                        stroke="white"
+                        stroke-width="6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <line
+                        x1="20"
+                        y1="95"
+                        x2="100"
+                        y2="95"
+                        stroke="white"
+                        stroke-width="6"
+                        stroke-linecap="round"
+                      />
+                      <circle cx="84" cy="52" r="17" fill="white" />
+                    </svg>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      gap: 5px;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 42px;
+                        height: 42px;
+                        border-radius: 50%;
+                        background: #1a1a1a;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <line
+                          x1="12"
+                          y1="5"
+                          x2="12"
+                          y2="19"
+                          stroke="white"
+                          stroke-width="2.5"
+                          stroke-linecap="round"
+                        />
+                        <line
+                          x1="5"
+                          y1="12"
+                          x2="19"
+                          y2="12"
+                          stroke="white"
+                          stroke-width="2.5"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                    </div>
+                    <span style="font-size: 8px; font-weight: 700; color: #444"
+                      >+ Jon</span
+                    >
+                  </div>
+                </div>
+                <div
+                  style="
+                    background: white;
+                    border-radius: 8px;
+                    border: 0.5px solid #e8e8e8;
+                    padding: 8px 9px;
+                    margin-bottom: 8px;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 7px;
+                      font-weight: 800;
+                      color: #888;
+                      letter-spacing: 0.8px;
+                      text-transform: uppercase;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    Derniers points
+                  </div>
+                  <div
+                    style="
+                      font-size: 9px;
+                      color: #555;
+                      display: flex;
+                      justify-content: space-between;
+                      padding: 2px 0;
+                    "
+                  >
+                    <span>Mikel E. marque</span
+                    ><span style="font-weight: 700; color: #ce1126">21—18</span>
+                  </div>
+                  <div
+                    style="
+                      font-size: 9px;
+                      color: #555;
+                      display: flex;
+                      justify-content: space-between;
+                      padding: 2px 0;
+                    "
+                  >
+                    <span>Jon U. marque</span
+                    ><span style="font-weight: 700; color: #555">20—18</span>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 5px">
+                  <div
+                    style="
+                      flex: 1;
+                      padding: 6px;
+                      border-radius: 7px;
+                      border: 0.5px solid #e0e0e0;
+                      background: white;
+                      font-size: 8px;
+                      color: #555;
+                      text-align: center;
+                    "
+                  >
+                    Faute
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      padding: 6px;
+                      border-radius: 7px;
+                      border: 0.5px solid #e0e0e0;
+                      background: white;
+                      font-size: 8px;
+                      color: #555;
+                      text-align: center;
+                    "
+                  >
+                    Hors
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      padding: 6px;
+                      border-radius: 7px;
+                      border: 0.5px solid #ce1126;
+                      background: #fef0f0;
+                      font-size: 8px;
+                      color: #ce1126;
+                      font-weight: 700;
+                      text-align: center;
+                    "
+                  >
+                    Pause
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  background: white;
+                  border-top: 0.5px solid #e0e0e0;
+                  display: flex;
+                  justify-content: space-around;
+                  padding: 5px 0 9px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="3"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Accueil</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" fill="#CE1126" />
+                    <line
+                      x1="12"
+                      y1="7"
+                      x2="12"
+                      y2="13"
+                      stroke="white"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    /></svg
+                  ><span
+                    style="font-size: 7px; color: #ce1126; font-weight: 700"
+                    >Matchs</span
+                  >
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2L15 9H22L16.5 13.5L18.5 21L12 16.5L5.5 21L7.5 13.5L2 9H9Z"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Tournois</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="s-lbl">Score live</span>
+        </div>
+
+        <!-- Screen 3 — Tournoi -->
+        <div class="screen-item">
+          <div class="s-num">03</div>
+          <div class="s-frame" style="width: 200px">
+            <div style="background: #f7f7f5">
+              <div style="background: #ce1126; padding: 0 14px 12px">
+                <div
+                  style="
+                    height: 28px;
+                    display: flex;
+                    align-items: flex-end;
+                    padding-bottom: 5px;
+                  "
+                >
+                  <span style="font-size: 8px; color: white; font-weight: 700"
+                    >9:41</span
+                  >
+                </div>
+                <div
+                  style="
+                    font-size: 10px;
+                    font-weight: 800;
+                    color: white;
+                    font-family: &quot;Syne&quot;, sans-serif;
+                  "
+                >
+                  Txapelketa 2026
+                </div>
+              </div>
+              <div style="padding: 8px 10px 0">
+                <div
+                  style="
+                    background: white;
+                    border-radius: 9px;
+                    border: 0.5px solid #e8e8e8;
+                    overflow: hidden;
+                    margin-bottom: 8px;
+                  "
+                >
+                  <div
+                    style="
+                      background: #1a1a1a;
+                      padding: 6px 10px;
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                    "
+                  >
+                    <span style="font-size: 9px; font-weight: 700; color: white"
+                      >Tableau — 1/4 finale</span
+                    ><span
+                      style="
+                        background: #ce1126;
+                        color: white;
+                        border-radius: 20px;
+                        font-size: 7px;
+                        font-weight: 800;
+                        padding: 2px 6px;
+                      "
+                      >En cours</span
+                    >
+                  </div>
+                  <div style="padding: 8px 10px">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 4px 0;
+                        border-bottom: 0.5px solid #f4f4f4;
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 5px">
+                        <div
+                          style="
+                            width: 5px;
+                            height: 5px;
+                            border-radius: 50%;
+                            background: #ce1126;
+                          "
+                        ></div>
+                        <span
+                          style="
+                            font-size: 10px;
+                            font-weight: 700;
+                            color: #1a1a1a;
+                          "
+                          >Mikel E.</span
+                        >
+                      </div>
+                      <span
+                        style="
+                          font-size: 14px;
+                          font-weight: 800;
+                          color: #ce1126;
+                          font-family: &quot;Syne&quot;, sans-serif;
+                        "
+                        >40</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 4px 0;
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 5px">
+                        <div
+                          style="
+                            width: 5px;
+                            height: 5px;
+                            border-radius: 50%;
+                            background: #ddd;
+                          "
+                        ></div>
+                        <span style="font-size: 10px; color: #555">Jon U.</span>
+                      </div>
+                      <span
+                        style="
+                          font-size: 14px;
+                          font-weight: 800;
+                          color: #888;
+                          font-family: &quot;Syne&quot;, sans-serif;
+                        "
+                        >27</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    font-size: 7px;
+                    font-weight: 800;
+                    color: #888;
+                    letter-spacing: 0.8px;
+                    text-transform: uppercase;
+                    margin-bottom: 6px;
+                  "
+                >
+                  Classement poule A
+                </div>
+                <div
+                  style="
+                    background: white;
+                    border-radius: 9px;
+                    border: 0.5px solid #e8e8e8;
+                    overflow: hidden;
+                  "
+                >
+                  <div style="padding: 0 10px">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 5px 0;
+                        border-bottom: 0.5px solid #f4f4f4;
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 5px">
+                        <span
+                          style="
+                            font-size: 9px;
+                            color: #ce1126;
+                            font-weight: 800;
+                          "
+                          >1</span
+                        ><span
+                          style="
+                            font-size: 10px;
+                            font-weight: 700;
+                            color: #1a1a1a;
+                          "
+                          >Mikel E.</span
+                        >
+                      </div>
+                      <span
+                        style="font-size: 9px; font-weight: 800; color: #ce1126"
+                        >10 pts</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 5px 0;
+                        border-bottom: 0.5px solid #f4f4f4;
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 5px">
+                        <span style="font-size: 9px; color: #888">2</span
+                        ><span style="font-size: 10px; color: #333"
+                          >Iker L.</span
+                        >
+                      </div>
+                      <span
+                        style="font-size: 9px; font-weight: 700; color: #1a1a1a"
+                        >8 pts</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 5px 0;
+                        border-bottom: 0.5px solid #f4f4f4;
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 5px">
+                        <span style="font-size: 9px; color: #888">3</span
+                        ><span style="font-size: 10px; color: #333"
+                          >Andoni B.</span
+                        >
+                      </div>
+                      <span
+                        style="font-size: 9px; font-weight: 700; color: #1a1a1a"
+                        >6 pts</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 5px 0;
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 5px">
+                        <span style="font-size: 9px; color: #888">4</span
+                        ><span style="font-size: 10px; color: #888"
+                          >Jon U.</span
+                        >
+                      </div>
+                      <span
+                        style="font-size: 9px; font-weight: 700; color: #888"
+                        >2 pts</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  background: white;
+                  border-top: 0.5px solid #e0e0e0;
+                  display: flex;
+                  justify-content: space-around;
+                  padding: 6px 0 10px;
+                  margin-top: 10px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="3"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Accueil</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Matchs</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2L15 9H22L16.5 13.5L18.5 21L12 16.5L5.5 21L7.5 13.5L2 9H9Z"
+                      fill="#CE1126"
+                      stroke="#CE1126"
+                      stroke-width="1"
+                      stroke-linejoin="round"
+                    /></svg
+                  ><span
+                    style="font-size: 7px; color: #ce1126; font-weight: 700"
+                    >Tournois</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="s-lbl">Tournoi</span>
+        </div>
+
+        <!-- Screen 4 — Profil -->
+        <div class="screen-item">
+          <div class="s-num">04</div>
+          <div class="s-frame" style="width: 200px">
+            <div style="background: #f7f7f5">
+              <div style="background: #ce1126; padding: 0 14px 14px">
+                <div
+                  style="
+                    height: 28px;
+                    display: flex;
+                    align-items: flex-end;
+                    padding-bottom: 5px;
+                  "
+                >
+                  <span style="font-size: 8px; color: white; font-weight: 700"
+                    >9:41</span
+                  >
+                </div>
+                <div
+                  style="
+                    font-size: 9px;
+                    font-weight: 700;
+                    color: white;
+                    font-family: &quot;Syne&quot;, sans-serif;
+                    margin-bottom: 10px;
+                  "
+                >
+                  Profil joueur
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 10px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 44px;
+                      height: 44px;
+                      border-radius: 50%;
+                      background: rgba(255, 255, 255, 0.2);
+                      border: 2px solid rgba(255, 255, 255, 0.5);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                    "
+                  >
+                    <span
+                      style="
+                        font-size: 14px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                      >ME</span
+                    >
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-size: 12px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      Mikel Etxeberria
+                    </div>
+                    <div
+                      style="font-size: 8px; color: rgba(255, 255, 255, 0.6)"
+                    >
+                      Bayonne · 28 ans
+                    </div>
+                    <div style="margin-top: 4px">
+                      <span
+                        style="
+                          background: rgba(255, 255, 255, 0.2);
+                          color: white;
+                          border-radius: 20px;
+                          font-size: 7px;
+                          font-weight: 700;
+                          padding: 2px 6px;
+                        "
+                        >Main nue</span
+                      ><span
+                        style="
+                          background: #ef9f27;
+                          color: #412402;
+                          border-radius: 20px;
+                          font-size: 7px;
+                          font-weight: 800;
+                          padding: 2px 6px;
+                          margin-left: 3px;
+                        "
+                        >#4</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.18);
+                    border-radius: 8px;
+                    padding: 7px 8px;
+                    display: flex;
+                    justify-content: space-around;
+                  "
+                >
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 13px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      67%
+                    </div>
+                    <div
+                      style="font-size: 7px; color: rgba(255, 255, 255, 0.55)"
+                    >
+                      Victoires
+                    </div>
+                  </div>
+                  <div
+                    style="width: 0.5px; background: rgba(255, 255, 255, 0.2)"
+                  ></div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 13px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      48
+                    </div>
+                    <div
+                      style="font-size: 7px; color: rgba(255, 255, 255, 0.55)"
+                    >
+                      Matchs
+                    </div>
+                  </div>
+                  <div
+                    style="width: 0.5px; background: rgba(255, 255, 255, 0.2)"
+                  ></div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 13px;
+                        font-weight: 800;
+                        color: white;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                    >
+                      7
+                    </div>
+                    <div
+                      style="font-size: 7px; color: rgba(255, 255, 255, 0.55)"
+                    >
+                      Titres
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="padding: 8px 10px 0">
+                <div
+                  style="
+                    background: white;
+                    border-radius: 9px;
+                    border: 0.5px solid #e8e8e8;
+                    padding: 9px 10px;
+                    margin-bottom: 8px;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 7px;
+                      font-weight: 800;
+                      color: #888;
+                      letter-spacing: 0.8px;
+                      text-transform: uppercase;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    Compétences
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 6px">
+                    <div style="display: flex; align-items: center; gap: 6px">
+                      <span style="font-size: 8px; color: #555; min-width: 42px"
+                        >Attaque</span
+                      >
+                      <div
+                        style="
+                          flex: 1;
+                          background: #f0f0f0;
+                          border-radius: 3px;
+                          height: 5px;
+                          overflow: hidden;
+                        "
+                      >
+                        <div
+                          style="
+                            width: 88%;
+                            height: 5px;
+                            background: #ce1126;
+                            border-radius: 3px;
+                          "
+                        ></div>
+                      </div>
+                      <span
+                        style="font-size: 8px; font-weight: 700; color: #ce1126"
+                        >88</span
+                      >
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px">
+                      <span style="font-size: 8px; color: #555; min-width: 42px"
+                        >Défense</span
+                      >
+                      <div
+                        style="
+                          flex: 1;
+                          background: #f0f0f0;
+                          border-radius: 3px;
+                          height: 5px;
+                          overflow: hidden;
+                        "
+                      >
+                        <div
+                          style="
+                            width: 74%;
+                            height: 5px;
+                            background: #ce1126;
+                            border-radius: 3px;
+                          "
+                        ></div>
+                      </div>
+                      <span
+                        style="font-size: 8px; font-weight: 700; color: #ce1126"
+                        >74</span
+                      >
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px">
+                      <span style="font-size: 8px; color: #555; min-width: 42px"
+                        >Précision</span
+                      >
+                      <div
+                        style="
+                          flex: 1;
+                          background: #f0f0f0;
+                          border-radius: 3px;
+                          height: 5px;
+                          overflow: hidden;
+                        "
+                      >
+                        <div
+                          style="
+                            width: 82%;
+                            height: 5px;
+                            background: #ce1126;
+                            border-radius: 3px;
+                          "
+                        ></div>
+                      </div>
+                      <span
+                        style="font-size: 8px; font-weight: 700; color: #ce1126"
+                        >82</span
+                      >
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px">
+                      <span style="font-size: 8px; color: #555; min-width: 42px"
+                        >Endurance</span
+                      >
+                      <div
+                        style="
+                          flex: 1;
+                          background: #f0f0f0;
+                          border-radius: 3px;
+                          height: 5px;
+                          overflow: hidden;
+                        "
+                      >
+                        <div
+                          style="
+                            width: 91%;
+                            height: 5px;
+                            background: #ce1126;
+                            border-radius: 3px;
+                          "
+                        ></div>
+                      </div>
+                      <span
+                        style="font-size: 8px; font-weight: 700; color: #ce1126"
+                        >91</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="
+                  background: white;
+                  border-top: 0.5px solid #e0e0e0;
+                  display: flex;
+                  justify-content: space-around;
+                  padding: 6px 0 10px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="3"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Accueil</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Matchs</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle cx="8" cy="6" r="3" fill="#CE1126" />
+                    <path
+                      d="M2 20c0-3 2.7-5.5 6-5.5s6 2.5 6 5.5"
+                      stroke="#CE1126"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    /></svg
+                  ><span
+                    style="font-size: 7px; color: #ce1126; font-weight: 700"
+                    >Profil</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="s-lbl">Profil joueur</span>
+        </div>
+
+        <!-- Screen 5 — Créer tournoi -->
+        <div class="screen-item">
+          <div class="s-num">05</div>
+          <div class="s-frame" style="width: 200px">
+            <div style="background: #f7f7f5">
+              <div style="background: #ce1126; padding: 0 14px 14px">
+                <div
+                  style="
+                    height: 28px;
+                    display: flex;
+                    align-items: flex-end;
+                    padding-bottom: 5px;
+                  "
+                >
+                  <span style="font-size: 8px; color: white; font-weight: 700"
+                    >9:41</span
+                  >
+                </div>
+                <div
+                  style="
+                    font-size: 10px;
+                    font-weight: 800;
+                    color: white;
+                    font-family: &quot;Syne&quot;, sans-serif;
+                    margin-bottom: 10px;
+                  "
+                >
+                  Nouveau tournoi
+                </div>
+                <div style="display: flex; align-items: center">
+                  <div
+                    style="
+                      width: 20px;
+                      height: 20px;
+                      border-radius: 50%;
+                      background: white;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                    "
+                  >
+                    <span
+                      style="
+                        font-size: 9px;
+                        font-weight: 800;
+                        color: #ce1126;
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                      >1</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 1.5px;
+                      background: rgba(255, 255, 255, 0.4);
+                      margin: 0 3px;
+                    "
+                  ></div>
+                  <div
+                    style="
+                      width: 20px;
+                      height: 20px;
+                      border-radius: 50%;
+                      background: rgba(255, 255, 255, 0.3);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                    "
+                  >
+                    <span
+                      style="
+                        font-size: 9px;
+                        font-weight: 700;
+                        color: rgba(255, 255, 255, 0.6);
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                      >2</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 1.5px;
+                      background: rgba(255, 255, 255, 0.25);
+                      margin: 0 3px;
+                    "
+                  ></div>
+                  <div
+                    style="
+                      width: 20px;
+                      height: 20px;
+                      border-radius: 50%;
+                      background: rgba(255, 255, 255, 0.3);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                    "
+                  >
+                    <span
+                      style="
+                        font-size: 9px;
+                        font-weight: 700;
+                        color: rgba(255, 255, 255, 0.6);
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                      >3</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      height: 1.5px;
+                      background: rgba(255, 255, 255, 0.25);
+                      margin: 0 3px;
+                    "
+                  ></div>
+                  <div
+                    style="
+                      width: 20px;
+                      height: 20px;
+                      border-radius: 50%;
+                      background: rgba(255, 255, 255, 0.3);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                    "
+                  >
+                    <span
+                      style="
+                        font-size: 9px;
+                        font-weight: 700;
+                        color: rgba(255, 255, 255, 0.6);
+                        font-family: &quot;Syne&quot;, sans-serif;
+                      "
+                      >4</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div style="padding: 10px 10px 0">
+                <div style="margin-bottom: 8px">
+                  <div
+                    style="
+                      font-size: 7px;
+                      font-weight: 800;
+                      color: #888;
+                      letter-spacing: 0.8px;
+                      text-transform: uppercase;
+                      margin-bottom: 4px;
+                    "
+                  >
+                    Nom du tournoi
+                  </div>
+                  <div
+                    style="
+                      background: white;
+                      border: 1.5px solid #ce1126;
+                      border-radius: 7px;
+                      padding: 7px 9px;
+                      font-size: 10px;
+                      color: #1a1a1a;
+                    "
+                  >
+                    Txapelketa Bayonne 2026
+                  </div>
+                </div>
+                <div style="margin-bottom: 8px">
+                  <div
+                    style="
+                      font-size: 7px;
+                      font-weight: 800;
+                      color: #888;
+                      letter-spacing: 0.8px;
+                      text-transform: uppercase;
+                      margin-bottom: 4px;
+                    "
+                  >
+                    Date de début
+                  </div>
+                  <div
+                    style="
+                      background: white;
+                      border: 0.5px solid #ddd;
+                      border-radius: 7px;
+                      padding: 7px 9px;
+                      font-size: 10px;
+                      color: #888;
+                    "
+                  >
+                    12 avril 2026
+                  </div>
+                </div>
+                <div style="margin-bottom: 8px">
+                  <div
+                    style="
+                      font-size: 7px;
+                      font-weight: 800;
+                      color: #888;
+                      letter-spacing: 0.8px;
+                      text-transform: uppercase;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    Discipline
+                  </div>
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap">
+                    <span
+                      style="
+                        background: #ce1126;
+                        color: white;
+                        border-radius: 20px;
+                        font-size: 8px;
+                        font-weight: 700;
+                        padding: 3px 8px;
+                      "
+                      >Main nue</span
+                    ><span
+                      style="
+                        background: white;
+                        color: #888;
+                        border: 0.5px solid #ddd;
+                        border-radius: 20px;
+                        font-size: 8px;
+                        font-weight: 600;
+                        padding: 3px 8px;
+                      "
+                      >Chistera</span
+                    ><span
+                      style="
+                        background: white;
+                        color: #888;
+                        border: 0.5px solid #ddd;
+                        border-radius: 20px;
+                        font-size: 8px;
+                        font-weight: 600;
+                        padding: 3px 8px;
+                      "
+                      >Pala</span
+                    >
+                  </div>
+                </div>
+                <div
+                  style="
+                    background: #ce1126;
+                    border-radius: 9px;
+                    padding: 9px;
+                    text-align: center;
+                  "
+                >
+                  <span
+                    style="
+                      font-size: 11px;
+                      font-weight: 800;
+                      color: white;
+                      font-family: &quot;Syne&quot;, sans-serif;
+                    "
+                    >Continuer →</span
+                  >
+                </div>
+              </div>
+              <div
+                style="
+                  background: white;
+                  border-top: 0.5px solid #e0e0e0;
+                  display: flex;
+                  justify-content: space-around;
+                  padding: 6px 0 10px;
+                  margin-top: 10px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="3"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="3"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="7"
+                      height="7"
+                      rx="1.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Accueil</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2L15 9H22L16.5 13.5L18.5 21L12 16.5L5.5 21L7.5 13.5L2 9H9Z"
+                      fill="#CE1126"
+                      stroke="#CE1126"
+                      stroke-width="1"
+                      stroke-linejoin="round"
+                    /></svg
+                  ><span
+                    style="font-size: 7px; color: #ce1126; font-weight: 700"
+                    >Tournois</span
+                  >
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2px;
+                  "
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="8"
+                      cy="6"
+                      r="3"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                    />
+                    <path
+                      d="M2 20c0-3 2.7-5.5 6-5.5s6 2.5 6 5.5"
+                      stroke="#bbb"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    /></svg
+                  ><span style="font-size: 7px; color: #bbb">Profil</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="s-lbl">Créer tournoi</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TESTIMONIALS ── -->
+    <section class="testimonials" id="temoignages">
+      <div class="section-tag fade-up">Témoignages</div>
+      <h2 class="section-title syne fade-up fade-up-delay-1">
+        Ce qu'ils disent<br />
+        <em>du fronton.</em>
+      </h2>
+      <div class="testim-grid">
+        <div class="testim-card fade-up">
+          <div class="testim-stars">
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+          </div>
+          <p class="testim-text">
+            La saisie de score en direct est vraiment fluide. Plus besoin de
+            papier ou de tableur Excel. Tout est là, instantané.
+          </p>
+          <div class="testim-author">
+            <div
+              class="testim-avatar"
+              style="background: var(--red-light); color: var(--red)"
+            >
+              ME
+            </div>
+            <div>
+              <div class="testim-name">Mikel Etxeberria</div>
+              <div class="testim-role">Champion régional · Bayonne</div>
+            </div>
+          </div>
+        </div>
+        <div class="testim-card fade-up fade-up-delay-1">
+          <div class="testim-stars">
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+          </div>
+          <p class="testim-text">
+            On a organisé notre Txapelketa annuel avec Kancha. 18 joueurs, 3
+            poules, finale en direct. Impeccable du début à la fin.
+          </p>
+          <div class="testim-author">
+            <div
+              class="testim-avatar"
+              style="background: #e8f5ee; color: #085041"
+            >
+              AT
+            </div>
+            <div>
+              <div class="testim-name">Amaia Txoperena</div>
+              <div class="testim-role">Organisatrice · Fronton Biarritz</div>
+            </div>
+          </div>
+        </div>
+        <div class="testim-card fade-up fade-up-delay-2">
+          <div class="testim-stars">
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+              />
+            </svg>
+            <svg class="star" viewBox="0 0 14 14">
+              <path
+                d="M7 1l1.5 4H13l-3.6 2.6 1.4 4.4L7 9.4 3.2 12l1.4-4.4L1 5h4.5z"
+                fill="#EF9F27"
+                opacity="0.3"
+              />
+            </svg>
+          </div>
+          <p class="testim-text">
+            Enfin une vraie app dédiée à la pelote basque. Les statistiques sont
+            précises et la progression saison me motive à m'améliorer.
+          </p>
+          <div class="testim-author">
+            <div
+              class="testim-avatar"
+              style="background: #faeeda; color: #633806"
+            >
+              IZ
+            </div>
+            <div>
+              <div class="testim-name">Iker Zabaleta</div>
+              <div class="testim-role">Joueur · Pala · Saint-Jean-de-Luz</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA ── -->
+    <section class="cta-section">
+      <div class="cta-glow"></div>
+      <div class="cta-inner">
+        <div
+          class="hero-eyebrow"
+          style="display: inline-flex; margin: 0 auto 20px"
+        >
+          <span></span>Gratuit · Sans abonnement
+        </div>
+        <h2 class="cta-title syne">Rejoins<br /><em>12 000 joueurs.</em></h2>
+        <p class="cta-sub">
+          Télécharge Kancha et commence à gérer tes matchs dès aujourd'hui.
+          Disponible sur iPhone et Android, gratuitement.
+        </p>
+        <div class="cta-buttons">
+          <a href="#" class="store-btn" style="min-width: 160px">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.2.04 2.02.54 2.78.55.97-.19 1.87-.72 2.94-.65 1.27.09 2.19.62 2.82 1.56-2.52 1.52-1.87 4.84.75 5.79-.52 1.44-1.2 2.87-2.29 3.63zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
+                fill="#1a1a1a"
+              />
+            </svg>
+            <div class="store-btn-text">
+              <span class="store-btn-sub">Télécharger sur</span>
+              <span class="store-btn-name">App Store</span>
+            </div>
+          </a>
+          <a href="#" class="store-btn dark" style="min-width: 160px">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M3.18 23.76c.36.2.76.24 1.15.1L14.84 12 11.84 9 3.18 23.76z"
+                fill="#EA4335"
+              />
+              <path
+                d="M20.66 10.42L17.5 8.62 14.15 12l3.35 3.38 3.16-1.8a1.77 1.77 0 000-3.16z"
+                fill="#FBBC04"
+              />
+              <path
+                d="M4.33.14a1.77 1.77 0 00-1.15.1L11.84 12l3-3L4.33.14z"
+                fill="#4285F4"
+              />
+              <path
+                d="M3.18.24L11.84 12l3-3L4.33.14A1.8 1.8 0 003.18.24z"
+                fill="#34A853"
+              />
+            </svg>
+            <div class="store-btn-text">
+              <span class="store-btn-sub">Disponible sur</span>
+              <span class="store-btn-name">Google Play</span>
+            </div>
+          </a>
+        </div>
+        <p class="cta-free">Gratuit · iOS 15+ · Android 8+ · Pas de pub</p>
+      </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+      <div class="footer-logo">
+        <svg width="20" height="20" viewBox="0 0 120 120">
+          <rect width="120" height="120" rx="22" fill="#CE1126" />
+          <path
+            d="M20 95L20 35Q20 25 30 25L100 25"
+            fill="none"
+            stroke="white"
+            stroke-width="9"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <line
+            x1="20"
+            y1="95"
+            x2="100"
+            y2="95"
+            stroke="white"
+            stroke-width="9"
+            stroke-linecap="round"
+          />
+          <circle cx="84" cy="52" r="20" fill="white" />
+        </svg>
+        Kancha
+      </div>
+      <div class="footer-links">
+        <a href="#">Confidentialité</a>
+        <a href="#">Conditions</a>
+        <a href="#">Contact</a>
+        <a href="#">Presse</a>
+      </div>
+      <div class="footer-copy">© 2026 Kancha App · Pilotariak</div>
+    </footer>
+
+    <script>
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((el) => {
+            if (el.isIntersecting) el.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.1 },
+      );
+      document
+        .querySelectorAll(".fade-up")
+        .forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>

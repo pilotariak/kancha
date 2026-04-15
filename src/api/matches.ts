@@ -3,7 +3,7 @@ import { graphqlRequest } from "./client";
 
 const RESULT_SUMMARY_FIELDS = `
   id
-  category
+  category { id name }
   dateMatch
   phase
   scoreA
@@ -38,13 +38,13 @@ const LIST_RESULTS = `
   query ListResults(
     $competitionId: ID
     $specialtyId: ID
-    $category: String
+    $categoryId: ID
     $phase: String
   ) {
     results(
       competitionId: $competitionId
       specialtyId: $specialtyId
-      category: $category
+      categoryId: $categoryId
       phase: $phase
     ) {
       ${RESULT_SUMMARY_FIELDS}
@@ -63,7 +63,7 @@ const GET_RESULT = `
 interface ListResultsParams {
   competitionId?: string;
   specialtyId?: string;
-  category?: string;
+  categoryId?: string;
   phase?: string;
 }
 
