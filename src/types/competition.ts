@@ -38,8 +38,7 @@ export interface Result {
   dateMatch?: string;
   clubA: Club;
   clubB: Club;
-  scoreA?: number;
-  scoreB?: number;
+  scores?: string;
   phase?: string;
   clubALineup?: ClubLineup;
   clubBLineup?: ClubLineup;

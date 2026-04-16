@@ -12,7 +12,8 @@ export function KanchaBackground({ children }: KanchaBackgroundProps) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[KanchaColors.red, KanchaColors.redDark]}
+        colors={[KanchaColors.red, KanchaColors.redDark, KanchaColors.cream]}
+        locations={[0, 0.55, 1]}
         style={styles.topGlow}
       />
       <View style={styles.circleOne} />
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 230,
+    height: 300,
   },
   circleOne: {
     position: "absolute",

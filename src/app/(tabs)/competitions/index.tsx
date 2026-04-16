@@ -1,5 +1,4 @@
 import { router } from "expo-router";
-import { ChevronRight, Trophy } from "lucide-react-native";
 import React from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,8 +12,7 @@ import { useCompetitions } from "@/hooks/use-competitions";
 export default function CompetitionsScreen() {
   const { data: competitions, isPending, isError, error } = useCompetitions();
 
-  const featured = competitions?.[0];
-  const others = competitions?.slice(1) ?? [];
+  const list = competitions ?? [];
 
   return (
     <KanchaBackground>
@@ -46,34 +44,7 @@ export default function CompetitionsScreen() {
             </View>
           )}
 
-          {featured && (
-            <PressableScale
-              style={styles.featuredCard}
-              onPress={() => router.push(`/(tabs)/competitions/specialty?id=${featured.id}`)}
-              testID="competition-featured-card"
-            >
-              <View style={styles.featuredTop}>
-                <View>
-                  <Text style={styles.featuredEyebrow}>Featured</Text>
-                  <Text style={styles.featuredTitle}>{featured.name}</Text>
-                </View>
-              </View>
-              {(featured.year != null || featured.level) && (
-                <View style={styles.featuredPanel}>
-                  <Trophy color={KanchaColors.white} size={16} />
-                  <Text style={styles.featuredPanelText}>
-                    {[featured.year, featured.level].filter(Boolean).join(" · ")}
-                  </Text>
-                </View>
-              )}
-              <View style={styles.featuredFooter}>
-                <Text style={styles.featuredFooterText}>View details</Text>
-                <ChevronRight color={KanchaColors.white} size={16} />
-              </View>
-            </PressableScale>
-          )}
-
-          {others.length > 0 && (
+          {list.length > 0 && (
             <>
               <SectionHeader
                 eyebrow="All competitions"
@@ -81,7 +52,7 @@ export default function CompetitionsScreen() {
                 subtitle="All competitions for your league."
               />
               <View style={styles.list}>
-                {others.map((item) => (
+                {list.map((item) => (
                   <PressableScale
                     key={item.id}
                     style={styles.card}
@@ -135,57 +106,6 @@ const styles = StyleSheet.create({
     color: KanchaColors.white,
     fontSize: 14,
     fontWeight: "600",
-  },
-  featuredCard: {
-    borderRadius: 24,
-    backgroundColor: KanchaColors.red,
-    padding: 20,
-    gap: 12,
-  },
-  featuredTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  featuredEyebrow: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-  featuredTitle: {
-    color: KanchaColors.white,
-    fontSize: 26,
-    fontWeight: "900",
-    marginTop: 6,
-  },
-  featuredPanel: {
-    borderRadius: 16,
-    backgroundColor: "#161616",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  featuredPanelText: {
-    color: KanchaColors.white,
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  featuredFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 12,
-  },
-  featuredFooterText: {
-    flex: 1,
-    color: KanchaColors.white,
-    fontSize: 15,
-    fontWeight: "700",
   },
   list: { gap: 12 },
   card: {

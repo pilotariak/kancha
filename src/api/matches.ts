@@ -6,8 +6,7 @@ const RESULT_SUMMARY_FIELDS = `
   category { id name }
   dateMatch
   phase
-  scoreA
-  scoreB
+  scores
   clubA { id name }
   clubB { id name }
   specialty { id name }

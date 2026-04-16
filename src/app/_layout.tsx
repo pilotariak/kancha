@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { LaunchScreen } from "@/components/launch-screen";
 
@@ -40,7 +41,9 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        {launching ? <LaunchScreen onFinish={handleLaunchFinish} /> : <RootLayoutNav />}
+        <SafeAreaProvider>
+          {launching ? <LaunchScreen onFinish={handleLaunchFinish} /> : <RootLayoutNav />}
+        </SafeAreaProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
   );
