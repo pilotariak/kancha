@@ -92,17 +92,29 @@ export default function CategoryPickerScreen() {
 
           {!loadingCategories && !isError && categories && categories.length > 0 && (
             <View style={styles.list}>
-              {categories.map((cat) => (
-                <Pressable
-                  key={cat.id}
-                  style={styles.card}
-                  onPress={() => handleSelect(cat.id)}
-                  testID={`category-card-${cat.id}`}
-                >
-                  <Text style={styles.cardTitle}>{cat.name}</Text>
-                  <ChevronRight color={KanchaColors.muted} size={18} />
-                </Pressable>
-              ))}
+              {[...categories]
+                .sort((a, b) => {
+                  const aIsSerie = a.name.includes("Série");
+                  const bIsSerie = b.name.includes("Série");
+                  if (aIsSerie && !bIsSerie) {
+                    return -1;
+                  }
+                  if (!aIsSerie && bIsSerie) {
+                    return 1;
+                  }
+                  return 0;
+                })
+                .map((cat) => (
+                  <Pressable
+                    key={cat.id}
+                    style={styles.card}
+                    onPress={() => handleSelect(cat.id)}
+                    testID={`category-card-${cat.id}`}
+                  >
+                    <Text style={styles.cardTitle}>{cat.name}</Text>
+                    <ChevronRight color={KanchaColors.muted} size={18} />
+                  </Pressable>
+                ))}
             </View>
           )}
         </ScrollView>
@@ -162,29 +174,33 @@ const styles = StyleSheet.create({
   },
   section: { gap: 4 },
   sectionEyebrow: {
-    color: "rgba(255,255,255,0.6)",
+    color: KanchaColors.muted,
     fontSize: 12,
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 1.4,
   },
-  sectionTitle: { color: KanchaColors.white, fontSize: 28, fontWeight: "900" },
-  sectionSubtitle: { color: "rgba(255,255,255,0.72)", fontSize: 14, lineHeight: 20, marginTop: 2 },
+  sectionTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "900" },
+  sectionSubtitle: { color: KanchaColors.muted, fontSize: 14, lineHeight: 20, marginTop: 2 },
   centered: { paddingVertical: 40, alignItems: "center" },
   errorBox: {
     borderRadius: 16,
-    backgroundColor: "rgba(255,60,60,0.15)",
+    backgroundColor: KanchaColors.redSoft,
     padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(200,16,46,0.2)",
   },
-  errorText: { color: KanchaColors.white, fontSize: 14, fontWeight: "600" },
+  errorText: { color: KanchaColors.redDark, fontSize: 14, fontWeight: "600" },
   emptyBox: {
     borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: KanchaColors.white,
     padding: 20,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: KanchaColors.line,
   },
   emptyText: {
-    color: "rgba(255,255,255,0.6)",
+    color: KanchaColors.muted,
     fontSize: 14,
     fontWeight: "600",
     textAlign: "center",
