@@ -1,0 +1,98 @@
+{
+  "tabs": {
+    "competitions": "Compétitions",
+    "slot": "Créneaux",
+    "about": "À propos",
+    "soon": "Bientôt"
+  },
+  "common": {
+    "back": "Retour",
+    "choose": "Choisir",
+    "soon": "Bientôt",
+    "competition_fallback": "Compétition"
+  },
+  "leagues": {
+    "eyebrow": "Tableau des compétitions",
+    "title": "Ligues",
+    "subtitle": "Sélectionnez une ligue pour parcourir ses compétitions.",
+    "your_league": "Votre ligue"
+  },
+  "competitions": {
+    "eyebrow": "Tableau des compétitions",
+    "title": "Compétitions",
+    "back": "Ligues",
+    "all_eyebrow": "Toutes les compétitions",
+    "season_title": "Aperçu de la saison",
+    "season_subtitle": "Toutes les compétitions de cette ligue.",
+    "error_load": "Échec du chargement des compétitions"
+  },
+  "specialty": {
+    "back": "Compétitions",
+    "title": "Spécialité",
+    "subtitle": "Sélectionnez une spécialité pour voir les résultats de cette compétition.",
+    "error_load": "Échec du chargement des spécialités."
+  },
+  "category": {
+    "back": "Spécialité",
+    "title": "Catégorie",
+    "subtitle": "Sélectionnez une catégorie pour voir les résultats de cette spécialité.",
+    "error_load": "Échec du chargement des catégories.",
+    "empty": "Aucune catégorie trouvée pour cette spécialité."
+  },
+  "details": {
+    "back": "Catégorie",
+    "error_load": "Échec du chargement des résultats",
+    "empty": "Aucun résultat trouvé pour cette compétition.",
+    "tableau_eyebrow": "Tableau",
+    "tournament_title": "Tournoi",
+    "matches_count_one": "{{count}} match",
+    "matches_count_other": "{{count}} matchs",
+    "rounds_count_one": "{{count}} tour",
+    "rounds_count_other": "{{count}} tours"
+  },
+  "rounds": {
+    "P": "Poules",
+    "B1T": "Barrages 1er tour",
+    "B2T": "Barrages 2e tour",
+    "B3T": "Barrages 3e tour",
+    "H": "Huitièmes de finale",
+    "Q": "Quarts de finale",
+    "D": "Demi-finales",
+    "F": "Finale",
+    "other": "Matchs"
+  },
+  "about": {
+    "tagline": "Gestionnaire de tournois de pelote",
+    "version": "Version",
+    "copyright": "Copyright",
+    "website": "Site web",
+    "partners_eyebrow": "Partenaires",
+    "supported_leagues": "Ligues soutenues"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "Anglais",
+    "fr": "Français",
+    "es": "Espagnol",
+    "eu": "Basque"
+  },
+  "new_competition": {
+    "title": "Nouvelle compétition",
+    "subtitle": "Un assistant pour configurer le format, les joueurs, le calendrier et les classements.",
+    "step_info": "Infos",
+    "step_format": "Format",
+    "step_players": "Joueurs",
+    "step_schedule": "Calendrier",
+    "step_summary": "Résumé",
+    "label_name": "Nom de la compétition",
+    "label_date": "Date de début",
+    "label_venue": "Lieu",
+    "label_discipline": "Discipline",
+    "label_category": "Catégorie",
+    "label_format": "Format",
+    "cta_continue": "Continuer",
+    "cta_ready": "Compétition prête",
+    "seeded": "Classé",
+    "schedule_meta": "Mode calendrier : rotation des terrains générée automatiquement avec suivi des classements."
+  }
+}

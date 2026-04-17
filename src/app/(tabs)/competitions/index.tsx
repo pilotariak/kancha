@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { ChevronRight, Shield } from "lucide-react-native";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -10,6 +11,7 @@ import { LEAGUES } from "@/constants/leagues";
 import { useLeagueStore } from "@/store/league-store";
 
 export default function LeaguePickerScreen() {
+  const { t } = useTranslation();
   const setLeague = useLeagueStore((s) => s.setLeague);
 
   function handleSelect(id: string) {
@@ -26,16 +28,14 @@ export default function LeaguePickerScreen() {
           testID="league-picker-screen"
         >
           <View style={styles.hero}>
-            <Text style={styles.eyebrow}>Competition desk</Text>
-            <Text style={styles.title}>Leagues</Text>
-            <Text style={styles.subtitle}>
-              Select a league to browse its competitions.
-            </Text>
+            <Text style={styles.eyebrow}>{t("leagues.eyebrow")}</Text>
+            <Text style={styles.title}>{t("leagues.title")}</Text>
+            <Text style={styles.subtitle}>{t("leagues.subtitle")}</Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionEyebrow}>Choose</Text>
-            <Text style={styles.sectionTitle}>Your league</Text>
+            <Text style={styles.sectionEyebrow}>{t("common.choose")}</Text>
+            <Text style={styles.sectionTitle}>{t("leagues.your_league")}</Text>
           </View>
 
           <View style={styles.list}>
@@ -58,7 +58,7 @@ export default function LeaguePickerScreen() {
                 </Text>
                 {league.supported
                   ? <ChevronRight color={KanchaColors.muted} size={18} />
-                  : <Text style={styles.comingSoon}>Soon</Text>}
+                  : <Text style={styles.comingSoon}>{t("common.soon")}</Text>}
               </Pressable>
             ))}
           </View>

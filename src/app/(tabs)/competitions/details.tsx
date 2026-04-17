@@ -1,6 +1,7 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Swords, Trophy, Users } from "lucide-react-native";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -151,29 +152,6 @@ const PHASE_COLORS: Record<PhaseType, PhaseColors> = {
   },
 };
 
-function roundLabel(type: PhaseType): string {
-  switch (type) {
-    case "P":
-      return "Poules";
-    case "B1T":
-      return "Barrages 1er tour";
-    case "B2T":
-      return "Barrages 2e tour";
-    case "B3T":
-      return "Barrages 3e tour";
-    case "H":
-      return "Huitièmes de finale";
-    case "Q":
-      return "Quarts de finale";
-    case "D":
-      return "Demi-finales";
-    case "F":
-      return "Finale";
-    default:
-      return "Matchs";
-  }
-}
-
 // ─── Grouping ─────────────────────────────────────────────────────────────────
 
 interface RoundGroup {
@@ -236,6 +214,7 @@ function formatLineup(lineup?: { player1?: { name: string }; player2?: { name: s
 // ─── Round header ─────────────────────────────────────────────────────────────
 
 function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
+  const { t } = useTranslation();
   const colors = PHASE_COLORS[type];
   const Icon = type === "P" ? Users : type === "F" ? Trophy : Swords;
 
@@ -250,7 +229,7 @@ function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
       >
         <Icon color={colors.icon} size={13} />
         <Text style={[styles.roundDividerLabel, { color: colors.label }]}>
-          {roundLabel(type)}
+          {t(`rounds.${type}`)}
         </Text>
         <Text style={[styles.roundDividerCount, { color: colors.count }]}>
           {count}
@@ -314,6 +293,7 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function CompetitionDetailsScreen() {
+  const { t } = useTranslation();
   const { id, specialtyId, categoryId } = useLocalSearchParams<{
     id: string;
     specialtyId: string;
@@ -344,7 +324,7 @@ export default function CompetitionDetailsScreen() {
         >
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <ArrowLeft color={KanchaColors.white} size={20} />
-            <Text style={styles.backLabel}>Category</Text>
+            <Text style={styles.backLabel}>{t("details.back")}</Text>
           </Pressable>
 
           {/* Hero */}
@@ -356,7 +336,9 @@ export default function CompetitionDetailsScreen() {
               ? <ActivityIndicator color={KanchaColors.white} />
               : (
                 <>
-                  <Text style={styles.heroTitle}>{competition?.name ?? "Competition"}</Text>
+                  <Text style={styles.heroTitle}>
+                    {competition?.name ?? t("common.competition_fallback")}
+                  </Text>
                   {(competition?.year != null || competition?.level) && (
                     <Text style={styles.heroMeta}>
                       {[competition?.year, competition?.level].filter(Boolean).join(" · ")}
@@ -390,7 +372,7 @@ export default function CompetitionDetailsScreen() {
           {isError && (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>
-                {error instanceof Error ? error.message : "Failed to load results"}
+                {error instanceof Error ? error.message : t("details.error_load")}
               </Text>
             </View>
           )}
@@ -403,7 +385,7 @@ export default function CompetitionDetailsScreen() {
 
           {!loadingResults && !isError && totalMatches === 0 && (
             <View style={styles.emptyBox}>
-              <Text style={styles.emptyText}>No results found for this competition.</Text>
+              <Text style={styles.emptyText}>{t("details.empty")}</Text>
             </View>
           )}
 
@@ -411,11 +393,12 @@ export default function CompetitionDetailsScreen() {
           {!loadingResults && !isError && rounds.length > 0 && (
             <>
               <View style={styles.tournamentHeader}>
-                <Text style={styles.tournamentEyebrow}>Tableau</Text>
-                <Text style={styles.tournamentTitle}>Tournoi</Text>
+                <Text style={styles.tournamentEyebrow}>{t("details.tableau_eyebrow")}</Text>
+                <Text style={styles.tournamentTitle}>{t("details.tournament_title")}</Text>
                 <Text style={styles.tournamentSub}>
-                  {totalMatches} match{totalMatches > 1 ? "s" : ""} · {rounds.length}{" "}
-                  tour{rounds.length > 1 ? "s" : ""}
+                  {t("details.matches_count", { count: totalMatches })}
+                  {" · "}
+                  {t("details.rounds_count", { count: rounds.length })}
                 </Text>
               </View>
 

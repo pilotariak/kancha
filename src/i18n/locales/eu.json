@@ -1,0 +1,98 @@
+{
+  "tabs": {
+    "competitions": "Txapelketak",
+    "slot": "Ordutegia",
+    "about": "Honi buruz",
+    "soon": "Laster"
+  },
+  "common": {
+    "back": "Atzera",
+    "choose": "Aukeratu",
+    "soon": "Laster",
+    "competition_fallback": "Txapelketa"
+  },
+  "leagues": {
+    "eyebrow": "Txapelketa mahai",
+    "title": "Ligak",
+    "subtitle": "Hautatu liga bat bere txapelketak ikusteko.",
+    "your_league": "Zure liga"
+  },
+  "competitions": {
+    "eyebrow": "Txapelketa mahai",
+    "title": "Txapelketak",
+    "back": "Ligak",
+    "all_eyebrow": "Txapelketa guztiak",
+    "season_title": "Denboraldi laburpena",
+    "season_subtitle": "Liga honetako txapelketa guztiak.",
+    "error_load": "Errorea txapelketak kargatzean"
+  },
+  "specialty": {
+    "back": "Txapelketak",
+    "title": "Espezialitatea",
+    "subtitle": "Hautatu espezialitate bat txapelketa honetako emaitzak ikusteko.",
+    "error_load": "Errorea espezialitateak kargatzean."
+  },
+  "category": {
+    "back": "Espezialitatea",
+    "title": "Kategoria",
+    "subtitle": "Hautatu kategoria bat espezialitate honetako emaitzak ikusteko.",
+    "error_load": "Errorea kategoriak kargatzean.",
+    "empty": "Ez da kategorialik aurkitu espezialitate honetarako."
+  },
+  "details": {
+    "back": "Kategoria",
+    "error_load": "Errorea emaitzak kargatzean",
+    "empty": "Ez da emaitzarik aurkitu txapelketa honetarako.",
+    "tableau_eyebrow": "Taula",
+    "tournament_title": "Txapelketa",
+    "matches_count_one": "{{count}} partida",
+    "matches_count_other": "{{count}} partida",
+    "rounds_count_one": "{{count}} txanda",
+    "rounds_count_other": "{{count}} txanda"
+  },
+  "rounds": {
+    "P": "Taldeak",
+    "B1T": "Barrageak 1. txanda",
+    "B2T": "Barrageak 2. txanda",
+    "B3T": "Barrageak 3. txanda",
+    "H": "Zortzirenak",
+    "Q": "Laurdenfinalak",
+    "D": "Erdifinalak",
+    "F": "Finala",
+    "other": "Partidak"
+  },
+  "about": {
+    "tagline": "Pilota txapelketa kudeatzailea",
+    "version": "Bertsioa",
+    "copyright": "Copyright",
+    "website": "Webgunea",
+    "partners_eyebrow": "Bazkideak",
+    "supported_leagues": "Onartutako ligak"
+  },
+  "language": {
+    "label": "Hizkuntza",
+    "en": "Ingelesa",
+    "fr": "Frantsesa",
+    "es": "Gaztelania",
+    "eu": "Euskara"
+  },
+  "new_competition": {
+    "title": "Txapelketa berria",
+    "subtitle": "Formatua, jokalariak, egutegia eta sailkapena konfiguratzeko gidatutako fluxua.",
+    "step_info": "Infoa",
+    "step_format": "Formatua",
+    "step_players": "Jokalariak",
+    "step_schedule": "Egutegia",
+    "step_summary": "Laburpena",
+    "label_name": "Txapelketa izena",
+    "label_date": "Hasiera data",
+    "label_venue": "Tokia",
+    "label_discipline": "Diziplina",
+    "label_category": "Kategoria",
+    "label_format": "Formatua",
+    "cta_continue": "Jarraitu",
+    "cta_ready": "Txapelketa prest",
+    "seeded": "Sailkatua",
+    "schedule_meta": "Egutegi modua: pisten txandaketa automatikoki sortua sailkapen jarraipena."
+  }
+}

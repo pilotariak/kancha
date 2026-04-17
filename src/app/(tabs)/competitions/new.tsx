@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { CalendarDays, ChevronRight, Users2 } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -9,13 +10,6 @@ import { PressableScale } from "@/components/PressableScale";
 import { StatusPill } from "@/components/StatusPill";
 import { KanchaColors } from "@/constants/colors";
 
-const stepTitles = [
-  "Info",
-  "Format",
-  "Players",
-  "Schedule",
-  "Summary",
-] as const;
 const disciplines = [
   "Main nue",
   "Chistera",
@@ -31,6 +25,14 @@ const formats = [
 ] as const;
 
 export default function NewCompetitionScreen() {
+  const { t } = useTranslation();
+  const stepTitles = [
+    t("new_competition.step_info"),
+    t("new_competition.step_format"),
+    t("new_competition.step_players"),
+    t("new_competition.step_schedule"),
+    t("new_competition.step_summary"),
+  ];
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [name, setName] = useState<string>("Txapelketa Bayonne 2026");
   const [date, setDate] = useState<string>("12/04/2026");
@@ -41,8 +43,11 @@ export default function NewCompetitionScreen() {
   const [playerCount] = useState<string>("14 teams");
 
   const nextLabel = useMemo(
-    () => currentStep === stepTitles.length - 1 ? "Competition ready" : "Continue",
-    [currentStep],
+    () =>
+      currentStep === stepTitles.length - 1
+        ? t("new_competition.cta_ready")
+        : t("new_competition.cta_continue"),
+    [currentStep, t],
   );
 
   const goNext = () => {
@@ -59,15 +64,13 @@ export default function NewCompetitionScreen() {
           testID="new-competition-screen"
         >
           <View style={styles.hero}>
-            <Text style={styles.title}>New competition</Text>
-            <Text style={styles.subtitle}>
-              A guided setup flow for format, players, scheduling, and standings.
-            </Text>
+            <Text style={styles.title}>{t("new_competition.title")}</Text>
+            <Text style={styles.subtitle}>{t("new_competition.subtitle")}</Text>
           </View>
 
           <View style={styles.stepsRow}>
             {stepTitles.map((step, index) => (
-              <View key={step} style={styles.stepItem}>
+              <View key={index} style={styles.stepItem}>
                 <View
                   style={[
                     styles.stepCircle,
@@ -97,7 +100,7 @@ export default function NewCompetitionScreen() {
           </View>
 
           <View style={styles.formCard}>
-            <Text style={styles.label}>Competition name</Text>
+            <Text style={styles.label}>{t("new_competition.label_name")}</Text>
             <TextInput
               value={name}
               onChangeText={setName}
@@ -105,7 +108,7 @@ export default function NewCompetitionScreen() {
               testID="input-competition-name"
             />
 
-            <Text style={styles.label}>Start date</Text>
+            <Text style={styles.label}>{t("new_competition.label_date")}</Text>
             <View style={styles.inputWithIcon}>
               <TextInput
                 value={date}
@@ -116,7 +119,7 @@ export default function NewCompetitionScreen() {
               <CalendarDays color={KanchaColors.ink} size={18} />
             </View>
 
-            <Text style={styles.label}>Venue</Text>
+            <Text style={styles.label}>{t("new_competition.label_venue")}</Text>
             <TextInput
               value={venue}
               onChangeText={setVenue}
@@ -124,7 +127,7 @@ export default function NewCompetitionScreen() {
               testID="input-competition-venue"
             />
 
-            <Text style={styles.label}>Discipline</Text>
+            <Text style={styles.label}>{t("new_competition.label_discipline")}</Text>
             <View style={styles.chipsWrap}>
               {disciplines.map((item) => (
                 <PressableScale
@@ -150,7 +153,7 @@ export default function NewCompetitionScreen() {
               ))}
             </View>
 
-            <Text style={styles.label}>Category</Text>
+            <Text style={styles.label}>{t("new_competition.label_category")}</Text>
             <View style={styles.chipsWrap}>
               {categories.map((item) => (
                 <PressableScale
@@ -176,7 +179,7 @@ export default function NewCompetitionScreen() {
               ))}
             </View>
 
-            <Text style={styles.label}>Format</Text>
+            <Text style={styles.label}>{t("new_competition.label_format")}</Text>
             <View style={styles.chipsWrap}>
               {formats.map((item) => (
                 <PressableScale key={item} onPress={() => setFormat(item)}>
@@ -203,11 +206,9 @@ export default function NewCompetitionScreen() {
               <View style={styles.summaryRow}>
                 <Users2 color={KanchaColors.red} size={16} />
                 <Text style={styles.summaryText}>{playerCount}</Text>
-                <StatusPill label="Seeded" tone="green" />
+                <StatusPill label={t("new_competition.seeded")} tone="green" />
               </View>
-              <Text style={styles.summaryMeta}>
-                Schedule mode: auto-generated court rotation with standings tracking.
-              </Text>
+              <Text style={styles.summaryMeta}>{t("new_competition.schedule_meta")}</Text>
             </View>
 
             <PressableScale onPress={goNext} testID="new-competition-continue">
