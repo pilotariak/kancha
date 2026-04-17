@@ -1,21 +1,32 @@
 import Constants from "expo-constants";
+import { Image } from "expo-image";
 import { ExternalLink } from "lucide-react-native";
 import React from "react";
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { KanchaColors } from "@/constants/colors";
+import { LEAGUES } from "@/constants/leagues";
 
 const WEBSITE_URL = "https://pilotariak.com";
 const APP_VERSION = Constants.expoConfig?.version ?? "—";
 const COPYRIGHT_YEAR = new Date().getFullYear();
 
+const LEAGUE_LOGOS: Record<string, string> = {
+  lcapb: "https://www.ccapb.net/wp-content/uploads/2016/09/logo1.png",
+};
+
+const supportedLeagues = LEAGUES.filter((l) => l.supported);
+
 export default function AboutScreen() {
   return (
     <KanchaBackground>
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <View style={styles.content}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.hero}>
             <View style={styles.logoBox}>
               <Text style={styles.logoLetter}>K</Text>
@@ -47,7 +58,35 @@ export default function AboutScreen() {
               </View>
             </Pressable>
           </View>
-        </View>
+
+          <View style={styles.leaguesSection}>
+            <Text style={styles.sectionEyebrow}>Partners</Text>
+            <Text style={styles.sectionTitle}>Supported leagues</Text>
+
+            <View style={styles.leagueList}>
+              {supportedLeagues.map((league) => {
+                const logo = LEAGUE_LOGOS[league.id];
+                return (
+                  <View
+                    key={league.id}
+                    style={styles.leagueCard}
+                    testID={`about-league-${league.id}`}
+                  >
+                    {logo && (
+                      <Image
+                        source={{ uri: logo }}
+                        style={styles.leagueLogo}
+                        contentFit="contain"
+                        transition={200}
+                      />
+                    )}
+                    <Text style={styles.leagueName}>{league.name}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </KanchaBackground>
   );
@@ -56,12 +95,10 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   content: {
-    flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 40,
+    paddingTop: 32,
+    paddingBottom: 60,
     gap: 32,
-    justifyContent: "center",
   },
   hero: {
     alignItems: "center",
@@ -131,5 +168,46 @@ const styles = StyleSheet.create({
     color: KanchaColors.red,
     fontSize: 15,
     fontWeight: "700",
+  },
+  leaguesSection: {
+    gap: 12,
+  },
+  sectionEyebrow: {
+    color: KanchaColors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 1.4,
+  },
+  sectionTitle: {
+    color: KanchaColors.ink,
+    fontSize: 22,
+    fontWeight: "900",
+    marginTop: -4,
+  },
+  leagueList: {
+    gap: 10,
+  },
+  leagueCard: {
+    borderRadius: 18,
+    backgroundColor: KanchaColors.white,
+    borderWidth: 1,
+    borderColor: KanchaColors.line,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  leagueLogo: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+  },
+  leagueName: {
+    color: KanchaColors.ink,
+    fontSize: 14,
+    fontWeight: "700",
+    flex: 1,
   },
 });

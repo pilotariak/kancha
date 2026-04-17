@@ -1,3 +1,4 @@
+import { useLeagueStore } from "@/store/league-store";
 import { logger } from "@/utils/logger";
 
 export class ApiError extends Error {
@@ -41,7 +42,9 @@ export async function graphqlRequest<TData, TVariables = Record<string, unknown>
   logger.startPerformanceMark(`graphql-${operationName}`);
 
   try {
-    const league = process.env.EXPO_PUBLIC_LEAGUE ?? "lcapb";
+    const league = useLeagueStore.getState().selectedLeagueId
+      ?? process.env.EXPO_PUBLIC_LEAGUE
+      ?? "lcapb";
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "X-Pilotariak-League": league,
