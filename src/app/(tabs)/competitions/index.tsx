@@ -1,18 +1,21 @@
 import { router } from "expo-router";
+import { ChevronRight, Shield } from "lucide-react-native";
 import React from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { KanchaBackground } from "@/components/KanchaBackground";
-import { PressableScale } from "@/components/PressableScale";
-import { SectionHeader } from "@/components/SectionHeader";
 import { KanchaColors } from "@/constants/colors";
-import { useCompetitions } from "@/hooks/use-competitions";
+import { LEAGUES } from "@/constants/leagues";
+import { useLeagueStore } from "@/store/league-store";
 
-export default function CompetitionsScreen() {
-  const { data: competitions, isPending, isError, error } = useCompetitions();
+export default function LeaguePickerScreen() {
+  const setLeague = useLeagueStore((s) => s.setLeague);
 
-  const list = competitions ?? [];
+  function handleSelect(id: string) {
+    setLeague(id);
+    router.push("/(tabs)/competitions/list");
+  }
 
   return (
     <KanchaBackground>
@@ -20,55 +23,45 @@ export default function CompetitionsScreen() {
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
-          testID="competitions-screen"
+          testID="league-picker-screen"
         >
           <View style={styles.hero}>
             <Text style={styles.eyebrow}>Competition desk</Text>
-            <Text style={styles.title}>Competitions</Text>
+            <Text style={styles.title}>Leagues</Text>
             <Text style={styles.subtitle}>
-              Plan formats, manage player pools, and monitor standings.
+              Select a league to browse its competitions.
             </Text>
           </View>
 
-          {isPending && (
-            <View style={styles.centered}>
-              <ActivityIndicator color={KanchaColors.white} size="large" />
-            </View>
-          )}
+          <View style={styles.section}>
+            <Text style={styles.sectionEyebrow}>Choose</Text>
+            <Text style={styles.sectionTitle}>Your league</Text>
+          </View>
 
-          {isError && (
-            <View style={styles.errorBox}>
-              <Text style={styles.errorText}>
-                {error instanceof Error ? error.message : "Failed to load competitions"}
-              </Text>
-            </View>
-          )}
-
-          {list.length > 0 && (
-            <>
-              <SectionHeader
-                eyebrow="All competitions"
-                title="Season overview"
-                subtitle="All competitions for your league."
-              />
-              <View style={styles.list}>
-                {list.map((item) => (
-                  <PressableScale
-                    key={item.id}
-                    style={styles.card}
-                    onPress={() => router.push(`/(tabs)/competitions/specialty?id=${item.id}`)}
-                    testID={`competition-card-${item.id}`}
-                  >
-                    <View style={styles.rowBetween}>
-                      <Text style={styles.cardTitle}>{item.name}</Text>
-                      {item.level && <Text style={styles.cardLevel}>{item.level}</Text>}
-                    </View>
-                    {item.year != null && <Text style={styles.cardMeta}>{item.year}</Text>}
-                  </PressableScale>
-                ))}
-              </View>
-            </>
-          )}
+          <View style={styles.list}>
+            {LEAGUES.map((league) => (
+              <Pressable
+                key={league.id}
+                style={[styles.card, !league.supported && styles.cardDisabled]}
+                onPress={() => league.supported && handleSelect(league.id)}
+                disabled={!league.supported}
+                testID={`league-card-${league.id}`}
+              >
+                <View style={[styles.cardIcon, !league.supported && styles.cardIconDisabled]}>
+                  <Shield
+                    color={league.supported ? KanchaColors.red : KanchaColors.muted}
+                    size={18}
+                  />
+                </View>
+                <Text style={[styles.cardTitle, !league.supported && styles.cardTitleDisabled]}>
+                  {league.name}
+                </Text>
+                {league.supported
+                  ? <ChevronRight color={KanchaColors.muted} size={18} />
+                  : <Text style={styles.comingSoon}>Soon</Text>}
+              </Pressable>
+            ))}
+          </View>
         </ScrollView>
       </SafeAreaView>
     </KanchaBackground>
@@ -93,20 +86,15 @@ const styles = StyleSheet.create({
   },
   title: { color: KanchaColors.white, fontSize: 34, fontWeight: "900" },
   subtitle: { color: "rgba(255,255,255,0.82)", fontSize: 14, lineHeight: 20 },
-  centered: {
-    paddingVertical: 60,
-    alignItems: "center",
+  section: { gap: 4 },
+  sectionEyebrow: {
+    color: KanchaColors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 1.4,
   },
-  errorBox: {
-    borderRadius: 16,
-    backgroundColor: "rgba(255,60,60,0.15)",
-    padding: 16,
-  },
-  errorText: {
-    color: KanchaColors.white,
-    fontSize: 14,
-    fontWeight: "600",
-  },
+  sectionTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "900" },
   list: { gap: 12 },
   card: {
     borderRadius: 20,
@@ -114,15 +102,32 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     borderColor: KanchaColors.line,
-    gap: 8,
-  },
-  rowBetween: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     gap: 12,
   },
-  cardTitle: { color: KanchaColors.ink, fontSize: 18, fontWeight: "800", flex: 1 },
-  cardLevel: { color: KanchaColors.muted, fontSize: 13, fontWeight: "600" },
-  cardMeta: { color: KanchaColors.muted, fontSize: 13 },
+  cardDisabled: {
+    backgroundColor: "rgba(247,244,239,0.5)",
+    borderColor: "rgba(229,222,214,0.5)",
+  },
+  cardIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: KanchaColors.redSoft,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardIconDisabled: {
+    backgroundColor: "rgba(229,222,214,0.6)",
+  },
+  cardTitle: { color: KanchaColors.ink, fontSize: 16, fontWeight: "800", flex: 1 },
+  cardTitleDisabled: { color: KanchaColors.muted },
+  comingSoon: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: KanchaColors.muted,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
 });
