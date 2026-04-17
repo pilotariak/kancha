@@ -11,21 +11,21 @@ on:
 
 jobs:
   build_android:
-    name: Build Android (production)
+    name: Build / Android (production)
     type: build
     params:
       platform: android
       profile: production
 
   build_ios:
-    name: Build iOS (production)
+    name: Build / iOS (production)
     type: build
     params:
       platform: ios
       profile: production
 
   submit_android:
-    name: Submit Android to Google Play
+    name: Submit / Android to Google Play
     type: submit
     needs:
       - build_android
@@ -34,7 +34,7 @@ jobs:
       profile: production
 
   submit_ios:
-    name: Submit iOS to App Store
+    name: Submit / iOS to App Store
     type: submit
     needs:
       - build_ios

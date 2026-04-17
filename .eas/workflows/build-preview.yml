@@ -14,14 +14,14 @@ on:
 
 jobs:
   build_android:
-    name: Build Android (preview)
+    name: Build / Android (preview)
     type: build
     params:
       platform: android
       profile: preview
 
   build_ios:
-    name: Build iOS (preview)
+    name: Build / iOS (preview)
     type: build
     params:
       platform: ios
