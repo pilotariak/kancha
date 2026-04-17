@@ -9,8 +9,6 @@ SHELL = /bin/bash -o pipefail
 
 DIR = $(shell pwd)
 
-NODE_BIN = ./node_modules/.bin
-
 # Colors for terminal output
 NO_COLOR=\033[0m
 OK_COLOR=\033[32;01m
@@ -64,54 +62,59 @@ deps: ## Install dependencies
 
 .PHONY: build-ios
 build-ios: ## Build iOS
-	npx expo prebuild
-	npx expo run:ios
+	bunx expo prebuild
+	bunx expo run:ios
 
 .PHONY: build-android
 build-android: ## Build android
-	npx expo prebuild
-	npx expo run:android
+	bunx expo prebuild
+	bunx expo run:android
 
 run-expo: ## Run Expo Go
-	$(NODE_BIN)/expo start
+	bunx expo start
 
 .PHONY: run-ios
 run-ios: ## Run iOS
-	$(NODE_BIN)/expo start --ios
+	bunx expo start --ios
 
 .PHONY: run-android
 run-android: ## Run android
-	$(NODE_BIN)/expo start --android
+	bunx expo start --android
 
 .PHONY: run-web
 run-web: ## Run web application
-	$(NODE_BIN)/expo start --web
+	bunx expo start --web
 
 ##@ Mobile / EAS
 
 .PHONY: eas-login
 eas-login: ## EAS authentication
 	@echo -e "$(OK_COLOR)[$(APP)] EAS authentication$(NO_COLOR)" >&2
-	$(NODE_BIN)/eas login -b
+	bunx eas login -b
 
 .PHONY: eas-configure
 eas-configure: ## EAS project configuration
 	@echo -e "$(OK_COLOR)[$(APP)] EAS project configuration$(NO_COLOR)" >&2
-	$(NODE_BIN)/eas build:configure
+	bunx eas build:configure
 
 .PHONY: eas-build-all
 eas-build-all: guard-PROFILE ## EAS build all platforms (profile=development|production)
 	@echo -e "$(OK_COLOR)[$(APP)] EAS project configuration$(NO_COLOR)" >&2
-	$(NODE_BIN)/eas build -p all --profile $(PROFILE)
+	bunx eas build -p all --profile $(PROFILE)
 
 .PHONY: eas-build-ios
 eas-build-ios: guard-PROFILE ## EAS build iOS (profile=development|production)
 	@echo -e "$(OK_COLOR)[$(APP)] EAS build iOS$(NO_COLOR)" >&2
-	$(NODE_BIN)/eas build -p ios --profile $(PROFILE)
-	# $(NODE_BIN)/eas build -p ios --profile development --local
+	bunx eas build -p ios --profile $(PROFILE)
+	# bunx eas build -p ios --profile development --local
 
 .PHONY: eas-build-android
 eas-build-android: guard-PROFILE ## EAS build android (profile=development|production)
 	@echo -e "$(OK_COLOR)[$(APP)] EAS build Android$(NO_COLOR)" >&2
-	$(NODE_BIN)/eas build -p ios --profile $(PROFILE)
-	# $(NODE_BIN)/eas build -p ios --profile $(PROFILE) --local
+	bunx eas build -p ios --profile $(PROFILE)
+	# bunx eas build -p ios --profile $(PROFILE) --local
+
+.PHONY: eas-export-web
+eas-export-web: ## Expert web application
+	@echo -e "$(OK_COLOR)[$(APP)] EAS export web$(NO_COLOR)" >&2
+	bunx expo export --platform web
