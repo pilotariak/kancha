@@ -1,0 +1,99 @@
+{
+  "tabs": {
+    "competitions": "Competitions",
+    "slot": "Slot",
+    "about": "About",
+    "soon": "Soon"
+  },
+  "common": {
+    "back": "Back",
+    "choose": "Choose",
+    "soon": "Soon",
+    "competition_fallback": "Competition"
+  },
+  "leagues": {
+    "eyebrow": "Competition desk",
+    "title": "Leagues",
+    "subtitle": "Select a league to browse its competitions.",
+    "your_league": "Your league"
+  },
+  "competitions": {
+    "eyebrow": "Competition desk",
+    "title": "Competitions",
+    "back": "Leagues",
+    "all_eyebrow": "All competitions",
+    "season_title": "Season overview",
+    "season_subtitle": "All competitions for this league.",
+    "error_load": "Failed to load competitions"
+  },
+  "specialty": {
+    "back": "Competitions",
+    "title": "Specialty",
+    "subtitle": "Select a specialty to view the results for this competition.",
+    "error_load": "Failed to load specialties."
+  },
+  "category": {
+    "back": "Specialty",
+    "title": "Category",
+    "subtitle": "Select a category to view the results for this specialty.",
+    "error_load": "Failed to load categories.",
+    "empty": "No categories found for this specialty."
+  },
+  "details": {
+    "back": "Category",
+    "error_load": "Failed to load results",
+    "empty": "No results found for this competition.",
+    "tableau_eyebrow": "Bracket",
+    "tournament_title": "Tournament",
+    "matches_count_one": "{{count}} match",
+    "matches_count_other": "{{count}} matches",
+    "rounds_count_one": "{{count}} round",
+    "rounds_count_other": "{{count}} rounds"
+  },
+  "rounds": {
+    "P": "Pools",
+    "B1T": "1st Round Playoffs",
+    "B2T": "2nd Round Playoffs",
+    "B3T": "3rd Round Playoffs",
+    "H": "Round of 16",
+    "Q": "Quarterfinals",
+    "D": "Semifinals",
+    "F": "Final",
+    "other": "Matches"
+  },
+  "about": {
+    "tagline": "Pelota tournament manager",
+    "version": "Version",
+    "copyright": "Copyright",
+    "website": "Website",
+    "leagues_title": "Leagues & committees",
+    "leagues_eyebrow": "Supported committees",
+    "leagues_description": "Kancha is currently connected to one committee, with more integrations planned as development progresses."
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "fr": "French",
+    "es": "Spanish",
+    "eu": "Basque"
+  },
+  "new_competition": {
+    "title": "New competition",
+    "subtitle": "A guided setup flow for format, players, scheduling, and standings.",
+    "step_info": "Info",
+    "step_format": "Format",
+    "step_players": "Players",
+    "step_schedule": "Schedule",
+    "step_summary": "Summary",
+    "label_name": "Competition name",
+    "label_date": "Start date",
+    "label_venue": "Venue",
+    "label_discipline": "Discipline",
+    "label_category": "Category",
+    "label_format": "Format",
+    "cta_continue": "Continue",
+    "cta_ready": "Competition ready",
+    "seeded": "Seeded",
+    "schedule_meta": "Schedule mode: auto-generated court rotation with standings tracking."
+  }
+}

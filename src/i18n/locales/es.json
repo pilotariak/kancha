@@ -1,0 +1,99 @@
+{
+  "tabs": {
+    "competitions": "Competiciones",
+    "slot": "Horario",
+    "about": "Acerca de",
+    "soon": "Pronto"
+  },
+  "common": {
+    "back": "Volver",
+    "choose": "Elegir",
+    "soon": "Pronto",
+    "competition_fallback": "Competición"
+  },
+  "leagues": {
+    "eyebrow": "Panel de competiciones",
+    "title": "Ligas",
+    "subtitle": "Selecciona una liga para ver sus competiciones.",
+    "your_league": "Tu liga"
+  },
+  "competitions": {
+    "eyebrow": "Panel de competiciones",
+    "title": "Competiciones",
+    "back": "Ligas",
+    "all_eyebrow": "Todas las competiciones",
+    "season_title": "Resumen de temporada",
+    "season_subtitle": "Todas las competiciones de esta liga.",
+    "error_load": "Error al cargar las competiciones"
+  },
+  "specialty": {
+    "back": "Competiciones",
+    "title": "Especialidad",
+    "subtitle": "Selecciona una especialidad para ver los resultados de esta competición.",
+    "error_load": "Error al cargar las especialidades."
+  },
+  "category": {
+    "back": "Especialidad",
+    "title": "Categoría",
+    "subtitle": "Selecciona una categoría para ver los resultados de esta especialidad.",
+    "error_load": "Error al cargar las categorías.",
+    "empty": "No se encontraron categorías para esta especialidad."
+  },
+  "details": {
+    "back": "Categoría",
+    "error_load": "Error al cargar los resultados",
+    "empty": "No se encontraron resultados para esta competición.",
+    "tableau_eyebrow": "Cuadro",
+    "tournament_title": "Torneo",
+    "matches_count_one": "{{count}} partido",
+    "matches_count_other": "{{count}} partidos",
+    "rounds_count_one": "{{count}} ronda",
+    "rounds_count_other": "{{count}} rondas"
+  },
+  "rounds": {
+    "P": "Grupos",
+    "B1T": "Repechaje 1ª ronda",
+    "B2T": "Repechaje 2ª ronda",
+    "B3T": "Repechaje 3ª ronda",
+    "H": "Octavos de final",
+    "Q": "Cuartos de final",
+    "D": "Semifinales",
+    "F": "Final",
+    "other": "Partidos"
+  },
+  "about": {
+    "tagline": "Gestor de torneos de pelota",
+    "version": "Versión",
+    "copyright": "Copyright",
+    "website": "Sitio web",
+    "leagues_title": "Ligas y comités",
+    "leagues_eyebrow": "Comités admitidos",
+    "leagues_description": "Kancha está actualmente conectado a un comité, con más integraciones previstas a medida que avanza el desarrollo."
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "Inglés",
+    "fr": "Francés",
+    "es": "Español",
+    "eu": "Euskera"
+  },
+  "new_competition": {
+    "title": "Nueva competición",
+    "subtitle": "Un asistente para configurar el formato, jugadores, calendario y clasificaciones.",
+    "step_info": "Info",
+    "step_format": "Formato",
+    "step_players": "Jugadores",
+    "step_schedule": "Calendario",
+    "step_summary": "Resumen",
+    "label_name": "Nombre de la competición",
+    "label_date": "Fecha de inicio",
+    "label_venue": "Lugar",
+    "label_discipline": "Disciplina",
+    "label_category": "Categoría",
+    "label_format": "Formato",
+    "cta_continue": "Continuar",
+    "cta_ready": "Competición lista",
+    "seeded": "Clasificado",
+    "schedule_meta": "Modo calendario: rotación de pistas generada automáticamente con seguimiento de clasificaciones."
+  }
+}

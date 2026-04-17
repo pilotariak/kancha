@@ -1,11 +1,13 @@
 import { Tabs } from "expo-router";
 import { CalendarClock, Info, Trophy } from "lucide-react-native";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 
 import Colors, { KanchaColors } from "@/constants/colors";
 
 export default function TabLayout() {
+  const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{
@@ -27,20 +29,20 @@ export default function TabLayout() {
       <Tabs.Screen
         name="competitions"
         options={{
-          title: "Competitions",
+          title: t("tabs.competitions"),
           tabBarIcon: ({ color, size }) => <Trophy color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="slot"
         options={{
-          title: "Slot",
+          title: t("tabs.slot"),
           tabBarIcon: ({ size }) => <CalendarClock color={KanchaColors.muted} size={size} />,
           tabBarButton: () => (
             <View pointerEvents="none" style={styles.disabledTab}>
               <CalendarClock color={KanchaColors.muted} size={24} />
-              <Text style={styles.disabledTabLabel}>Slot</Text>
-              <Text style={styles.disabledTabBadge}>Soon</Text>
+              <Text style={styles.disabledTabLabel}>{t("tabs.slot")}</Text>
+              <Text style={styles.disabledTabBadge}>{t("tabs.soon")}</Text>
             </View>
           ),
         }}
@@ -48,7 +50,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "About",
+          title: t("tabs.about"),
           tabBarIcon: ({ color, size }) => <Info color={color} size={size} />,
         }}
       />

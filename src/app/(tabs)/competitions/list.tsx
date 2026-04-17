@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -13,6 +14,7 @@ import { useCompetitions } from "@/hooks/use-competitions";
 import { useLeagueStore } from "@/store/league-store";
 
 export default function CompetitionsListScreen() {
+  const { t } = useTranslation();
   const { data: competitions, isPending, isError, error } = useCompetitions();
   const selectedLeagueId = useLeagueStore((s) => s.selectedLeagueId);
 
@@ -29,12 +31,12 @@ export default function CompetitionsListScreen() {
         >
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <ArrowLeft color={KanchaColors.white} size={20} />
-            <Text style={styles.backLabel}>Leagues</Text>
+            <Text style={styles.backLabel}>{t("competitions.back")}</Text>
           </Pressable>
 
           <View style={styles.hero}>
-            <Text style={styles.eyebrow}>Competition desk</Text>
-            <Text style={styles.title}>Competitions</Text>
+            <Text style={styles.eyebrow}>{t("competitions.eyebrow")}</Text>
+            <Text style={styles.title}>{t("competitions.title")}</Text>
             {league && <Text style={styles.subtitle}>{league.name}</Text>}
           </View>
 
@@ -47,7 +49,7 @@ export default function CompetitionsListScreen() {
           {isError && (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>
-                {error instanceof Error ? error.message : "Failed to load competitions"}
+                {error instanceof Error ? error.message : t("competitions.error_load")}
               </Text>
             </View>
           )}
@@ -55,9 +57,9 @@ export default function CompetitionsListScreen() {
           {list.length > 0 && (
             <>
               <SectionHeader
-                eyebrow="All competitions"
-                title="Season overview"
-                subtitle="All competitions for this league."
+                eyebrow={t("competitions.all_eyebrow")}
+                title={t("competitions.season_title")}
+                subtitle={t("competitions.season_subtitle")}
               />
               <View style={styles.list}>
                 {list.map((item) => (

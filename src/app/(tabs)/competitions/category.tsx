@@ -1,6 +1,7 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, ChevronRight, Trophy } from "lucide-react-native";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -11,6 +12,7 @@ import { useCompetition } from "@/hooks/use-competitions";
 import { useSpecialties } from "@/hooks/use-specialties";
 
 export default function CategoryPickerScreen() {
+  const { t } = useTranslation();
   const { id, specialtyId } = useLocalSearchParams<{ id: string; specialtyId: string }>();
 
   const { data: competition, isPending: loadingComp } = useCompetition(id ?? "");
@@ -36,7 +38,7 @@ export default function CategoryPickerScreen() {
         >
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <ArrowLeft color={KanchaColors.white} size={20} />
-            <Text style={styles.backLabel}>Specialty</Text>
+            <Text style={styles.backLabel}>{t("category.back")}</Text>
           </Pressable>
 
           <View style={styles.heroCard}>
@@ -47,7 +49,9 @@ export default function CategoryPickerScreen() {
               ? <ActivityIndicator color={KanchaColors.white} />
               : (
                 <>
-                  <Text style={styles.heroTitle}>{competition?.name ?? "Competition"}</Text>
+                  <Text style={styles.heroTitle}>
+                    {competition?.name ?? t("common.competition_fallback")}
+                  </Text>
                   {(competition?.year != null || competition?.level) && (
                     <Text style={styles.heroMeta}>
                       {[competition?.year, competition?.level].filter(Boolean).join(" · ")}
@@ -63,11 +67,9 @@ export default function CategoryPickerScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionEyebrow}>Choose</Text>
-            <Text style={styles.sectionTitle}>Category</Text>
-            <Text style={styles.sectionSubtitle}>
-              Select a category to view the results for this specialty.
-            </Text>
+            <Text style={styles.sectionEyebrow}>{t("common.choose")}</Text>
+            <Text style={styles.sectionTitle}>{t("category.title")}</Text>
+            <Text style={styles.sectionSubtitle}>{t("category.subtitle")}</Text>
           </View>
 
           {loadingCategories && (
@@ -79,14 +81,14 @@ export default function CategoryPickerScreen() {
           {isError && (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>
-                {error instanceof Error ? error.message : "Failed to load categories."}
+                {error instanceof Error ? error.message : t("category.error_load")}
               </Text>
             </View>
           )}
 
           {!loadingCategories && !isError && categories && categories.length === 0 && (
             <View style={styles.emptyBox}>
-              <Text style={styles.emptyText}>No categories found for this specialty.</Text>
+              <Text style={styles.emptyText}>{t("category.empty")}</Text>
             </View>
           )}
 
