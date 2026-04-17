@@ -66,8 +66,9 @@
     "version": "Versión",
     "copyright": "Copyright",
     "website": "Sitio web",
-    "partners_eyebrow": "Socios",
-    "supported_leagues": "Ligas admitidas"
+    "leagues_title": "Ligas y comités",
+    "leagues_eyebrow": "Comités admitidos",
+    "leagues_description": "Kancha está actualmente conectado a un comité, con más integraciones previstas a medida que avanza el desarrollo."
   },
   "language": {
     "label": "Idioma",

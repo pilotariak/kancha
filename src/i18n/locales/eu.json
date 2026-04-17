@@ -66,8 +66,9 @@
     "version": "Bertsioa",
     "copyright": "Copyright",
     "website": "Webgunea",
-    "partners_eyebrow": "Bazkideak",
-    "supported_leagues": "Onartutako ligak"
+    "leagues_title": "Ligak eta batzordeak",
+    "leagues_eyebrow": "Onartutako batzordeak",
+    "leagues_description": "Kancha gaur egun batzorde batekin konektatuta dago, eta garapenak aurrera egin ahala integrazio gehiago planifikatuta daude."
   },
   "language": {
     "label": "Hizkuntza",

@@ -66,8 +66,9 @@
     "version": "Version",
     "copyright": "Copyright",
     "website": "Website",
-    "partners_eyebrow": "Partners",
-    "supported_leagues": "Supported leagues"
+    "leagues_title": "Leagues & committees",
+    "leagues_eyebrow": "Supported committees",
+    "leagues_description": "Kancha is currently connected to one committee, with more integrations planned as development progresses."
   },
   "language": {
     "label": "Language",

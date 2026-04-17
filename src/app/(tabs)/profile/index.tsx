@@ -131,8 +131,9 @@ export default function AboutScreen() {
           </View>
 
           <View style={styles.leaguesSection}>
-            <Text style={styles.sectionEyebrow}>{t("about.partners_eyebrow")}</Text>
-            <Text style={styles.sectionTitle}>{t("about.supported_leagues")}</Text>
+            <Text style={styles.sectionEyebrow}>{t("about.leagues_eyebrow")}</Text>
+            <Text style={styles.sectionTitle}>{t("about.leagues_title")}</Text>
+            <Text style={styles.sectionDescription}>{t("about.leagues_description")}</Text>
 
             <View style={styles.leagueList}>
               {supportedLeagues.map((league) => {
@@ -299,6 +300,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "900",
     marginTop: -4,
+  },
+  sectionDescription: {
+    color: KanchaColors.muted,
+    fontSize: 14,
+    lineHeight: 20,
   },
   leagueList: {
     gap: 10,
