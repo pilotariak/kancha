@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (C) Nicolas Lamirault <nicolas.lamirault@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Cloudflare Pages routing: serve pre-rendered HTML files first,
+# fall back to index.html for unmatched paths (handled by Expo Router client-side)
+/* /index.html 200
