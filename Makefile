@@ -118,3 +118,8 @@ eas-build-android: guard-PROFILE ## EAS build android (profile=development|produ
 eas-export-web: ## Expert web application
 	@echo -e "$(OK_COLOR)[$(APP)] EAS export web$(NO_COLOR)" >&2
 	bunx expo export --platform web
+
+.PHONY: cf-deploy-web
+cf-deploy-web: ## Deploy web application
+	@echo -e "$(OK_COLOR)[$(APP)] Deploy web$(NO_COLOR)" >&2
+	bunx wrangler pages deploy dist
