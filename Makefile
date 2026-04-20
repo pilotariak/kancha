@@ -122,4 +122,4 @@ eas-export-web: ## Expert web application
 .PHONY: cf-deploy-web
 cf-deploy-web: ## Deploy web application
 	@echo -e "$(OK_COLOR)[$(APP)] Deploy web$(NO_COLOR)" >&2
-	bunx wrangler pages deploy dist
+	bunx wrangler pages deploy dist --project-name=kancha-website
