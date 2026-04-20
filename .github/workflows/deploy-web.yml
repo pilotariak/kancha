@@ -43,6 +43,8 @@ jobs:
           bun install
 
       - name: ✅ Build web
+        env:
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
         run: bunx expo export -p web
 
       - name: 📡 Deploy to Cloudflare Pages
