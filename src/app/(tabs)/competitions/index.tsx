@@ -2,10 +2,11 @@ import { router } from "expo-router";
 import { ChevronRight, Shield } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { KanchaBackground } from "@/components/KanchaBackground";
+import { PressableScale } from "@/components/PressableScale";
 import { KanchaColors } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import { useLeagueStore } from "@/store/league-store";
@@ -40,7 +41,7 @@ export default function LeaguePickerScreen() {
 
           <View style={styles.list}>
             {LEAGUES.map((league) => (
-              <Pressable
+              <PressableScale
                 key={league.id}
                 style={[styles.card, !league.supported && styles.cardDisabled]}
                 onPress={() => league.supported && handleSelect(league.id)}
@@ -59,7 +60,7 @@ export default function LeaguePickerScreen() {
                 {league.supported
                   ? <ChevronRight color={KanchaColors.muted} size={18} />
                   : <Text style={styles.comingSoon}>{t("common.soon")}</Text>}
-              </Pressable>
+              </PressableScale>
             ))}
           </View>
         </ScrollView>
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1.4,
   },
-  sectionTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "900" },
+  sectionTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "800" },
   list: { gap: 12 },
   card: {
     borderRadius: 20,
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
   cardIcon: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: KanchaColors.redSoft,
     alignItems: "center",
     justifyContent: "center",
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   cardIconDisabled: {
     backgroundColor: "rgba(229,222,214,0.6)",
   },
-  cardTitle: { color: KanchaColors.ink, fontSize: 16, fontWeight: "800", flex: 1 },
+  cardTitle: { color: KanchaColors.ink, fontSize: 18, fontWeight: "800", flex: 1 },
   cardTitleDisabled: { color: KanchaColors.muted },
   comingSoon: {
     fontSize: 11,

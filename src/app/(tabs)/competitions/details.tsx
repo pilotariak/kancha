@@ -77,79 +77,32 @@ interface PhaseColors {
   cardBorder: string; // match card border
 }
 
+const NEUTRAL_PHASE: PhaseColors = {
+  pill: KanchaColors.cream,
+  border: KanchaColors.line,
+  label: KanchaColors.ink,
+  count: KanchaColors.muted,
+  icon: KanchaColors.ink,
+  cardBorder: KanchaColors.line,
+};
+
 const PHASE_COLORS: Record<PhaseType, PhaseColors> = {
-  P: {
-    pill: "#EBF3FF",
-    border: "rgba(37,99,235,0.3)",
-    label: "#1D4ED8",
-    count: "#2563EB",
-    icon: "#2563EB",
-    cardBorder: "rgba(37,99,235,0.25)",
-  },
-  B1T: {
-    pill: "#ECFDF5",
-    border: "rgba(5,150,105,0.3)",
-    label: "#047857",
-    count: "#059669",
-    icon: "#059669",
-    cardBorder: "rgba(5,150,105,0.25)",
-  },
-  B2T: {
-    pill: "#F0FDF4",
-    border: "rgba(22,163,74,0.3)",
-    label: "#15803D",
-    count: "#16A34A",
-    icon: "#16A34A",
-    cardBorder: "rgba(22,163,74,0.25)",
-  },
-  B3T: {
-    pill: "#F7FEE7",
-    border: "rgba(101,163,13,0.3)",
-    label: "#4D7C0F",
-    count: "#65A30D",
-    icon: "#65A30D",
-    cardBorder: "rgba(101,163,13,0.25)",
-  },
-  H: {
-    pill: "#F3EEFF",
-    border: "rgba(124,58,237,0.3)",
-    label: "#6D28D9",
-    count: "#7C3AED",
-    icon: "#7C3AED",
-    cardBorder: "rgba(124,58,237,0.25)",
-  },
-  Q: {
-    pill: "#E6FAF8",
-    border: "rgba(8,145,178,0.3)",
-    label: "#0E7490",
-    count: "#0891B2",
-    icon: "#0891B2",
-    cardBorder: "rgba(8,145,178,0.25)",
-  },
-  D: {
-    pill: "#FFF3E6",
-    border: "rgba(234,88,12,0.3)",
-    label: "#C2410C",
-    count: "#EA580C",
-    icon: "#EA580C",
-    cardBorder: "rgba(234,88,12,0.25)",
-  },
+  P: NEUTRAL_PHASE,
+  B1T: NEUTRAL_PHASE,
+  B2T: NEUTRAL_PHASE,
+  B3T: NEUTRAL_PHASE,
+  H: NEUTRAL_PHASE,
+  Q: NEUTRAL_PHASE,
+  D: NEUTRAL_PHASE,
   F: {
-    pill: "#FFF8E7",
+    pill: KanchaColors.amberBg,
     border: "rgba(200,144,10,0.4)",
     label: "#A86E00",
-    count: "#C8900A",
-    icon: "#C8900A",
+    count: KanchaColors.amber,
+    icon: KanchaColors.amber,
     cardBorder: KanchaColors.red,
   },
-  other: {
-    pill: KanchaColors.cream,
-    border: KanchaColors.line,
-    label: KanchaColors.ink,
-    count: KanchaColors.muted,
-    icon: KanchaColors.ink,
-    cardBorder: KanchaColors.line,
-  },
+  other: NEUTRAL_PHASE,
 };
 
 // ─── Grouping ─────────────────────────────────────────────────────────────────
@@ -500,7 +453,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1.4,
   },
-  tournamentTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "900" },
+  tournamentTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "800" },
   tournamentSub: { color: KanchaColors.muted, fontSize: 13 },
 
   // Round section

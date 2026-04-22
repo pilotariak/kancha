@@ -31,7 +31,7 @@ export function PressableScale({
   const handlePressIn = useCallback(
     (event: Parameters<NonNullable<PressableProps["onPressIn"]>>[0]) => {
       Haptics.selectionAsync().catch(() => undefined);
-      animateTo(0.98);
+      animateTo(0.96);
       onPressIn?.(event);
     },
     [animateTo, onPressIn],
