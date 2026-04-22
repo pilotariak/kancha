@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 32,
-    paddingBottom: 60,
+    paddingBottom: 120,
     gap: 32,
   },
   hero: {
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   card: {
-    borderRadius: 18,
+    borderRadius: 20,
     backgroundColor: KanchaColors.white,
     borderWidth: 1,
     borderColor: KanchaColors.line,
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   languageList: {
     marginTop: 4,
-    borderRadius: 18,
+    borderRadius: 20,
     backgroundColor: KanchaColors.white,
     borderWidth: 1,
     borderColor: KanchaColors.line,
@@ -297,8 +297,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: KanchaColors.ink,
-    fontSize: 22,
-    fontWeight: "900",
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.8,
     marginTop: -4,
   },
   sectionDescription: {
@@ -310,7 +311,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   leagueCard: {
-    borderRadius: 18,
+    borderRadius: 20,
     backgroundColor: KanchaColors.white,
     borderWidth: 1,
     borderColor: KanchaColors.line,

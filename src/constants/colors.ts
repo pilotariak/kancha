@@ -13,6 +13,8 @@ export const KanchaColors = {
   green: "#1F7A5A",
   greenSoft: "#E6F4EE",
   shadow: "rgba(103, 18, 31, 0.14)",
+  amber: "#C8900A",
+  amberBg: "#FFF8E7",
 } as const;
 
 const Colors = {
