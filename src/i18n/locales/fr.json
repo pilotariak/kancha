@@ -77,6 +77,21 @@
     "es": "Espagnol",
     "eu": "Basque"
   },
+  "score": {
+    "tab": "Score",
+    "setup_title": "Nouveau match",
+    "setup_subtitle": "Configurez le match avant de commencer.",
+    "label_team_a": "Équipe A",
+    "label_team_b": "Équipe B",
+    "label_target": "Score à atteindre",
+    "placeholder_team": "Nom de l'équipe",
+    "placeholder_target": "ex : 40",
+    "cta_start": "Commencer",
+    "winner": "Victoire !",
+    "cta_new_game": "Nouveau match",
+    "undo": "Annuler",
+    "reset": "Réinitialiser"
+  },
   "new_competition": {
     "title": "Nouvelle compétition",
     "subtitle": "Un assistant pour configurer le format, les joueurs, le calendrier et les classements.",

@@ -77,6 +77,21 @@
     "es": "Spanish",
     "eu": "Basque"
   },
+  "score": {
+    "tab": "Score",
+    "setup_title": "New match",
+    "setup_subtitle": "Set up the match before starting.",
+    "label_team_a": "Team A",
+    "label_team_b": "Team B",
+    "label_target": "Winning score",
+    "placeholder_team": "Team name",
+    "placeholder_target": "e.g. 40",
+    "cta_start": "Start",
+    "winner": "Victory!",
+    "cta_new_game": "New match",
+    "undo": "Undo",
+    "reset": "Reset"
+  },
   "new_competition": {
     "title": "New competition",
     "subtitle": "A guided setup flow for format, players, scheduling, and standings.",
