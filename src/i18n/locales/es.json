@@ -77,6 +77,21 @@
     "es": "Español",
     "eu": "Euskera"
   },
+  "score": {
+    "tab": "Marcador",
+    "setup_title": "Nuevo partido",
+    "setup_subtitle": "Configura el partido antes de empezar.",
+    "label_team_a": "Equipo A",
+    "label_team_b": "Equipo B",
+    "label_target": "Puntuación ganadora",
+    "placeholder_team": "Nombre del equipo",
+    "placeholder_target": "ej: 40",
+    "cta_start": "Empezar",
+    "winner": "¡Victoria!",
+    "cta_new_game": "Nuevo partido",
+    "undo": "Deshacer",
+    "reset": "Reiniciar"
+  },
   "new_competition": {
     "title": "Nueva competición",
     "subtitle": "Un asistente para configurar el formato, jugadores, calendario y clasificaciones.",

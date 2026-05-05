@@ -77,6 +77,21 @@
     "es": "Gaztelania",
     "eu": "Euskara"
   },
+  "score": {
+    "tab": "Puntuazioa",
+    "setup_title": "Partida berria",
+    "setup_subtitle": "Konfiguratu partida hasi aurretik.",
+    "label_team_a": "A Taldea",
+    "label_team_b": "B Taldea",
+    "label_target": "Irabazle puntuazioa",
+    "placeholder_team": "Taldearen izena",
+    "placeholder_target": "adib: 40",
+    "cta_start": "Hasi",
+    "winner": "Garaipena!",
+    "cta_new_game": "Partida berria",
+    "undo": "Desegin",
+    "reset": "Berrezarri"
+  },
   "new_competition": {
     "title": "Txapelketa berria",
     "subtitle": "Formatua, jokalariak, egutegia eta sailkapena konfiguratzeko gidatutako fluxua.",

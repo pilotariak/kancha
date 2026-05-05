@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { CalendarClock, Info, Trophy } from "lucide-react-native";
+import { CalendarClock, Info, Swords, Trophy } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
@@ -45,6 +45,13 @@ export default function TabLayout() {
               <Text style={styles.disabledTabBadge}>{t("tabs.soon")}</Text>
             </View>
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="score"
+        options={{
+          title: t("score.tab"),
+          tabBarIcon: ({ color, size }) => <Swords color={color} size={size} />,
         }}
       />
       <Tabs.Screen
