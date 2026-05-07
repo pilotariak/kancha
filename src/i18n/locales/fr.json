@@ -45,8 +45,8 @@
     "empty": "Aucun résultat trouvé pour cette compétition.",
     "tableau_eyebrow": "Tableau",
     "tournament_title": "Tournoi",
-    "matches_count_one": "{{count}} match",
-    "matches_count_other": "{{count}} matchs",
+    "matches_count_one": "{{count}} partie",
+    "matches_count_other": "{{count}} parties",
     "rounds_count_one": "{{count}} tour",
     "rounds_count_other": "{{count}} tours"
   },
@@ -59,7 +59,7 @@
     "Q": "Quarts de finale",
     "D": "Demi-finales",
     "F": "Finale",
-    "other": "Matchs"
+    "other": "Parties"
   },
   "about": {
     "tagline": "Gestionnaire de tournois de pelote",
@@ -79,8 +79,8 @@
   },
   "score": {
     "tab": "Score",
-    "setup_title": "Nouveau match",
-    "setup_subtitle": "Configurez le match avant de commencer.",
+    "setup_title": "Nouvelle partie",
+    "setup_subtitle": "Configurez la partie avant de commencer.",
     "label_team_a": "Équipe A",
     "label_team_b": "Équipe B",
     "label_target": "Score à atteindre",
