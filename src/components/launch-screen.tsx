@@ -2,91 +2,90 @@ import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
-import Svg, { Circle, Path } from "react-native-svg";
 
 import { KanchaColors } from "@/constants/colors";
-
-function KanchaLogo({ size = 96 }: { size?: number }) {
-  const r = size / 2;
-  const strokeW = size * 0.045;
-
-  // Pelota (Basque ball) — white circle with curved stitch lines
-  return (
-    <Svg width={size} height={size} viewBox="0 0 100 100">
-      <Circle cx="50" cy="50" r="46" fill={KanchaColors.white} />
-      <Circle
-        cx="50"
-        cy="50"
-        r="46"
-        fill="none"
-        stroke="rgba(200,16,46,0.18)"
-        strokeWidth="2"
-      />
-      {/* stitch arcs that suggest a pelota ball */}
-      <Path
-        d="M 28 20 Q 50 42 28 64"
-        fill="none"
-        stroke={KanchaColors.red}
-        strokeWidth={strokeW}
-        strokeLinecap="round"
-      />
-      <Path
-        d="M 72 20 Q 50 42 72 64"
-        fill="none"
-        stroke={KanchaColors.red}
-        strokeWidth={strokeW}
-        strokeLinecap="round"
-      />
-      {/* K letter centred */}
-      <Path
-        d="M 38 30 L 38 70 M 38 50 L 58 30 M 38 50 L 60 70"
-        fill="none"
-        stroke={KanchaColors.red}
-        strokeWidth={strokeW * 1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
+import { KanchaLogo } from "./KanchaLogo";
 
 interface LaunchScreenProps {
   onFinish: () => void;
 }
 
 export function LaunchScreen({ onFinish }: LaunchScreenProps) {
-  const opacity = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.72)).current;
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const titleOpacity = useRef(new Animated.Value(0)).current;
+  const subtitleOpacity = useRef(new Animated.Value(0)).current;
+
   const version = Constants.expoConfig?.version ?? "—";
 
   useEffect(() => {
     Animated.sequence([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.delay(1200),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }),
+      // Logo springs in while fading — spring gives natural overshoot feel
+      Animated.parallel([
+        Animated.spring(logoScale, {
+          toValue: 1,
+          friction: 6,
+          tension: 90,
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoOpacity, {
+          toValue: 1,
+          duration: 420,
+          useNativeDriver: true,
+        }),
+      ]),
+      // Title then subtitle stagger in
+      Animated.stagger(110, [
+        Animated.timing(titleOpacity, {
+          toValue: 1,
+          duration: 280,
+          useNativeDriver: true,
+        }),
+        Animated.timing(subtitleOpacity, {
+          toValue: 1,
+          duration: 280,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.delay(950),
+      // All fade out together
+      Animated.parallel([
+        Animated.timing(logoOpacity, { toValue: 0, duration: 360, useNativeDriver: true }),
+        Animated.timing(titleOpacity, { toValue: 0, duration: 360, useNativeDriver: true }),
+        Animated.timing(subtitleOpacity, { toValue: 0, duration: 360, useNativeDriver: true }),
+      ]),
     ]).start(() => onFinish());
-  }, [opacity, onFinish]);
+  }, []);
 
   return (
     <LinearGradient
       colors={[KanchaColors.red, KanchaColors.redDark]}
       style={StyleSheet.absoluteFill}
     >
-      <View style={styles.container}>
-        <Animated.View style={[styles.content, { opacity }]}>
-          <KanchaLogo size={112} />
-          <Text style={styles.title}>Kancha</Text>
-          <Text style={styles.subtitle}>Pilotariak</Text>
-        </Animated.View>
+      {/* Decorative translucent circles — consistent with hero zone across all screens */}
+      <View style={styles.circleOne} />
+      <View style={styles.circleTwo} />
 
-        <Animated.Text style={[styles.version, { opacity }]}>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Animated.View
+            style={{ opacity: logoOpacity, transform: [{ scale: logoScale }] }}
+          >
+            <KanchaLogo size={112} variant="on-dark" />
+          </Animated.View>
+
+          <Animated.Text style={[styles.title, { opacity: titleOpacity }]}>
+            Kancha
+          </Animated.Text>
+
+          <Animated.Text style={[styles.subtitle, { opacity: subtitleOpacity }]}>
+            Pilotariak
+          </Animated.Text>
+        </View>
+
+        <Animated.Text
+          style={[styles.version, { opacity: subtitleOpacity }]}
+        >
           v{version}
         </Animated.Text>
       </View>
@@ -95,6 +94,24 @@ export function LaunchScreen({ onFinish }: LaunchScreenProps) {
 }
 
 const styles = StyleSheet.create({
+  circleOne: {
+    position: "absolute",
+    top: 60,
+    right: -30,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: "rgba(255,255,255,0.07)",
+  },
+  circleTwo: {
+    position: "absolute",
+    top: 200,
+    left: -45,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "rgba(255,255,255,0.05)",
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -106,13 +123,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 42,
-    fontWeight: "700",
+    fontWeight: "900",
     letterSpacing: 2,
     color: KanchaColors.white,
   },
   subtitle: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "700",
     letterSpacing: 6,
     color: "rgba(255,255,255,0.65)",
     textTransform: "uppercase",
@@ -121,7 +138,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 48,
     fontSize: 12,
-    color: "rgba(255,255,255,0.45)",
+    color: "rgba(255,255,255,0.4)",
     letterSpacing: 1,
   },
 });
