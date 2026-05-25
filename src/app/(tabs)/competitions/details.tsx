@@ -216,7 +216,7 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
     <View style={cardStyle} testID={`result-card-${result.id}`}>
       <View style={styles.matchCardInner}>
         <View style={styles.teamRow}>
-          <Text style={[styles.teamName, isFinal && styles.teamNameFinal]} numberOfLines={1}>
+          <Text style={[styles.teamName, isFinal && styles.teamNameFinal]}>
             {lineupA || result.clubA.name}
           </Text>
           {hasScore
@@ -225,7 +225,7 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
         </View>
         <View style={styles.divider} />
         <View style={styles.teamRow}>
-          <Text style={[styles.teamName, isFinal && styles.teamNameFinal]} numberOfLines={1}>
+          <Text style={[styles.teamName, isFinal && styles.teamNameFinal]}>
             {lineupB || result.clubB.name}
           </Text>
           {hasScore
