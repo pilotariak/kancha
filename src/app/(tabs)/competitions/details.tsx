@@ -204,6 +204,36 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
   );
 }
 
+// ─── Stats strip ─────────────────────────────────────────────────────────────
+
+interface StatsStripProps {
+  total: number;
+  played: number;
+  pending: number;
+}
+
+function StatCell({ value, label }: { value: number; label: string }) {
+  return (
+    <View style={styles.statCell}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function StatsStrip({ total, played, pending }: StatsStripProps) {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.statsStrip}>
+      <StatCell value={total} label={t("details.stat_total")} />
+      <View style={styles.statDivider} />
+      <StatCell value={played} label={t("details.stat_played")} />
+      <View style={styles.statDivider} />
+      <StatCell value={pending} label={t("details.stat_pending")} />
+    </View>
+  );
+}
+
 // ─── View toggle ──────────────────────────────────────────────────────────────
 
 type ViewMode = "list" | "bracket";
@@ -267,6 +297,8 @@ export default function CompetitionDetailsScreen() {
 
   const rounds = results ? groupByRound(results) : [];
   const totalMatches = results?.length ?? 0;
+  const playedMatches = results?.filter((r) => r.scores).length ?? 0;
+  const pendingMatches = totalMatches - playedMatches;
 
   return (
     <KanchaBackground>
@@ -351,10 +383,9 @@ export default function CompetitionDetailsScreen() {
                 <Text style={styles.tournamentEyebrow}>{t("details.tableau_eyebrow")}</Text>
                 <Text style={styles.tournamentTitle}>{t("details.tournament_title")}</Text>
                 <Text style={styles.tournamentSub}>
-                  {t("details.matches_count", { count: totalMatches })}
-                  {" · "}
                   {t("details.rounds_count", { count: rounds.length })}
                 </Text>
+                <StatsStrip total={totalMatches} played={playedMatches} pending={pendingMatches} />
                 <ViewToggle mode={viewMode} onChange={setViewMode} />
               </View>
 
@@ -464,6 +495,41 @@ const styles = StyleSheet.create({
   },
   tournamentTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "800" },
   tournamentSub: { color: KanchaColors.muted, fontSize: 13 },
+
+  // Stats strip
+  statsStrip: {
+    flexDirection: "row",
+    borderRadius: 16,
+    backgroundColor: KanchaColors.white,
+    borderWidth: 1,
+    borderColor: KanchaColors.line,
+    overflow: "hidden",
+    marginTop: 12,
+  },
+  statCell: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 14,
+    gap: 4,
+  },
+  statValue: {
+    color: KanchaColors.ink,
+    fontSize: 26,
+    fontWeight: "900",
+    lineHeight: 28,
+  },
+  statLabel: {
+    color: KanchaColors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: KanchaColors.line,
+    marginVertical: 12,
+  },
 
   // View toggle
   toggleRow: {

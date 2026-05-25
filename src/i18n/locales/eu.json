@@ -50,7 +50,10 @@
     "rounds_count_one": "{{count}} txanda",
     "rounds_count_other": "{{count}} txanda",
     "view_list": "Zerrenda",
-    "view_bracket": "Taula"
+    "view_bracket": "Taula",
+    "stat_total": "Guztira",
+    "stat_played": "Jokatuta",
+    "stat_pending": "Jokateke"
   },
   "rounds": {
     "P": "Taldeak",

@@ -1,7 +1,8 @@
-import { Undo2 } from "lucide-react-native";
-import React, { useReducer, useState } from "react";
+import { Trophy, Undo2 } from "lucide-react-native";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Animated,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -76,6 +77,42 @@ function reducer(state: ScoreState, action: ScoreAction): ScoreState {
     case "reset":
       return INITIAL;
   }
+}
+
+// ─── Score bar ────────────────────────────────────────────────────────────────
+
+interface ScoreBarProps {
+  score: number;
+  target: number;
+  isWinner: boolean | null;
+  isTop: boolean;
+}
+
+function ScoreBar({ score, target, isWinner, isTop }: ScoreBarProps) {
+  const progress = useRef(new Animated.Value(0)).current;
+  const ratio = target > 0 ? Math.min(score / target, 1) : 0;
+
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: ratio,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  }, [ratio]);
+
+  const fillColor = isWinner ? KanchaColors.green : "rgba(255,255,255,0.55)";
+
+  return (
+    <View style={[styles.barTrack, isTop ? styles.barTrackBottom : styles.barTrackTop]}>
+      <Animated.View
+        style={[
+          styles.barFill,
+          { backgroundColor: fillColor },
+          { width: progress.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }) },
+        ]}
+      />
+    </View>
+  );
 }
 
 // ─── Setup screen ─────────────────────────────────────────────────────────────
@@ -227,6 +264,8 @@ function ScorePanel(
     </View>
   );
 
+  const bar = <ScoreBar score={score} target={target} isWinner={isWinner} isTop={isTop} />;
+
   return (
     <View style={[styles.panel, { backgroundColor: activeBg }]}>
       {isTop
@@ -235,10 +274,12 @@ function ScorePanel(
             {teamLabel}
             {scoreDisplay}
             {controls}
+            {bar}
           </>
         )
         : (
           <>
+            {bar}
             {controls}
             {scoreDisplay}
             {teamLabel}
@@ -257,7 +298,6 @@ interface GameProps {
 
 function GameScreen({ state, dispatch }: GameProps) {
   const { t } = useTranslation();
-  const gameOver = state.phase === "won";
 
   return (
     <View style={styles.gameFlex}>
@@ -267,7 +307,7 @@ function GameScreen({ state, dispatch }: GameProps) {
         score={state.scoreA}
         target={state.target}
         canUndo={state.prev !== null}
-        isWinner={gameOver ? state.winner === "a" : null}
+        isWinner={null}
         onIncrement={() => dispatch({ type: "increment", side: "a" })}
         onUndo={() => dispatch({ type: "undo" })}
       />
@@ -277,9 +317,7 @@ function GameScreen({ state, dispatch }: GameProps) {
           style={({ pressed }) => [styles.resetBtn, pressed && styles.resetBtnPressed]}
           onPress={() => dispatch({ type: "reset" })}
         >
-          <Text style={styles.resetLabel}>
-            {gameOver ? t("score.cta_new_game") : t("score.reset")}
-          </Text>
+          <Text style={styles.resetLabel}>{t("score.reset")}</Text>
         </Pressable>
       </View>
 
@@ -289,10 +327,73 @@ function GameScreen({ state, dispatch }: GameProps) {
         score={state.scoreB}
         target={state.target}
         canUndo={state.prev !== null}
-        isWinner={gameOver ? state.winner === "b" : null}
+        isWinner={null}
         onIncrement={() => dispatch({ type: "increment", side: "b" })}
         onUndo={() => dispatch({ type: "undo" })}
       />
+    </View>
+  );
+}
+
+// ─── Win screen ───────────────────────────────────────────────────────────────
+
+interface WinProps {
+  state: ScoreState;
+  onNewGame: () => void;
+}
+
+function WinScreen({ state, onNewGame }: WinProps) {
+  const { t } = useTranslation();
+  const scale = useRef(new Animated.Value(0.4)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 1,
+        friction: 5,
+        tension: 80,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const winnerName = state.winner === "a" ? state.teamA : state.teamB;
+
+  return (
+    <View style={styles.winFlex}>
+      <Animated.View style={[styles.winContent, { opacity }]}>
+        <Animated.View style={[styles.winTrophyWrap, { transform: [{ scale }] }]}>
+          <Trophy color={KanchaColors.amber} size={64} />
+        </Animated.View>
+
+        <Text style={styles.winLabel}>{t("score.winner")}</Text>
+        <Text style={styles.winTeam}>{winnerName}</Text>
+
+        <View style={styles.winScoreCard}>
+          <View style={styles.winScoreRow}>
+            <Text style={styles.winScoreTeam} numberOfLines={1}>{state.teamA}</Text>
+            <Text style={styles.winScoreNum}>{state.scoreA}</Text>
+          </View>
+          <View style={styles.winScoreDivider} />
+          <View style={styles.winScoreRow}>
+            <Text style={styles.winScoreTeam} numberOfLines={1}>{state.teamB}</Text>
+            <Text style={styles.winScoreNum}>{state.scoreB}</Text>
+          </View>
+        </View>
+      </Animated.View>
+
+      <Pressable
+        style={({ pressed }) => [styles.newGameBtn, pressed && styles.newGameBtnPressed]}
+        onPress={onNewGame}
+      >
+        <Text style={styles.newGameLabel}>{t("score.cta_new_game")}</Text>
+      </Pressable>
     </View>
   );
 }
@@ -310,6 +411,8 @@ export default function ScoreScreen() {
             onStart={(teamA, teamB, target) => dispatch({ type: "start", teamA, teamB, target })}
           />
         )
+        : state.phase === "won"
+        ? <WinScreen state={state} onNewGame={() => dispatch({ type: "reset" })} />
         : <GameScreen state={state} dispatch={dispatch} />}
     </SafeAreaView>
   );
@@ -471,5 +574,101 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     letterSpacing: 0.4,
+  },
+
+  // Win screen
+  winFlex: {
+    flex: 1,
+    backgroundColor: KanchaColors.green,
+    paddingHorizontal: 28,
+    paddingBottom: 28,
+    paddingTop: 20,
+    justifyContent: "space-between",
+  },
+  winContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  winTrophyWrap: {
+    width: 112,
+    height: 112,
+    borderRadius: 36,
+    backgroundColor: KanchaColors.amberBg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  winLabel: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 13,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 2,
+  },
+  winTeam: {
+    color: KanchaColors.white,
+    fontSize: 36,
+    fontWeight: "900",
+    textAlign: "center",
+    lineHeight: 40,
+  },
+  winScoreCard: {
+    marginTop: 20,
+    width: "100%",
+    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.15)",
+    overflow: "hidden",
+  },
+  winScoreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 22,
+    paddingVertical: 16,
+    gap: 12,
+  },
+  winScoreTeam: {
+    flex: 1,
+    color: KanchaColors.white,
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  winScoreNum: {
+    color: KanchaColors.white,
+    fontSize: 32,
+    fontWeight: "900",
+    minWidth: 40,
+    textAlign: "right",
+  },
+  winScoreDivider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    marginHorizontal: 22,
+  },
+  newGameBtn: {
+    borderRadius: 18,
+    backgroundColor: KanchaColors.red,
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  newGameBtnPressed: { opacity: 0.8 },
+  newGameLabel: {
+    color: KanchaColors.white,
+    fontSize: 18,
+    fontWeight: "900",
+    letterSpacing: 0.4,
+  },
+
+  // Score bar
+  barTrack: {
+    height: 6,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    overflow: "hidden",
+  },
+  barTrackBottom: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 },
+  barTrackTop: { borderTopLeftRadius: 0, borderTopRightRadius: 0 },
+  barFill: {
+    height: "100%",
   },
 });
