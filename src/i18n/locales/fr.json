@@ -48,7 +48,12 @@
     "matches_count_one": "{{count}} partie",
     "matches_count_other": "{{count}} parties",
     "rounds_count_one": "{{count}} tour",
-    "rounds_count_other": "{{count}} tours"
+    "rounds_count_other": "{{count}} tours",
+    "view_list": "Liste",
+    "view_bracket": "Tableau",
+    "stat_total": "Total",
+    "stat_played": "Joués",
+    "stat_pending": "À jouer"
   },
   "rounds": {
     "P": "Poules",

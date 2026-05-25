@@ -1,10 +1,19 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, Swords, Trophy, Users } from "lucide-react-native";
-import React from "react";
+import { ArrowLeft, LayoutList, Network, Swords, Trophy, Users } from "lucide-react-native";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BracketView, PHASE_COLORS, RoundGroup } from "@/components/BracketView";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { StatusPill } from "@/components/StatusPill";
 import { KanchaColors } from "@/constants/colors";
@@ -14,15 +23,11 @@ import { useResultsByCompetition } from "@/hooks/use-matches";
 import { useSpecialties } from "@/hooks/use-specialties";
 import { Temporal } from "@js-temporal/polyfill";
 
+import type { PhaseColors, PhaseType } from "@/components/BracketView";
 import type { Result } from "@/types/competition";
 
 // ─── Score parsing ────────────────────────────────────────────────────────────
 
-/**
- * Parse the `scores` field (e.g. "15/10 15/13") into per-team display strings.
- * Each space-separated token is one set in "A/B" format.
- * Returns the per-set scores joined by "–" for each team, or null when absent.
- */
 function parseScores(scores?: string): { scoreA: string | null; scoreB: string | null } {
   if (!scores) return { scoreA: null, scoreB: null };
   const sets = scores.trim().split(/\s+/);
@@ -40,8 +45,6 @@ function parseScores(scores?: string): { scoreA: string | null; scoreB: string |
 }
 
 // ─── Phase parsing ────────────────────────────────────────────────────────────
-
-type PhaseType = "P" | "B1T" | "B2T" | "B3T" | "H" | "Q" | "D" | "F" | "other";
 
 interface ParsedPhase {
   type: PhaseType;
@@ -68,49 +71,7 @@ const ROUND_ORDER: Record<PhaseType, number> = {
   other: 8,
 };
 
-interface PhaseColors {
-  pill: string; // pill background
-  border: string; // pill border
-  label: string; // text color
-  count: string; // count badge color
-  icon: string; // icon color
-  cardBorder: string; // match card border
-}
-
-const NEUTRAL_PHASE: PhaseColors = {
-  pill: KanchaColors.cream,
-  border: KanchaColors.line,
-  label: KanchaColors.ink,
-  count: KanchaColors.muted,
-  icon: KanchaColors.ink,
-  cardBorder: KanchaColors.line,
-};
-
-const PHASE_COLORS: Record<PhaseType, PhaseColors> = {
-  P: NEUTRAL_PHASE,
-  B1T: NEUTRAL_PHASE,
-  B2T: NEUTRAL_PHASE,
-  B3T: NEUTRAL_PHASE,
-  H: NEUTRAL_PHASE,
-  Q: NEUTRAL_PHASE,
-  D: NEUTRAL_PHASE,
-  F: {
-    pill: KanchaColors.amberBg,
-    border: "rgba(200,144,10,0.4)",
-    label: "#A86E00",
-    count: KanchaColors.amber,
-    icon: KanchaColors.amber,
-    cardBorder: KanchaColors.red,
-  },
-  other: NEUTRAL_PHASE,
-};
-
 // ─── Grouping ─────────────────────────────────────────────────────────────────
-
-interface RoundGroup {
-  type: PhaseType;
-  results: Result[];
-}
 
 function groupByRound(results: Result[]): RoundGroup[] {
   const map = new Map<PhaseType, Result[]>();
@@ -203,7 +164,7 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
   const pillLabel = formatDate(result.dateMatch);
   const pillTone = dateTone(result.dateMatch);
   const phaseLabel = result.phase ?? "";
-  const colors = PHASE_COLORS[phaseType];
+  const colors: PhaseColors = PHASE_COLORS[phaseType];
   const isFinal = phaseType === "F";
 
   const cardStyle = [
@@ -243,6 +204,74 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
   );
 }
 
+// ─── Stats strip ─────────────────────────────────────────────────────────────
+
+interface StatsStripProps {
+  total: number;
+  played: number;
+  pending: number;
+}
+
+function StatCell({ value, label }: { value: number; label: string }) {
+  return (
+    <View style={styles.statCell}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function StatsStrip({ total, played, pending }: StatsStripProps) {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.statsStrip}>
+      <StatCell value={total} label={t("details.stat_total")} />
+      <View style={styles.statDivider} />
+      <StatCell value={played} label={t("details.stat_played")} />
+      <View style={styles.statDivider} />
+      <StatCell value={pending} label={t("details.stat_pending")} />
+    </View>
+  );
+}
+
+// ─── View toggle ──────────────────────────────────────────────────────────────
+
+type ViewMode = "list" | "bracket";
+
+function ViewToggle(
+  { mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void },
+) {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.toggleRow}>
+      <Pressable
+        style={[styles.togglePill, mode === "list" && styles.togglePillActive]}
+        onPress={() => onChange("list")}
+      >
+        <LayoutList
+          size={12}
+          color={mode === "list" ? KanchaColors.white : KanchaColors.muted}
+        />
+        <Text style={[styles.togglePillLabel, mode === "list" && styles.togglePillLabelActive]}>
+          {t("details.view_list")}
+        </Text>
+      </Pressable>
+      <Pressable
+        style={[styles.togglePill, mode === "bracket" && styles.togglePillActive]}
+        onPress={() => onChange("bracket")}
+      >
+        <Network
+          size={12}
+          color={mode === "bracket" ? KanchaColors.white : KanchaColors.muted}
+        />
+        <Text style={[styles.togglePillLabel, mode === "bracket" && styles.togglePillLabelActive]}>
+          {t("details.view_bracket")}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function CompetitionDetailsScreen() {
@@ -252,6 +281,9 @@ export default function CompetitionDetailsScreen() {
     specialtyId: string;
     categoryId: string;
   }>();
+
+  const { width: screenWidth } = useWindowDimensions();
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const { data: competition, isPending: loadingComp } = useCompetition(id ?? "");
   const { data: specialties } = useSpecialties();
@@ -265,6 +297,8 @@ export default function CompetitionDetailsScreen() {
 
   const rounds = results ? groupByRound(results) : [];
   const totalMatches = results?.length ?? 0;
+  const playedMatches = results?.filter((r) => r.scores).length ?? 0;
+  const pendingMatches = totalMatches - playedMatches;
 
   return (
     <KanchaBackground>
@@ -349,22 +383,28 @@ export default function CompetitionDetailsScreen() {
                 <Text style={styles.tournamentEyebrow}>{t("details.tableau_eyebrow")}</Text>
                 <Text style={styles.tournamentTitle}>{t("details.tournament_title")}</Text>
                 <Text style={styles.tournamentSub}>
-                  {t("details.matches_count", { count: totalMatches })}
-                  {" · "}
                   {t("details.rounds_count", { count: rounds.length })}
                 </Text>
+                <StatsStrip total={totalMatches} played={playedMatches} pending={pendingMatches} />
+                <ViewToggle mode={viewMode} onChange={setViewMode} />
               </View>
 
-              {rounds.map((round) => (
-                <View key={round.type} style={styles.roundSection}>
-                  <RoundHeader type={round.type} count={round.results.length} />
-                  <View style={styles.matchList}>
-                    {round.results.map((r) => (
-                      <MatchCard key={r.id} result={r} phaseType={round.type} />
-                    ))}
+              {viewMode === "bracket"
+                ? (
+                  <View style={[styles.bracketWrapper, { width: screenWidth }]}>
+                    <BracketView rounds={rounds} />
                   </View>
-                </View>
-              ))}
+                )
+                : rounds.map((round) => (
+                  <View key={round.type} style={styles.roundSection}>
+                    <RoundHeader type={round.type} count={round.results.length} />
+                    <View style={styles.matchList}>
+                      {round.results.map((r) => (
+                        <MatchCard key={r.id} result={r} phaseType={round.type} />
+                      ))}
+                    </View>
+                  </View>
+                ))}
             </>
           )}
         </ScrollView>
@@ -444,7 +484,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // Tournament header — rendered over cream, so use dark ink tones
+  // Tournament header
   tournamentHeader: { gap: 4 },
   tournamentEyebrow: {
     color: KanchaColors.muted,
@@ -456,10 +496,79 @@ const styles = StyleSheet.create({
   tournamentTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "800" },
   tournamentSub: { color: KanchaColors.muted, fontSize: 13 },
 
+  // Stats strip
+  statsStrip: {
+    flexDirection: "row",
+    borderRadius: 16,
+    backgroundColor: KanchaColors.white,
+    borderWidth: 1,
+    borderColor: KanchaColors.line,
+    overflow: "hidden",
+    marginTop: 12,
+  },
+  statCell: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 14,
+    gap: 4,
+  },
+  statValue: {
+    color: KanchaColors.ink,
+    fontSize: 26,
+    fontWeight: "900",
+    lineHeight: 28,
+  },
+  statLabel: {
+    color: KanchaColors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: KanchaColors.line,
+    marginVertical: 12,
+  },
+
+  // View toggle
+  toggleRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12,
+  },
+  togglePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 9999,
+    backgroundColor: KanchaColors.card,
+    borderWidth: 1,
+    borderColor: KanchaColors.line,
+  },
+  togglePillActive: {
+    backgroundColor: KanchaColors.red,
+    borderColor: KanchaColors.red,
+  },
+  togglePillLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: KanchaColors.muted,
+  },
+  togglePillLabelActive: {
+    color: KanchaColors.white,
+  },
+
+  bracketWrapper: {
+    marginLeft: -20,
+  },
+
   // Round section
   roundSection: { gap: 10 },
 
-  // Round divider title — cream background, use line/ink colors
+  // Round divider
   roundDivider: {
     flexDirection: "row",
     alignItems: "center",

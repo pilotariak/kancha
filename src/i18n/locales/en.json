@@ -48,7 +48,12 @@
     "matches_count_one": "{{count}} match",
     "matches_count_other": "{{count}} matches",
     "rounds_count_one": "{{count}} round",
-    "rounds_count_other": "{{count}} rounds"
+    "rounds_count_other": "{{count}} rounds",
+    "view_list": "List",
+    "view_bracket": "Bracket",
+    "stat_total": "Total",
+    "stat_played": "Played",
+    "stat_pending": "Pending"
   },
   "rounds": {
     "P": "Pools",
