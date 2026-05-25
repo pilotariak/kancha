@@ -223,7 +223,7 @@ function ScorePanel(
   const teamLabel = (
     <View style={styles.teamLabelRow}>
       {isWinner && <Text style={styles.winnerBadge}>{t("score.winner")}</Text>}
-      <Text style={styles.teamName} numberOfLines={1}>{team}</Text>
+      <Text style={styles.teamName}>{team}</Text>
     </View>
   );
 
