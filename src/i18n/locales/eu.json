@@ -48,7 +48,9 @@
     "matches_count_one": "{{count}} partida",
     "matches_count_other": "{{count}} partida",
     "rounds_count_one": "{{count}} txanda",
-    "rounds_count_other": "{{count}} txanda"
+    "rounds_count_other": "{{count}} txanda",
+    "view_list": "Zerrenda",
+    "view_bracket": "Taula"
   },
   "rounds": {
     "P": "Taldeak",

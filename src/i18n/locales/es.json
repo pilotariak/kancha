@@ -48,7 +48,9 @@
     "matches_count_one": "{{count}} partido",
     "matches_count_other": "{{count}} partidos",
     "rounds_count_one": "{{count}} ronda",
-    "rounds_count_other": "{{count}} rondas"
+    "rounds_count_other": "{{count}} rondas",
+    "view_list": "Lista",
+    "view_bracket": "Cuadro"
   },
   "rounds": {
     "P": "Grupos",
