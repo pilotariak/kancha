@@ -10,14 +10,15 @@ on:
     branches:
     - main
 
-permissions:
-  contents: write         # to push tags and changelog
-  issues: write           # (optional) for any issue linkage
-  pull-requests: write    # to create/modify the release PR
+permissions: read-all
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
 
     steps:
     - name: Checkout Code

@@ -27,3 +27,26 @@ labels:
   - name: "dependency/typescript"
     description: "Dependency Typescript"
     color: "6fcb70"
+
+  - name: "dependency/github-actions"
+    description: "Dependency GitHub Actions"
+    color: "6fcb70"
+
+  - name: "dependency/npm"
+    description: "Dependency NPM"
+    color: "6fcb70"
+
+branches:
+  - name: main
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - "Lint & Type Check"
+      enforce_admins: true
+      required_linear_history: true
+      restrictions: null
