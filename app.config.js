@@ -14,7 +14,7 @@ module.exports = {
     splash: {
       image: "./assets/images/splash-icon.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#F7F4EF",
     },
     ios: {
       supportsTablet: false,
@@ -23,7 +23,7 @@ module.exports = {
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#F7F4EF",
       },
       package: "io.pilotariak.kancha",
     },

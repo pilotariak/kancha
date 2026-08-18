@@ -45,7 +45,11 @@ export default function AboutScreen() {
         >
           <View style={styles.hero}>
             <View style={styles.logoBox}>
-              <Text style={styles.logoLetter}>K</Text>
+              <Image
+                source={require("../../../../assets/images/icon.png")}
+                style={{ width: 64, height: 64 }}
+                contentFit="contain"
+              />
             </View>
             <Text style={styles.appName}>Kancha</Text>
             <Text style={styles.tagline}>{t("about.tagline")}</Text>
@@ -180,7 +184,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 26,
-    backgroundColor: KanchaColors.red,
+    backgroundColor: KanchaColors.white,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: KanchaColors.shadow,
@@ -188,11 +192,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 16,
     elevation: 8,
-  },
-  logoLetter: {
-    color: KanchaColors.white,
-    fontSize: 42,
-    fontWeight: "900",
   },
   appName: {
     color: KanchaColors.ink,

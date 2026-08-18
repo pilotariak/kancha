@@ -1,18 +1,18 @@
 import Constants from "expo-constants";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import { Animated, StyleSheet, View } from "react-native";
 
 import { KanchaColors } from "@/constants/colors";
-import { KanchaLogo } from "./KanchaLogo";
 
 interface LaunchScreenProps {
   onFinish: () => void;
 }
 
 export function LaunchScreen({ onFinish }: LaunchScreenProps) {
-  const logoScale = useRef(new Animated.Value(0.72)).current;
-  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const iconScale = useRef(new Animated.Value(0.72)).current;
+  const iconOpacity = useRef(new Animated.Value(0)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
 
@@ -20,15 +20,15 @@ export function LaunchScreen({ onFinish }: LaunchScreenProps) {
 
   useEffect(() => {
     Animated.sequence([
-      // Logo springs in while fading — spring gives natural overshoot feel
+      // Icon springs in while fading — spring gives natural overshoot feel
       Animated.parallel([
-        Animated.spring(logoScale, {
+        Animated.spring(iconScale, {
           toValue: 1,
           friction: 6,
           tension: 90,
           useNativeDriver: true,
         }),
-        Animated.timing(logoOpacity, {
+        Animated.timing(iconOpacity, {
           toValue: 1,
           duration: 420,
           useNativeDriver: true,
@@ -50,7 +50,7 @@ export function LaunchScreen({ onFinish }: LaunchScreenProps) {
       Animated.delay(950),
       // All fade out together
       Animated.parallel([
-        Animated.timing(logoOpacity, { toValue: 0, duration: 360, useNativeDriver: true }),
+        Animated.timing(iconOpacity, { toValue: 0, duration: 360, useNativeDriver: true }),
         Animated.timing(titleOpacity, { toValue: 0, duration: 360, useNativeDriver: true }),
         Animated.timing(subtitleOpacity, { toValue: 0, duration: 360, useNativeDriver: true }),
       ]),
@@ -69,9 +69,12 @@ export function LaunchScreen({ onFinish }: LaunchScreenProps) {
       <View style={styles.container}>
         <View style={styles.content}>
           <Animated.View
-            style={{ opacity: logoOpacity, transform: [{ scale: logoScale }] }}
+            style={{ opacity: iconOpacity, transform: [{ scale: iconScale }] }}
           >
-            <KanchaLogo size={112} variant="on-dark" />
+            <Image
+              source={require("../../assets/images/icon.png")}
+              style={{ width: 112, height: 112 }}
+            />
           </Animated.View>
 
           <Animated.Text style={[styles.title, { opacity: titleOpacity }]}>
