@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.4.0](https://github.com/pilotariak/kancha/compare/kancha-v0.3.0...kancha-v0.4.0) (2026-08-18)
+
+
+### 🚀 Features
+
+* **cicd:** migrate to EAS Workflows and improve eas.json ([#21](https://github.com/pilotariak/kancha/issues/21)) ([6c037d4](https://github.com/pilotariak/kancha/commit/6c037d4318546267161afc1cbf404c2589bbb0c6))
+* **i18n:** add internationalization support with language picker ([#20](https://github.com/pilotariak/kancha/issues/20)) ([4357c8d](https://github.com/pilotariak/kancha/commit/4357c8da27d716388cc57a812df835fadd6e7628))
+* **league:** add multi-league support with league picker ([#19](https://github.com/pilotariak/kancha/issues/19)) ([53d4bb2](https://github.com/pilotariak/kancha/commit/53d4bb2044a9faa3eb6e09502bec5dda84a358d7))
+* **ui:** add bracket view, score bar, stats strip, and win screen ([#29](https://github.com/pilotariak/kancha/issues/29)) ([fa0ce44](https://github.com/pilotariak/kancha/commit/fa0ce4438e3d5fae41872f0630f8c20fbe4f5bb0))
+* **ui:** add score tab with match scoreboard screen ([#25](https://github.com/pilotariak/kancha/issues/25)) ([b5da3ac](https://github.com/pilotariak/kancha/commit/b5da3ac83a495a5819f0487c28cb25569dbed026))
+* **ui:** extract KanchaLogo component and improve launch screen ([#27](https://github.com/pilotariak/kancha/issues/27)) ([5f9324b](https://github.com/pilotariak/kancha/commit/5f9324bcb55033d91f1217bb7ee0a87398b88243))
+
+
+### 🐛 Bug Fixes
+
+* **cicd:** add --project-name flag to cf-deploy-web target ([230f2c8](https://github.com/pilotariak/kancha/commit/230f2c8ebcc17678e74d8470c83574b2a3772af5))
+* **ci:** Setup Bun using Github Action ([#35](https://github.com/pilotariak/kancha/issues/35)) ([da9ef20](https://github.com/pilotariak/kancha/commit/da9ef2008c67fa7e5c28249b784ad52cbe686fe8))
+* **config:** use environment-specific API URLs for web builds ([#23](https://github.com/pilotariak/kancha/issues/23)) ([9346d12](https://github.com/pilotariak/kancha/commit/9346d12e1a8429f4f3cd6172d508687d9ff63cc4))
+* **ui:** allow team names to wrap on multiple lines ([#28](https://github.com/pilotariak/kancha/issues/28)) ([88e51df](https://github.com/pilotariak/kancha/commit/88e51df9cca16452ba61d191b505d272588f47d6))
+* **ui:** enforce design system conformance across screens ([#24](https://github.com/pilotariak/kancha/issues/24)) ([ecd5cbc](https://github.com/pilotariak/kancha/commit/ecd5cbc881cb050a392b3ea7493b7191097cb015))
+
+
+### 🚨 Maintenance
+
+* **config:** replace app.json with dynamic app.config.js ([#18](https://github.com/pilotariak/kancha/issues/18)) ([f157bbc](https://github.com/pilotariak/kancha/commit/f157bbcd13de391ffb7ec93ecff167b5ef7a4129))
+* **release-please:** bump to v5.0.0 ([#26](https://github.com/pilotariak/kancha/issues/26)) ([3261db7](https://github.com/pilotariak/kancha/commit/3261db7b849a8d70a58dac69ea12d6a999e4f9a8))
+
+
+### 📚 Documentation
+
+* add AGENTS.md for AI agent context ([#33](https://github.com/pilotariak/kancha/issues/33)) ([36c9420](https://github.com/pilotariak/kancha/commit/36c9420f9b7c869c5f0017198d244d833a14905f))
+* **docs:** add README and Diataxis documentation structure ([#30](https://github.com/pilotariak/kancha/issues/30)) ([40ac747](https://github.com/pilotariak/kancha/commit/40ac747671bfd8c8e8d9cfd8cd13c7dfa22cfbe1))
+
 ## [0.3.0](https://github.com/pilotariak/kancha/compare/kancha-v0.2.0...kancha-v0.3.0) (2026-04-16)
 
 ### 🚀 Features
