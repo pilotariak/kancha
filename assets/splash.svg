@@ -1,0 +1,18 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: Warm Limestone Cream (matches app.config.js splash.backgroundColor) -->
+  <rect width="1024" height="1024" fill="#F7F4EF"/>
+  <!-- K + pelota mark, centered with generous padding (scale 0.7, translate to center) -->
+  <g transform="translate(147, 147) scale(0.71)">
+    <!-- K: vertical stroke -->
+    <line x1="300" y1="196" x2="300" y2="828" stroke="#C8102E" stroke-width="84" stroke-linecap="round"/>
+    <!-- K: upper diagonal -->
+    <line x1="300" y1="512" x2="722" y2="196" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
+    <!-- K: lower diagonal -->
+    <line x1="300" y1="512" x2="722" y2="828" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
+    <!-- Pelota ball -->
+    <circle cx="784" cy="512" r="70" fill="#C8102E"/>
+    <!-- Pelota seam lines -->
+    <path d="M714 512 Q784 442 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
+    <path d="M714 512 Q784 582 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>
