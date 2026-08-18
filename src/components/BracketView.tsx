@@ -175,7 +175,7 @@ export function BracketView({ rounds }: { rounds: RoundGroup[] }) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const COLUMN_WIDTH = 200;
+const COLUMN_WIDTH = 350;
 
 const styles = StyleSheet.create({
   container: {
