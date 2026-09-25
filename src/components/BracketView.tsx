@@ -82,8 +82,10 @@ function MatchNode(
 ) {
   const { scoreA, scoreB } = parseScores(result.scores);
   const hasScore = scoreA != null && scoreB != null;
-  const nameA = formatLineup(result.clubALineup) || result.clubA.name;
-  const nameB = formatLineup(result.clubBLineup) || result.clubB.name;
+  const lineupA = formatLineup(result.clubALineup);
+  const lineupB = formatLineup(result.clubBLineup);
+  const nameA = lineupA || result.clubA.name;
+  const nameB = lineupB || result.clubB.name;
 
   return (
     <View
@@ -94,18 +96,24 @@ function MatchNode(
       ]}
     >
       <View style={styles.nodeRow}>
-        <Text style={[styles.nodeTeam, isFinal && styles.nodeTeamFinal]}>
-          {nameA}
-        </Text>
+        <View style={styles.nodeTeamInfo}>
+          <Text style={[styles.nodeTeam, isFinal && styles.nodeTeamFinal]}>
+            {nameA}
+          </Text>
+          {lineupA ? <Text style={styles.nodeClub}>{result.clubA.name}</Text> : null}
+        </View>
         {hasScore
           ? <Text style={[styles.nodeScore, isFinal && styles.nodeScoreFinal]}>{scoreA}</Text>
           : <Text style={styles.nodeScorePending}>—</Text>}
       </View>
       <View style={styles.nodeDivider} />
       <View style={styles.nodeRow}>
-        <Text style={[styles.nodeTeam, isFinal && styles.nodeTeamFinal]}>
-          {nameB}
-        </Text>
+        <View style={styles.nodeTeamInfo}>
+          <Text style={[styles.nodeTeam, isFinal && styles.nodeTeamFinal]}>
+            {nameB}
+          </Text>
+          {lineupB ? <Text style={styles.nodeClub}>{result.clubB.name}</Text> : null}
+        </View>
         {hasScore
           ? <Text style={[styles.nodeScore, isFinal && styles.nodeScoreFinal]}>{scoreB}</Text>
           : <Text style={styles.nodeScorePending}>—</Text>}
@@ -229,12 +237,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 10,
   },
-  nodeTeam: {
+  nodeTeamInfo: {
     flex: 1,
+    gap: 2,
+  },
+  nodeTeam: {
     color: KanchaColors.ink,
     fontSize: 14,
     fontWeight: "700",
     lineHeight: 20,
+  },
+  nodeClub: {
+    color: KanchaColors.muted,
+    fontSize: 11,
+    fontWeight: "600",
   },
   nodeTeamFinal: { fontSize: 15, fontWeight: "800" },
   nodeScore: {

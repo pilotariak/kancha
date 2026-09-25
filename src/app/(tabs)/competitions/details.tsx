@@ -177,18 +177,24 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
     <View style={cardStyle} testID={`result-card-${result.id}`}>
       <View style={styles.matchCardInner}>
         <View style={styles.teamRow}>
-          <Text style={[styles.teamName, isFinal && styles.teamNameFinal]}>
-            {lineupA || result.clubA.name}
-          </Text>
+          <View style={styles.teamInfo}>
+            <Text style={[styles.teamName, isFinal && styles.teamNameFinal]}>
+              {lineupA || result.clubA.name}
+            </Text>
+            {lineupA ? <Text style={styles.teamClub}>{result.clubA.name}</Text> : null}
+          </View>
           {hasScore
             ? <Text style={[styles.score, isFinal && styles.scoreFinal]}>{scoreA}</Text>
             : <Text style={styles.scorePending}>—</Text>}
         </View>
         <View style={styles.divider} />
         <View style={styles.teamRow}>
-          <Text style={[styles.teamName, isFinal && styles.teamNameFinal]}>
-            {lineupB || result.clubB.name}
-          </Text>
+          <View style={styles.teamInfo}>
+            <Text style={[styles.teamName, isFinal && styles.teamNameFinal]}>
+              {lineupB || result.clubB.name}
+            </Text>
+            {lineupB ? <Text style={styles.teamClub}>{result.clubB.name}</Text> : null}
+          </View>
           {hasScore
             ? <Text style={[styles.score, isFinal && styles.scoreFinal]}>{scoreB}</Text>
             : <Text style={styles.scorePending}>—</Text>}
@@ -621,11 +627,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 12,
   },
-  teamName: {
+  teamInfo: {
     flex: 1,
+    gap: 2,
+  },
+  teamName: {
     color: KanchaColors.ink,
     fontSize: 15,
     fontWeight: "700",
+  },
+  teamClub: {
+    color: KanchaColors.muted,
+    fontSize: 12,
+    fontWeight: "600",
   },
   teamNameFinal: { fontSize: 16, fontWeight: "800" },
   score: {
