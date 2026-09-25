@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/pilotariak/kancha/compare/kancha-v0.4.0...kancha-v0.5.0) (2026-09-25)
+
+
+### 🚀 Features
+
+* **ui:** show club names in match cards ([#38](https://github.com/pilotariak/kancha/issues/38)) ([e90ca84](https://github.com/pilotariak/kancha/commit/e90ca841f11f0c76aaf19ae39fc79f4bb64553bb))
+* **ui:** update app icon and splash screen design ([#36](https://github.com/pilotariak/kancha/issues/36)) ([c3c8116](https://github.com/pilotariak/kancha/commit/c3c8116c5af7f2be998401d171e193521293b8e8))
+
 ## [0.4.0](https://github.com/pilotariak/kancha/compare/kancha-v0.3.0...kancha-v0.4.0) (2026-08-18)
 
 ### 🚀 Features
