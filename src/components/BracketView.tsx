@@ -8,7 +8,7 @@ import type { Result } from "@/types/competition";
 
 // ─── Shared types (re-exported for details.tsx) ───────────────────────────────
 
-export type PhaseType = "P" | "B1T" | "B2T" | "B3T" | "H" | "Q" | "D" | "F" | "other";
+export type PhaseType = "P" | "B" | "BM" | "B1T" | "B2T" | "B3T" | "H" | "Q" | "D" | "F" | "other";
 
 export interface RoundGroup {
   type: PhaseType;
@@ -35,6 +35,8 @@ const NEUTRAL_PHASE: PhaseColors = {
 
 export const PHASE_COLORS: Record<PhaseType, PhaseColors> = {
   P: NEUTRAL_PHASE,
+  B: NEUTRAL_PHASE,
+  BM: NEUTRAL_PHASE,
   B1T: NEUTRAL_PHASE,
   B2T: NEUTRAL_PHASE,
   B3T: NEUTRAL_PHASE,
