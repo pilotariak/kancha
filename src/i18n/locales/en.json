@@ -60,6 +60,8 @@
     "B1T": "1st Round Playoffs",
     "B2T": "2nd Round Playoffs",
     "B3T": "3rd Round Playoffs",
+    "B": "Playoff",
+    "BM": "Relegation Playoff",
     "H": "Round of 16",
     "Q": "Quarterfinals",
     "D": "Semifinals",
