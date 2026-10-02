@@ -16,7 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
 import { StatusPill } from "@/components/StatusPill";
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 type PlayerStatus = "ok" | "ko" | "disponible";
 
@@ -38,6 +39,8 @@ const STATUS_OPTIONS: { value: PlayerStatus; label: string; tone: "green" | "red
 ];
 
 export default function NewSlotScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [currentStep, setCurrentStep] = useState(0);
 
   // Step 0 — Période
@@ -108,14 +111,18 @@ export default function NewSlotScreen() {
           {/* ── Hero ── */}
           <View style={styles.heroRow}>
             {currentStep > 0 && (
-              <PressableScale onPress={goBack}>
+              <PressableScale
+                onPress={goBack}
+                accessibilityRole="button"
+                accessibilityLabel="Retour"
+              >
                 <View style={styles.backBtn}>
-                  <ArrowLeft color={KanchaColors.white} size={20} />
+                  <ArrowLeft color="#FFFFFF" size={20} />
                 </View>
               </PressableScale>
             )}
             <View style={styles.heroText}>
-              <Text style={styles.title}>Nouveau slot</Text>
+              <Text style={styles.title} accessibilityRole="header">Nouveau slot</Text>
               <Text style={styles.subtitle}>
                 Configurez votre créneau récurrent pas à pas.
               </Text>
@@ -133,7 +140,7 @@ export default function NewSlotScreen() {
                     index < currentStep ? styles.stepCircleDone : null,
                   ]}
                 >
-                  {index < currentStep ? <Check color={KanchaColors.red} size={14} /> : (
+                  {index < currentStep ? <Check color={colors.red} size={14} /> : (
                     <Text
                       style={[
                         styles.stepText,
@@ -177,7 +184,7 @@ export default function NewSlotScreen() {
                   onChangeText={setStartDate}
                   style={styles.input}
                   placeholder="ex : Septembre 2025"
-                  placeholderTextColor={KanchaColors.muted}
+                  placeholderTextColor={colors.muted}
                   testID="input-start-date"
                 />
 
@@ -187,12 +194,12 @@ export default function NewSlotScreen() {
                   onChangeText={setEndDate}
                   style={styles.input}
                   placeholder="ex : Août 2026"
-                  placeholderTextColor={KanchaColors.muted}
+                  placeholderTextColor={colors.muted}
                   testID="input-end-date"
                 />
 
                 <View style={styles.previewBox}>
-                  <CalendarClock color={KanchaColors.red} size={16} />
+                  <CalendarClock color={colors.red} size={16} />
                   <Text style={styles.previewText}>
                     {seasonName || "—"} · {startDate || "?"} → {endDate || "?"}
                   </Text>
@@ -208,7 +215,12 @@ export default function NewSlotScreen() {
                 <Text style={styles.label}>Jour de la semaine</Text>
                 <View style={styles.chipsWrap}>
                   {WEEKDAYS.map((day) => (
-                    <PressableScale key={day} onPress={() => setWeekday(day)}>
+                    <PressableScale
+                      key={day}
+                      onPress={() => setWeekday(day)}
+                      accessibilityRole="button"
+                      accessibilityLabel={day}
+                    >
                       <View
                         style={[
                           styles.chip,
@@ -235,7 +247,7 @@ export default function NewSlotScreen() {
                     onChangeText={setTimeFrom}
                     style={[styles.input, styles.inputHalf]}
                     placeholder="18:00"
-                    placeholderTextColor={KanchaColors.muted}
+                    placeholderTextColor={colors.muted}
                     testID="input-time-from"
                   />
                   <Text style={styles.timeSep}>→</Text>
@@ -244,26 +256,26 @@ export default function NewSlotScreen() {
                     onChangeText={setTimeTo}
                     style={[styles.input, styles.inputHalf]}
                     placeholder="20:00"
-                    placeholderTextColor={KanchaColors.muted}
+                    placeholderTextColor={colors.muted}
                     testID="input-time-to"
                   />
                 </View>
 
                 <Text style={styles.label}>Lieu</Text>
                 <View style={styles.inputWithIcon}>
-                  <MapPin color={KanchaColors.muted} size={16} />
+                  <MapPin color={colors.muted} size={16} />
                   <TextInput
                     value={venue}
                     onChangeText={setVenue}
                     style={styles.inputFlexible}
                     placeholder="Fronton municipal…"
-                    placeholderTextColor={KanchaColors.muted}
+                    placeholderTextColor={colors.muted}
                     testID="input-venue"
                   />
                 </View>
 
                 <View style={styles.previewBox}>
-                  <CalendarClock color={KanchaColors.red} size={16} />
+                  <CalendarClock color={colors.red} size={16} />
                   <Text style={styles.previewText}>
                     {`${weekday}s · ${timeFrom || "?"} – ${timeTo || "?"}`}
                   </Text>
@@ -285,14 +297,18 @@ export default function NewSlotScreen() {
                     onChangeText={setNewPlayerName}
                     style={styles.inputFlexible}
                     placeholder="Nom du joueur…"
-                    placeholderTextColor={KanchaColors.muted}
+                    placeholderTextColor={colors.muted}
                     onSubmitEditing={addPlayer}
                     returnKeyType="done"
                     testID="input-player-name"
                   />
-                  <PressableScale onPress={addPlayer}>
+                  <PressableScale
+                    onPress={addPlayer}
+                    accessibilityRole="button"
+                    accessibilityLabel="Ajouter le joueur"
+                  >
                     <View style={styles.addBtn}>
-                      <Plus color={KanchaColors.white} size={16} />
+                      <Plus color="#FFFFFF" size={16} />
                     </View>
                   </PressableScale>
                 </View>
@@ -311,9 +327,13 @@ export default function NewSlotScreen() {
                     <Text style={styles.playerName} numberOfLines={1}>
                       {p.name}
                     </Text>
-                    <PressableScale onPress={() => removePlayer(p.id)}>
+                    <PressableScale
+                      onPress={() => removePlayer(p.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Supprimer ${p.name}`}
+                    >
                       <View style={styles.removeBtn}>
-                        <X color={KanchaColors.muted} size={14} />
+                        <X color={colors.muted} size={14} />
                       </View>
                     </PressableScale>
                   </View>
@@ -344,6 +364,9 @@ export default function NewSlotScreen() {
                         <PressableScale
                           key={opt.value}
                           onPress={() => setStatus(p.id, opt.value)}
+                          accessibilityRole="button"
+                          accessibilityLabel={opt.label}
+                          accessibilityState={{ selected: p.status === opt.value }}
                         >
                           <View
                             style={[
@@ -385,7 +408,13 @@ export default function NewSlotScreen() {
                 {players.length === 0 && <Text style={styles.emptyHint}>Aucun joueur ajouté.</Text>}
 
                 {players.map((p) => (
-                  <PressableScale key={p.id} onPress={() => toggleSelected(p.id)}>
+                  <PressableScale
+                    key={p.id}
+                    onPress={() => toggleSelected(p.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={p.name}
+                    accessibilityState={{ selected: p.selected }}
+                  >
                     <View
                       style={[
                         styles.selectionRow,
@@ -399,7 +428,7 @@ export default function NewSlotScreen() {
                         ]}
                       >
                         {p.selected
-                          ? <UserCheck color={KanchaColors.white} size={16} />
+                          ? <UserCheck color="#FFFFFF" size={16} />
                           : <Text style={styles.playerInitialText}>{p.name.charAt(0)}</Text>}
                       </View>
                       <Text
@@ -442,7 +471,7 @@ export default function NewSlotScreen() {
                     {`${weekday}s · ${timeFrom}–${timeTo}`}
                   </Text>
                   <View style={styles.summaryRow}>
-                    <MapPin color={KanchaColors.muted} size={13} />
+                    <MapPin color={colors.muted} size={13} />
                     <Text style={styles.summaryMeta}>{venue || "—"}</Text>
                   </View>
                 </View>
@@ -464,7 +493,7 @@ export default function NewSlotScreen() {
                             ?? p.status}
                           tone={STATUS_OPTIONS.find((o) => o.value === p.status)?.tone ?? "soft"}
                         />
-                        {p.selected && <UserCheck color={KanchaColors.green} size={14} />}
+                        {p.selected && <UserCheck color={colors.green} size={14} />}
                       </View>
                     ))}
                     {players.length === 0 && <Text style={styles.emptyHint}>Aucun joueur.</Text>}
@@ -477,12 +506,14 @@ export default function NewSlotScreen() {
             <PressableScale
               onPress={isLastStep ? handleConfirm : goNext}
               testID="new-slot-continue"
+              accessibilityRole="button"
+              accessibilityLabel={nextLabel}
             >
               <View style={styles.ctaButton}>
                 <Text style={styles.ctaText}>{nextLabel}</Text>
                 {isLastStep
-                  ? <Check color={KanchaColors.ink} size={18} />
-                  : <ChevronRight color={KanchaColors.ink} size={18} />}
+                  ? <Check color={colors.ink} size={18} />
+                  : <ChevronRight color={colors.ink} size={18} />}
               </View>
             </PressableScale>
           </View>
@@ -492,263 +523,264 @@ export default function NewSlotScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 120,
-    gap: 22,
-  },
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    safeArea: { flex: 1 },
+    content: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 120,
+      gap: 22,
+    },
 
-  heroRow: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-  },
-  heroText: { flex: 1, gap: 6 },
-  title: { color: KanchaColors.white, fontSize: 32, fontWeight: "900" },
-  subtitle: {
-    color: "rgba(255,255,255,0.82)",
-    fontSize: 14,
-    lineHeight: 20,
-  },
+    heroRow: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
+    backBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: "rgba(255,255,255,0.18)",
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 4,
+    },
+    heroText: { flex: 1, gap: 6 },
+    title: { color: "#FFFFFF", fontSize: 32, fontWeight: "900" },
+    subtitle: {
+      color: "rgba(255,255,255,0.82)",
+      fontSize: 14,
+      lineHeight: 20,
+    },
 
-  stepsRow: { flexDirection: "row", justifyContent: "space-between", gap: 4 },
-  stepItem: { flex: 1, alignItems: "center", gap: 6 },
-  stepCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.22)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  stepCircleActive: { backgroundColor: KanchaColors.white },
-  stepCircleDone: { backgroundColor: "#F6C0C9" },
-  stepText: { color: KanchaColors.white, fontSize: 13, fontWeight: "800" },
-  stepTextActive: { color: KanchaColors.red },
-  stepLabel: {
-    color: "rgba(255,255,255,0.65)",
-    fontSize: 10,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-  stepLabelActive: { color: KanchaColors.white },
+    stepsRow: { flexDirection: "row", justifyContent: "space-between", gap: 4 },
+    stepItem: { flex: 1, alignItems: "center", gap: 6 },
+    stepCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: "rgba(255,255,255,0.22)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    stepCircleActive: { backgroundColor: c.white },
+    stepCircleDone: { backgroundColor: "#F6C0C9" },
+    stepText: { color: "#FFFFFF", fontSize: 13, fontWeight: "800", fontVariant: ["tabular-nums"] },
+    stepTextActive: { color: c.red },
+    stepLabel: {
+      color: "rgba(255,255,255,0.65)",
+      fontSize: 10,
+      fontWeight: "700",
+      textAlign: "center",
+    },
+    stepLabelActive: { color: "#FFFFFF" },
 
-  formCard: {
-    borderRadius: 24,
-    backgroundColor: KanchaColors.card,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    gap: 14,
-  },
-  stepHeading: {
-    color: KanchaColors.ink,
-    fontSize: 20,
-    fontWeight: "900",
-  },
-  stepHint: {
-    color: KanchaColors.muted,
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: -6,
-  },
+    formCard: {
+      borderRadius: 24,
+      backgroundColor: c.card,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: c.line,
+      gap: 14,
+    },
+    stepHeading: {
+      color: c.ink,
+      fontSize: 20,
+      fontWeight: "900",
+    },
+    stepHint: {
+      color: c.muted,
+      fontSize: 13,
+      lineHeight: 18,
+      marginTop: -6,
+    },
 
-  label: {
-    color: "#8E857C",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.3,
-  },
-  input: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    backgroundColor: KanchaColors.white,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: KanchaColors.ink,
-    fontWeight: "600",
-  },
-  inputHalf: { flex: 1 },
-  inputWithIcon: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    backgroundColor: KanchaColors.white,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  inputFlexible: {
-    flex: 1,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: KanchaColors.ink,
-    fontWeight: "600",
-  },
-  timeRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  timeSep: { color: KanchaColors.muted, fontSize: 16, fontWeight: "700" },
+    label: {
+      color: "#8E857C",
+      fontSize: 12,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.3,
+    },
+    input: {
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      backgroundColor: c.white,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: c.ink,
+      fontWeight: "600",
+    },
+    inputHalf: { flex: 1 },
+    inputWithIcon: {
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      backgroundColor: c.white,
+      paddingHorizontal: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    inputFlexible: {
+      flex: 1,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: c.ink,
+      fontWeight: "600",
+    },
+    timeRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    timeSep: { color: c.muted, fontSize: 16, fontWeight: "700" },
 
-  chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  chip: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    backgroundColor: KanchaColors.white,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  chipActive: { backgroundColor: KanchaColors.redSoft, borderColor: "#F1B9C4" },
-  chipText: { color: KanchaColors.ink, fontSize: 14, fontWeight: "700" },
-  chipTextActive: { color: KanchaColors.redDark },
+    chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+    chip: {
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      backgroundColor: c.white,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+    },
+    chipActive: { backgroundColor: c.redSoft, borderColor: "#F1B9C4" },
+    chipText: { color: c.ink, fontSize: 14, fontWeight: "700" },
+    chipTextActive: { color: c.redDark },
 
-  addBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: KanchaColors.red,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyHint: {
-    color: KanchaColors.muted,
-    fontSize: 13,
-    fontStyle: "italic",
-    textAlign: "center",
-    paddingVertical: 8,
-  },
+    addBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: c.red,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    emptyHint: {
+      color: c.muted,
+      fontSize: 13,
+      fontStyle: "italic",
+      textAlign: "center",
+      paddingVertical: 8,
+    },
 
-  playerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: KanchaColors.cream,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  playerInitial: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: KanchaColors.redSoft,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  playerInitialText: { color: KanchaColors.red, fontSize: 14, fontWeight: "900" },
-  playerInitialSelected: { backgroundColor: KanchaColors.green },
-  playerName: { flex: 1, color: KanchaColors.ink, fontSize: 15, fontWeight: "700" },
-  playerNameSelected: { color: KanchaColors.green },
-  removeBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#EFE8DE",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    playerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: c.cream,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    playerInitial: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: c.redSoft,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    playerInitialText: { color: c.red, fontSize: 14, fontWeight: "900" },
+    playerInitialSelected: { backgroundColor: c.green },
+    playerName: { flex: 1, color: c.ink, fontSize: 15, fontWeight: "700" },
+    playerNameSelected: { color: c.green },
+    removeBtn: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: "#EFE8DE",
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: KanchaColors.cream,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  statusChips: { flexDirection: "row", gap: 6 },
-  statusChip: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    backgroundColor: KanchaColors.white,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  statusChipActive: { backgroundColor: KanchaColors.ink, borderColor: KanchaColors.ink },
-  statusChipText: { color: KanchaColors.muted, fontSize: 12, fontWeight: "700" },
-  statusChipTextActive: { color: KanchaColors.white },
+    statusRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: c.cream,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    statusChips: { flexDirection: "row", gap: 6 },
+    statusChip: {
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      backgroundColor: c.white,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+    },
+    statusChipActive: { backgroundColor: c.ink, borderColor: c.ink },
+    statusChipText: { color: c.muted, fontSize: 12, fontWeight: "700" },
+    statusChipTextActive: { color: c.white },
 
-  selectionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: KanchaColors.cream,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  selectionRowActive: {
-    backgroundColor: KanchaColors.greenSoft,
-    borderColor: "#B8E0D0",
-  },
+    selectionRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: c.cream,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderWidth: 1,
+      borderColor: "transparent",
+    },
+    selectionRowActive: {
+      backgroundColor: c.greenSoft,
+      borderColor: "#B8E0D0",
+    },
 
-  previewBox: {
-    borderRadius: 14,
-    backgroundColor: "#F5EEE6",
-    padding: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  previewText: { color: KanchaColors.ink, fontSize: 14, fontWeight: "700", flex: 1 },
+    previewBox: {
+      borderRadius: 14,
+      backgroundColor: "#F5EEE6",
+      padding: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    previewText: { color: c.ink, fontSize: 14, fontWeight: "700", flex: 1 },
 
-  divider: { height: 1, backgroundColor: KanchaColors.line },
+    divider: { height: 1, backgroundColor: c.line },
 
-  summarySection: { gap: 6 },
-  summaryLabel: {
-    color: "#8E857C",
-    fontSize: 11,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-  summaryValue: { color: KanchaColors.ink, fontSize: 17, fontWeight: "900" },
-  summaryMeta: { color: KanchaColors.muted, fontSize: 13 },
-  summaryRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  summaryPlayers: { gap: 8 },
-  summaryPlayer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: KanchaColors.cream,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  summaryPlayerName: {
-    flex: 1,
-    color: KanchaColors.ink,
-    fontSize: 14,
-    fontWeight: "700",
-  },
+    summarySection: { gap: 6 },
+    summaryLabel: {
+      color: "#8E857C",
+      fontSize: 11,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
+    },
+    summaryValue: { color: c.ink, fontSize: 17, fontWeight: "900" },
+    summaryMeta: { color: c.muted, fontSize: 13 },
+    summaryRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+    summaryPlayers: { gap: 8 },
+    summaryPlayer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: c.cream,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    summaryPlayerName: {
+      flex: 1,
+      color: c.ink,
+      fontSize: 14,
+      fontWeight: "700",
+    },
 
-  ctaButton: {
-    borderRadius: 16,
-    backgroundColor: KanchaColors.white,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginTop: 4,
-  },
-  ctaText: { color: KanchaColors.ink, fontSize: 16, fontWeight: "800" },
-});
+    ctaButton: {
+      borderRadius: 16,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      paddingHorizontal: 18,
+      paddingVertical: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      marginTop: 4,
+    },
+    ctaText: { color: c.ink, fontSize: 16, fontWeight: "800" },
+  });

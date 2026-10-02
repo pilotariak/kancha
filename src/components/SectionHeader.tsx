@@ -1,7 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
+import { useThemedStyles } from "@/hooks/use-theme";
 
 interface SectionHeaderProps {
   eyebrow: string;
@@ -14,6 +15,7 @@ export function SectionHeader({
   title,
   subtitle,
 }: SectionHeaderProps) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.container}>
       <Text style={styles.eyebrow}>{eyebrow}</Text>
@@ -23,26 +25,27 @@ export function SectionHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    gap: 4,
-  },
-  eyebrow: {
-    color: KanchaColors.muted,
-    fontSize: 12,
-    fontWeight: "800",
-    letterSpacing: 1.6,
-    textTransform: "uppercase",
-  },
-  title: {
-    color: KanchaColors.ink,
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: -0.8,
-  },
-  subtitle: {
-    color: KanchaColors.muted,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    container: {
+      gap: 4,
+    },
+    eyebrow: {
+      color: c.muted,
+      fontSize: 12,
+      fontWeight: "800",
+      letterSpacing: 1.6,
+      textTransform: "uppercase",
+    },
+    title: {
+      color: c.ink,
+      fontSize: 28,
+      fontWeight: "800",
+      letterSpacing: -0.8,
+    },
+    subtitle: {
+      color: c.muted,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+  });

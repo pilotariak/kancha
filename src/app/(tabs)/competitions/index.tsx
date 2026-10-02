@@ -7,12 +7,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 
 export default function LeaguePickerScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const setLeague = useLeagueStore((s) => s.setLeague);
 
   function handleSelect(id: string) {
@@ -30,13 +33,15 @@ export default function LeaguePickerScreen() {
         >
           <View style={styles.hero}>
             <Text style={styles.eyebrow}>{t("leagues.eyebrow")}</Text>
-            <Text style={styles.title}>{t("leagues.title")}</Text>
+            <Text style={styles.title} accessibilityRole="header">{t("leagues.title")}</Text>
             <Text style={styles.subtitle}>{t("leagues.subtitle")}</Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionEyebrow}>{t("common.choose")}</Text>
-            <Text style={styles.sectionTitle}>{t("leagues.your_league")}</Text>
+            <Text style={styles.sectionTitle} accessibilityRole="header">
+              {t("leagues.your_league")}
+            </Text>
           </View>
 
           <View style={styles.list}>
@@ -46,11 +51,17 @@ export default function LeaguePickerScreen() {
                 style={[styles.card, !league.supported && styles.cardDisabled]}
                 onPress={() => league.supported && handleSelect(league.id)}
                 disabled={!league.supported}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !league.supported }}
+                accessibilityLabel={league.supported
+                  ? league.name
+                  : `${league.name}, ${t("common.soon")}`}
+                accessibilityHint={league.supported ? t("leagues.open_hint") : undefined}
                 testID={`league-card-${league.id}`}
               >
                 <View style={[styles.cardIcon, !league.supported && styles.cardIconDisabled]}>
                   <Shield
-                    color={league.supported ? KanchaColors.red : KanchaColors.muted}
+                    color={league.supported ? colors.red : colors.muted}
                     size={18}
                   />
                 </View>
@@ -58,7 +69,7 @@ export default function LeaguePickerScreen() {
                   {league.name}
                 </Text>
                 {league.supported
-                  ? <ChevronRight color={KanchaColors.muted} size={18} />
+                  ? <ChevronRight color={colors.muted} size={18} />
                   : <Text style={styles.comingSoon}>{t("common.soon")}</Text>}
               </PressableScale>
             ))}
@@ -69,66 +80,68 @@ export default function LeaguePickerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 120,
-    gap: 22,
-  },
-  hero: { gap: 6 },
-  eyebrow: {
-    color: "rgba(255,255,255,0.78)",
-    fontSize: 12,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-  },
-  title: { color: KanchaColors.white, fontSize: 34, fontWeight: "900" },
-  subtitle: { color: "rgba(255,255,255,0.82)", fontSize: 14, lineHeight: 20 },
-  section: { gap: 4 },
-  sectionEyebrow: {
-    color: KanchaColors.muted,
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.4,
-  },
-  sectionTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "800" },
-  list: { gap: 12 },
-  card: {
-    borderRadius: 20,
-    backgroundColor: KanchaColors.card,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  cardDisabled: {
-    backgroundColor: "rgba(247,244,239,0.5)",
-    borderColor: "rgba(229,222,214,0.5)",
-  },
-  cardIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: KanchaColors.redSoft,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cardIconDisabled: {
-    backgroundColor: "rgba(229,222,214,0.6)",
-  },
-  cardTitle: { color: KanchaColors.ink, fontSize: 18, fontWeight: "800", flex: 1 },
-  cardTitleDisabled: { color: KanchaColors.muted },
-  comingSoon: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: KanchaColors.muted,
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    safeArea: { flex: 1 },
+    content: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 120,
+      gap: 22,
+    },
+    hero: { gap: 6 },
+    eyebrow: {
+      color: c.onRedSoft,
+      fontSize: 12,
+      fontWeight: "800",
+      letterSpacing: 1.5,
+      textTransform: "uppercase",
+    },
+    title: { color: "#FFFFFF", fontSize: 34, fontWeight: "900" },
+    subtitle: { color: c.onRedStrong, fontSize: 14, lineHeight: 20 },
+    section: { gap: 4 },
+    sectionEyebrow: {
+      color: c.muted,
+      fontSize: 12,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.4,
+    },
+    sectionTitle: { color: c.ink, fontSize: 28, fontWeight: "800" },
+    list: { gap: 12 },
+    card: {
+      borderRadius: 20,
+      backgroundColor: c.card,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: c.line,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    cardDisabled: {
+      backgroundColor: c.cream,
+      borderColor: c.line,
+      opacity: 0.6,
+    },
+    cardIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: c.redSoft,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    cardIconDisabled: {
+      backgroundColor: c.line,
+    },
+    cardTitle: { color: c.ink, fontSize: 18, fontWeight: "800", flex: 1 },
+    cardTitleDisabled: { color: c.muted },
+    comingSoon: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: c.muted,
+      textTransform: "uppercase",
+      letterSpacing: 0.8,
+    },
+  });

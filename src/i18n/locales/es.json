@@ -9,13 +9,21 @@
     "back": "Volver",
     "choose": "Elegir",
     "soon": "Pronto",
-    "competition_fallback": "Competición"
+    "competition_fallback": "Competición",
+    "loading": "Cargando"
+  },
+  "theme": {
+    "label": "Apariencia",
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Oscuro"
   },
   "leagues": {
     "eyebrow": "Panel de competiciones",
     "title": "Ligas",
     "subtitle": "Selecciona una liga para ver sus competiciones.",
-    "your_league": "Tu liga"
+    "your_league": "Tu liga",
+    "open_hint": "Abre las competiciones de la liga"
   },
   "competitions": {
     "eyebrow": "Panel de competiciones",

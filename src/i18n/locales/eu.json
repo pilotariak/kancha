@@ -9,13 +9,21 @@
     "back": "Atzera",
     "choose": "Aukeratu",
     "soon": "Laster",
-    "competition_fallback": "Txapelketa"
+    "competition_fallback": "Txapelketa",
+    "loading": "Kargatzen"
+  },
+  "theme": {
+    "label": "Itxura",
+    "system": "Sistema",
+    "light": "Argia",
+    "dark": "Iluna"
   },
   "leagues": {
     "eyebrow": "Txapelketa mahai",
     "title": "Ligak",
     "subtitle": "Hautatu liga bat bere txapelketak ikusteko.",
-    "your_league": "Zure liga"
+    "your_league": "Zure liga",
+    "open_hint": "Ligaren lehiaketak irekitzen ditu"
   },
   "competitions": {
     "eyebrow": "Txapelketa mahai",

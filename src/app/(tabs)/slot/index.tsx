@@ -6,7 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 // ── Slot configuration (will come from wizard state/storage) ──────────────────
 
@@ -93,6 +94,8 @@ type ListRow = MonthRow | SessionRow;
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function SlotScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -152,7 +155,7 @@ export default function SlotScreen() {
               {/* ── Hero ── */}
               <View style={styles.hero}>
                 <Text style={styles.eyebrow}>Créneau récurrent</Text>
-                <Text style={styles.title}>Slot</Text>
+                <Text style={styles.title} accessibilityRole="header">Slot</Text>
                 <Text style={styles.subtitle}>
                   {`${totalSessions} séances · ${SLOT_CONFIG.playerCount} joueurs`}
                 </Text>
@@ -163,22 +166,26 @@ export default function SlotScreen() {
                 <Text style={styles.configSeason}>{SLOT_CONFIG.seasonName}</Text>
 
                 <View style={styles.configRow}>
-                  <CalendarClock color={KanchaColors.red} size={15} />
+                  <CalendarClock color={colors.red} size={15} />
                   <Text style={styles.configInfo}>
                     {`${SLOT_CONFIG.weekdayLabel}s · ${SLOT_CONFIG.timeFrom}–${SLOT_CONFIG.timeTo}`}
                   </Text>
                 </View>
 
                 <View style={styles.configRow}>
-                  <MapPin color={KanchaColors.muted} size={15} />
+                  <MapPin color={colors.muted} size={15} />
                   <Text style={styles.configVenue}>{SLOT_CONFIG.venue}</Text>
                 </View>
               </View>
 
               {/* ── New slot button ── */}
-              <PressableScale onPress={() => router.push("/(tabs)/slot/new")}>
+              <PressableScale
+                onPress={() => router.push("/(tabs)/slot/new")}
+                accessibilityRole="button"
+                accessibilityLabel="Nouveau slot"
+              >
                 <View style={styles.ctaButton} testID="slot-new-button">
-                  <Plus color={KanchaColors.ink} size={17} />
+                  <Plus color={colors.ink} size={17} />
                   <Text style={styles.ctaText}>Nouveau slot</Text>
                 </View>
               </PressableScale>
@@ -187,7 +194,7 @@ export default function SlotScreen() {
               <View style={styles.listHeader}>
                 <Text style={styles.listHeaderTitle}>Toutes les séances</Text>
                 <View style={styles.legendRow}>
-                  <View style={[styles.legendDot, { backgroundColor: KanchaColors.green }]} />
+                  <View style={[styles.legendDot, { backgroundColor: colors.green }]} />
                   <Text style={styles.legendText}>OK</Text>
                   <View style={[styles.legendDot, { backgroundColor: "#E53935" }]} />
                   <Text style={styles.legendText}>KO</Text>
@@ -261,7 +268,7 @@ export default function SlotScreen() {
                 {/* Counters */}
                 <View style={styles.counters}>
                   <View style={styles.counter}>
-                    <View style={[styles.counterDot, { backgroundColor: KanchaColors.green }]} />
+                    <View style={[styles.counterDot, { backgroundColor: colors.green }]} />
                     <Text
                       style={[
                         styles.counterValue,
@@ -303,150 +310,152 @@ export default function SlotScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 120,
-    gap: 10,
-  },
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    safeArea: { flex: 1 },
+    content: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 120,
+      gap: 10,
+    },
 
-  // Hero
-  hero: { gap: 6, marginBottom: 8 },
-  eyebrow: {
-    color: "rgba(255,255,255,0.78)",
-    fontSize: 12,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-  },
-  title: { color: KanchaColors.white, fontSize: 34, fontWeight: "900" },
-  subtitle: { color: "rgba(255,255,255,0.82)", fontSize: 14 },
+    // Hero
+    hero: { gap: 6, marginBottom: 8 },
+    eyebrow: {
+      color: "rgba(255,255,255,0.78)",
+      fontSize: 12,
+      fontWeight: "800",
+      letterSpacing: 1.5,
+      textTransform: "uppercase",
+    },
+    title: { color: "#FFFFFF", fontSize: 34, fontWeight: "900" },
+    subtitle: { color: "rgba(255,255,255,0.82)", fontSize: 14 },
 
-  // Config card
-  configCard: {
-    borderRadius: 20,
-    backgroundColor: KanchaColors.card,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    gap: 10,
-  },
-  configSeason: { color: KanchaColors.ink, fontSize: 16, fontWeight: "900" },
-  configRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  configInfo: { color: KanchaColors.ink, fontSize: 14, fontWeight: "700" },
-  configVenue: { color: KanchaColors.muted, fontSize: 13, flex: 1 },
+    // Config card
+    configCard: {
+      borderRadius: 20,
+      backgroundColor: c.card,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: c.line,
+      gap: 10,
+    },
+    configSeason: { color: c.ink, fontSize: 16, fontWeight: "900" },
+    configRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+    configInfo: { color: c.ink, fontSize: 14, fontWeight: "700" },
+    configVenue: { color: c.muted, fontSize: 13, flex: 1 },
 
-  // CTA
-  ctaButton: {
-    borderRadius: 14,
-    backgroundColor: KanchaColors.white,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  ctaText: { color: KanchaColors.ink, fontSize: 15, fontWeight: "800" },
+    // CTA
+    ctaButton: {
+      borderRadius: 14,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+    ctaText: { color: c.ink, fontSize: 15, fontWeight: "800" },
 
-  // List header
-  listHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 6,
-    paddingBottom: 2,
-  },
-  listHeaderTitle: { color: KanchaColors.ink, fontSize: 16, fontWeight: "900" },
-  legendRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  legendDot: { width: 7, height: 7, borderRadius: 4 },
-  legendText: { color: KanchaColors.muted, fontSize: 11, fontWeight: "700", marginRight: 4 },
+    // List header
+    listHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingTop: 6,
+      paddingBottom: 2,
+    },
+    listHeaderTitle: { color: c.ink, fontSize: 16, fontWeight: "900" },
+    legendRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+    legendDot: { width: 7, height: 7, borderRadius: 4 },
+    legendText: { color: c.muted, fontSize: 11, fontWeight: "700", marginRight: 4 },
 
-  // Month separator
-  monthRow: {
-    paddingTop: 10,
-    paddingBottom: 4,
-    paddingHorizontal: 2,
-  },
-  monthLabel: {
-    color: KanchaColors.muted,
-    fontSize: 11,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
+    // Month separator
+    monthRow: {
+      paddingTop: 10,
+      paddingBottom: 4,
+      paddingHorizontal: 2,
+    },
+    monthLabel: {
+      color: c.muted,
+      fontSize: 11,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
+    },
 
-  // Session row
-  sessionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    backgroundColor: KanchaColors.card,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  sessionRowPast: {
-    backgroundColor: "#FAF8F5",
-    borderColor: "#EDE8E1",
-  },
-  sessionRowNext: {
-    backgroundColor: KanchaColors.redSoft,
-    borderColor: "#F1B9C4",
-  },
+    // Session row
+    sessionRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      backgroundColor: c.card,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.line,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+    },
+    sessionRowPast: {
+      backgroundColor: "#FAF8F5",
+      borderColor: "#EDE8E1",
+    },
+    sessionRowNext: {
+      backgroundColor: c.redSoft,
+      borderColor: "#F1B9C4",
+    },
 
-  // Date block
-  dateBlock: {
-    width: 40,
-    alignItems: "center",
-    gap: 2,
-  },
-  dateBlockNext: {},
-  dateBlockPast: {},
-  dateDay: {
-    color: KanchaColors.ink,
-    fontSize: 20,
-    fontWeight: "900",
-    lineHeight: 22,
-  },
-  dateDayNext: { color: KanchaColors.redDark },
-  dateDayPast: { color: "#B0A89E" },
-  dateDayLabel: {
-    color: KanchaColors.muted,
-    fontSize: 11,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  dateDayLabelNext: { color: KanchaColors.red },
-  dateDayLabelPast: { color: "#C4BBB2" },
+    // Date block
+    dateBlock: {
+      width: 40,
+      alignItems: "center",
+      gap: 2,
+    },
+    dateBlockNext: {},
+    dateBlockPast: {},
+    dateDay: {
+      color: c.ink,
+      fontSize: 20,
+      fontWeight: "900",
+      lineHeight: 22,
+      fontVariant: ["tabular-nums"],
+    },
+    dateDayNext: { color: c.redDark },
+    dateDayPast: { color: "#B0A89E" },
+    dateDayLabel: {
+      color: c.muted,
+      fontSize: 11,
+      fontWeight: "700",
+      textTransform: "uppercase",
+    },
+    dateDayLabelNext: { color: c.red },
+    dateDayLabelPast: { color: "#C4BBB2" },
 
-  // "Prochain" badge
-  nextBadge: {
-    flex: 1,
-    borderRadius: 8,
-    backgroundColor: KanchaColors.red,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    alignSelf: "center",
-  },
-  nextBadgeText: {
-    color: KanchaColors.white,
-    fontSize: 11,
-    fontWeight: "800",
-  },
+    // "Prochain" badge
+    nextBadge: {
+      flex: 1,
+      borderRadius: 8,
+      backgroundColor: c.red,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      alignSelf: "center",
+    },
+    nextBadgeText: {
+      color: "#FFFFFF",
+      fontSize: 11,
+      fontWeight: "800",
+    },
 
-  flex: { flex: 1 },
+    flex: { flex: 1 },
 
-  // Counters
-  counters: { flexDirection: "row", gap: 10 },
-  counter: { flexDirection: "row", alignItems: "center", gap: 5, minWidth: 26 },
-  counterDot: { width: 8, height: 8, borderRadius: 4 },
-  counterValue: { color: KanchaColors.ink, fontSize: 14, fontWeight: "800" },
-  counterValuePast: { color: "#B0A89E" },
-});
+    // Counters
+    counters: { flexDirection: "row", gap: 10 },
+    counter: { flexDirection: "row", alignItems: "center", gap: 5, minWidth: 26 },
+    counterDot: { width: 8, height: 8, borderRadius: 4 },
+    counterValue: { color: c.ink, fontSize: 14, fontWeight: "800", fontVariant: ["tabular-nums"] },
+    counterValuePast: { color: "#B0A89E" },
+  });

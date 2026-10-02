@@ -1,9 +1,10 @@
 import { ChevronRight, Swords, Trophy, Users } from "lucide-react-native";
-import React from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { KanchaColors } from "@/constants/colors";
+import { type Palette } from "@/constants/colors";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import type { Result } from "@/types/competition";
 
 // ─── Shared types (re-exported for details.tsx) ───────────────────────────────
@@ -36,36 +37,43 @@ export interface PhaseColors {
   cardBorder: string;
 }
 
-const NEUTRAL_PHASE: PhaseColors = {
-  pill: KanchaColors.cream,
-  border: KanchaColors.line,
-  label: KanchaColors.ink,
-  count: KanchaColors.muted,
-  icon: KanchaColors.ink,
-  cardBorder: KanchaColors.line,
-};
+function makePhaseColors(c: Palette): Record<PhaseType, PhaseColors> {
+  const neutral: PhaseColors = {
+    pill: c.cream,
+    border: c.line,
+    label: c.ink,
+    count: c.muted,
+    icon: c.ink,
+    cardBorder: c.line,
+  };
+  return {
+    P: neutral,
+    B: neutral,
+    BM: neutral,
+    B1T: neutral,
+    B2T: neutral,
+    B3T: neutral,
+    S: neutral,
+    H: neutral,
+    Q: neutral,
+    D: neutral,
+    F: {
+      pill: c.amberBg,
+      border: "rgba(200,144,10,0.4)",
+      label: c.amber,
+      count: c.amber,
+      icon: c.amber,
+      cardBorder: c.red,
+    },
+    other: neutral,
+  };
+}
 
-export const PHASE_COLORS: Record<PhaseType, PhaseColors> = {
-  P: NEUTRAL_PHASE,
-  B: NEUTRAL_PHASE,
-  BM: NEUTRAL_PHASE,
-  B1T: NEUTRAL_PHASE,
-  B2T: NEUTRAL_PHASE,
-  B3T: NEUTRAL_PHASE,
-  S: NEUTRAL_PHASE,
-  H: NEUTRAL_PHASE,
-  Q: NEUTRAL_PHASE,
-  D: NEUTRAL_PHASE,
-  F: {
-    pill: KanchaColors.amberBg,
-    border: "rgba(200,144,10,0.4)",
-    label: "#A86E00",
-    count: KanchaColors.amber,
-    icon: KanchaColors.amber,
-    cardBorder: KanchaColors.red,
-  },
-  other: NEUTRAL_PHASE,
-};
+/** Theme-aware phase colors for round pills and bracket accents. */
+export function usePhaseColors(): Record<PhaseType, PhaseColors> {
+  const { colors } = useTheme();
+  return useMemo(() => makePhaseColors(colors), [colors]);
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -95,6 +103,7 @@ function formatLineup(lineup?: { player1?: { name: string }; player2?: { name: s
 function MatchNode(
   { result, isFinal, colors }: { result: Result; isFinal: boolean; colors: PhaseColors },
 ) {
+  const styles = useThemedStyles(makeStyles);
   const { scoreA, scoreB } = parseScores(result.scores);
   const hasScore = scoreA != null && scoreB != null;
   const lineupA = formatLineup(result.clubALineup);
@@ -141,7 +150,8 @@ function MatchNode(
 
 function RoundColumn({ group }: { group: RoundGroup }) {
   const { t } = useTranslation();
-  const colors = PHASE_COLORS[group.type];
+  const styles = useThemedStyles(makeStyles);
+  const colors = usePhaseColors()[group.type];
   const isFinal = group.type === "F";
   const Icon = group.type === "P" ? Users : isFinal ? Trophy : Swords;
 
@@ -170,9 +180,11 @@ function RoundColumn({ group }: { group: RoundGroup }) {
 // ─── Connector ────────────────────────────────────────────────────────────────
 
 function RoundConnector() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.connector}>
-      <ChevronRight color={KanchaColors.line} size={16} />
+      <ChevronRight color={colors.line} size={16} />
     </View>
   );
 }
@@ -180,6 +192,7 @@ function RoundConnector() {
 // ─── BracketView ──────────────────────────────────────────────────────────────
 
 export function BracketView({ rounds }: { rounds: RoundGroup[] }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <ScrollView
       horizontal
@@ -200,91 +213,93 @@ export function BracketView({ rounds }: { rounds: RoundGroup[] }) {
 
 const COLUMN_WIDTH = 350;
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 4,
-    paddingBottom: 16,
-    alignItems: "flex-start",
-  },
-  column: {
-    width: COLUMN_WIDTH,
-    gap: 10,
-  },
-  columnHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-    alignSelf: "flex-start",
-    marginBottom: 4,
-  },
-  columnHeaderLabel: {
-    fontSize: 11,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  columnHeaderCount: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  columnBody: { gap: 10 },
-  connector: {
-    width: 32,
-    paddingTop: 50,
-    alignItems: "center",
-  },
-  matchNode: {
-    width: COLUMN_WIDTH,
-    borderRadius: 14,
-    backgroundColor: KanchaColors.white,
-    overflow: "hidden",
-  },
-  matchNodePending: { backgroundColor: KanchaColors.card },
-  nodeRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 10,
-  },
-  nodeTeamInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  nodeTeam: {
-    color: KanchaColors.ink,
-    fontSize: 14,
-    fontWeight: "700",
-    lineHeight: 20,
-  },
-  nodeClub: {
-    color: KanchaColors.muted,
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  nodeTeamFinal: { fontSize: 15, fontWeight: "800" },
-  nodeScore: {
-    color: KanchaColors.red,
-    fontSize: 17,
-    fontWeight: "900",
-    minWidth: 28,
-    textAlign: "right",
-  },
-  nodeScoreFinal: { fontSize: 22 },
-  nodeScorePending: {
-    color: KanchaColors.muted,
-    fontSize: 16,
-    fontWeight: "300",
-    minWidth: 18,
-    textAlign: "right",
-  },
-  nodeDivider: {
-    height: 1,
-    backgroundColor: KanchaColors.line,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 20,
+      paddingTop: 4,
+      paddingBottom: 16,
+      alignItems: "flex-start",
+    },
+    column: {
+      width: COLUMN_WIDTH,
+      gap: 10,
+    },
+    columnHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 20,
+      borderWidth: 1,
+      alignSelf: "flex-start",
+      marginBottom: 4,
+    },
+    columnHeaderLabel: {
+      fontSize: 11,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    columnHeaderCount: {
+      fontSize: 11,
+      fontWeight: "600",
+    },
+    columnBody: { gap: 10 },
+    connector: {
+      width: 32,
+      paddingTop: 50,
+      alignItems: "center",
+    },
+    matchNode: {
+      width: COLUMN_WIDTH,
+      borderRadius: 14,
+      backgroundColor: c.white,
+      overflow: "hidden",
+    },
+    matchNodePending: { backgroundColor: c.card },
+    nodeRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      gap: 10,
+    },
+    nodeTeamInfo: {
+      flex: 1,
+      gap: 2,
+    },
+    nodeTeam: {
+      color: c.ink,
+      fontSize: 14,
+      fontWeight: "700",
+      lineHeight: 20,
+    },
+    nodeClub: {
+      color: c.muted,
+      fontSize: 11,
+      fontWeight: "600",
+    },
+    nodeTeamFinal: { fontSize: 15, fontWeight: "800" },
+    nodeScore: {
+      color: c.red,
+      fontSize: 17,
+      fontWeight: "900",
+      minWidth: 28,
+      textAlign: "right",
+      fontVariant: ["tabular-nums"],
+    },
+    nodeScoreFinal: { fontSize: 22 },
+    nodeScorePending: {
+      color: c.muted,
+      fontSize: 16,
+      fontWeight: "300",
+      minWidth: 18,
+      textAlign: "right",
+    },
+    nodeDivider: {
+      height: 1,
+      backgroundColor: c.line,
+    },
+  });

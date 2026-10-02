@@ -6,12 +6,15 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { KanchaBackground } from "@/components/KanchaBackground";
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
 import { useCompetition } from "@/hooks/use-competitions";
 import { useSpecialties } from "@/hooks/use-specialties";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 export default function SpecialtyPickerScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const { data: competition, isPending: loadingComp } = useCompetition(id ?? "");
@@ -30,20 +33,25 @@ export default function SpecialtyPickerScreen() {
           showsVerticalScrollIndicator={false}
           testID="specialty-picker-screen"
         >
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft color={KanchaColors.white} size={20} />
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel={t("specialty.back")}
+          >
+            <ArrowLeft color="#FFFFFF" size={20} />
             <Text style={styles.backLabel}>{t("specialty.back")}</Text>
           </Pressable>
 
           <View style={styles.heroCard}>
             <View style={styles.heroIcon}>
-              <Trophy color={KanchaColors.white} size={20} />
+              <Trophy color="#FFFFFF" size={20} />
             </View>
             {loadingComp
-              ? <ActivityIndicator color={KanchaColors.white} />
+              ? <ActivityIndicator color="#FFFFFF" accessibilityLabel={t("common.loading")} />
               : (
                 <>
-                  <Text style={styles.heroTitle}>
+                  <Text style={styles.heroTitle} accessibilityRole="header">
                     {competition?.name ?? t("common.competition_fallback")}
                   </Text>
                   {(competition?.year != null || competition?.level) && (
@@ -57,18 +65,24 @@ export default function SpecialtyPickerScreen() {
 
           <View style={styles.section}>
             <Text style={styles.sectionEyebrow}>{t("common.choose")}</Text>
-            <Text style={styles.sectionTitle}>{t("specialty.title")}</Text>
+            <Text style={styles.sectionTitle} accessibilityRole="header">
+              {t("specialty.title")}
+            </Text>
             <Text style={styles.sectionSubtitle}>{t("specialty.subtitle")}</Text>
           </View>
 
           {loadingSpecialties && (
             <View style={styles.centered}>
-              <ActivityIndicator color={KanchaColors.white} size="large" />
+              <ActivityIndicator
+                color="#FFFFFF"
+                size="large"
+                accessibilityLabel={t("common.loading")}
+              />
             </View>
           )}
 
           {isError && (
-            <View style={styles.errorBox}>
+            <View style={styles.errorBox} accessibilityRole="alert">
               <Text style={styles.errorText}>{t("specialty.error_load")}</Text>
             </View>
           )}
@@ -80,10 +94,12 @@ export default function SpecialtyPickerScreen() {
                   key={s.id}
                   style={styles.card}
                   onPress={() => handleSelect(s.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={s.name}
                   testID={`specialty-card-${s.id}`}
                 >
                   <Text style={styles.cardTitle}>{s.name}</Text>
-                  <ChevronRight color={KanchaColors.muted} size={18} />
+                  <ChevronRight color={colors.muted} size={18} />
                 </Pressable>
               ))}
             </View>
@@ -94,70 +110,71 @@ export default function SpecialtyPickerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 120,
-    gap: 22,
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 4,
-  },
-  backLabel: {
-    color: KanchaColors.white,
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  heroCard: {
-    borderRadius: 24,
-    backgroundColor: KanchaColors.red,
-    padding: 22,
-    gap: 10,
-  },
-  heroIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  heroTitle: { color: KanchaColors.white, fontSize: 28, fontWeight: "900" },
-  heroMeta: { color: "rgba(255,255,255,0.78)", fontSize: 14, fontWeight: "600" },
-  section: { gap: 4 },
-  sectionEyebrow: {
-    color: KanchaColors.muted,
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.4,
-  },
-  sectionTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "900" },
-  sectionSubtitle: { color: KanchaColors.muted, fontSize: 14, lineHeight: 20, marginTop: 2 },
-  centered: { paddingVertical: 40, alignItems: "center" },
-  errorBox: {
-    borderRadius: 16,
-    backgroundColor: KanchaColors.redSoft,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(200,16,46,0.2)",
-  },
-  errorText: { color: KanchaColors.redDark, fontSize: 14, fontWeight: "600" },
-  list: { gap: 12 },
-  card: {
-    borderRadius: 20,
-    backgroundColor: KanchaColors.card,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  cardTitle: { color: KanchaColors.ink, fontSize: 17, fontWeight: "800", flex: 1 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    safeArea: { flex: 1 },
+    content: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 120,
+      gap: 22,
+    },
+    backButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginBottom: 4,
+    },
+    backLabel: {
+      color: "#FFFFFF",
+      fontSize: 15,
+      fontWeight: "600",
+    },
+    heroCard: {
+      borderRadius: 24,
+      backgroundColor: c.red,
+      padding: 22,
+      gap: 10,
+    },
+    heroIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: "rgba(0,0,0,0.2)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    heroTitle: { color: "#FFFFFF", fontSize: 28, fontWeight: "900" },
+    heroMeta: { color: "rgba(255,255,255,0.78)", fontSize: 14, fontWeight: "600" },
+    section: { gap: 4 },
+    sectionEyebrow: {
+      color: c.muted,
+      fontSize: 12,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.4,
+    },
+    sectionTitle: { color: c.ink, fontSize: 28, fontWeight: "900" },
+    sectionSubtitle: { color: c.muted, fontSize: 14, lineHeight: 20, marginTop: 2 },
+    centered: { paddingVertical: 40, alignItems: "center" },
+    errorBox: {
+      borderRadius: 16,
+      backgroundColor: c.redSoft,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: "rgba(200,16,46,0.2)",
+    },
+    errorText: { color: c.red, fontSize: 14, fontWeight: "600" },
+    list: { gap: 12 },
+    card: {
+      borderRadius: 20,
+      backgroundColor: c.card,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: c.line,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    cardTitle: { color: c.ink, fontSize: 17, fontWeight: "800", flex: 1 },
+  });

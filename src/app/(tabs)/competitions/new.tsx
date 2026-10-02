@@ -8,7 +8,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
 import { StatusPill } from "@/components/StatusPill";
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 const disciplines = [
   "Main nue",
@@ -26,6 +27,8 @@ const formats = [
 
 export default function NewCompetitionScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const stepTitles = [
     t("new_competition.step_info"),
     t("new_competition.step_format"),
@@ -64,7 +67,9 @@ export default function NewCompetitionScreen() {
           testID="new-competition-screen"
         >
           <View style={styles.hero}>
-            <Text style={styles.title}>{t("new_competition.title")}</Text>
+            <Text style={styles.title} accessibilityRole="header">
+              {t("new_competition.title")}
+            </Text>
             <Text style={styles.subtitle}>{t("new_competition.subtitle")}</Text>
           </View>
 
@@ -116,7 +121,7 @@ export default function NewCompetitionScreen() {
                 style={styles.inputFlexible}
                 testID="input-competition-date"
               />
-              <CalendarDays color={KanchaColors.ink} size={18} />
+              <CalendarDays color={colors.ink} size={18} />
             </View>
 
             <Text style={styles.label}>{t("new_competition.label_venue")}</Text>
@@ -133,6 +138,8 @@ export default function NewCompetitionScreen() {
                 <PressableScale
                   key={item}
                   onPress={() => setDiscipline(item)}
+                  accessibilityRole="button"
+                  accessibilityLabel={item}
                 >
                   <View
                     style={[
@@ -159,6 +166,8 @@ export default function NewCompetitionScreen() {
                 <PressableScale
                   key={item}
                   onPress={() => setCategory(item)}
+                  accessibilityRole="button"
+                  accessibilityLabel={item}
                 >
                   <View
                     style={[
@@ -182,7 +191,12 @@ export default function NewCompetitionScreen() {
             <Text style={styles.label}>{t("new_competition.label_format")}</Text>
             <View style={styles.chipsWrap}>
               {formats.map((item) => (
-                <PressableScale key={item} onPress={() => setFormat(item)}>
+                <PressableScale
+                  key={item}
+                  onPress={() => setFormat(item)}
+                  accessibilityRole="button"
+                  accessibilityLabel={item}
+                >
                   <View
                     style={[
                       styles.chip,
@@ -204,17 +218,22 @@ export default function NewCompetitionScreen() {
 
             <View style={styles.summaryCard}>
               <View style={styles.summaryRow}>
-                <Users2 color={KanchaColors.red} size={16} />
+                <Users2 color={colors.red} size={16} />
                 <Text style={styles.summaryText}>{playerCount}</Text>
                 <StatusPill label={t("new_competition.seeded")} tone="green" />
               </View>
               <Text style={styles.summaryMeta}>{t("new_competition.schedule_meta")}</Text>
             </View>
 
-            <PressableScale onPress={goNext} testID="new-competition-continue">
+            <PressableScale
+              onPress={goNext}
+              testID="new-competition-continue"
+              accessibilityRole="button"
+              accessibilityLabel={nextLabel}
+            >
               <View style={styles.ctaButton}>
                 <Text style={styles.ctaText}>{nextLabel}</Text>
-                <ChevronRight color={KanchaColors.ink} size={18} />
+                <ChevronRight color={colors.ink} size={18} />
               </View>
             </PressableScale>
           </View>
@@ -224,124 +243,125 @@ export default function NewCompetitionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 120,
-    gap: 22,
-  },
-  hero: { gap: 6 },
-  title: { color: KanchaColors.white, fontSize: 32, fontWeight: "900" },
-  subtitle: {
-    color: "rgba(255,255,255,0.82)",
-    fontSize: 14,
-    lineHeight: 20,
-    maxWidth: 310,
-  },
-  stepsRow: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
-  stepItem: { flex: 1, alignItems: "center", gap: 8 },
-  stepCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "rgba(255,255,255,0.22)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  stepCircleActive: { backgroundColor: KanchaColors.white },
-  stepCircleDone: { backgroundColor: "#F6C0C9" },
-  stepText: { color: KanchaColors.white, fontSize: 14, fontWeight: "800" },
-  stepTextActive: { color: KanchaColors.red },
-  stepLabel: {
-    color: "rgba(255,255,255,0.76)",
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  stepLabelActive: { color: KanchaColors.white },
-  formCard: {
-    borderRadius: 24,
-    backgroundColor: KanchaColors.card,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    gap: 14,
-  },
-  label: {
-    color: "#8E857C",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.3,
-  },
-  input: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    backgroundColor: KanchaColors.white,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: KanchaColors.ink,
-    fontWeight: "600",
-  },
-  inputWithIcon: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    backgroundColor: KanchaColors.white,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  inputFlexible: {
-    flex: 1,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: KanchaColors.ink,
-    fontWeight: "600",
-  },
-  chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  chip: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    backgroundColor: KanchaColors.white,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  chipActive: { backgroundColor: KanchaColors.redSoft, borderColor: "#F1B9C4" },
-  chipActiveDark: { backgroundColor: "#1B1B1B", borderColor: "#1B1B1B" },
-  chipText: { color: KanchaColors.ink, fontSize: 15, fontWeight: "700" },
-  chipTextActive: { color: KanchaColors.redDark },
-  chipTextDark: { color: KanchaColors.white },
-  summaryCard: {
-    borderRadius: 18,
-    backgroundColor: "#F5EEE6",
-    padding: 16,
-    gap: 10,
-  },
-  summaryRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  summaryText: {
-    flex: 1,
-    color: KanchaColors.ink,
-    fontSize: 15,
-    fontWeight: "800",
-  },
-  summaryMeta: { color: "#6E655C", fontSize: 13, lineHeight: 18 },
-  ctaButton: {
-    borderRadius: 16,
-    backgroundColor: KanchaColors.white,
-    borderWidth: 1,
-    borderColor: "#D8CFC6",
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  ctaText: { color: KanchaColors.ink, fontSize: 16, fontWeight: "800" },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    safeArea: { flex: 1 },
+    content: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 120,
+      gap: 22,
+    },
+    hero: { gap: 6 },
+    title: { color: "#FFFFFF", fontSize: 32, fontWeight: "900" },
+    subtitle: {
+      color: "rgba(255,255,255,0.82)",
+      fontSize: 14,
+      lineHeight: 20,
+      maxWidth: 310,
+    },
+    stepsRow: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
+    stepItem: { flex: 1, alignItems: "center", gap: 8 },
+    stepCircle: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: "rgba(255,255,255,0.22)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    stepCircleActive: { backgroundColor: c.white },
+    stepCircleDone: { backgroundColor: "#F6C0C9" },
+    stepText: { color: "#FFFFFF", fontSize: 14, fontWeight: "800", fontVariant: ["tabular-nums"] },
+    stepTextActive: { color: c.red },
+    stepLabel: {
+      color: "rgba(255,255,255,0.76)",
+      fontSize: 11,
+      fontWeight: "700",
+    },
+    stepLabelActive: { color: "#FFFFFF" },
+    formCard: {
+      borderRadius: 24,
+      backgroundColor: c.card,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: c.line,
+      gap: 14,
+    },
+    label: {
+      color: "#8E857C",
+      fontSize: 12,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.3,
+    },
+    input: {
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      backgroundColor: c.white,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: c.ink,
+      fontWeight: "600",
+    },
+    inputWithIcon: {
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      backgroundColor: c.white,
+      paddingHorizontal: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    inputFlexible: {
+      flex: 1,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: c.ink,
+      fontWeight: "600",
+    },
+    chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+    chip: {
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      backgroundColor: c.white,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    chipActive: { backgroundColor: c.redSoft, borderColor: "#F1B9C4" },
+    chipActiveDark: { backgroundColor: "#1B1B1B", borderColor: "#1B1B1B" },
+    chipText: { color: c.ink, fontSize: 15, fontWeight: "700" },
+    chipTextActive: { color: c.redDark },
+    chipTextDark: { color: "#FFFFFF" },
+    summaryCard: {
+      borderRadius: 18,
+      backgroundColor: "#F5EEE6",
+      padding: 16,
+      gap: 10,
+    },
+    summaryRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    summaryText: {
+      flex: 1,
+      color: c.ink,
+      fontSize: 15,
+      fontWeight: "800",
+    },
+    summaryMeta: { color: "#6E655C", fontSize: 13, lineHeight: 18 },
+    ctaButton: {
+      borderRadius: 16,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: "#D8CFC6",
+      paddingHorizontal: 18,
+      paddingVertical: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+    ctaText: { color: c.ink, fontSize: 16, fontWeight: "800" },
+  });

@@ -9,13 +9,21 @@
     "back": "Retour",
     "choose": "Choisir",
     "soon": "Bientôt",
-    "competition_fallback": "Compétition"
+    "competition_fallback": "Compétition",
+    "loading": "Chargement"
+  },
+  "theme": {
+    "label": "Apparence",
+    "system": "Système",
+    "light": "Clair",
+    "dark": "Sombre"
   },
   "leagues": {
     "eyebrow": "Tableau des compétitions",
     "title": "Ligues",
     "subtitle": "Sélectionnez une ligue pour parcourir ses compétitions.",
-    "your_league": "Votre ligue"
+    "your_league": "Votre ligue",
+    "open_hint": "Ouvre les compétitions de la ligue"
   },
   "competitions": {
     "eyebrow": "Tableau des compétitions",

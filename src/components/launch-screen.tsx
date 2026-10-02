@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 42,
     fontWeight: "900",
     letterSpacing: 2,
-    color: KanchaColors.white,
+    color: "#FFFFFF",
   },
   subtitle: {
     fontSize: 14,

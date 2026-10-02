@@ -13,14 +13,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { BracketView, PHASE_COLORS, RoundGroup } from "@/components/BracketView";
+import { BracketView, RoundGroup, usePhaseColors } from "@/components/BracketView";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { StatusPill } from "@/components/StatusPill";
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
 import { useCategories } from "@/hooks/use-categories";
 import { useCompetition } from "@/hooks/use-competitions";
 import { useResultsByCompetition } from "@/hooks/use-matches";
 import { useSpecialties } from "@/hooks/use-specialties";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { Temporal } from "@js-temporal/polyfill";
 
 import type { PhaseColors, PhaseType } from "@/components/BracketView";
@@ -134,7 +135,8 @@ function formatLineup(lineup?: { player1?: { name: string }; player2?: { name: s
 
 function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
   const { t } = useTranslation();
-  const colors = PHASE_COLORS[type];
+  const styles = useThemedStyles(makeStyles);
+  const colors = usePhaseColors()[type];
   const Icon = type === "P" ? Users : type === "F" ? Trophy : Swords;
 
   return (
@@ -162,6 +164,7 @@ function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
 // ─── Match card ───────────────────────────────────────────────────────────────
 
 function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType }) {
+  const styles = useThemedStyles(makeStyles);
   const { scoreA, scoreB } = parseScores(result.scores);
   const hasScore = scoreA != null && scoreB != null;
   const lineupA = formatLineup(result.clubALineup);
@@ -169,7 +172,7 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
   const pillLabel = formatDate(result.dateMatch);
   const pillTone = dateTone(result.dateMatch);
   const phaseLabel = result.phase ?? "";
-  const colors: PhaseColors = PHASE_COLORS[phaseType];
+  const colors: PhaseColors = usePhaseColors()[phaseType];
   const isFinal = phaseType === "F";
 
   const cardStyle = [
@@ -224,6 +227,7 @@ interface StatsStripProps {
 }
 
 function StatCell({ value, label }: { value: number; label: string }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.statCell}>
       <Text style={styles.statValue}>{value}</Text>
@@ -234,6 +238,7 @@ function StatCell({ value, label }: { value: number; label: string }) {
 
 function StatsStrip({ total, played, pending }: StatsStripProps) {
   const { t } = useTranslation();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.statsStrip}>
       <StatCell value={total} label={t("details.stat_total")} />
@@ -253,15 +258,19 @@ function ViewToggle(
   { mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void },
 ) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.toggleRow}>
       <Pressable
         style={[styles.togglePill, mode === "list" && styles.togglePillActive]}
         onPress={() => onChange("list")}
+        accessibilityRole="button"
+        accessibilityLabel={t("details.view_list")}
       >
         <LayoutList
           size={12}
-          color={mode === "list" ? KanchaColors.white : KanchaColors.muted}
+          color={mode === "list" ? "#FFFFFF" : colors.muted}
         />
         <Text style={[styles.togglePillLabel, mode === "list" && styles.togglePillLabelActive]}>
           {t("details.view_list")}
@@ -270,10 +279,12 @@ function ViewToggle(
       <Pressable
         style={[styles.togglePill, mode === "bracket" && styles.togglePillActive]}
         onPress={() => onChange("bracket")}
+        accessibilityRole="button"
+        accessibilityLabel={t("details.view_bracket")}
       >
         <Network
           size={12}
-          color={mode === "bracket" ? KanchaColors.white : KanchaColors.muted}
+          color={mode === "bracket" ? "#FFFFFF" : colors.muted}
         />
         <Text style={[styles.togglePillLabel, mode === "bracket" && styles.togglePillLabelActive]}>
           {t("details.view_bracket")}
@@ -287,6 +298,7 @@ function ViewToggle(
 
 export default function CompetitionDetailsScreen() {
   const { t } = useTranslation();
+  const styles = useThemedStyles(makeStyles);
   const { id, specialtyId, categoryId } = useLocalSearchParams<{
     id: string;
     specialtyId: string;
@@ -320,21 +332,26 @@ export default function CompetitionDetailsScreen() {
           showsVerticalScrollIndicator={false}
           testID="competition-details-screen"
         >
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft color={KanchaColors.white} size={20} />
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel={t("details.back")}
+          >
+            <ArrowLeft color="#FFFFFF" size={20} />
             <Text style={styles.backLabel}>{t("details.back")}</Text>
           </Pressable>
 
           {/* Hero */}
           <View style={styles.heroCard}>
             <View style={styles.heroIcon}>
-              <Trophy color={KanchaColors.white} size={20} />
+              <Trophy color="#FFFFFF" size={20} />
             </View>
             {loadingComp
-              ? <ActivityIndicator color={KanchaColors.white} />
+              ? <ActivityIndicator color="#FFFFFF" accessibilityLabel={t("common.loading")} />
               : (
                 <>
-                  <Text style={styles.heroTitle}>
+                  <Text style={styles.heroTitle} accessibilityRole="header">
                     {competition?.name ?? t("common.competition_fallback")}
                   </Text>
                   {(competition?.year != null || competition?.level) && (
@@ -368,7 +385,7 @@ export default function CompetitionDetailsScreen() {
 
           {/* States */}
           {isError && (
-            <View style={styles.errorBox}>
+            <View style={styles.errorBox} accessibilityRole="alert">
               <Text style={styles.errorText}>
                 {error instanceof Error ? error.message : t("details.error_load")}
               </Text>
@@ -377,7 +394,11 @@ export default function CompetitionDetailsScreen() {
 
           {loadingResults && (
             <View style={styles.centered}>
-              <ActivityIndicator color={KanchaColors.white} size="large" />
+              <ActivityIndicator
+                color="#FFFFFF"
+                size="large"
+                accessibilityLabel={t("common.loading")}
+              />
             </View>
           )}
 
@@ -392,7 +413,9 @@ export default function CompetitionDetailsScreen() {
             <>
               <View style={styles.tournamentHeader}>
                 <Text style={styles.tournamentEyebrow}>{t("details.tableau_eyebrow")}</Text>
-                <Text style={styles.tournamentTitle}>{t("details.tournament_title")}</Text>
+                <Text style={styles.tournamentTitle} accessibilityRole="header">
+                  {t("details.tournament_title")}
+                </Text>
                 <Text style={styles.tournamentSub}>
                   {t("details.rounds_count", { count: rounds.length })}
                 </Text>
@@ -426,259 +449,262 @@ export default function CompetitionDetailsScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 120,
-    gap: 20,
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 4,
-  },
-  backLabel: { color: KanchaColors.white, fontSize: 15, fontWeight: "600" },
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    safeArea: { flex: 1 },
+    content: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 120,
+      gap: 20,
+    },
+    backButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginBottom: 4,
+    },
+    backLabel: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
 
-  // Hero
-  heroCard: {
-    borderRadius: 24,
-    backgroundColor: KanchaColors.red,
-    padding: 22,
-    gap: 10,
-  },
-  heroIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  heroTitle: { color: KanchaColors.white, fontSize: 28, fontWeight: "900" },
-  heroMeta: { color: "rgba(255,255,255,0.78)", fontSize: 14, fontWeight: "600" },
+    // Hero
+    heroCard: {
+      borderRadius: 24,
+      backgroundColor: c.red,
+      padding: 22,
+      gap: 10,
+    },
+    heroIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: "rgba(0,0,0,0.2)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    heroTitle: { color: "#FFFFFF", fontSize: 28, fontWeight: "900" },
+    heroMeta: { color: "rgba(255,255,255,0.78)", fontSize: 14, fontWeight: "600" },
 
-  // Context badges
-  badgeRow: { flexDirection: "row", gap: 8 },
-  badge: {
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: KanchaColors.white,
-  },
-  badgeText: { color: KanchaColors.red, fontSize: 13, fontWeight: "800" },
+    // Context badges
+    badgeRow: { flexDirection: "row", gap: 8 },
+    badge: {
+      borderRadius: 20,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      backgroundColor: c.white,
+    },
+    badgeText: { color: c.red, fontSize: 13, fontWeight: "800" },
 
-  // States
-  centered: { paddingVertical: 40, alignItems: "center" },
-  errorBox: {
-    borderRadius: 16,
-    backgroundColor: KanchaColors.redSoft,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(200,16,46,0.2)",
-  },
-  errorText: { color: KanchaColors.redDark, fontSize: 14, fontWeight: "600" },
-  emptyBox: {
-    borderRadius: 16,
-    backgroundColor: KanchaColors.white,
-    padding: 20,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-  },
-  emptyText: {
-    color: KanchaColors.muted,
-    fontSize: 14,
-    fontWeight: "600",
-    textAlign: "center",
-  },
+    // States
+    centered: { paddingVertical: 40, alignItems: "center" },
+    errorBox: {
+      borderRadius: 16,
+      backgroundColor: c.redSoft,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: "rgba(200,16,46,0.2)",
+    },
+    errorText: { color: c.red, fontSize: 14, fontWeight: "600" },
+    emptyBox: {
+      borderRadius: 16,
+      backgroundColor: c.white,
+      padding: 20,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: c.line,
+    },
+    emptyText: {
+      color: c.muted,
+      fontSize: 14,
+      fontWeight: "600",
+      textAlign: "center",
+    },
 
-  // Tournament header
-  tournamentHeader: { gap: 4 },
-  tournamentEyebrow: {
-    color: KanchaColors.muted,
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.4,
-  },
-  tournamentTitle: { color: KanchaColors.ink, fontSize: 28, fontWeight: "800" },
-  tournamentSub: { color: KanchaColors.muted, fontSize: 13 },
+    // Tournament header
+    tournamentHeader: { gap: 4 },
+    tournamentEyebrow: {
+      color: c.muted,
+      fontSize: 12,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.4,
+    },
+    tournamentTitle: { color: c.ink, fontSize: 28, fontWeight: "800" },
+    tournamentSub: { color: c.muted, fontSize: 13 },
 
-  // Stats strip
-  statsStrip: {
-    flexDirection: "row",
-    borderRadius: 16,
-    backgroundColor: KanchaColors.white,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    overflow: "hidden",
-    marginTop: 12,
-  },
-  statCell: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 14,
-    gap: 4,
-  },
-  statValue: {
-    color: KanchaColors.ink,
-    fontSize: 26,
-    fontWeight: "900",
-    lineHeight: 28,
-  },
-  statLabel: {
-    color: KanchaColors.muted,
-    fontSize: 11,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: KanchaColors.line,
-    marginVertical: 12,
-  },
+    // Stats strip
+    statsStrip: {
+      flexDirection: "row",
+      borderRadius: 16,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: c.line,
+      overflow: "hidden",
+      marginTop: 12,
+    },
+    statCell: {
+      flex: 1,
+      alignItems: "center",
+      paddingVertical: 14,
+      gap: 4,
+    },
+    statValue: {
+      color: c.ink,
+      fontSize: 26,
+      fontWeight: "900",
+      lineHeight: 28,
+      fontVariant: ["tabular-nums"],
+    },
+    statLabel: {
+      color: c.muted,
+      fontSize: 11,
+      fontWeight: "700",
+      textTransform: "uppercase",
+      letterSpacing: 0.8,
+    },
+    statDivider: {
+      width: 1,
+      backgroundColor: c.line,
+      marginVertical: 12,
+    },
 
-  // View toggle
-  toggleRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 12,
-  },
-  togglePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    backgroundColor: KanchaColors.card,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-  },
-  togglePillActive: {
-    backgroundColor: KanchaColors.red,
-    borderColor: KanchaColors.red,
-  },
-  togglePillLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: KanchaColors.muted,
-  },
-  togglePillLabelActive: {
-    color: KanchaColors.white,
-  },
+    // View toggle
+    toggleRow: {
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 12,
+    },
+    togglePill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 9999,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.line,
+    },
+    togglePillActive: {
+      backgroundColor: c.red,
+      borderColor: c.red,
+    },
+    togglePillLabel: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: c.muted,
+    },
+    togglePillLabelActive: {
+      color: "#FFFFFF",
+    },
 
-  bracketWrapper: {
-    marginLeft: -20,
-  },
+    bracketWrapper: {
+      marginLeft: -20,
+    },
 
-  // Round section
-  roundSection: { gap: 10 },
+    // Round section
+    roundSection: { gap: 10 },
 
-  // Round divider
-  roundDivider: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginVertical: 4,
-  },
-  roundDividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: KanchaColors.line,
-    borderRadius: 1,
-  },
-  roundDividerPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  roundDividerLabel: {
-    fontSize: 13,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-  },
-  roundDividerCount: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
+    // Round divider
+    roundDivider: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      marginVertical: 4,
+    },
+    roundDividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: c.line,
+      borderRadius: 1,
+    },
+    roundDividerPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 20,
+      borderWidth: 1,
+    },
+    roundDividerLabel: {
+      fontSize: 13,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 0.8,
+    },
+    roundDividerCount: {
+      fontSize: 12,
+      fontWeight: "600",
+    },
 
-  // Match list
-  matchList: { gap: 8 },
+    // Match list
+    matchList: { gap: 8 },
 
-  // Match card
-  matchCard: {
-    borderRadius: 16,
-    backgroundColor: KanchaColors.white,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    overflow: "hidden",
-  },
-  matchCardPending: { backgroundColor: KanchaColors.card },
-  matchCardInner: { padding: 14, gap: 0 },
-  teamRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-    gap: 12,
-  },
-  teamInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  teamName: {
-    color: KanchaColors.ink,
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  teamClub: {
-    color: KanchaColors.muted,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  teamNameFinal: { fontSize: 16, fontWeight: "800" },
-  score: {
-    color: KanchaColors.red,
-    fontSize: 22,
-    fontWeight: "900",
-    minWidth: 28,
-    textAlign: "right",
-  },
-  scoreFinal: { fontSize: 28 },
-  scorePending: {
-    color: KanchaColors.muted,
-    fontSize: 20,
-    fontWeight: "300",
-    minWidth: 28,
-    textAlign: "right",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: KanchaColors.line,
-  },
-  matchMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: KanchaColors.line,
-    backgroundColor: "rgba(0,0,0,0.02)",
-  },
-  phaseChip: {
-    color: KanchaColors.muted,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-});
+    // Match card
+    matchCard: {
+      borderRadius: 16,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: c.line,
+      overflow: "hidden",
+    },
+    matchCardPending: { backgroundColor: c.card },
+    matchCardInner: { padding: 14, gap: 0 },
+    teamRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 8,
+      gap: 12,
+    },
+    teamInfo: {
+      flex: 1,
+      gap: 2,
+    },
+    teamName: {
+      color: c.ink,
+      fontSize: 15,
+      fontWeight: "700",
+    },
+    teamClub: {
+      color: c.muted,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    teamNameFinal: { fontSize: 16, fontWeight: "800" },
+    score: {
+      color: c.red,
+      fontSize: 22,
+      fontWeight: "900",
+      minWidth: 28,
+      textAlign: "right",
+      fontVariant: ["tabular-nums"],
+    },
+    scoreFinal: { fontSize: 28 },
+    scorePending: {
+      color: c.muted,
+      fontSize: 20,
+      fontWeight: "300",
+      minWidth: 28,
+      textAlign: "right",
+    },
+    divider: {
+      height: 1,
+      backgroundColor: c.line,
+    },
+    matchMeta: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: c.line,
+      backgroundColor: "rgba(0,0,0,0.02)",
+    },
+    phaseChip: {
+      color: c.muted,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+  });
