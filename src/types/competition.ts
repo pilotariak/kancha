@@ -3,6 +3,7 @@ export interface Competition {
   name: string;
   year?: number;
   level?: string;
+  enabled?: boolean;
 }
 
 export interface Club {
