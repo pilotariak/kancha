@@ -9,13 +9,21 @@
     "back": "Back",
     "choose": "Choose",
     "soon": "Soon",
-    "competition_fallback": "Competition"
+    "competition_fallback": "Competition",
+    "loading": "Loading"
+  },
+  "theme": {
+    "label": "Appearance",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
   },
   "leagues": {
     "eyebrow": "Competition desk",
     "title": "Leagues",
     "subtitle": "Select a league to browse its competitions.",
-    "your_league": "Your league"
+    "your_league": "Your league",
+    "open_hint": "Opens the league's competitions"
   },
   "competitions": {
     "eyebrow": "Competition desk",

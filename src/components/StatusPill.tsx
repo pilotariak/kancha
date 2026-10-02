@@ -1,38 +1,34 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
+import { useTheme } from "@/hooks/use-theme";
+
+type Tone = "red" | "green" | "dark" | "soft" | "amber";
 
 interface StatusPillProps {
   label: string;
-  tone: "red" | "green" | "dark" | "soft" | "amber";
+  tone: Tone;
 }
 
-const toneStyles = {
-  red: {
-    backgroundColor: "#F9D8DE",
-    color: KanchaColors.redDark,
-  },
-  green: {
-    backgroundColor: KanchaColors.greenSoft,
-    color: KanchaColors.green,
-  },
-  dark: {
-    backgroundColor: "#262626",
-    color: KanchaColors.white,
-  },
-  soft: {
-    backgroundColor: "#EFE8DE",
-    color: "#5D5145",
-  },
-  amber: {
-    backgroundColor: "#FFF3DC",
-    color: "#8A5E00",
-  },
-} as const;
+function toneFor(tone: Tone, c: Palette): { backgroundColor: string; color: string } {
+  switch (tone) {
+    case "red":
+      return { backgroundColor: c.redSoft, color: c.red };
+    case "green":
+      return { backgroundColor: c.greenSoft, color: c.green };
+    case "dark":
+      return { backgroundColor: c.text, color: c.cream };
+    case "soft":
+      return { backgroundColor: c.line, color: c.muted };
+    case "amber":
+      return { backgroundColor: c.amberBg, color: c.amber };
+  }
+}
 
 export function StatusPill({ label, tone }: StatusPillProps) {
-  const palette = toneStyles[tone];
+  const { colors } = useTheme();
+  const palette = toneFor(tone, colors);
 
   return (
     <View style={[styles.pill, { backgroundColor: palette.backgroundColor }]}>

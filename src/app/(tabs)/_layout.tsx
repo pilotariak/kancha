@@ -4,19 +4,22 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 
-import Colors, { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 export default function TabLayout() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.light.tint,
-        tabBarInactiveTintColor: Colors.light.tabIconDefault,
+        tabBarActiveTintColor: colors.red,
+        tabBarInactiveTintColor: colors.tabIconInactive,
         tabBarStyle: {
-          backgroundColor: KanchaColors.white,
-          borderTopColor: "#E9E0D6",
+          backgroundColor: colors.tabBar,
+          borderTopColor: colors.tabBarBorder,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -37,10 +40,17 @@ export default function TabLayout() {
         name="slot"
         options={{
           title: t("tabs.slot"),
-          tabBarIcon: ({ size }) => <CalendarClock color={KanchaColors.muted} size={size} />,
+          tabBarIcon: ({ size }) => <CalendarClock color={colors.muted} size={size} />,
           tabBarButton: () => (
-            <View pointerEvents="none" style={styles.disabledTab}>
-              <CalendarClock color={KanchaColors.muted} size={24} />
+            <View
+              pointerEvents="none"
+              style={styles.disabledTab}
+              accessible
+              accessibilityRole="tab"
+              accessibilityState={{ disabled: true }}
+              accessibilityLabel={`${t("tabs.slot")}, ${t("tabs.soon")}`}
+            >
+              <CalendarClock color={colors.muted} size={24} />
               <Text style={styles.disabledTabLabel}>{t("tabs.slot")}</Text>
               <Text style={styles.disabledTabBadge}>{t("tabs.soon")}</Text>
             </View>
@@ -65,26 +75,27 @@ export default function TabLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  disabledTab: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 6,
-    gap: 2,
-    opacity: 0.45,
-  },
-  disabledTabLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: KanchaColors.muted,
-  },
-  disabledTabBadge: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: KanchaColors.muted,
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
-    marginTop: 1,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    disabledTab: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingTop: 6,
+      gap: 2,
+      opacity: 0.45,
+    },
+    disabledTabLabel: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: c.muted,
+    },
+    disabledTabBadge: {
+      fontSize: 9,
+      fontWeight: "800",
+      color: c.muted,
+      textTransform: "uppercase",
+      letterSpacing: 0.6,
+      marginTop: 1,
+    },
+  });

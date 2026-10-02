@@ -6,9 +6,12 @@ import { Modal, Platform, Pressable, StyleSheet, Text, View } from "react-native
 
 import { PressableScale } from "@/components/PressableScale";
 import { StatusPill } from "@/components/StatusPill";
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 export default function ModalScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <Modal
       animationType="fade"
@@ -24,15 +27,19 @@ export default function ModalScreen() {
         >
           <View style={styles.header}>
             <View style={styles.iconWrap}>
-              <BellRing color={KanchaColors.white} size={18} />
+              <BellRing color="#FFFFFF" size={18} />
             </View>
-            <PressableScale onPress={() => router.back()}>
+            <PressableScale
+              onPress={() => router.back()}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+            >
               <View style={styles.closeButton}>
-                <X color={KanchaColors.ink} size={16} />
+                <X color={colors.ink} size={16} />
               </View>
             </PressableScale>
           </View>
-          <Text style={styles.title}>Club alerts</Text>
+          <Text style={styles.title} accessibilityRole="header">Club alerts</Text>
           <Text style={styles.description}>
             Court 2 needs a score confirmation before the evening update is published.
           </Text>
@@ -61,53 +68,54 @@ export default function ModalScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(10,10,10,0.54)",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  card: {
-    borderRadius: 28,
-    backgroundColor: KanchaColors.card,
-    padding: 20,
-    gap: 14,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  iconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: KanchaColors.red,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: "#EFE7DE",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: { color: KanchaColors.ink, fontSize: 24, fontWeight: "900" },
-  description: { color: KanchaColors.muted, fontSize: 14, lineHeight: 20 },
-  alertItem: {
-    borderRadius: 18,
-    backgroundColor: KanchaColors.white,
-    borderWidth: 1,
-    borderColor: KanchaColors.line,
-    padding: 16,
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "center",
-  },
-  alertCopy: { flex: 1, gap: 4 },
-  alertTitle: { color: KanchaColors.ink, fontSize: 16, fontWeight: "800" },
-  alertMeta: { color: "#71675E", fontSize: 13, lineHeight: 18 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(10,10,10,0.54)",
+      justifyContent: "center",
+      paddingHorizontal: 20,
+    },
+    card: {
+      borderRadius: 28,
+      backgroundColor: c.card,
+      padding: 20,
+      gap: 14,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    iconWrap: {
+      width: 42,
+      height: 42,
+      borderRadius: 14,
+      backgroundColor: c.red,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    closeButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: "#EFE7DE",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    title: { color: c.ink, fontSize: 24, fontWeight: "900" },
+    description: { color: c.muted, fontSize: 14, lineHeight: 20 },
+    alertItem: {
+      borderRadius: 18,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: c.line,
+      padding: 16,
+      flexDirection: "row",
+      gap: 10,
+      alignItems: "center",
+    },
+    alertCopy: { flex: 1, gap: 4 },
+    alertTitle: { color: c.ink, fontSize: 16, fontWeight: "800" },
+    alertMeta: { color: "#71675E", fontSize: 13, lineHeight: 18 },
+  });

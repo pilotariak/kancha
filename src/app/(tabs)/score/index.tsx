@@ -14,7 +14,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { KanchaColors } from "@/constants/colors";
+import type { Palette } from "@/constants/colors";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 // ─── State machine ────────────────────────────────────────────────────────────
 
@@ -89,6 +90,8 @@ interface ScoreBarProps {
 }
 
 function ScoreBar({ score, target, isWinner, isTop }: ScoreBarProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const progress = useRef(new Animated.Value(0)).current;
   const ratio = target > 0 ? Math.min(score / target, 1) : 0;
 
@@ -100,7 +103,7 @@ function ScoreBar({ score, target, isWinner, isTop }: ScoreBarProps) {
     }).start();
   }, [ratio]);
 
-  const fillColor = isWinner ? KanchaColors.green : "rgba(255,255,255,0.55)";
+  const fillColor = isWinner ? colors.green : "rgba(255,255,255,0.55)";
 
   return (
     <View style={[styles.barTrack, isTop ? styles.barTrackBottom : styles.barTrackTop]}>
@@ -123,6 +126,8 @@ interface SetupProps {
 
 function SetupScreen({ onStart }: SetupProps) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [teamA, setTeamA] = useState("");
   const [teamB, setTeamB] = useState("");
   const [targetRaw, setTargetRaw] = useState("");
@@ -141,7 +146,7 @@ function SetupScreen({ onStart }: SetupProps) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.setupHeader}>
-          <Text style={styles.setupTitle}>{t("score.setup_title")}</Text>
+          <Text style={styles.setupTitle} accessibilityRole="header">{t("score.setup_title")}</Text>
           <Text style={styles.setupSubtitle}>{t("score.setup_subtitle")}</Text>
         </View>
 
@@ -179,7 +184,7 @@ function SetupScreen({ onStart }: SetupProps) {
               value={targetRaw}
               onChangeText={setTargetRaw}
               placeholder={t("score.placeholder_target")}
-              placeholderTextColor={KanchaColors.muted}
+              placeholderTextColor={colors.muted}
               keyboardType="number-pad"
               returnKeyType="done"
             />
@@ -196,6 +201,8 @@ function SetupScreen({ onStart }: SetupProps) {
           ]}
           onPress={() => canStart && onStart(teamA.trim(), teamB.trim(), target)}
           disabled={!canStart}
+          accessibilityRole="button"
+          accessibilityLabel={t("score.cta_start")}
         >
           <Text style={styles.startBtnLabel}>{t("score.cta_start")}</Text>
         </Pressable>
@@ -221,9 +228,11 @@ function ScorePanel(
   { team, score, target, canUndo, isWinner, side, onIncrement, onUndo }: PanelProps,
 ) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const isTop = side === "top";
-  const bg = isTop ? KanchaColors.red : KanchaColors.panel;
-  const winnerBg = KanchaColors.green;
+  const bg = isTop ? colors.red : colors.panel;
+  const winnerBg = colors.green;
   const activeBg = isWinner ? winnerBg : bg;
 
   const controls = (
@@ -232,6 +241,8 @@ function ScorePanel(
         style={({ pressed }) => [styles.addBtn, pressed && styles.addBtnPressed]}
         onPress={onIncrement}
         disabled={isWinner !== null && !isWinner}
+        accessibilityRole="button"
+        accessibilityLabel={`+1, ${team}`}
       >
         <Text style={styles.addBtnLabel}>+1</Text>
       </Pressable>
@@ -243,8 +254,10 @@ function ScorePanel(
         ]}
         onPress={onUndo}
         disabled={!canUndo}
+        accessibilityRole="button"
+        accessibilityLabel={t("score.undo")}
       >
-        <Undo2 color={KanchaColors.white} size={18} />
+        <Undo2 color="#FFFFFF" size={18} />
         <Text style={styles.undoBtnLabel}>{t("score.undo")}</Text>
       </Pressable>
     </View>
@@ -298,6 +311,7 @@ interface GameProps {
 
 function GameScreen({ state, dispatch }: GameProps) {
   const { t } = useTranslation();
+  const styles = useThemedStyles(makeStyles);
 
   return (
     <View style={styles.gameFlex}>
@@ -316,6 +330,8 @@ function GameScreen({ state, dispatch }: GameProps) {
         <Pressable
           style={({ pressed }) => [styles.resetBtn, pressed && styles.resetBtnPressed]}
           onPress={() => dispatch({ type: "reset" })}
+          accessibilityRole="button"
+          accessibilityLabel={t("score.reset")}
         >
           <Text style={styles.resetLabel}>{t("score.reset")}</Text>
         </Pressable>
@@ -344,6 +360,8 @@ interface WinProps {
 
 function WinScreen({ state, onNewGame }: WinProps) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const scale = useRef(new Animated.Value(0.4)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -369,11 +387,11 @@ function WinScreen({ state, onNewGame }: WinProps) {
     <View style={styles.winFlex}>
       <Animated.View style={[styles.winContent, { opacity }]}>
         <Animated.View style={[styles.winTrophyWrap, { transform: [{ scale }] }]}>
-          <Trophy color={KanchaColors.amber} size={64} />
+          <Trophy color={colors.amber} size={64} />
         </Animated.View>
 
         <Text style={styles.winLabel}>{t("score.winner")}</Text>
-        <Text style={styles.winTeam}>{winnerName}</Text>
+        <Text style={styles.winTeam} accessibilityRole="header">{winnerName}</Text>
 
         <View style={styles.winScoreCard}>
           <View style={styles.winScoreRow}>
@@ -391,6 +409,8 @@ function WinScreen({ state, onNewGame }: WinProps) {
       <Pressable
         style={({ pressed }) => [styles.newGameBtn, pressed && styles.newGameBtnPressed]}
         onPress={onNewGame}
+        accessibilityRole="button"
+        accessibilityLabel={t("score.cta_new_game")}
       >
         <Text style={styles.newGameLabel}>{t("score.cta_new_game")}</Text>
       </Pressable>
@@ -402,6 +422,7 @@ function WinScreen({ state, onNewGame }: WinProps) {
 
 export default function ScoreScreen() {
   const [state, dispatch] = useReducer(reducer, INITIAL);
+  const styles = useThemedStyles(makeStyles);
 
   return (
     <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
@@ -420,255 +441,259 @@ export default function ScoreScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: KanchaColors.ink },
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: c.ink },
 
-  // Setup
-  setupFlex: { flex: 1, backgroundColor: KanchaColors.cream },
-  setupContent: {
-    flexGrow: 1,
-    padding: 24,
-    gap: 28,
-    justifyContent: "center",
-  },
-  setupHeader: { gap: 6 },
-  setupTitle: {
-    color: KanchaColors.ink,
-    fontSize: 32,
-    fontWeight: "900",
-  },
-  setupSubtitle: {
-    color: KanchaColors.muted,
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  setupForm: { gap: 18 },
-  fieldGroup: { gap: 8 },
-  fieldLabel: {
-    color: KanchaColors.ink,
-    fontSize: 13,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-  },
-  input: {
-    borderRadius: 14,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    fontSize: 16,
-    fontWeight: "700",
-    color: KanchaColors.white,
-  },
-  inputRed: { backgroundColor: KanchaColors.red },
-  inputDark: { backgroundColor: KanchaColors.panel },
-  inputNeutral: {
-    backgroundColor: KanchaColors.ink,
-    color: KanchaColors.white,
-  },
-  startBtn: {
-    borderRadius: 16,
-    backgroundColor: KanchaColors.red,
-    paddingVertical: 18,
-    alignItems: "center",
-  },
-  startBtnDisabled: { opacity: 0.35 },
-  startBtnPressed: { opacity: 0.75 },
-  startBtnLabel: {
-    color: KanchaColors.white,
-    fontSize: 17,
-    fontWeight: "900",
-    letterSpacing: 0.4,
-  },
+    // Setup
+    setupFlex: { flex: 1, backgroundColor: c.cream },
+    setupContent: {
+      flexGrow: 1,
+      padding: 24,
+      gap: 28,
+      justifyContent: "center",
+    },
+    setupHeader: { gap: 6 },
+    setupTitle: {
+      color: c.ink,
+      fontSize: 32,
+      fontWeight: "900",
+    },
+    setupSubtitle: {
+      color: c.muted,
+      fontSize: 15,
+      fontWeight: "500",
+    },
+    setupForm: { gap: 18 },
+    fieldGroup: { gap: 8 },
+    fieldLabel: {
+      color: c.ink,
+      fontSize: 13,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 0.8,
+    },
+    input: {
+      borderRadius: 14,
+      paddingHorizontal: 18,
+      paddingVertical: 16,
+      fontSize: 16,
+      fontWeight: "700",
+      color: "#FFFFFF",
+    },
+    inputRed: { backgroundColor: c.red },
+    inputDark: { backgroundColor: c.panel },
+    inputNeutral: {
+      backgroundColor: c.ink,
+      color: "#FFFFFF",
+    },
+    startBtn: {
+      borderRadius: 16,
+      backgroundColor: c.red,
+      paddingVertical: 18,
+      alignItems: "center",
+    },
+    startBtnDisabled: { opacity: 0.35 },
+    startBtnPressed: { opacity: 0.75 },
+    startBtnLabel: {
+      color: "#FFFFFF",
+      fontSize: 17,
+      fontWeight: "900",
+      letterSpacing: 0.4,
+    },
 
-  // Game
-  gameFlex: { flex: 1 },
-  panel: {
-    flex: 1,
-    paddingHorizontal: 28,
-    paddingVertical: 20,
-    justifyContent: "space-between",
-  },
-  teamLabelRow: { gap: 4 },
-  teamName: {
-    color: KanchaColors.white,
-    fontSize: 22,
-    fontWeight: "900",
-    letterSpacing: 0.2,
-  },
-  winnerBadge: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-  scoreDisplayWrap: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 8,
-  },
-  scoreNumber: {
-    color: KanchaColors.white,
-    fontSize: 96,
-    fontWeight: "900",
-    lineHeight: 100,
-  },
-  scoreTarget: {
-    color: "rgba(255,255,255,0.4)",
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
-  panelControls: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  addBtn: {
-    flex: 1,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    paddingVertical: 18,
-    alignItems: "center",
-  },
-  addBtnPressed: { backgroundColor: "rgba(255,255,255,0.32)" },
-  addBtnLabel: {
-    color: KanchaColors.white,
-    fontSize: 24,
-    fontWeight: "900",
-  },
-  undoBtn: {
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  undoBtnDisabled: { opacity: 0.25 },
-  undoBtnPressed: { backgroundColor: "rgba(255,255,255,0.2)" },
-  undoBtnLabel: {
-    color: KanchaColors.white,
-    fontSize: 15,
-    fontWeight: "700",
-  },
+    // Game
+    gameFlex: { flex: 1 },
+    panel: {
+      flex: 1,
+      paddingHorizontal: 28,
+      paddingVertical: 20,
+      justifyContent: "space-between",
+    },
+    teamLabelRow: { gap: 4 },
+    teamName: {
+      color: "#FFFFFF",
+      fontSize: 22,
+      fontWeight: "900",
+      letterSpacing: 0.2,
+    },
+    winnerBadge: {
+      color: "rgba(255,255,255,0.7)",
+      fontSize: 12,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
+    },
+    scoreDisplayWrap: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: 8,
+    },
+    scoreNumber: {
+      color: "#FFFFFF",
+      fontSize: 96,
+      fontWeight: "900",
+      lineHeight: 100,
+      fontVariant: ["tabular-nums"],
+    },
+    scoreTarget: {
+      color: "rgba(255,255,255,0.4)",
+      fontSize: 24,
+      fontWeight: "700",
+      marginBottom: 12,
+      fontVariant: ["tabular-nums"],
+    },
+    panelControls: {
+      flexDirection: "row",
+      gap: 12,
+    },
+    addBtn: {
+      flex: 1,
+      borderRadius: 16,
+      backgroundColor: "rgba(255,255,255,0.18)",
+      paddingVertical: 18,
+      alignItems: "center",
+    },
+    addBtnPressed: { backgroundColor: "rgba(255,255,255,0.32)" },
+    addBtnLabel: {
+      color: "#FFFFFF",
+      fontSize: 24,
+      fontWeight: "900",
+    },
+    undoBtn: {
+      borderRadius: 16,
+      backgroundColor: "rgba(255,255,255,0.1)",
+      paddingHorizontal: 20,
+      paddingVertical: 18,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    undoBtnDisabled: { opacity: 0.25 },
+    undoBtnPressed: { backgroundColor: "rgba(255,255,255,0.2)" },
+    undoBtnLabel: {
+      color: "#FFFFFF",
+      fontSize: 15,
+      fontWeight: "700",
+    },
 
-  // Divider
-  divider: {
-    height: 52,
-    backgroundColor: KanchaColors.ink,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  resetBtn: {
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
-  },
-  resetBtnPressed: { backgroundColor: "rgba(255,255,255,0.16)" },
-  resetLabel: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.4,
-  },
+    // Divider
+    divider: {
+      height: 52,
+      backgroundColor: c.ink,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    resetBtn: {
+      paddingHorizontal: 24,
+      paddingVertical: 10,
+      borderRadius: 20,
+      backgroundColor: "rgba(255,255,255,0.08)",
+      borderWidth: 1,
+      borderColor: "rgba(255,255,255,0.15)",
+    },
+    resetBtnPressed: { backgroundColor: "rgba(255,255,255,0.16)" },
+    resetLabel: {
+      color: "rgba(255,255,255,0.6)",
+      fontSize: 13,
+      fontWeight: "700",
+      letterSpacing: 0.4,
+    },
 
-  // Win screen
-  winFlex: {
-    flex: 1,
-    backgroundColor: KanchaColors.green,
-    paddingHorizontal: 28,
-    paddingBottom: 28,
-    paddingTop: 20,
-    justifyContent: "space-between",
-  },
-  winContent: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  winTrophyWrap: {
-    width: 112,
-    height: 112,
-    borderRadius: 36,
-    backgroundColor: KanchaColors.amberBg,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  winLabel: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 13,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 2,
-  },
-  winTeam: {
-    color: KanchaColors.white,
-    fontSize: 36,
-    fontWeight: "900",
-    textAlign: "center",
-    lineHeight: 40,
-  },
-  winScoreCard: {
-    marginTop: 20,
-    width: "100%",
-    borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.15)",
-    overflow: "hidden",
-  },
-  winScoreRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 22,
-    paddingVertical: 16,
-    gap: 12,
-  },
-  winScoreTeam: {
-    flex: 1,
-    color: KanchaColors.white,
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  winScoreNum: {
-    color: KanchaColors.white,
-    fontSize: 32,
-    fontWeight: "900",
-    minWidth: 40,
-    textAlign: "right",
-  },
-  winScoreDivider: {
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    marginHorizontal: 22,
-  },
-  newGameBtn: {
-    borderRadius: 18,
-    backgroundColor: KanchaColors.red,
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-  newGameBtnPressed: { opacity: 0.8 },
-  newGameLabel: {
-    color: KanchaColors.white,
-    fontSize: 18,
-    fontWeight: "900",
-    letterSpacing: 0.4,
-  },
+    // Win screen
+    winFlex: {
+      flex: 1,
+      backgroundColor: c.green,
+      paddingHorizontal: 28,
+      paddingBottom: 28,
+      paddingTop: 20,
+      justifyContent: "space-between",
+    },
+    winContent: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 12,
+    },
+    winTrophyWrap: {
+      width: 112,
+      height: 112,
+      borderRadius: 36,
+      backgroundColor: c.amberBg,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 8,
+    },
+    winLabel: {
+      color: "rgba(255,255,255,0.7)",
+      fontSize: 13,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 2,
+    },
+    winTeam: {
+      color: "#FFFFFF",
+      fontSize: 36,
+      fontWeight: "900",
+      textAlign: "center",
+      lineHeight: 40,
+    },
+    winScoreCard: {
+      marginTop: 20,
+      width: "100%",
+      borderRadius: 20,
+      backgroundColor: "rgba(0,0,0,0.15)",
+      overflow: "hidden",
+    },
+    winScoreRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 22,
+      paddingVertical: 16,
+      gap: 12,
+    },
+    winScoreTeam: {
+      flex: 1,
+      color: "#FFFFFF",
+      fontSize: 18,
+      fontWeight: "800",
+    },
+    winScoreNum: {
+      color: "#FFFFFF",
+      fontSize: 32,
+      fontWeight: "900",
+      minWidth: 40,
+      textAlign: "right",
+      fontVariant: ["tabular-nums"],
+    },
+    winScoreDivider: {
+      height: 1,
+      backgroundColor: "rgba(255,255,255,0.15)",
+      marginHorizontal: 22,
+    },
+    newGameBtn: {
+      borderRadius: 18,
+      backgroundColor: c.red,
+      paddingVertical: 20,
+      alignItems: "center",
+    },
+    newGameBtnPressed: { opacity: 0.8 },
+    newGameLabel: {
+      color: "#FFFFFF",
+      fontSize: 18,
+      fontWeight: "900",
+      letterSpacing: 0.4,
+    },
 
-  // Score bar
-  barTrack: {
-    height: 6,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    overflow: "hidden",
-  },
-  barTrackBottom: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 },
-  barTrackTop: { borderTopLeftRadius: 0, borderTopRightRadius: 0 },
-  barFill: {
-    height: "100%",
-  },
-});
+    // Score bar
+    barTrack: {
+      height: 6,
+      backgroundColor: "rgba(255,255,255,0.12)",
+      overflow: "hidden",
+    },
+    barTrackBottom: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 },
+    barTrackTop: { borderTopLeftRadius: 0, borderTopRightRadius: 0 },
+    barFill: {
+      height: "100%",
+    },
+  });
