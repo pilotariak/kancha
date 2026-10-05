@@ -16,7 +16,7 @@ jobs:
     name: Type-check
     type: custom
     steps:
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      - uses: eas/checkout
+      - uses: eas/install_node_modules
       - name: Type-check
-        run: bunx tsc --noEmit
+        run: npx tsc --noEmit

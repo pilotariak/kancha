@@ -4,6 +4,7 @@ import { graphqlRequest } from "./client";
 const COMPETITION_FIELDS = `
   id
   name
+  enabled
 `;
 
 const LIST_COMPETITIONS = `
@@ -25,7 +26,7 @@ const GET_COMPETITION = `
 export const competitionsApi = {
   list: (): Promise<Competition[]> =>
     graphqlRequest<{ competitions: Competition[] }>(LIST_COMPETITIONS).then(
-      (d) => d.competitions,
+      (d) => d.competitions.filter((c) => c.enabled !== false),
     ),
 
   get: (id: string): Promise<Competition> =>
