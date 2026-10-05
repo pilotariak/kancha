@@ -5,6 +5,7 @@ const LIST_CATEGORIES = `
     categories {
       id
       name
+      enabled
     }
   }
 `;
@@ -12,9 +13,12 @@ const LIST_CATEGORIES = `
 export interface Category {
   id: string;
   name: string;
+  enabled?: boolean;
 }
 
 export const categoriesApi = {
   list: (): Promise<Category[]> =>
-    graphqlRequest<{ categories: Category[] }>(LIST_CATEGORIES).then((d) => d.categories),
+    graphqlRequest<{ categories: Category[] }>(LIST_CATEGORIES).then(
+      (d) => d.categories.filter((c) => c.enabled !== false),
+    ),
 };

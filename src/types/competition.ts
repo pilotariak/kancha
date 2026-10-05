@@ -14,6 +14,7 @@ export interface Club {
 export interface Specialty {
   id: string;
   name: string;
+  enabled?: boolean;
 }
 
 export interface Player {
@@ -29,6 +30,7 @@ export interface ClubLineup {
 export interface Category {
   id: string;
   name: string;
+  enabled?: boolean;
 }
 
 export interface Result {
