@@ -3,7 +3,7 @@
 
 ---
 
-name: CI
+name: Typescript / Lint
 
 on:
   push:

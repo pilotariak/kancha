@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: Copyright (C) Nicolas Lamirault <nicolas.lamirault@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+---
+
+name: Design System / Lint
+
+on:
+  pull_request:
+    paths:
+      - "DESIGN.md"
+      - "src/constants/colors.ts"
+      - "hack/gen-design-tokens.py"
+      - ".github/workflows/design-lint.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "DESIGN.md"
+      - "src/constants/colors.ts"
+      - "hack/gen-design-tokens.py"
+      - ".github/workflows/design-lint.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint-design:
+    name: Lint & Token Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout Code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Lint DESIGN.md against the design.md standard
+        run: npx --yes @google/design.md@0.4.0 lint DESIGN.md
+
+      - name: Verify colors.ts tokens are in sync with DESIGN.md
+        run: |
+          python3 -m pip install --quiet pyyaml
+          python3 hack/gen-design-tokens.py --check
