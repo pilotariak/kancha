@@ -12,6 +12,11 @@
     "competition_fallback": "Competición",
     "loading": "Cargando"
   },
+  "error": {
+    "title": "Algo salió mal",
+    "subtitle": "Un error inesperado detuvo esta pantalla. Puedes intentarlo de nuevo.",
+    "retry": "Reintentar"
+  },
   "theme": {
     "label": "Apariencia",
     "system": "Sistema",

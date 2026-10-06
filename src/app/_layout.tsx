@@ -9,8 +9,13 @@ import { useTranslation } from "react-i18next";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { ErrorScreen } from "@/components/ErrorScreen";
 import { LaunchScreen } from "@/components/launch-screen";
 import { useTheme } from "@/hooks/use-theme";
+
+// Expo Router renders this instead of a blank screen when any route subtree
+// throws during render; exported from the root layout so it catches app-wide.
+export { ErrorScreen as ErrorBoundary };
 
 void SplashScreen.preventAutoHideAsync();
 

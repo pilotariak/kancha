@@ -12,6 +12,11 @@
     "competition_fallback": "Competition",
     "loading": "Loading"
   },
+  "error": {
+    "title": "Something went wrong",
+    "subtitle": "An unexpected error stopped this screen. You can try again.",
+    "retry": "Try again"
+  },
   "theme": {
     "label": "Appearance",
     "system": "System",
