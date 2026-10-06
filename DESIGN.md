@@ -1,3 +1,251 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# Machine-readable design tokens. Source of truth mirrors src/constants/colors.ts.
+# Human-readable rationale lives in the markdown body below.
+# Edit here, then run `make tokens` to regenerate src/constants/colors.ts.
+# ─────────────────────────────────────────────────────────────────────────────
+
+meta:
+  name: "Kancha Mobile App"
+  description: "Pelota basque tournament manager — warm cream canvas, Basque red identity, card-based clarity."
+  platform: "native"
+  colorScheme: "light"
+  # cssExtras — non-schema token values generated into src/constants/colors.ts.
+  # These are translucent/compound values (rgba) that fall outside the design.md
+  # color schema but still need a single source of truth. Ignored by the linter.
+  cssExtras:
+    shadow: "rgba(103, 18, 31, 0.14)"
+    on-red-strong: "rgba(255,255,255,0.82)"
+    on-red-soft: "rgba(255,255,255,0.78)"
+    hero-circle-one: "rgba(255,255,255,0.08)"
+    hero-circle-two: "rgba(255,255,255,0.06)"
+  # darkColors — full "fronton at night" dark palette. The design.md standard is
+  # single-scheme, so the dark variant lives here (every Palette field, keyed by
+  # its TypeScript name). Ignored by the linter; read by hack/gen-design-tokens.py.
+  darkColors:
+    red: "#E63950"
+    redDark: "#7E0A1E"
+    redSoft: "#3A1A20"
+    white: "#2E251F"
+    cream: "#17120F"
+    ink: "#F7F4EF"
+    text: "#E8E2DB"
+    muted: "#A69E95"
+    line: "#3A302A"
+    card: "#241C18"
+    panel: "#0E0B09"
+    green: "#3FA87E"
+    greenSoft: "#163026"
+    shadow: "rgba(0, 0, 0, 0.45)"
+    amber: "#E0A419"
+    amberBg: "#2E2410"
+    onRedStrong: "rgba(255,255,255,0.90)"
+    onRedSoft: "rgba(255,255,255,0.80)"
+    heroCircleOne: "rgba(255,255,255,0.06)"
+    heroCircleTwo: "rgba(255,255,255,0.04)"
+    tabBar: "#1C1511"
+    tabBarBorder: "#2C231D"
+    tabIconInactive: "#6F665E"
+
+# Light palette — the original Kancha identity (cream canvas, Basque red).
+# Standard design.md color keys carry the light hex values; translucent values
+# live in meta.cssExtras above. The linter may flag unreferenced colors as
+# "defined but never used by a component" — expected and accepted.
+colors:
+  primary: "#C8102E"           # Basque Red — brand anchor, CTAs, hero, scores
+  brand: "#C8102E"             # Basque Red — alias of primary
+  brandDark: "#970D25"         # Fronton Dark Red — gradient stop, pressed, error text
+  brandSoft: "#FDE8EC"         # Blush Soft Red — error backgrounds, score chips
+  background: "#F7F4EF"        # Warm Limestone Cream — screen canvas (never white)
+  surface: "#FFFDFC"           # Pearl Card White — list cards
+  surfaceElevated: "#FFFFFF"   # Pure White — match cards, modals, insets
+  border: "#E5DED6"            # Warm Greige Line — universal border/divider
+  textPrimary: "#141414"       # Deep Ink — headings, titles
+  text: "#262626"              # Charcoal Text — body copy
+  textMuted: "#7A7A7A"         # Warm Muted Gray — metadata, eyebrows, placeholders
+  success: "#1F7A5A"           # Tournament Green — live/success/today
+  successSoft: "#E6F4EE"       # Tournament Green Soft — success pill bg
+  championship: "#C8900A"      # Championship Amber — finals/trophy highlights
+  championshipSoft: "#FFF8E7"  # Championship Amber Soft — amber pill bg
+  panel: "#1E1E1E"             # Panel Dark — dark inset surfaces on red cards
+  tabBar: "#FFFFFF"            # Tab bar surface
+  tabBarBorder: "#E9E0D6"      # Tab bar top border
+  tabIconInactive: "#B8B1AA"   # Inactive tab icon tint
+  error: "#C8102E"             # alias of primary
+  info: "#1F7A5A"              # alias of success
+
+typography:
+  screenTitle:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "34px"
+    fontWeight: 900
+    lineHeight: 1.1
+    letterSpacing: "0px"
+  heroTitle:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "28px"
+    fontWeight: 900
+    lineHeight: 1.1
+    letterSpacing: "0px"
+  sectionTitle:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "28px"
+    fontWeight: 800
+    lineHeight: 1.15
+    letterSpacing: "-0.8px"
+  cardTitle:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "18px"
+    fontWeight: 800
+    lineHeight: 1.2
+    letterSpacing: "0px"
+  cardSubtitle:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "17px"
+    fontWeight: 800
+    lineHeight: 1.2
+    letterSpacing: "0px"
+  body:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "15px"
+    fontWeight: 400
+    lineHeight: 1.4
+    letterSpacing: "0px"
+  bodyStrong:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "15px"
+    fontWeight: 700
+    lineHeight: 1.4
+    letterSpacing: "0px"
+  meta:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: 1.43
+    letterSpacing: "0px"
+  metaStrong:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "14px"
+    fontWeight: 600
+    lineHeight: 1.43
+    letterSpacing: "0px"
+  eyebrow:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "12px"
+    fontWeight: 800
+    lineHeight: 1.2
+    letterSpacing: "1.5px"
+  scoreLarge:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "28px"
+    fontWeight: 900
+    lineHeight: 1.0
+    letterSpacing: "0px"
+  score:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "22px"
+    fontWeight: 900
+    lineHeight: 1.0
+    letterSpacing: "0px"
+  scorePending:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "20px"
+    fontWeight: 300
+    lineHeight: 1.0
+    letterSpacing: "0px"
+  phaseChip:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "12px"
+    fontWeight: 600
+    lineHeight: 1.2
+    letterSpacing: "0px"
+  pill:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "12px"
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: "0px"
+  roundDivider:
+    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontSize: "13px"
+    fontWeight: 800
+    lineHeight: 1.2
+    letterSpacing: "0.8px"
+
+spacing:
+  xs: "4px"
+  sm: "8px"
+  md: "12px"
+  lg: "14px"
+  xl: "20px"
+  "2xl": "22px"
+  "3xl": "24px"
+  hero: "120px"
+
+rounded:
+  icon: "12px"
+  chip: "16px"
+  round: "20px"
+  hero: "24px"
+  pill: "9999px"
+
+# Resting (default-state) component tokens. Interactive states — pressed, error,
+# disabled — plus borders, shadows and pill variants are documented in §4
+# (Component Stylings) and §6 (Depth & Elevation) of the body.
+components:
+  buttonPrimary:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.surfaceElevated}"
+    typography: "{typography.bodyStrong}"
+    rounded: "{rounded.round}"
+    padding: "14px 20px"
+  buttonDark:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.surfaceElevated}"
+    typography: "{typography.bodyStrong}"
+    rounded: "{rounded.icon}"
+    padding: "14px 14px"
+  card:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.textPrimary}"
+    rounded: "{rounded.round}"
+    padding: "18px"
+  cardFeatured:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.surfaceElevated}"
+    rounded: "{rounded.hero}"
+    padding: "22px"
+  matchCard:
+    backgroundColor: "{colors.surfaceElevated}"
+    textColor: "{colors.textPrimary}"
+    rounded: "{rounded.chip}"
+    padding: "14px"
+  statusPill:
+    backgroundColor: "{colors.successSoft}"
+    textColor: "{colors.success}"
+    typography: "{typography.pill}"
+    rounded: "{rounded.pill}"
+    padding: "6px 10px"
+  contextBadge:
+    backgroundColor: "{colors.surfaceElevated}"
+    textColor: "{colors.primary}"
+    typography: "{typography.metaStrong}"
+    rounded: "{rounded.round}"
+    padding: "8px 16px"
+  errorState:
+    backgroundColor: "{colors.brandSoft}"
+    textColor: "{colors.brandDark}"
+    typography: "{typography.meta}"
+    rounded: "{rounded.chip}"
+    padding: "16px"
+  emptyState:
+    backgroundColor: "{colors.surfaceElevated}"
+    textColor: "{colors.textMuted}"
+    typography: "{typography.meta}"
+    rounded: "{rounded.chip}"
+    padding: "20px"
+---
+
 # Design System — Kancha Mobile App
 
 > Pelota basque tournament manager. Warm cream canvas, Basque red identity, card-based clarity.
