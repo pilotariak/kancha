@@ -12,6 +12,11 @@
     "competition_fallback": "Compétition",
     "loading": "Chargement"
   },
+  "error": {
+    "title": "Une erreur est survenue",
+    "subtitle": "Une erreur inattendue a interrompu cet écran. Vous pouvez réessayer.",
+    "retry": "Réessayer"
+  },
   "theme": {
     "label": "Apparence",
     "system": "Système",
