@@ -15,70 +15,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import type { Palette } from "@/constants/colors";
+import { INITIAL, reducer, type ScoreAction, type ScoreState } from "@/features/score/scoreMachine";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
-
-// ─── State machine ────────────────────────────────────────────────────────────
-
-type Phase = "setup" | "playing" | "won";
-
-interface ScoreState {
-  phase: Phase;
-  teamA: string;
-  teamB: string;
-  target: number;
-  scoreA: number;
-  scoreB: number;
-  prev: { scoreA: number; scoreB: number } | null;
-  winner: "a" | "b" | null;
-}
-
-type ScoreAction =
-  | { type: "start"; teamA: string; teamB: string; target: number }
-  | { type: "increment"; side: "a" | "b" }
-  | { type: "undo" }
-  | { type: "reset" };
-
-const INITIAL: ScoreState = {
-  phase: "setup",
-  teamA: "",
-  teamB: "",
-  target: 0,
-  scoreA: 0,
-  scoreB: 0,
-  prev: null,
-  winner: null,
-};
-
-function reducer(state: ScoreState, action: ScoreAction): ScoreState {
-  switch (action.type) {
-    case "start":
-      return {
-        ...INITIAL,
-        phase: "playing",
-        teamA: action.teamA,
-        teamB: action.teamB,
-        target: action.target,
-      };
-    case "increment": {
-      const nextA = action.side === "a" ? state.scoreA + 1 : state.scoreA;
-      const nextB = action.side === "b" ? state.scoreB + 1 : state.scoreB;
-      const won = nextA >= state.target || nextB >= state.target;
-      return {
-        ...state,
-        prev: { scoreA: state.scoreA, scoreB: state.scoreB },
-        scoreA: nextA,
-        scoreB: nextB,
-        phase: won ? "won" : "playing",
-        winner: won ? (nextA >= state.target ? "a" : "b") : null,
-      };
-    }
-    case "undo":
-      if (!state.prev) return state;
-      return { ...state, ...state.prev, prev: null, phase: "playing", winner: null };
-    case "reset":
-      return INITIAL;
-  }
-}
 
 // ─── Score bar ────────────────────────────────────────────────────────────────
 
