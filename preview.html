@@ -102,6 +102,19 @@
   .section-sub { color: var(--muted); font-size: 14px; line-height: 20px; margin: 0 0 20px; }
   .grid { display: grid; gap: 12px; }
 
+  /* Sub-section header inside a section (one per component group). */
+  .sub-head {
+    font-size: 14px; color: var(--muted); font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px; margin: 28px 0 12px;
+  }
+  .sub-head:first-child { margin-top: 24px; }
+
+  /* Gallery wrappers shared by the component groups. */
+  .gallery-row   { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .gallery-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .gallery-stack { display: flex; flex-direction: column; gap: 16px; }
+  .gallery-cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
   /* ── Color swatches ───────────────────────────────────────────────────────── */
   .swatches { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   .swatch {
@@ -311,14 +324,7 @@
       <p class="eyebrow">Foundations</p>
       <h2 class="section-title">Elevation &amp; depth</h2>
       <p class="section-sub">Depth through warm border color, not shadow stacking. Shadows are red-tinted and used sparingly.</p>
-      <div class="grid elev-wrap">
-        <div class="elev-cell elev-0">0 · Screen</div>
-        <div class="elev-cell elev-1">1 · List card</div>
-        <div class="elev-cell elev-2">2 · Match card</div>
-        <div class="elev-cell elev-3">3 · Featured</div>
-        <div class="elev-cell elev-4">4 · Final match</div>
-        <div class="elev-cell elev-5">5 · FAB / Logo</div>
-      </div>
+      <div class="grid elev-wrap" id="elevation"></div>
     </section>
 
     <!-- COMPONENTS -->
@@ -326,115 +332,98 @@
       <p class="eyebrow">Library</p>
       <h2 class="section-title">Components</h2>
       <p class="section-sub">Rendered from the DESIGN.md §4 token values and the StatusPill runtime tones.</p>
-
-      <h3 style="font-size:14px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:24px 0 12px;">Buttons</h3>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-        <button class="btn btn-primary">Start match</button>
-        <button class="btn btn-primary pressed">Pressed</button>
-        <button class="btn btn-primary disabled">Disabled</button>
-        <button class="btn btn-dark">+1</button>
-      </div>
-
-      <h3 style="font-size:14px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:28px 0 12px;">Status pills</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="pill green">Today</span>
-        <span class="pill red">Finished</span>
-        <span class="pill amber">Semi-final</span>
-        <span class="pill dark">Final</span>
-        <span class="pill soft">Upcoming</span>
-      </div>
-
-      <h3 style="font-size:14px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:28px 0 12px;">Context badge</h3>
-      <span class="context-badge">Main nue · Senior</span>
-
-      <h3 style="font-size:14px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:28px 0 12px;">Cards</h3>
-      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">
-        <div class="card">
-          <p class="c-title">Championnat du Pays Basque</p>
-          <p class="c-meta">2026 · 42 matches</p>
-        </div>
-        <div class="card-featured">
-          <p class="f-eyebrow">Featured competition</p>
-          <p class="f-title">Finale Nationale</p>
-          <span class="f-inset">2026 · Elite</span>
-        </div>
-      </div>
-
-      <h3 style="font-size:14px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:28px 0 12px;">Match cards</h3>
-      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">
-        <div class="match-card">
-          <div class="match-row"><span class="team">Larralde / Etchart</span><span class="score">40</span></div>
-          <div class="match-row"><span class="team">Bielle / Ducassou</span><span class="score">35</span></div>
-          <div class="match-footer"><span class="pill green">Played</span><span class="phase-chip">Poule A</span></div>
-        </div>
-        <div class="match-card">
-          <div class="match-row"><span class="team">Olçomendy / Idiart</span><span class="score pending">—</span></div>
-          <div class="match-row"><span class="team">Waltary / Palomes</span><span class="score pending">—</span></div>
-          <div class="match-footer"><span class="pill soft">Upcoming</span><span class="phase-chip">Quart</span></div>
-        </div>
-        <div class="match-card final">
-          <div class="match-row"><span class="team">Peña II / Ezkurdia</span><span class="score">40</span></div>
-          <div class="match-row"><span class="team">Altuna III / Mariezkurrena</span><span class="score">38</span></div>
-          <div class="match-footer"><span class="pill dark">Final</span><span class="phase-chip">Finale</span></div>
-        </div>
-      </div>
-
-      <h3 style="font-size:14px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:28px 0 12px;">Round dividers</h3>
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <div class="round-divider">
-          <span class="rule"></span>
-          <span class="rd-pill"><span class="rd-label">Quarts</span><span class="rd-count">4</span></span>
-          <span class="rule"></span>
-        </div>
-        <div class="round-divider final">
-          <span class="rule"></span>
-          <span class="rd-pill"><span class="rd-label">🏆 Finale</span><span class="rd-count">1</span></span>
-          <span class="rule"></span>
-        </div>
-      </div>
-
-      <h3 style="font-size:14px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:28px 0 12px;">Feedback states</h3>
-      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">
-        <div class="error-state">Failed to load competitions. Check your connection and try again.</div>
-        <div class="empty-state">No matches scheduled for this round yet.</div>
-      </div>
+      <div id="components"></div>
     </section>
 
     <!-- DO / DON'T -->
     <section>
       <p class="eyebrow">Guardrails</p>
       <h2 class="section-title">Do's &amp; Don'ts</h2>
-      <div class="grid dd-grid">
-        <div class="dd-col do">
-          <h3>✅ Do</h3>
-          <ul>
-            <li>Use cream <code>#F7F4EF</code> as the canvas — never white or cold gray.</li>
-            <li>Limit red to purposeful elements: hero, CTAs, scores, active states.</li>
-            <li>Uppercase + ≥1.4px letter-spacing on every eyebrow label.</li>
-            <li>Use the warm <code>line</code> border to separate cards — not shadows.</li>
-            <li>Weight 900 for hero titles; weight 800 for section titles.</li>
-            <li>Give Final-round content the amber treatment.</li>
-          </ul>
-        </div>
-        <div class="dd-col dont">
-          <h3>❌ Don't</h3>
-          <ul>
-            <li>Don't put <code>rgba(255,255,255,x)</code> text on cream — invisible.</li>
-            <li>Don't use pure black — use ink <code>#141414</code> or panel.</li>
-            <li>Don't use more than one accent color per screen.</li>
-            <li>Don't set border-radius below 12px on interactive elements.</li>
-            <li>Don't add box-shadows to list cards — borders suffice.</li>
-            <li>Don't skip the 22px gap between major sections.</li>
-          </ul>
-        </div>
-      </div>
+      <div class="grid dd-grid" id="doDont"></div>
     </section>
 
     <footer>Generated from DESIGN.md · Kancha · Pilotariak</footer>
   </main>
 
 <script>
-  // ── Data mirrors DESIGN.md frontmatter ──────────────────────────────────────
+  // ───────────────────────────────────────────────────────────────────────────
+  //  Catalog = data + render helpers. Each UI pattern has ONE component here;
+  //  every gallery below is built by mapping data through it. Add a variant by
+  //  adding a data row, not by copy-pasting markup.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /** Component library — one pure string-builder per design-system primitive. */
+  const C = {
+    swatch: (c) => `
+      <div class="swatch">
+        <div class="chip" style="background:var(${c.var})"></div>
+        <div class="meta">
+          <div class="name">${c.name}</div>
+          <div class="hex" data-var="${c.var}">—</div>
+          <div class="role">${c.role}</div>
+        </div>
+      </div>`,
+    typeRow: (t) => `
+      <div class="type-row">
+        <div class="type-label">${t.label}</div>
+        <div class="type-specimen" style="${t.css}">${t.text}</div>
+      </div>`,
+    rulerRow: ([name, px]) => `
+      <div class="ruler-row">
+        <div class="r-label">${name} · ${px}px</div>
+        <div class="ruler-bar" style="width:${px}px"></div>
+      </div>`,
+    radiusCell: ([name, px]) => {
+      const r = px > 100 ? 36 : px;
+      return `
+      <div class="radius-cell">
+        <div class="radius-box" style="border-radius:${r}px">${px > 100 ? "∞" : px}</div>
+        <div class="r-cap">${name}</div>
+      </div>`;
+    },
+    elevCell: ([label, cls]) => `<div class="elev-cell ${cls}">${label}</div>`,
+    pill: (tone, label) => `<span class="pill ${tone}">${label}</span>`,
+    button: (b) => `<button class="btn btn-primary ${b.mod || ""}">${b.label}</button>`,
+    darkButton: (label) => `<button class="btn btn-dark">${label}</button>`,
+    badge: (text) => `<span class="context-badge">${text}</span>`,
+    card: (c) => `
+      <div class="card">
+        <p class="c-title">${c.title}</p>
+        <p class="c-meta">${c.meta}</p>
+      </div>`,
+    featured: (c) => `
+      <div class="card-featured">
+        <p class="f-eyebrow">${c.eyebrow}</p>
+        <p class="f-title">${c.title}</p>
+        <span class="f-inset">${c.inset}</span>
+      </div>`,
+    matchCard: (m) => `
+      <div class="match-card${m.final ? " final" : ""}">
+        ${m.teams.map((t) =>
+          `<div class="match-row"><span class="team">${t.name}</span>` +
+          `<span class="score${t.pending ? " pending" : ""}">${t.score}</span></div>`
+        ).join("")}
+        <div class="match-footer">${C.pill(m.pill[0], m.pill[1])}<span class="phase-chip">${m.phase}</span></div>
+      </div>`,
+    roundDivider: (d) => `
+      <div class="round-divider${d.final ? " final" : ""}">
+        <span class="rule"></span>
+        <span class="rd-pill"><span class="rd-label">${d.label}</span><span class="rd-count">${d.count}</span></span>
+        <span class="rule"></span>
+      </div>`,
+    errorState: (text) => `<div class="error-state">${text}</div>`,
+    emptyState: (text) => `<div class="empty-state">${text}</div>`,
+    ddColumn: (col) => `
+      <div class="dd-col ${col.kind}">
+        <h3>${col.title}</h3>
+        <ul>${col.items.map((i) => `<li>${i}</li>`).join("")}</ul>
+      </div>`,
+    /** A labelled component group: sub-header + a wrapped row of rendered items. */
+    group: (title, wrapClass, inner) =>
+      `<h3 class="sub-head">${title}</h3>` + (wrapClass ? `<div class="${wrapClass}">${inner}</div>` : inner),
+  };
+
+  // ── Data — mirrors DESIGN.md frontmatter & the StatusPill runtime ───────────
   const COLORS = [
     { name: "Red",        var: "--red",       role: "Brand, CTAs, scores" },
     { name: "Red Dark",   var: "--red-dark",  role: "Gradient stop, pressed" },
@@ -466,47 +455,104 @@
   ];
   const SPACING = [["xs",4],["sm",8],["md",12],["lg",14],["xl",20],["2xl",22],["3xl",24]];
   const RADIUS = [["icon",12],["chip",16],["round",20],["hero",24],["pill",9999]];
+  const ELEVATION = [
+    ["0 · Screen", "elev-0"],
+    ["1 · List card", "elev-1"],
+    ["2 · Match card", "elev-2"],
+    ["3 · Featured", "elev-3"],
+    ["4 · Final match", "elev-4"],
+    ["5 · FAB / Logo", "elev-5"],
+  ];
+  const PILLS = [
+    ["green", "Today"],
+    ["red", "Finished"],
+    ["amber", "Semi-final"],
+    ["dark", "Final"],
+    ["soft", "Upcoming"],
+  ];
+  const BUTTONS = [
+    { label: "Start match" },
+    { label: "Pressed", mod: "pressed" },
+    { label: "Disabled", mod: "disabled" },
+  ];
+  const CARDS = [
+    { title: "Championnat du Pays Basque", meta: "2026 · 42 matches" },
+  ];
+  const FEATURED = [
+    { eyebrow: "Featured competition", title: "Finale Nationale", inset: "2026 · Elite" },
+  ];
+  const MATCHES = [
+    {
+      teams: [{ name: "Larralde / Etchart", score: "40" }, { name: "Bielle / Ducassou", score: "35" }],
+      pill: ["green", "Played"], phase: "Poule A",
+    },
+    {
+      teams: [{ name: "Olçomendy / Idiart", score: "—", pending: true }, { name: "Waltary / Palomes", score: "—", pending: true }],
+      pill: ["soft", "Upcoming"], phase: "Quart",
+    },
+    {
+      teams: [{ name: "Peña II / Ezkurdia", score: "40" }, { name: "Altuna III / Mariezkurrena", score: "38" }],
+      pill: ["dark", "Final"], phase: "Finale", final: true,
+    },
+  ];
+  const DIVIDERS = [
+    { label: "Quarts", count: 4 },
+    { label: "🏆 Finale", count: 1, final: true },
+  ];
+  const FEEDBACK = [
+    C.errorState("Failed to load competitions. Check your connection and try again."),
+    C.emptyState("No matches scheduled for this round yet."),
+  ];
+  const DO_DONT = [
+    {
+      kind: "do", title: "✅ Do",
+      items: [
+        "Use cream <code>#F7F4EF</code> as the canvas — never white or cold gray.",
+        "Limit red to purposeful elements: hero, CTAs, scores, active states.",
+        "Uppercase + ≥1.4px letter-spacing on every eyebrow label.",
+        "Use the warm <code>line</code> border to separate cards — not shadows.",
+        "Weight 900 for hero titles; weight 800 for section titles.",
+        "Give Final-round content the amber treatment.",
+      ],
+    },
+    {
+      kind: "dont", title: "❌ Don't",
+      items: [
+        "Don't put <code>rgba(255,255,255,x)</code> text on cream — invisible.",
+        "Don't use pure black — use ink <code>#141414</code> or panel.",
+        "Don't use more than one accent color per screen.",
+        "Don't set border-radius below 12px on interactive elements.",
+        "Don't add box-shadows to list cards — borders suffice.",
+        "Don't skip the 22px gap between major sections.",
+      ],
+    },
+  ];
 
-  const sw = document.getElementById("swatches");
-  COLORS.forEach(c => {
-    sw.insertAdjacentHTML("beforeend", `
-      <div class="swatch">
-        <div class="chip" style="background:var(${c.var})"></div>
-        <div class="meta">
-          <div class="name">${c.name}</div>
-          <div class="hex" data-var="${c.var}">—</div>
-          <div class="role">${c.role}</div>
-        </div>
-      </div>`);
-  });
+  // ── Component groups for the Library section (sub-header + gallery each) ─────
+  const COMPONENT_GROUPS = [
+    () => C.group("Buttons", "gallery-row",
+      BUTTONS.map(C.button).join("") + C.darkButton("+1")),
+    () => C.group("Status pills", "gallery-pills",
+      PILLS.map(([tone, label]) => C.pill(tone, label)).join("")),
+    () => C.group("Context badge", null, C.badge("Main nue · Senior")),
+    () => C.group("Cards", "gallery-cards",
+      CARDS.map(C.card).join("") + FEATURED.map(C.featured).join("")),
+    () => C.group("Match cards", "gallery-cards", MATCHES.map(C.matchCard).join("")),
+    () => C.group("Round dividers", "gallery-stack", DIVIDERS.map(C.roundDivider).join("")),
+    () => C.group("Feedback states", "gallery-cards", FEEDBACK.join("")),
+  ];
 
-  const ts = document.getElementById("typeScale");
-  TYPE.forEach(t => {
-    ts.insertAdjacentHTML("beforeend", `
-      <div class="type-row">
-        <div class="type-label">${t.label}</div>
-        <div class="type-specimen" style="${t.css}">${t.text}</div>
-      </div>`);
-  });
+  // ── Mount: render each data set through its component into the DOM ──────────
+  const render = (id, html) => { document.getElementById(id).innerHTML = html; };
+  const mapTo = (id, data, fn) => render(id, data.map(fn).join(""));
 
-  const sr = document.getElementById("spacingRuler");
-  SPACING.forEach(([name, px]) => {
-    sr.insertAdjacentHTML("beforeend", `
-      <div class="ruler-row">
-        <div class="r-label">${name} · ${px}px</div>
-        <div class="ruler-bar" style="width:${px}px"></div>
-      </div>`);
-  });
-
-  const rs = document.getElementById("radiusScale");
-  RADIUS.forEach(([name, px]) => {
-    const r = px > 100 ? 36 : px;
-    rs.insertAdjacentHTML("beforeend", `
-      <div class="radius-cell">
-        <div class="radius-box" style="border-radius:${r}px">${px > 100 ? "∞" : px}</div>
-        <div class="r-cap">${name}</div>
-      </div>`);
-  });
+  mapTo("swatches", COLORS, C.swatch);
+  mapTo("typeScale", TYPE, C.typeRow);
+  mapTo("spacingRuler", SPACING, C.rulerRow);
+  mapTo("radiusScale", RADIUS, C.radiusCell);
+  mapTo("elevation", ELEVATION, C.elevCell);
+  render("components", COMPONENT_GROUPS.map((g) => g()).join(""));
+  mapTo("doDont", DO_DONT, C.ddColumn);
 
   // Resolve computed hex per theme for the swatch captions.
   function refreshHex() {
