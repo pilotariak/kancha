@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kancha — Design System Preview</title>
+<style>
+  /* ── Light palette (source: DESIGN.md colors + src/constants/colors.ts) ───── */
+  :root {
+    --red: #C8102E;
+    --red-dark: #970D25;
+    --red-soft: #FDE8EC;
+    --bg: #F7F4EF;        /* cream — screen canvas */
+    --surface: #FFFDFC;   /* card */
+    --elevated: #FFFFFF;  /* white — match cards, modals */
+    --line: #E5DED6;
+    --ink: #141414;
+    --text: #262626;
+    --muted: #7A7A7A;
+    --green: #1F7A5A;
+    --green-soft: #E6F4EE;
+    --amber: #C8900A;
+    --amber-bg: #FFF8E7;
+    --panel: #1E1E1E;
+    --shadow: rgba(103, 18, 31, 0.14);
+    --on-red-strong: rgba(255, 255, 255, 0.82);
+    --on-red-soft: rgba(255, 255, 255, 0.78);
+    --pill-dark-bg: var(--text);
+    --pill-dark-text: var(--bg);
+    --pill-soft-bg: var(--line);
+    --pill-soft-text: var(--muted);
+  }
+  /* ── Dark palette — "fronton at night" (source: DESIGN.md meta.darkColors) ── */
+  :root[data-theme="dark"] {
+    --red: #E63950;
+    --red-dark: #7E0A1E;
+    --red-soft: #3A1A20;
+    --bg: #17120F;        /* cream flips to near-black */
+    --surface: #241C18;   /* card */
+    --elevated: #2E251F;  /* white */
+    --line: #3A302A;
+    --ink: #F7F4EF;       /* ink flips to light */
+    --text: #E8E2DB;
+    --muted: #A69E95;
+    --green: #3FA87E;
+    --green-soft: #163026;
+    --amber: #E0A419;
+    --amber-bg: #2E2410;
+    --panel: #0E0B09;
+    --shadow: rgba(0, 0, 0, 0.45);
+    --on-red-strong: rgba(255, 255, 255, 0.90);
+    --on-red-soft: rgba(255, 255, 255, 0.80);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  /* ── Top bar / hero ───────────────────────────────────────────────────────── */
+  .hero {
+    background: linear-gradient(180deg, var(--red) 0%, var(--red-dark) 55%, var(--bg) 100%);
+    padding: 40px 20px 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before, .hero::after {
+    content: ""; position: absolute; border-radius: 9999px;
+  }
+  .hero::before { width: 160px; height: 160px; top: 30px; right: -20px; background: rgba(255,255,255,0.08); }
+  .hero::after  { width: 120px; height: 120px; top: 80px; left: -35px; background: rgba(255,255,255,0.06); }
+  .hero-eyebrow {
+    color: var(--on-red-soft); font-size: 12px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.5px; margin: 0;
+  }
+  .hero-title { color: #fff; font-size: 34px; font-weight: 900; line-height: 1.1; margin: 6px 0 4px; }
+  .hero-sub { color: var(--on-red-strong); font-size: 14px; margin: 0; max-width: 520px; }
+  .toggle {
+    position: absolute; top: 20px; right: 20px; z-index: 2;
+    border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.14);
+    color: #fff; font-size: 13px; font-weight: 700; padding: 8px 14px;
+    border-radius: 9999px; cursor: pointer;
+  }
+  .toggle:hover { background: rgba(255,255,255,0.24); }
+
+  /* ── Layout ───────────────────────────────────────────────────────────────── */
+  main { max-width: 960px; margin: -40px auto 0; padding: 0 20px 80px; position: relative; }
+  section { margin-top: 48px; }
+  .eyebrow {
+    color: var(--muted); font-size: 12px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.6px; margin: 0 0 4px;
+  }
+  h2.section-title {
+    color: var(--ink); font-size: 28px; font-weight: 800; letter-spacing: -0.8px;
+    margin: 0 0 4px;
+  }
+  .section-sub { color: var(--muted); font-size: 14px; line-height: 20px; margin: 0 0 20px; }
+  .grid { display: grid; gap: 12px; }
+
+  /* Sub-section header inside a section (one per component group). */
+  .sub-head {
+    font-size: 14px; color: var(--muted); font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px; margin: 28px 0 12px;
+  }
+  .sub-head:first-child { margin-top: 24px; }
+
+  /* Gallery wrappers shared by the component groups. */
+  .gallery-row   { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .gallery-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .gallery-stack { display: flex; flex-direction: column; gap: 16px; }
+  .gallery-cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+  /* ── Color swatches ───────────────────────────────────────────────────────── */
+  .swatches { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .swatch {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; overflow: hidden;
+  }
+  .swatch .chip { height: 64px; }
+  .swatch .meta { padding: 10px 12px; }
+  .swatch .name { font-size: 13px; font-weight: 800; color: var(--ink); }
+  .swatch .hex { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .swatch .role { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Typography specimens ─────────────────────────────────────────────────── */
+  .type-row {
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+    padding: 14px 0; border-bottom: 1px solid var(--line);
+  }
+  .type-row:last-child { border-bottom: 0; }
+  .type-label { flex: 0 0 150px; color: var(--muted); font-size: 12px; font-weight: 600; }
+  .type-specimen { color: var(--ink); flex: 1; min-width: 200px; }
+
+  /* ── Cards gallery ────────────────────────────────────────────────────────── */
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 20px; padding: 18px;
+  }
+  .card .c-title { color: var(--ink); font-size: 18px; font-weight: 800; margin: 0; }
+  .card .c-meta { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+
+  .card-featured {
+    background: var(--red); border-radius: 24px; padding: 22px; color: #fff;
+  }
+  .card-featured .f-eyebrow {
+    color: var(--on-red-soft); font-size: 12px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.5px; margin: 0;
+  }
+  .card-featured .f-title { font-size: 28px; font-weight: 900; line-height: 1.1; margin: 8px 0 12px; }
+  .card-featured .f-inset {
+    background: #161616; color: #fff; border-radius: 12px;
+    padding: 8px 14px; font-size: 14px; font-weight: 600; display: inline-block;
+  }
+
+  .match-card {
+    background: var(--elevated); border: 1px solid var(--line);
+    border-radius: 16px; overflow: hidden;
+  }
+  .match-card.final { border: 2px solid var(--red); }
+  .match-row {
+    display: flex; align-items: center; padding: 8px 14px; gap: 12px;
+  }
+  .match-row + .match-row { border-top: 1px solid var(--line); }
+  .team { flex: 1; color: var(--ink); font-size: 15px; font-weight: 700; }
+  .score { color: var(--red); font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .score.pending { color: var(--muted); font-size: 20px; font-weight: 300; }
+  .match-footer {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-top: 1px solid var(--line);
+    background: rgba(0,0,0,0.02);
+  }
+  .phase-chip { color: var(--muted); font-size: 12px; font-weight: 600; }
+
+  /* ── Pills ────────────────────────────────────────────────────────────────── */
+  .pill {
+    display: inline-flex; align-items: center;
+    border-radius: 9999px; padding: 6px 10px; font-size: 12px; font-weight: 700;
+  }
+  .pill.red   { background: var(--red-soft);   color: var(--red); }
+  .pill.green { background: var(--green-soft);  color: var(--green); }
+  .pill.dark  { background: var(--pill-dark-bg, var(--text)); color: var(--pill-dark-text, var(--bg)); }
+  .pill.soft  { background: var(--pill-soft-bg, var(--line)); color: var(--pill-soft-text, var(--muted)); }
+  .pill.amber { background: var(--amber-bg);    color: var(--amber); }
+
+  /* ── Buttons ──────────────────────────────────────────────────────────────── */
+  .btn {
+    border: 0; font-size: 15px; font-weight: 700; cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-primary {
+    background: var(--red); color: #fff; border-radius: 20px; padding: 14px 20px;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+  .btn-primary.pressed { background: var(--red-dark); transform: scale(0.96); box-shadow: none; }
+  .btn-primary.disabled { opacity: 0.35; box-shadow: none; cursor: not-allowed; }
+  .btn-dark {
+    background: var(--panel); color: #fff; border-radius: 12px;
+    width: 54px; height: 54px; font-size: 24px; font-weight: 900;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Context badge ────────────────────────────────────────────────────────── */
+  .context-badge {
+    display: inline-flex; background: var(--elevated); color: var(--red);
+    font-size: 13px; font-weight: 800; border-radius: 20px; padding: 8px 16px;
+    border: 1px solid var(--line);
+  }
+
+  /* ── Round divider ────────────────────────────────────────────────────────── */
+  .round-divider { display: flex; align-items: center; gap: 12px; }
+  .round-divider .rule { flex: 1; height: 1px; background: var(--line); }
+  .round-divider .rd-pill {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 20px;
+    padding: 6px 14px; display: inline-flex; gap: 8px; align-items: center;
+  }
+  .round-divider .rd-label {
+    color: var(--ink); font-size: 13px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .round-divider .rd-count { color: var(--muted); font-size: 12px; font-weight: 600; }
+  .round-divider.final .rd-pill { background: var(--amber-bg); border-color: rgba(200,144,10,0.4); }
+  .round-divider.final .rd-label { color: var(--amber); }
+
+  /* ── Error / Empty states ─────────────────────────────────────────────────── */
+  .error-state {
+    background: var(--red-soft); border: 1px solid rgba(200,16,46,0.2);
+    color: var(--red-dark); font-size: 14px; font-weight: 600;
+    border-radius: 16px; padding: 16px;
+  }
+  .empty-state {
+    background: var(--elevated); border: 1px solid var(--line);
+    color: var(--muted); font-size: 14px; font-weight: 600;
+    border-radius: 16px; padding: 20px; text-align: center;
+  }
+
+  /* ── Spacing & radius rulers ──────────────────────────────────────────────── */
+  .ruler-row { display: flex; align-items: center; gap: 14px; padding: 6px 0; }
+  .ruler-row .r-label { flex: 0 0 120px; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .ruler-bar { background: var(--red); height: 16px; border-radius: 4px; }
+  .radius-box {
+    width: 72px; height: 72px; background: var(--red); display: inline-flex;
+    align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700;
+  }
+  .radius-wrap { display: flex; gap: 16px; flex-wrap: wrap; }
+  .radius-cell { text-align: center; }
+  .radius-cell .r-cap { margin-top: 6px; font-size: 12px; color: var(--muted); }
+
+  /* ── Elevation ────────────────────────────────────────────────────────────── */
+  .elev-wrap { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .elev-cell {
+    border-radius: 16px; padding: 18px; min-height: 90px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    font-size: 12px; font-weight: 700;
+  }
+  .elev-0 { background: var(--bg); color: var(--muted); border: 1px dashed var(--line); }
+  .elev-1 { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  .elev-2 { background: var(--elevated); color: var(--ink); border: 1px solid var(--line); }
+  .elev-3 { background: var(--red); color: #fff; }
+  .elev-4 { background: var(--elevated); color: var(--ink); border: 2px solid var(--red); }
+  .elev-5 { background: var(--red); color: #fff; box-shadow: 0 6px 16px var(--shadow); }
+
+  /* ── Do / Don't ───────────────────────────────────────────────────────────── */
+  .dd-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .dd-grid { grid-template-columns: 1fr; } }
+  .dd-col { border-radius: 16px; padding: 18px; border: 1px solid var(--line); background: var(--surface); }
+  .dd-col h3 { margin: 0 0 12px; font-size: 15px; font-weight: 800; }
+  .dd-col.do h3 { color: var(--green); }
+  .dd-col.dont h3 { color: var(--red); }
+  .dd-col ul { margin: 0; padding-left: 18px; }
+  .dd-col li { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 6px; }
+
+  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 56px; }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <button class="toggle" id="themeToggle" type="button">◐ Dark</button>
+    <p class="hero-eyebrow">Design system</p>
+    <h1 class="hero-title">Kancha</h1>
+    <p class="hero-sub">Pelota basque tournament manager — warm cream canvas, Basque red identity, card-based clarity. Live catalog generated from DESIGN.md.</p>
+  </header>
+
+  <main>
+    <!-- COLORS -->
+    <section>
+      <p class="eyebrow">Foundations</p>
+      <h2 class="section-title">Colors</h2>
+      <p class="section-sub">Every semantic role. Toggle the theme to inspect the "fronton at night" dark palette.</p>
+      <div class="grid swatches" id="swatches"></div>
+    </section>
+
+    <!-- TYPOGRAPHY -->
+    <section>
+      <p class="eyebrow">Foundations</p>
+      <h2 class="section-title">Typography</h2>
+      <p class="section-sub">System font at high weights. Weight 900 for heroes, 800 for section titles. Scores use tabular numerals.</p>
+      <div id="typeScale"></div>
+    </section>
+
+    <!-- SPACING -->
+    <section>
+      <p class="eyebrow">Foundations</p>
+      <h2 class="section-title">Spacing</h2>
+      <p class="section-sub">Screen gutter 20px. 22px between major sections. 120px bottom clearance for the floating tab bar.</p>
+      <div id="spacingRuler"></div>
+    </section>
+
+    <!-- RADIUS -->
+    <section>
+      <p class="eyebrow">Foundations</p>
+      <h2 class="section-title">Corner radius</h2>
+      <p class="section-sub">Nothing interactive drops below 12px. Pills are fully round.</p>
+      <div class="radius-wrap" id="radiusScale"></div>
+    </section>
+
+    <!-- ELEVATION -->
+    <section>
+      <p class="eyebrow">Foundations</p>
+      <h2 class="section-title">Elevation &amp; depth</h2>
+      <p class="section-sub">Depth through warm border color, not shadow stacking. Shadows are red-tinted and used sparingly.</p>
+      <div class="grid elev-wrap" id="elevation"></div>
+    </section>
+
+    <!-- COMPONENTS -->
+    <section>
+      <p class="eyebrow">Library</p>
+      <h2 class="section-title">Components</h2>
+      <p class="section-sub">Rendered from the DESIGN.md §4 token values and the StatusPill runtime tones.</p>
+      <div id="components"></div>
+    </section>
+
+    <!-- DO / DON'T -->
+    <section>
+      <p class="eyebrow">Guardrails</p>
+      <h2 class="section-title">Do's &amp; Don'ts</h2>
+      <div class="grid dd-grid" id="doDont"></div>
+    </section>
+
+    <footer>Generated from DESIGN.md · Kancha · Pilotariak</footer>
+  </main>
+
+<script>
+  // ───────────────────────────────────────────────────────────────────────────
+  //  Catalog = data + render helpers. Each UI pattern has ONE component here;
+  //  every gallery below is built by mapping data through it. Add a variant by
+  //  adding a data row, not by copy-pasting markup.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /** Component library — one pure string-builder per design-system primitive. */
+  const C = {
+    swatch: (c) => `
+      <div class="swatch">
+        <div class="chip" style="background:var(${c.var})"></div>
+        <div class="meta">
+          <div class="name">${c.name}</div>
+          <div class="hex" data-var="${c.var}">—</div>
+          <div class="role">${c.role}</div>
+        </div>
+      </div>`,
+    typeRow: (t) => `
+      <div class="type-row">
+        <div class="type-label">${t.label}</div>
+        <div class="type-specimen" style="${t.css}">${t.text}</div>
+      </div>`,
+    rulerRow: ([name, px]) => `
+      <div class="ruler-row">
+        <div class="r-label">${name} · ${px}px</div>
+        <div class="ruler-bar" style="width:${px}px"></div>
+      </div>`,
+    radiusCell: ([name, px]) => {
+      const r = px > 100 ? 36 : px;
+      return `
+      <div class="radius-cell">
+        <div class="radius-box" style="border-radius:${r}px">${px > 100 ? "∞" : px}</div>
+        <div class="r-cap">${name}</div>
+      </div>`;
+    },
+    elevCell: ([label, cls]) => `<div class="elev-cell ${cls}">${label}</div>`,
+    pill: (tone, label) => `<span class="pill ${tone}">${label}</span>`,
+    button: (b) => `<button class="btn btn-primary ${b.mod || ""}">${b.label}</button>`,
+    darkButton: (label) => `<button class="btn btn-dark">${label}</button>`,
+    badge: (text) => `<span class="context-badge">${text}</span>`,
+    card: (c) => `
+      <div class="card">
+        <p class="c-title">${c.title}</p>
+        <p class="c-meta">${c.meta}</p>
+      </div>`,
+    featured: (c) => `
+      <div class="card-featured">
+        <p class="f-eyebrow">${c.eyebrow}</p>
+        <p class="f-title">${c.title}</p>
+        <span class="f-inset">${c.inset}</span>
+      </div>`,
+    matchCard: (m) => `
+      <div class="match-card${m.final ? " final" : ""}">
+        ${m.teams.map((t) =>
+          `<div class="match-row"><span class="team">${t.name}</span>` +
+          `<span class="score${t.pending ? " pending" : ""}">${t.score}</span></div>`
+        ).join("")}
+        <div class="match-footer">${C.pill(m.pill[0], m.pill[1])}<span class="phase-chip">${m.phase}</span></div>
+      </div>`,
+    roundDivider: (d) => `
+      <div class="round-divider${d.final ? " final" : ""}">
+        <span class="rule"></span>
+        <span class="rd-pill"><span class="rd-label">${d.label}</span><span class="rd-count">${d.count}</span></span>
+        <span class="rule"></span>
+      </div>`,
+    errorState: (text) => `<div class="error-state">${text}</div>`,
+    emptyState: (text) => `<div class="empty-state">${text}</div>`,
+    ddColumn: (col) => `
+      <div class="dd-col ${col.kind}">
+        <h3>${col.title}</h3>
+        <ul>${col.items.map((i) => `<li>${i}</li>`).join("")}</ul>
+      </div>`,
+    /** A labelled component group: sub-header + a wrapped row of rendered items. */
+    group: (title, wrapClass, inner) =>
+      `<h3 class="sub-head">${title}</h3>` + (wrapClass ? `<div class="${wrapClass}">${inner}</div>` : inner),
+  };
+
+  // ── Data — mirrors DESIGN.md frontmatter & the StatusPill runtime ───────────
+  const COLORS = [
+    { name: "Red",        var: "--red",       role: "Brand, CTAs, scores" },
+    { name: "Red Dark",   var: "--red-dark",  role: "Gradient stop, pressed" },
+    { name: "Red Soft",   var: "--red-soft",  role: "Error bg, score chips" },
+    { name: "Cream",      var: "--bg",        role: "Screen canvas" },
+    { name: "Card",       var: "--surface",   role: "List card" },
+    { name: "White",      var: "--elevated",  role: "Match cards, modals" },
+    { name: "Line",       var: "--line",      role: "Borders, dividers" },
+    { name: "Ink",        var: "--ink",       role: "Headings, titles" },
+    { name: "Text",       var: "--text",      role: "Body copy" },
+    { name: "Muted",      var: "--muted",     role: "Metadata, eyebrows" },
+    { name: "Green",      var: "--green",     role: "Live / today / success" },
+    { name: "Green Soft", var: "--green-soft",role: "Success pill bg" },
+    { name: "Amber",      var: "--amber",     role: "Finals / trophy" },
+    { name: "Amber bg",   var: "--amber-bg",  role: "Finale pill bg" },
+    { name: "Panel",      var: "--panel",     role: "Dark inset on red" },
+  ];
+  const TYPE = [
+    { label: "Screen title · 34/900",  css: "font-size:34px;font-weight:900;letter-spacing:0;",      text: "Competitions" },
+    { label: "Hero title · 28/900",    css: "font-size:28px;font-weight:900;",                        text: "Finale Nationale" },
+    { label: "Section title · 28/800", css: "font-size:28px;font-weight:800;letter-spacing:-0.8px;",  text: "Season overview" },
+    { label: "Card title · 18/800",    css: "font-size:18px;font-weight:800;",                        text: "Championnat du Pays Basque" },
+    { label: "Body · 15/400",          css: "font-size:15px;font-weight:400;",                        text: "Select a specialty to view results." },
+    { label: "Body strong · 15/700",   css: "font-size:15px;font-weight:700;",                        text: "Larralde / Etchart" },
+    { label: "Meta · 14/400",          css: "font-size:14px;font-weight:400;color:var(--muted);",     text: "2026 · 42 matches" },
+    { label: "Eyebrow · 12/800",       css: "font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);", text: "Competition desk" },
+    { label: "Score · 22/900",         css: "font-size:22px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums;", text: "40" },
+    { label: "Score pending · 20/300", css: "font-size:20px;font-weight:300;color:var(--muted);",     text: "—" },
+  ];
+  const SPACING = [["xs",4],["sm",8],["md",12],["lg",14],["xl",20],["2xl",22],["3xl",24]];
+  const RADIUS = [["icon",12],["chip",16],["round",20],["hero",24],["pill",9999]];
+  const ELEVATION = [
+    ["0 · Screen", "elev-0"],
+    ["1 · List card", "elev-1"],
+    ["2 · Match card", "elev-2"],
+    ["3 · Featured", "elev-3"],
+    ["4 · Final match", "elev-4"],
+    ["5 · FAB / Logo", "elev-5"],
+  ];
+  const PILLS = [
+    ["green", "Today"],
+    ["red", "Finished"],
+    ["amber", "Semi-final"],
+    ["dark", "Final"],
+    ["soft", "Upcoming"],
+  ];
+  const BUTTONS = [
+    { label: "Start match" },
+    { label: "Pressed", mod: "pressed" },
+    { label: "Disabled", mod: "disabled" },
+  ];
+  const CARDS = [
+    { title: "Championnat du Pays Basque", meta: "2026 · 42 matches" },
+  ];
+  const FEATURED = [
+    { eyebrow: "Featured competition", title: "Finale Nationale", inset: "2026 · Elite" },
+  ];
+  const MATCHES = [
+    {
+      teams: [{ name: "Larralde / Etchart", score: "40" }, { name: "Bielle / Ducassou", score: "35" }],
+      pill: ["green", "Played"], phase: "Poule A",
+    },
+    {
+      teams: [{ name: "Olçomendy / Idiart", score: "—", pending: true }, { name: "Waltary / Palomes", score: "—", pending: true }],
+      pill: ["soft", "Upcoming"], phase: "Quart",
+    },
+    {
+      teams: [{ name: "Peña II / Ezkurdia", score: "40" }, { name: "Altuna III / Mariezkurrena", score: "38" }],
+      pill: ["dark", "Final"], phase: "Finale", final: true,
+    },
+  ];
+  const DIVIDERS = [
+    { label: "Quarts", count: 4 },
+    { label: "🏆 Finale", count: 1, final: true },
+  ];
+  const FEEDBACK = [
+    C.errorState("Failed to load competitions. Check your connection and try again."),
+    C.emptyState("No matches scheduled for this round yet."),
+  ];
+  const DO_DONT = [
+    {
+      kind: "do", title: "✅ Do",
+      items: [
+        "Use cream <code>#F7F4EF</code> as the canvas — never white or cold gray.",
+        "Limit red to purposeful elements: hero, CTAs, scores, active states.",
+        "Uppercase + ≥1.4px letter-spacing on every eyebrow label.",
+        "Use the warm <code>line</code> border to separate cards — not shadows.",
+        "Weight 900 for hero titles; weight 800 for section titles.",
+        "Give Final-round content the amber treatment.",
+      ],
+    },
+    {
+      kind: "dont", title: "❌ Don't",
+      items: [
+        "Don't put <code>rgba(255,255,255,x)</code> text on cream — invisible.",
+        "Don't use pure black — use ink <code>#141414</code> or panel.",
+        "Don't use more than one accent color per screen.",
+        "Don't set border-radius below 12px on interactive elements.",
+        "Don't add box-shadows to list cards — borders suffice.",
+        "Don't skip the 22px gap between major sections.",
+      ],
+    },
+  ];
+
+  // ── Component groups for the Library section (sub-header + gallery each) ─────
+  const COMPONENT_GROUPS = [
+    () => C.group("Buttons", "gallery-row",
+      BUTTONS.map(C.button).join("") + C.darkButton("+1")),
+    () => C.group("Status pills", "gallery-pills",
+      PILLS.map(([tone, label]) => C.pill(tone, label)).join("")),
+    () => C.group("Context badge", null, C.badge("Main nue · Senior")),
+    () => C.group("Cards", "gallery-cards",
+      CARDS.map(C.card).join("") + FEATURED.map(C.featured).join("")),
+    () => C.group("Match cards", "gallery-cards", MATCHES.map(C.matchCard).join("")),
+    () => C.group("Round dividers", "gallery-stack", DIVIDERS.map(C.roundDivider).join("")),
+    () => C.group("Feedback states", "gallery-cards", FEEDBACK.join("")),
+  ];
+
+  // ── Mount: render each data set through its component into the DOM ──────────
+  const render = (id, html) => { document.getElementById(id).innerHTML = html; };
+  const mapTo = (id, data, fn) => render(id, data.map(fn).join(""));
+
+  mapTo("swatches", COLORS, C.swatch);
+  mapTo("typeScale", TYPE, C.typeRow);
+  mapTo("spacingRuler", SPACING, C.rulerRow);
+  mapTo("radiusScale", RADIUS, C.radiusCell);
+  mapTo("elevation", ELEVATION, C.elevCell);
+  render("components", COMPONENT_GROUPS.map((g) => g()).join(""));
+  mapTo("doDont", DO_DONT, C.ddColumn);
+
+  // Resolve computed hex per theme for the swatch captions.
+  function refreshHex() {
+    const cs = getComputedStyle(document.documentElement);
+    document.querySelectorAll(".hex[data-var]").forEach(el => {
+      el.textContent = cs.getPropertyValue(el.dataset.var).trim() || "—";
+    });
+  }
+
+  const root = document.documentElement;
+  const toggle = document.getElementById("themeToggle");
+  function setTheme(mode) {
+    root.setAttribute("data-theme", mode);
+    toggle.textContent = mode === "dark" ? "◑ Light" : "◐ Dark";
+    try { localStorage.setItem("kancha-preview-theme", mode); } catch (e) {}
+    refreshHex();
+  }
+  toggle.addEventListener("click", () => {
+    setTheme(root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+  let saved = "light";
+  try { saved = localStorage.getItem("kancha-preview-theme") || "light"; } catch (e) {}
+  setTheme(saved);
+</script>
+</body>
+</html>
