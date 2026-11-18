@@ -1,5 +1,14 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, LayoutList, Network, Swords, Trophy, Users } from "lucide-react-native";
+import {
+  ArrowLeft,
+  LayoutList,
+  ListOrdered,
+  type LucideIcon,
+  Network,
+  Swords,
+  Trophy,
+  Users,
+} from "lucide-react-native";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,6 +24,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, usePhaseColors } from "@/components/BracketView";
 import { KanchaBackground } from "@/components/KanchaBackground";
+import { RankingView } from "@/components/RankingView";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { useCategories } from "@/hooks/use-categories";
@@ -252,7 +262,13 @@ function StatsStrip({ total, played, pending }: StatsStripProps) {
 
 // ─── View toggle ──────────────────────────────────────────────────────────────
 
-type ViewMode = "list" | "bracket";
+type ViewMode = "list" | "bracket" | "ranking";
+
+const VIEW_MODES: { mode: ViewMode; icon: LucideIcon; labelKey: string }[] = [
+  { mode: "list", icon: LayoutList, labelKey: "details.view_list" },
+  { mode: "bracket", icon: Network, labelKey: "details.view_bracket" },
+  { mode: "ranking", icon: ListOrdered, labelKey: "details.view_ranking" },
+];
 
 function ViewToggle(
   { mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void },
@@ -262,34 +278,24 @@ function ViewToggle(
   const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.toggleRow}>
-      <Pressable
-        style={[styles.togglePill, mode === "list" && styles.togglePillActive]}
-        onPress={() => onChange("list")}
-        accessibilityRole="button"
-        accessibilityLabel={t("details.view_list")}
-      >
-        <LayoutList
-          size={12}
-          color={mode === "list" ? "#FFFFFF" : colors.muted}
-        />
-        <Text style={[styles.togglePillLabel, mode === "list" && styles.togglePillLabelActive]}>
-          {t("details.view_list")}
-        </Text>
-      </Pressable>
-      <Pressable
-        style={[styles.togglePill, mode === "bracket" && styles.togglePillActive]}
-        onPress={() => onChange("bracket")}
-        accessibilityRole="button"
-        accessibilityLabel={t("details.view_bracket")}
-      >
-        <Network
-          size={12}
-          color={mode === "bracket" ? "#FFFFFF" : colors.muted}
-        />
-        <Text style={[styles.togglePillLabel, mode === "bracket" && styles.togglePillLabelActive]}>
-          {t("details.view_bracket")}
-        </Text>
-      </Pressable>
+      {VIEW_MODES.map(({ mode: option, icon: Icon, labelKey }) => {
+        const active = mode === option;
+        return (
+          <Pressable
+            key={option}
+            style={[styles.togglePill, active && styles.togglePillActive]}
+            onPress={() => onChange(option)}
+            accessibilityRole="button"
+            accessibilityLabel={t(labelKey)}
+            accessibilityState={{ selected: active }}
+          >
+            <Icon size={12} color={active ? "#FFFFFF" : colors.muted} />
+            <Text style={[styles.togglePillLabel, active && styles.togglePillLabelActive]}>
+              {t(labelKey)}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -383,64 +389,81 @@ export default function CompetitionDetailsScreen() {
             </View>
           )}
 
-          {/* States */}
-          {isError && (
-            <View style={styles.errorBox} accessibilityRole="alert">
-              <Text style={styles.errorText}>
-                {error instanceof Error ? error.message : t("details.error_load")}
-              </Text>
-            </View>
-          )}
+          <ViewToggle mode={viewMode} onChange={setViewMode} />
 
-          {loadingResults && (
-            <View style={styles.centered}>
-              <ActivityIndicator
-                color="#FFFFFF"
-                size="large"
-                accessibilityLabel={t("common.loading")}
+          {viewMode === "ranking"
+            ? (
+              <RankingView
+                competitionId={id ?? ""}
+                specialtyId={specialtyId ?? ""}
+                categoryId={categoryId ?? ""}
               />
-            </View>
-          )}
-
-          {!loadingResults && !isError && totalMatches === 0 && (
-            <View style={styles.emptyBox}>
-              <Text style={styles.emptyText}>{t("details.empty")}</Text>
-            </View>
-          )}
-
-          {/* Tournament rounds */}
-          {!loadingResults && !isError && rounds.length > 0 && (
-            <>
-              <View style={styles.tournamentHeader}>
-                <Text style={styles.tournamentEyebrow}>{t("details.tableau_eyebrow")}</Text>
-                <Text style={styles.tournamentTitle} accessibilityRole="header">
-                  {t("details.tournament_title")}
-                </Text>
-                <Text style={styles.tournamentSub}>
-                  {t("details.rounds_count", { count: rounds.length })}
-                </Text>
-                <StatsStrip total={totalMatches} played={playedMatches} pending={pendingMatches} />
-                <ViewToggle mode={viewMode} onChange={setViewMode} />
-              </View>
-
-              {viewMode === "bracket"
-                ? (
-                  <View style={[styles.bracketWrapper, { width: screenWidth }]}>
-                    <BracketView rounds={rounds} />
+            )
+            : (
+              <>
+                {/* States */}
+                {isError && (
+                  <View style={styles.errorBox} accessibilityRole="alert">
+                    <Text style={styles.errorText}>
+                      {error instanceof Error ? error.message : t("details.error_load")}
+                    </Text>
                   </View>
-                )
-                : rounds.map((round) => (
-                  <View key={round.type} style={styles.roundSection}>
-                    <RoundHeader type={round.type} count={round.results.length} />
-                    <View style={styles.matchList}>
-                      {round.results.map((r) => (
-                        <MatchCard key={r.id} result={r} phaseType={round.type} />
-                      ))}
+                )}
+
+                {loadingResults && (
+                  <View style={styles.centered}>
+                    <ActivityIndicator
+                      color="#FFFFFF"
+                      size="large"
+                      accessibilityLabel={t("common.loading")}
+                    />
+                  </View>
+                )}
+
+                {!loadingResults && !isError && totalMatches === 0 && (
+                  <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>{t("details.empty")}</Text>
+                  </View>
+                )}
+
+                {/* Tournament rounds */}
+                {!loadingResults && !isError && rounds.length > 0 && (
+                  <>
+                    <View style={styles.tournamentHeader}>
+                      <Text style={styles.tournamentEyebrow}>{t("details.tableau_eyebrow")}</Text>
+                      <Text style={styles.tournamentTitle} accessibilityRole="header">
+                        {t("details.tournament_title")}
+                      </Text>
+                      <Text style={styles.tournamentSub}>
+                        {t("details.rounds_count", { count: rounds.length })}
+                      </Text>
+                      <StatsStrip
+                        total={totalMatches}
+                        played={playedMatches}
+                        pending={pendingMatches}
+                      />
                     </View>
-                  </View>
-                ))}
-            </>
-          )}
+
+                    {viewMode === "bracket"
+                      ? (
+                        <View style={[styles.bracketWrapper, { width: screenWidth }]}>
+                          <BracketView rounds={rounds} />
+                        </View>
+                      )
+                      : rounds.map((round) => (
+                        <View key={round.type} style={styles.roundSection}>
+                          <RoundHeader type={round.type} count={round.results.length} />
+                          <View style={styles.matchList}>
+                            {round.results.map((r) => (
+                              <MatchCard key={r.id} result={r} phaseType={round.type} />
+                            ))}
+                          </View>
+                        </View>
+                      ))}
+                  </>
+                )}
+              </>
+            )}
         </ScrollView>
       </SafeAreaView>
     </KanchaBackground>
@@ -570,8 +593,8 @@ const makeStyles = (c: Palette) =>
     // View toggle
     toggleRow: {
       flexDirection: "row",
+      flexWrap: "wrap",
       gap: 8,
-      marginTop: 12,
     },
     togglePill: {
       flexDirection: "row",

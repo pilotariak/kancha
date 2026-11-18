@@ -66,7 +66,8 @@
     "view_bracket": "Taula",
     "stat_total": "Guztira",
     "stat_played": "Jokatuta",
-    "stat_pending": "Jokateke"
+    "stat_pending": "Jokateke",
+    "view_ranking": "Sailkapena"
   },
   "rounds": {
     "P": "Taldeak",
@@ -131,5 +132,20 @@
     "cta_ready": "Txapelketa prest",
     "seeded": "Sailkatua",
     "schedule_meta": "Egutegi modua: pisten txandaketa automatikoki sortua sailkapen jarraipena."
+  },
+  "ranking": {
+    "eyebrow": "Sailkapena",
+    "title": "Txapelketaren sailkapena",
+    "teams_count_one": "{{count}} talde",
+    "teams_count_other": "{{count}} talde",
+    "final": "Behin betiko sailkapena",
+    "provisional": "Behin-behinekoa",
+    "provisional_note": "Txapelketa oraindik martxan dago: postuak eta faseak alda daitezke oraindik.",
+    "champion": "Txapelduna",
+    "team": "{{number}}. taldea",
+    "licence": "Lizentzia {{licence}}",
+    "rank_a11y": "{{rank}}. postua",
+    "empty": "Ligak ez du kategoria honetarako sailkapenik argitaratzen.",
+    "error_load": "Ezin izan da sailkapena kargatu."
   }
 }

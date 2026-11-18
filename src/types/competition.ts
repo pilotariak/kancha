@@ -46,3 +46,21 @@ export interface Result {
   clubALineup?: ClubLineup;
   clubBLineup?: ClubLineup;
 }
+
+export interface RankedPlayer {
+  licence: string;
+  /** Null when the league site lists the licence alone. */
+  name: string | null;
+}
+
+export interface TeamRanking {
+  id: string;
+  club: Club;
+  teamNumber: number;
+  rank: number;
+  /** Raw French text from the league site: "Champion", "1/2 finale", "FORFAIT"… */
+  phase: string;
+  /** False while the championship is still running: ranks and phases are provisional. */
+  final: boolean;
+  players: RankedPlayer[];
+}
