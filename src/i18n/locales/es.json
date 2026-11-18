@@ -66,7 +66,8 @@
     "view_bracket": "Cuadro",
     "stat_total": "Total",
     "stat_played": "Jugados",
-    "stat_pending": "Pendientes"
+    "stat_pending": "Pendientes",
+    "view_ranking": "Clasificación"
   },
   "rounds": {
     "P": "Grupos",
@@ -131,5 +132,20 @@
     "cta_ready": "Competición lista",
     "seeded": "Clasificado",
     "schedule_meta": "Modo calendario: rotación de pistas generada automáticamente con seguimiento de clasificaciones."
+  },
+  "ranking": {
+    "eyebrow": "Clasificación",
+    "title": "Clasificación del campeonato",
+    "teams_count_one": "{{count}} equipo",
+    "teams_count_other": "{{count}} equipos",
+    "final": "Clasificación definitiva",
+    "provisional": "Provisional",
+    "provisional_note": "El campeonato sigue en curso: las posiciones y las fases aún pueden cambiar.",
+    "champion": "Campeón",
+    "team": "Equipo {{number}}",
+    "licence": "Licencia {{licence}}",
+    "rank_a11y": "Posición {{rank}}",
+    "empty": "La liga no publica clasificación para esta categoría.",
+    "error_load": "No se pudo cargar la clasificación."
   }
 }
