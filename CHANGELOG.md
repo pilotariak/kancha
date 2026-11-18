@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/pilotariak/kancha/compare/v0.5.0...v0.6.0) (2026-11-18)
+
+
+### 🚀 Features
+
+* **design:** adopt design.md standard as single source of truth ([#45](https://github.com/pilotariak/kancha/issues/45)) ([5f9a40a](https://github.com/pilotariak/kancha/commit/5f9a40a189dfe1fc7b22293df4343c0ed8e97167))
+* **rankings:** add championship ranking view to category details ([#51](https://github.com/pilotariak/kancha/issues/51)) ([5b3e533](https://github.com/pilotariak/kancha/commit/5b3e533ad1112ba4601ded3f0fec1cfa330a96cf)), closes [#50](https://github.com/pilotariak/kancha/issues/50)
+* **ui:** add root error boundary with themed fallback ([#47](https://github.com/pilotariak/kancha/issues/47)) ([3f4fece](https://github.com/pilotariak/kancha/commit/3f4fece5afe39d67daa0055112fdaf4214c1da8b))
+
+
+### 📚 Documentation
+
+* **design:** add design system preview catalog ([#49](https://github.com/pilotariak/kancha/issues/49)) ([c253d6f](https://github.com/pilotariak/kancha/commit/c253d6f815ca105c9520ee7f980bfaa8257ebe02))
+
 ## [0.5.0](https://github.com/pilotariak/kancha/compare/kancha-v0.4.0...kancha-v0.5.0) (2026-10-05)
 
 ### 🚀 Features
