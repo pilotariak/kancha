@@ -11,6 +11,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorScreen } from "@/components/ErrorScreen";
 import { LaunchScreen } from "@/components/launch-screen";
+import { WebDocumentHead } from "@/components/WebDocumentHead";
 import { useTheme } from "@/hooks/use-theme";
 
 // Expo Router renders this instead of a blank screen when any route subtree
@@ -63,6 +64,7 @@ export default function RootLayout() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <StatusBar style="light" backgroundColor="transparent" translucent />
+          <WebDocumentHead />
           {launching ? <LaunchScreen onFinish={handleLaunchFinish} /> : <RootLayoutNav />}
         </SafeAreaProvider>
       </GestureHandlerRootView>
