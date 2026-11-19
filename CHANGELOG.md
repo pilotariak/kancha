@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0](https://github.com/pilotariak/kancha/compare/v0.6.0...v0.7.0) (2026-11-19)
+
+
+### 🚀 Features
+
+* **league:** enable the Landes league under the llpb id ([#53](https://github.com/pilotariak/kancha/issues/53)) ([88692c5](https://github.com/pilotariak/kancha/commit/88692c5640ddbad8c8bd45f2337a9fee71ab6e50))
+* **league:** enable the lidfpb league ([#55](https://github.com/pilotariak/kancha/issues/55)) ([c246cb1](https://github.com/pilotariak/kancha/commit/c246cb18b1c5a58c6bad45cdf3e0212675535c9b)), closes [#54](https://github.com/pilotariak/kancha/issues/54)
+* **players:** add a player statistics screen and name search ([#68](https://github.com/pilotariak/kancha/issues/68)) ([9a63792](https://github.com/pilotariak/kancha/commit/9a637922d9aa8397e8fb9bdcaaa53f7749a49108)), closes [#67](https://github.com/pilotariak/kancha/issues/67)
+* **ui:** replace the dark theme with the Ikurriña palette ([#66](https://github.com/pilotariak/kancha/issues/66)) ([443cf43](https://github.com/pilotariak/kancha/commit/443cf431c70d65575d05c4afcec29d607f1238f2))
+* **web:** add HTML metadata, page titles and a web manifest ([#63](https://github.com/pilotariak/kancha/issues/63)) ([213e6f0](https://github.com/pilotariak/kancha/commit/213e6f07824277c1b955ea7216585ab40fce54f0))
+
 ## [0.6.0](https://github.com/pilotariak/kancha/compare/v0.5.0...v0.6.0) (2026-11-18)
 
 
