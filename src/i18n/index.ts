@@ -23,4 +23,9 @@ void i18n.use(initReactI18next).init({
   },
 });
 
+// The static web HTML is rendered at build time, where the browser language is
+// unknown, so it is always English. The root layout gives this English
+// instance to the screens while React hydrates that HTML, then switches to i18n.
+export const hydrationI18n = i18n.cloneInstance({ lng: "en" });
+
 export default i18n;
