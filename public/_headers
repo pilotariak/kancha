@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright (C) Nicolas Lamirault <nicolas.lamirault@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Cloudflare Pages response headers: https://developers.cloudflare.com/pages/configuration/headers/
+#
+# A request that matches several rules gets the headers of all of them, and a
+# header set twice has its values joined with a comma. So the catch-all rule
+# below must never set Cache-Control: it would be joined to the long-lived
+# value of the static asset rules.
+#
+# Expo export names every file under /_expo/static/ and /assets/ with a hash of
+# its content, so a given URL never changes and can be cached for a year.
+#
+# HTML is left on the Pages default, `Cache-Control: public, max-age=0,
+# must-revalidate` with an ETag, so the browser revalidates it on every load
+# and picks up a new deploy at once.
+#
+# No Content-Security-Policy: the exported HTML has an inline module script
+# (Expo Router's hydration flag) and inline <style> blocks and style attributes
+# from react-native-web, which would need 'unsafe-inline' or per-build hashes,
+# and the profile screen loads league logos from third-party hosts. A policy
+# could not be checked on Pages before a deploy.
+#
+# Permissions-Policy denies the powerful features: the web app uses none of
+# them (expo-location and expo-image-picker are dependencies, but unused).
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
+/_expo/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
