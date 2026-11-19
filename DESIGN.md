@@ -19,33 +19,36 @@ meta:
     on-red-soft: "rgba(255,255,255,0.78)"
     hero-circle-one: "rgba(255,255,255,0.08)"
     hero-circle-two: "rgba(255,255,255,0.06)"
-  # darkColors — full "fronton at night" dark palette. The design.md standard is
-  # single-scheme, so the dark variant lives here (every Palette field, keyed by
-  # its TypeScript name). Ignored by the linter; read by hack/gen-design-tokens.py.
+  # darkColors — full "Ikurriña" dark palette: very dark forest-green surfaces,
+  # Basque red and white text, the three colors of the Basque flag. The
+  # design.md standard is single-scheme, so the dark variant lives here (every
+  # Palette field, keyed by its TypeScript name). Ignored by the linter; read by
+  # hack/gen-design-tokens.py.
   darkColors:
-    red: "#E63950"
-    redDark: "#7E0A1E"
-    redSoft: "#3A1A20"
-    white: "#2E251F"
-    cream: "#17120F"
-    ink: "#F7F4EF"
-    text: "#E8E2DB"
-    muted: "#A69E95"
-    line: "#3A302A"
-    card: "#241C18"
-    panel: "#0E0B09"
-    green: "#3FA87E"
-    greenSoft: "#163026"
-    shadow: "rgba(0, 0, 0, 0.45)"
-    amber: "#E0A419"
-    amberBg: "#2E2410"
+    red: "#F5586E"
+    redFill: "#B5142F"
+    redDark: "#6E0C1E"
+    redSoft: "#36141B"
+    white: "#1A2922"
+    cream: "#0B1411"
+    ink: "#F3F7F4"
+    text: "#DCE6E0"
+    muted: "#97A89F"
+    line: "#25362E"
+    card: "#13201A"
+    panel: "#1E2E26"
+    green: "#3CC489"
+    greenSoft: "#12352A"
+    shadow: "rgba(0, 8, 4, 0.50)"
+    amber: "#E9AC2A"
+    amberBg: "#2A240F"
     onRedStrong: "rgba(255,255,255,0.90)"
     onRedSoft: "rgba(255,255,255,0.80)"
     heroCircleOne: "rgba(255,255,255,0.06)"
     heroCircleTwo: "rgba(255,255,255,0.04)"
-    tabBar: "#1C1511"
-    tabBarBorder: "#2C231D"
-    tabIconInactive: "#6F665E"
+    tabBar: "#0F1A15"
+    tabBarBorder: "#1F2D27"
+    tabIconInactive: "#5E7268"
 
 # Light palette — the original Kancha identity (cream canvas, Basque red).
 # Standard design.md color keys carry the light hex values; translucent values
@@ -54,6 +57,7 @@ meta:
 colors:
   primary: "#C8102E"           # Basque Red — brand anchor, CTAs, hero, scores
   brand: "#C8102E"             # Basque Red — alias of primary
+  brandFill: "#C8102E"         # Basque Red Fill — red surfaces under white text (hero, score panel, buttons)
   brandDark: "#970D25"         # Fronton Dark Red — gradient stop, pressed, error text
   brandSoft: "#FDE8EC"         # Blush Soft Red — error backgrounds, score chips
   background: "#F7F4EF"        # Warm Limestone Cream — screen canvas (never white)
@@ -277,7 +281,8 @@ components:
 
 ### Brand & Primary
 
-- **Red** (`#C8102E`): Primary brand color. Hero card backgrounds, CTA buttons, score text, active tab indicator. Use at full opacity only — never tint arbitrarily.
+- **Red** (`#C8102E`): Primary brand color. Red text and icons (scores, errors, active tab indicator). Use at full opacity only — never tint arbitrarily.
+- **Red Fill** (`#C8102E`): Red surfaces that carry white text or icons — hero cards, the top of the hero gradient, the score panel, CTA buttons, the active toggle pill. Same value as Red in light; in dark it stays deep so white text keeps 4.5:1 while Red brightens for text on dark surfaces.
 - **Red Dark** (`#970D25`): Darker red for pressed states, gradient bottom stop, error text on light surfaces.
 - **Red Soft** (`#FDE8EC`): Light pink tint for error state backgrounds, score badge chips on light cards.
 
@@ -305,11 +310,22 @@ components:
 - **Panel** (`#1E1E1E`): Dark inset surfaces within red hero cards (e.g. year/level badge).
 - `#161616`: Alternate deep dark — used for featured info chips inside red cards.
 
+### Dark theme — Ikurriña
+
+The dark palette (`meta.darkColors`) takes the three colors of the Basque flag: very dark forest-green surfaces, Basque red, white text.
+
+- **Canvas** (`#0B1411`), **Card** (`#13201A`), **White** (`#1A2922`): three green-black steps, from screen background to elevated match cards.
+- **Red** (`#F5586E`): lifted so red text, scores and pills reach 4.5:1 on every dark surface.
+- **Red Fill** (`#B5142F`): deep red for surfaces under white text — the hero, the score panel and red buttons stay at 4.5:1 or more.
+- **Panel** (`#1E2E26`): the dark score panel, one step lighter than the cards.
+- Every text pair meets WCAG AA (4.5:1); inactive tab icons meet 3:1.
+
 ### Reference table
 
 | Role           | Value                  | Usage                              |
 | -------------- | ---------------------- | ---------------------------------- |
-| `--red`        | `#C8102E`              | Brand, CTAs, hero backgrounds      |
+| `--red`        | `#C8102E`              | Brand, red text, scores, icons     |
+| `--red-fill`   | `#C8102E`              | Hero, CTAs, red under white text   |
 | `--red-dark`   | `#970D25`              | Gradient stop, pressed, error text |
 | `--red-soft`   | `#FDE8EC`              | Error bg, score chips              |
 | `--cream`      | `#F7F4EF`              | Screen background                  |

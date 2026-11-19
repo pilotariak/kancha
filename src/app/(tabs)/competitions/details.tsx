@@ -471,7 +471,7 @@ const makeStyles = (c: Palette) =>
     // Hero
     heroCard: {
       borderRadius: 24,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       padding: 22,
       gap: 10,
     },
@@ -587,8 +587,8 @@ const makeStyles = (c: Palette) =>
       borderColor: c.line,
     },
     togglePillActive: {
-      backgroundColor: c.red,
-      borderColor: c.red,
+      backgroundColor: c.redFill,
+      borderColor: c.redFill,
     },
     togglePillLabel: {
       fontSize: 12,

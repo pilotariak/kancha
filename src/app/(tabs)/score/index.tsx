@@ -169,7 +169,7 @@ function ScorePanel(
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const isTop = side === "top";
-  const bg = isTop ? colors.red : colors.panel;
+  const bg = isTop ? colors.redFill : colors.panel;
   const winnerBg = colors.green;
   const activeBg = isWinner ? winnerBg : bg;
 
@@ -419,7 +419,7 @@ const makeStyles = (c: Palette) =>
       fontWeight: "700",
       color: "#FFFFFF",
     },
-    inputRed: { backgroundColor: c.red },
+    inputRed: { backgroundColor: c.redFill },
     inputDark: { backgroundColor: c.panel },
     inputNeutral: {
       backgroundColor: c.ink,
@@ -427,7 +427,7 @@ const makeStyles = (c: Palette) =>
     },
     startBtn: {
       borderRadius: 16,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       paddingVertical: 18,
       alignItems: "center",
     },
@@ -611,7 +611,7 @@ const makeStyles = (c: Palette) =>
     },
     newGameBtn: {
       borderRadius: 18,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       paddingVertical: 20,
       alignItems: "center",
     },

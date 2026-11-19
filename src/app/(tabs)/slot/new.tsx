@@ -649,7 +649,7 @@ const makeStyles = (c: Palette) =>
       width: 36,
       height: 36,
       borderRadius: 12,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       alignItems: "center",
       justifyContent: "center",
     },

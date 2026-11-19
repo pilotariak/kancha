@@ -8,6 +8,7 @@
   /* ── Light palette (source: DESIGN.md colors + src/constants/colors.ts) ───── */
   :root {
     --red: #C8102E;
+    --red-fill: #C8102E;  /* red under white text */
     --red-dark: #970D25;
     --red-soft: #FDE8EC;
     --bg: #F7F4EF;        /* cream — screen canvas */
@@ -30,24 +31,25 @@
     --pill-soft-bg: var(--line);
     --pill-soft-text: var(--muted);
   }
-  /* ── Dark palette — "fronton at night" (source: DESIGN.md meta.darkColors) ── */
+  /* ── Dark palette — "Ikurriña" (source: DESIGN.md meta.darkColors) ─────── */
   :root[data-theme="dark"] {
-    --red: #E63950;
-    --red-dark: #7E0A1E;
-    --red-soft: #3A1A20;
-    --bg: #17120F;        /* cream flips to near-black */
-    --surface: #241C18;   /* card */
-    --elevated: #2E251F;  /* white */
-    --line: #3A302A;
-    --ink: #F7F4EF;       /* ink flips to light */
-    --text: #E8E2DB;
-    --muted: #A69E95;
-    --green: #3FA87E;
-    --green-soft: #163026;
-    --amber: #E0A419;
-    --amber-bg: #2E2410;
-    --panel: #0E0B09;
-    --shadow: rgba(0, 0, 0, 0.45);
+    --red: #F5586E;
+    --red-fill: #B5142F;  /* deep red under white text */
+    --red-dark: #6E0C1E;
+    --red-soft: #36141B;
+    --bg: #0B1411;        /* very dark forest green */
+    --surface: #13201A;   /* card */
+    --elevated: #1A2922;  /* white */
+    --line: #25362E;
+    --ink: #F3F7F4;       /* ink flips to light */
+    --text: #DCE6E0;
+    --muted: #97A89F;
+    --green: #3CC489;
+    --green-soft: #12352A;
+    --amber: #E9AC2A;
+    --amber-bg: #2A240F;
+    --panel: #1E2E26;
+    --shadow: rgba(0, 8, 4, 0.50);
     --on-red-strong: rgba(255, 255, 255, 0.90);
     --on-red-soft: rgba(255, 255, 255, 0.80);
   }
@@ -64,7 +66,7 @@
 
   /* ── Top bar / hero ───────────────────────────────────────────────────────── */
   .hero {
-    background: linear-gradient(180deg, var(--red) 0%, var(--red-dark) 55%, var(--bg) 100%);
+    background: linear-gradient(180deg, var(--red-fill) 0%, var(--red-dark) 55%, var(--bg) 100%);
     padding: 40px 20px 72px;
     position: relative;
     overflow: hidden;
@@ -145,7 +147,7 @@
   .card .c-meta { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
 
   .card-featured {
-    background: var(--red); border-radius: 24px; padding: 22px; color: #fff;
+    background: var(--red-fill); border-radius: 24px; padding: 22px; color: #fff;
   }
   .card-featured .f-eyebrow {
     color: var(--on-red-soft); font-size: 12px; font-weight: 800;
@@ -193,7 +195,7 @@
     font-family: inherit;
   }
   .btn-primary {
-    background: var(--red); color: #fff; border-radius: 20px; padding: 14px 20px;
+    background: var(--red-fill); color: #fff; border-radius: 20px; padding: 14px 20px;
     box-shadow: 0 4px 16px var(--shadow);
   }
   .btn-primary.pressed { background: var(--red-dark); transform: scale(0.96); box-shadow: none; }
@@ -243,7 +245,7 @@
   .ruler-row .r-label { flex: 0 0 120px; font-size: 12px; color: var(--muted); font-weight: 600; }
   .ruler-bar { background: var(--red); height: 16px; border-radius: 4px; }
   .radius-box {
-    width: 72px; height: 72px; background: var(--red); display: inline-flex;
+    width: 72px; height: 72px; background: var(--red-fill); display: inline-flex;
     align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700;
   }
   .radius-wrap { display: flex; gap: 16px; flex-wrap: wrap; }
@@ -260,9 +262,9 @@
   .elev-0 { background: var(--bg); color: var(--muted); border: 1px dashed var(--line); }
   .elev-1 { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
   .elev-2 { background: var(--elevated); color: var(--ink); border: 1px solid var(--line); }
-  .elev-3 { background: var(--red); color: #fff; }
+  .elev-3 { background: var(--red-fill); color: #fff; }
   .elev-4 { background: var(--elevated); color: var(--ink); border: 2px solid var(--red); }
-  .elev-5 { background: var(--red); color: #fff; box-shadow: 0 6px 16px var(--shadow); }
+  .elev-5 { background: var(--red-fill); color: #fff; box-shadow: 0 6px 16px var(--shadow); }
 
   /* ── Do / Don't ───────────────────────────────────────────────────────────── */
   .dd-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -291,7 +293,7 @@
     <section>
       <p class="eyebrow">Foundations</p>
       <h2 class="section-title">Colors</h2>
-      <p class="section-sub">Every semantic role. Toggle the theme to inspect the "fronton at night" dark palette.</p>
+      <p class="section-sub">Every semantic role. Toggle the theme to inspect the "Ikurriña" dark palette.</p>
       <div class="grid swatches" id="swatches"></div>
     </section>
 
@@ -425,7 +427,8 @@
 
   // ── Data — mirrors DESIGN.md frontmatter & the StatusPill runtime ───────────
   const COLORS = [
-    { name: "Red",        var: "--red",       role: "Brand, CTAs, scores" },
+    { name: "Red",        var: "--red",       role: "Red text, scores, icons" },
+    { name: "Red Fill",   var: "--red-fill",  role: "Hero, CTAs, under white text" },
     { name: "Red Dark",   var: "--red-dark",  role: "Gradient stop, pressed" },
     { name: "Red Soft",   var: "--red-soft",  role: "Error bg, score chips" },
     { name: "Cream",      var: "--bg",        role: "Screen canvas" },
