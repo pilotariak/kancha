@@ -1,10 +1,10 @@
 import { Stack } from "expo-router";
-import { CalendarDays, ChevronRight, Users2 } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CalendarDays, ChevronRight, Users2 } from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
 import { StatusPill } from "@/components/StatusPill";

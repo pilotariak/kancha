@@ -1,9 +1,9 @@
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { BellRing, X } from "lucide-react-native";
 import React from "react";
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { BellRing, X } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";

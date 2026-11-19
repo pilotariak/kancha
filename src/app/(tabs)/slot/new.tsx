@@ -1,4 +1,8 @@
 import { router, Stack } from "expo-router";
+import React, { useMemo, useRef, useState } from "react";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import {
   ArrowLeft,
   CalendarClock,
@@ -8,11 +12,7 @@ import {
   Plus,
   UserCheck,
   X,
-} from "lucide-react-native";
-import React, { useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
+} from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
 import { StatusPill } from "@/components/StatusPill";

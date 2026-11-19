@@ -1,9 +1,9 @@
 import { Tabs } from "expo-router";
-import { CalendarClock, Info, Swords, Trophy } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 
+import { CalendarClock, Info, Swords, Trophy } from "@/components/icons";
 import type { Palette } from "@/constants/colors";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 

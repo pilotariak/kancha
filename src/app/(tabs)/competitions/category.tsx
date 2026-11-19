@@ -1,10 +1,10 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, ChevronRight, Trophy } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ArrowLeft, ChevronRight, Trophy } from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import type { Palette } from "@/constants/colors";
 import { useCategories } from "@/hooks/use-categories";

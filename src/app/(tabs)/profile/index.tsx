@@ -1,5 +1,10 @@
 import Constants from "expo-constants";
 import { Image } from "expo-image";
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import {
   ChevronDown,
   ChevronUp,
@@ -9,12 +14,7 @@ import {
   Moon,
   Sun,
   SunMoon,
-} from "lucide-react-native";
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
+} from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
