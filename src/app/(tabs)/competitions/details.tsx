@@ -1,14 +1,5 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import {
-  ArrowLeft,
-  LayoutList,
-  ListOrdered,
-  type LucideIcon,
-  Network,
-  Swords,
-  Trophy,
-  Users,
-} from "lucide-react-native";
+import type { LucideIcon } from "lucide-react-native";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -23,16 +14,25 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, usePhaseColors } from "@/components/BracketView";
+import {
+  ArrowLeft,
+  LayoutList,
+  ListOrdered,
+  Network,
+  Swords,
+  Trophy,
+  Users,
+} from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { RankingView } from "@/components/RankingView";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
+import { dateTone } from "@/features/competitions/matchDate";
 import { useCategories } from "@/hooks/use-categories";
 import { useCompetition } from "@/hooks/use-competitions";
 import { useResultsByCompetition } from "@/hooks/use-matches";
 import { useSpecialties } from "@/hooks/use-specialties";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
-import { Temporal } from "@js-temporal/polyfill";
 
 import type { PhaseColors, PhaseType } from "@/components/BracketView";
 import type { Result } from "@/types/competition";
@@ -110,30 +110,9 @@ function groupByRound(results: Result[]): RoundGroup[] {
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
-function parsePlainDate(dateStr: string): Temporal.PlainDate | null {
-  const [d, m, y] = dateStr.split("/");
-  if (!d || !m || !y) return null;
-  try {
-    return Temporal.PlainDate.from({ year: Number(y), month: Number(m), day: Number(d) });
-  } catch {
-    return null;
-  }
-}
-
 function formatDate(dateStr?: string): string {
   if (!dateStr) return "—";
   return dateStr;
-}
-
-function dateTone(dateStr?: string): "red" | "green" | "dark" {
-  if (!dateStr) return "dark";
-  const date = parsePlainDate(dateStr);
-  if (!date) return "dark";
-  const today = Temporal.Now.plainDateISO();
-  const cmp = Temporal.PlainDate.compare(date, today);
-  if (cmp < 0) return "red";
-  if (cmp > 0) return "dark";
-  return "green";
 }
 
 function formatLineup(lineup?: { player1?: { name: string }; player2?: { name: string } }): string {

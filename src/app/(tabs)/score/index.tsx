@@ -1,4 +1,3 @@
-import { Trophy, Undo2 } from "lucide-react-native";
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Trophy, Undo2 } from "@/components/icons";
 import type { Palette } from "@/constants/colors";
 import { INITIAL, reducer, type ScoreAction, type ScoreState } from "@/features/score/scoreMachine";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";

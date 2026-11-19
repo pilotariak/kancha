@@ -1,9 +1,9 @@
 import type { ErrorBoundaryProps } from "expo-router";
-import { RotateCcw } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { RotateCcw } from "@/components/icons";
 import type { Palette } from "@/constants/colors";
 import { useThemedStyles } from "@/hooks/use-theme";
 

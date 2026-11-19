@@ -1,10 +1,10 @@
 import { router } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ArrowLeft } from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
 import { SectionHeader } from "@/components/SectionHeader";

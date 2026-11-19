@@ -1,9 +1,9 @@
 import { router } from "expo-router";
-import { CalendarClock, MapPin, Plus } from "lucide-react-native";
 import React, { useMemo } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CalendarClock, MapPin, Plus } from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
 import type { Palette } from "@/constants/colors";

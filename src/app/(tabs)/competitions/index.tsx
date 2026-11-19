@@ -1,10 +1,10 @@
 import { router } from "expo-router";
-import { ChevronRight, Shield } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ChevronRight, Shield } from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
 import type { Palette } from "@/constants/colors";

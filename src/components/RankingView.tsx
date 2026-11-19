@@ -1,8 +1,8 @@
-import { RotateCcw, Trophy } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { RotateCcw, Trophy } from "@/components/icons";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";

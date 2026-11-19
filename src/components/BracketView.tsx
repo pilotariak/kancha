@@ -1,8 +1,8 @@
-import { ChevronRight, Swords, Trophy, Users } from "lucide-react-native";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { ChevronRight, Swords, Trophy, Users } from "@/components/icons";
 import { type Palette } from "@/constants/colors";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import type { Result } from "@/types/competition";
