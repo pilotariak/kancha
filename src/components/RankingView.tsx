@@ -1,14 +1,44 @@
+import { router } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { RotateCcw, Trophy } from "@/components/icons";
+import { ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { buildRanking, type RankingRow } from "@/features/rankings/ranking";
 import { useRankings } from "@/hooks/use-rankings";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
+import type { RankedPlayer } from "@/types/competition";
+
+// ─── Player link ──────────────────────────────────────────────────────────────
+
+function PlayerLink({ player }: { player: RankedPlayer }) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  const label = player.name ?? t("ranking.licence", { licence: player.licence });
+
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.playerLink, pressed && styles.playerLinkPressed]}
+      onPress={() =>
+        router.push({
+          pathname: "/(tabs)/competitions/player",
+          params: { licence: player.licence },
+        })}
+      hitSlop={4}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityHint={t("player.open_hint")}
+      testID={`ranking-player-${player.licence}`}
+    >
+      <Text style={styles.playerLinkLabel}>{label}</Text>
+      <ChevronRight color={colors.muted} size={14} />
+    </Pressable>
+  );
+}
 
 // ─── Ranking card ─────────────────────────────────────────────────────────────
 
@@ -16,9 +46,6 @@ function RankingCard({ row }: { row: RankingRow }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const players = row.players
-    .map((p) => p.name ?? t("ranking.licence", { licence: p.licence }))
-    .join(" / ");
 
   return (
     <View
@@ -39,7 +66,11 @@ function RankingCard({ row }: { row: RankingRow }) {
           <Text style={styles.clubName}>{row.clubName}</Text>
           <Text style={styles.teamNumber}>{t("ranking.team", { number: row.teamNumber })}</Text>
         </View>
-        {players ? <Text style={styles.players}>{players}</Text> : null}
+        {row.players.length > 0 && (
+          <View style={styles.players}>
+            {row.players.map((p) => <PlayerLink key={p.licence} player={p} />)}
+          </View>
+        )}
         <View style={styles.rankMeta}>
           {row.isChampion
             ? <StatusPill label={t("ranking.champion")} tone="amber" />
@@ -232,6 +263,20 @@ const makeStyles = (c: Palette) =>
     },
     clubName: { color: c.ink, fontSize: 15, fontWeight: "700", flexShrink: 1 },
     teamNumber: { color: c.muted, fontSize: 12, fontWeight: "600" },
-    players: { color: c.text, fontSize: 13, fontWeight: "600", lineHeight: 18 },
+    players: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    // 36pt tall plus a 4pt hit slop on each side reaches the 44pt touch target.
+    playerLink: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      minHeight: 36,
+      paddingHorizontal: 12,
+      borderRadius: 18,
+      backgroundColor: c.cream,
+      borderWidth: 1,
+      borderColor: c.line,
+    },
+    playerLinkPressed: { backgroundColor: c.line },
+    playerLinkLabel: { color: c.text, fontSize: 13, fontWeight: "600", flexShrink: 1 },
     rankMeta: { flexDirection: "row" },
   });

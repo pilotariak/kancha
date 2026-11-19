@@ -37,7 +37,9 @@
     "all_eyebrow": "Txapelketa guztiak",
     "season_title": "Denboraldi laburpena",
     "season_subtitle": "Liga honetako txapelketa guztiak.",
-    "error_load": "Errorea txapelketak kargatzean"
+    "error_load": "Errorea txapelketak kargatzean",
+    "find_player": "Jokalari bat bilatu",
+    "find_player_subtitle": "Txapelak, bikotekideak eta sailkapenak denboraldika"
   },
   "specialty": {
     "back": "Txapelketak",
@@ -147,6 +149,42 @@
     "rank_a11y": "{{rank}}. postua",
     "empty": "Ligak ez du kategoria honetarako sailkapenik argitaratzen.",
     "error_load": "Ezin izan da sailkapena kargatu."
+  },
+  "player": {
+    "title": "Jokalaria",
+    "eyebrow": "Jokalaria",
+    "stat_titles": "Txapelak",
+    "stat_runner_ups": "Txapeldunordeak",
+    "stat_seasons": "Denboraldiak",
+    "stat_rankings": "Sailkapenak",
+    "best_eyebrow": "Espezialitateka",
+    "best_title": "Postu onenak",
+    "best_empty": "Oraindik ez dago behin betiko sailkapenik: txapelketa guztiak martxan daude.",
+    "titles_count_one": "{{count}} txapela",
+    "titles_count_other": "{{count}} txapela",
+    "partners_eyebrow": "Bikotekideak",
+    "partners_title": "Norekin jokatu du",
+    "together_count_one": "{{count}} sailkapen elkarrekin",
+    "together_count_other": "{{count}} sailkapen elkarrekin",
+    "with": "Bikotekideak: {{names}}",
+    "history_eyebrow": "Historia",
+    "history_title": "Denboraldiz denboraldi",
+    "empty": "Ez da sailkapenik aurkitu lizentzia honetarako.",
+    "error_load": "Ezin izan dira jokalari honen sailkapenak kargatu.",
+    "open_hint": "Jokalariaren estatistikak irekitzen ditu"
+  },
+  "player_search": {
+    "back": "Txapelketak",
+    "eyebrow": "Jokalariak",
+    "title": "Jokalari bat bilatu",
+    "subtitle": "Bilatu izenez ligako txapelketen sailkapenetan.",
+    "label": "Jokalariaren izena",
+    "placeholder": "Abizena, izena",
+    "hint": "Idatzi izen baten bi letra gutxienez.",
+    "results_count_one": "{{count}} jokalari",
+    "results_count_other": "{{count}} jokalari",
+    "empty": "Ez da izen hori duen jokalaririk aurkitu.",
+    "error_load": "Ezin izan dira jokalariak bilatu."
   },
   "head": {
     "page_title": "{{screen}} · Kancha",

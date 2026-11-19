@@ -37,7 +37,9 @@
     "all_eyebrow": "All competitions",
     "season_title": "Season overview",
     "season_subtitle": "All competitions for this league.",
-    "error_load": "Failed to load competitions"
+    "error_load": "Failed to load competitions",
+    "find_player": "Find a player",
+    "find_player_subtitle": "Titles, partners and rankings by season"
   },
   "specialty": {
     "back": "Competitions",
@@ -147,6 +149,42 @@
     "rank_a11y": "Rank {{rank}}",
     "empty": "The league publishes no ranking for this category.",
     "error_load": "Could not load the ranking."
+  },
+  "player": {
+    "title": "Player",
+    "eyebrow": "Player",
+    "stat_titles": "Titles",
+    "stat_runner_ups": "Runners-up",
+    "stat_seasons": "Seasons",
+    "stat_rankings": "Rankings",
+    "best_eyebrow": "By specialty",
+    "best_title": "Best ranks",
+    "best_empty": "No final ranking yet: every championship is still running.",
+    "titles_count_one": "{{count}} title",
+    "titles_count_other": "{{count}} titles",
+    "partners_eyebrow": "Partners",
+    "partners_title": "Played with",
+    "together_count_one": "{{count}} ranking together",
+    "together_count_other": "{{count}} rankings together",
+    "with": "With {{names}}",
+    "history_eyebrow": "History",
+    "history_title": "Season by season",
+    "empty": "No ranking found for this licence.",
+    "error_load": "Could not load this player's rankings.",
+    "open_hint": "Opens the player's statistics"
+  },
+  "player_search": {
+    "back": "Competitions",
+    "eyebrow": "Players",
+    "title": "Find a player",
+    "subtitle": "Search the league's championship rankings by name.",
+    "label": "Player name",
+    "placeholder": "Last name, first name",
+    "hint": "Type at least two letters of a name.",
+    "results_count_one": "{{count}} player",
+    "results_count_other": "{{count}} players",
+    "empty": "No player found with this name.",
+    "error_load": "Could not search the players."
   },
   "head": {
     "page_title": "{{screen}} · Kancha",

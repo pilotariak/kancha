@@ -37,7 +37,9 @@
     "all_eyebrow": "Toutes les compétitions",
     "season_title": "Aperçu de la saison",
     "season_subtitle": "Toutes les compétitions de cette ligue.",
-    "error_load": "Échec du chargement des compétitions"
+    "error_load": "Échec du chargement des compétitions",
+    "find_player": "Trouver un joueur",
+    "find_player_subtitle": "Titres, partenaires et classements par saison"
   },
   "specialty": {
     "back": "Compétitions",
@@ -147,6 +149,42 @@
     "rank_a11y": "Rang {{rank}}",
     "empty": "La ligue ne publie pas de classement pour cette catégorie.",
     "error_load": "Impossible de charger le classement."
+  },
+  "player": {
+    "title": "Joueur",
+    "eyebrow": "Joueur",
+    "stat_titles": "Titres",
+    "stat_runner_ups": "2es places",
+    "stat_seasons": "Saisons",
+    "stat_rankings": "Classements",
+    "best_eyebrow": "Par spécialité",
+    "best_title": "Meilleurs rangs",
+    "best_empty": "Aucun classement définitif pour l'instant : tous les championnats sont en cours.",
+    "titles_count_one": "{{count}} titre",
+    "titles_count_other": "{{count}} titres",
+    "partners_eyebrow": "Partenaires",
+    "partners_title": "A joué avec",
+    "together_count_one": "{{count}} classement ensemble",
+    "together_count_other": "{{count}} classements ensemble",
+    "with": "Avec {{names}}",
+    "history_eyebrow": "Historique",
+    "history_title": "Saison par saison",
+    "empty": "Aucun classement trouvé pour cette licence.",
+    "error_load": "Impossible de charger les classements de ce joueur.",
+    "open_hint": "Ouvre les statistiques du joueur"
+  },
+  "player_search": {
+    "back": "Compétitions",
+    "eyebrow": "Joueurs",
+    "title": "Trouver un joueur",
+    "subtitle": "Cherchez par nom dans les classements de championnat de la ligue.",
+    "label": "Nom du joueur",
+    "placeholder": "Nom, prénom",
+    "hint": "Saisissez au moins deux lettres d'un nom.",
+    "results_count_one": "{{count}} joueur",
+    "results_count_other": "{{count}} joueurs",
+    "empty": "Aucun joueur trouvé avec ce nom.",
+    "error_load": "Impossible de rechercher les joueurs."
   },
   "head": {
     "page_title": "{{screen}} · Kancha",

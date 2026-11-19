@@ -11,6 +11,8 @@ export const SCREEN_TITLE_KEYS: Readonly<Record<string, string>> = {
   "competitions/category": "category.title",
   "competitions/details": "head.results",
   "competitions/new": "new_competition.title",
+  "competitions/player": "player.title",
+  "competitions/player-search": "player_search.title",
   score: "score.tab",
   profile: "tabs.about",
   slot: "tabs.slot",
