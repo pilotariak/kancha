@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { useColorScheme } from "react-native";
 
 import { type ColorScheme, getPalette, type Palette } from "@/constants/colors";
@@ -10,6 +10,8 @@ export type Theme = {
   isDark: boolean;
 };
 
+const subscribeNever = () => () => {};
+
 /**
  * Resolves the active color scheme from the user's chosen mode
  * ("system" | "light" | "dark") and the OS appearance, then returns the
@@ -18,11 +20,17 @@ export type Theme = {
 export function useTheme(): Theme {
   const mode = useThemeStore((s) => s.mode);
   const system = useColorScheme();
+  // The static web render knows neither the browser appearance nor the saved
+  // mode, so it is always light. While React hydrates that HTML, the server
+  // snapshot (false) keeps the client on light too; React then re-renders with
+  // the real scheme. Native never hydrates, so it always reads true.
+  const hydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
 
   return useMemo(() => {
-    const scheme: ColorScheme = mode === "system" ? (system ?? "light") : mode;
+    const resolved: ColorScheme = mode === "system" ? (system ?? "light") : mode;
+    const scheme: ColorScheme = hydrated ? resolved : "light";
     return { scheme, colors: getPalette(scheme), isDark: scheme === "dark" };
-  }, [mode, system]);
+  }, [mode, system, hydrated]);
 }
 
 /**
