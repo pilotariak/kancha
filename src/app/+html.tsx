@@ -1,4 +1,4 @@
-import "@/i18n";
+import { hydrationI18n } from "@/i18n";
 
 import { ScrollViewStyleReset } from "expo-router/html";
 import React, { type PropsWithChildren } from "react";
@@ -13,12 +13,14 @@ const SHARE_IMAGE = `${SITE_URL}/icons/icon-512.png`;
 
 /**
  * HTML shell of every page in the static web export, rendered in Node at build
- * time (no DOM). The page `<title>` comes from `WebDocumentHead`: the static
- * renderer always injects the `Head` title first, so a `<title>` here would be
- * a second, ignored one.
+ * time (no DOM). It reads the English `hydrationI18n`, like the screens in the
+ * static HTML, so `lang` and the description match the page content whatever
+ * the build machine's locale. The page `<title>` comes from `WebDocumentHead`:
+ * the static renderer always injects the `Head` title first, so a `<title>`
+ * here would be a second, ignored one.
  */
 export default function Root({ children }: PropsWithChildren) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(undefined, { i18n: hydrationI18n });
   const description = t("head.description");
 
   return (
