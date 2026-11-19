@@ -40,6 +40,7 @@ Source = tuple[str, str]
 # Order matches the `Palette` type in colors.ts — it is the emitted field order.
 FIELDS: list[tuple[str, Source]] = [
     ("red", ("c", "primary")),
+    ("redFill", ("c", "brandFill")),
     ("redDark", ("c", "brandDark")),
     ("redSoft", ("c", "brandSoft")),
     ("white", ("c", "surfaceElevated")),

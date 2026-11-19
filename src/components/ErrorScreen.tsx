@@ -98,7 +98,7 @@ const makeStyles = (c: Palette) =>
       alignItems: "center",
       gap: 8,
       borderRadius: 999,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       paddingHorizontal: 22,
       paddingVertical: 14,
     },

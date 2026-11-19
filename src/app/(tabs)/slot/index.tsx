@@ -439,7 +439,7 @@ const makeStyles = (c: Palette) =>
     nextBadge: {
       flex: 1,
       borderRadius: 8,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       paddingHorizontal: 10,
       paddingVertical: 4,
       alignSelf: "center",

@@ -16,7 +16,7 @@ export function KanchaBackground({ children }: KanchaBackgroundProps) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[colors.red, colors.redDark, colors.cream]}
+        colors={[colors.redFill, colors.redDark, colors.cream]}
         locations={[0, 0.55, 1]}
         style={styles.topGlow}
       />

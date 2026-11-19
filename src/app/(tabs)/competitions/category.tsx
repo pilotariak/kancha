@@ -163,7 +163,7 @@ const makeStyles = (c: Palette) =>
     },
     heroCard: {
       borderRadius: 24,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       padding: 22,
       gap: 10,
     },

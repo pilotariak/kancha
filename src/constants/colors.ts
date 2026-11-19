@@ -1,5 +1,8 @@
 export type Palette = {
+  /** Red text and icons. */
   red: string;
+  /** Red surfaces under white text or icons: hero, score panel, buttons. */
+  redFill: string;
   redDark: string;
   redSoft: string;
   white: string;
@@ -30,6 +33,7 @@ export type Palette = {
 // Light palette — the original Kancha identity (cream canvas, Basque red).
 export const KanchaColorsLight: Palette = {
   red: "#C8102E",
+  redFill: "#C8102E",
   redDark: "#970D25",
   redSoft: "#FDE8EC",
   white: "#FFFFFF",
@@ -54,32 +58,34 @@ export const KanchaColorsLight: Palette = {
   tabIconInactive: "#B8B1AA",
 };
 
-// Dark palette — "fronton at night": warm near-black stone, red identity kept,
-// cream flips to become text. Reds/greens lifted for contrast on dark surfaces.
+// Dark palette — "Ikurriña": very dark forest-green surfaces, Basque red and
+// white text, the colors of the Basque flag. Red is lifted for text on dark
+// surfaces; redFill stays deep so white text on red keeps its contrast.
 export const KanchaColorsDark: Palette = {
-  red: "#E63950",
-  redDark: "#7E0A1E",
-  redSoft: "#3A1A20",
-  white: "#2E251F",
-  cream: "#17120F",
-  ink: "#F7F4EF",
-  text: "#E8E2DB",
-  muted: "#A69E95",
-  line: "#3A302A",
-  card: "#241C18",
-  panel: "#0E0B09",
-  green: "#3FA87E",
-  greenSoft: "#163026",
-  shadow: "rgba(0, 0, 0, 0.45)",
-  amber: "#E0A419",
-  amberBg: "#2E2410",
+  red: "#F5586E",
+  redFill: "#B5142F",
+  redDark: "#6E0C1E",
+  redSoft: "#36141B",
+  white: "#1A2922",
+  cream: "#0B1411",
+  ink: "#F3F7F4",
+  text: "#DCE6E0",
+  muted: "#97A89F",
+  line: "#25362E",
+  card: "#13201A",
+  panel: "#1E2E26",
+  green: "#3CC489",
+  greenSoft: "#12352A",
+  shadow: "rgba(0, 8, 4, 0.50)",
+  amber: "#E9AC2A",
+  amberBg: "#2A240F",
   onRedStrong: "rgba(255,255,255,0.90)",
   onRedSoft: "rgba(255,255,255,0.80)",
   heroCircleOne: "rgba(255,255,255,0.06)",
   heroCircleTwo: "rgba(255,255,255,0.04)",
-  tabBar: "#1C1511",
-  tabBarBorder: "#2C231D",
-  tabIconInactive: "#6F665E",
+  tabBar: "#0F1A15",
+  tabBarBorder: "#1F2D27",
+  tabIconInactive: "#5E7268",
 };
 
 export type ColorScheme = "light" | "dark";

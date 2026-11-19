@@ -55,7 +55,7 @@ const makeStyles = (c: Palette) =>
     link: {
       marginTop: 20,
       borderRadius: 999,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       paddingHorizontal: 18,
       paddingVertical: 12,
     },

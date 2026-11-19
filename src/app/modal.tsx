@@ -91,7 +91,7 @@ const makeStyles = (c: Palette) =>
       width: 42,
       height: 42,
       borderRadius: 14,
-      backgroundColor: c.red,
+      backgroundColor: c.redFill,
       alignItems: "center",
       justifyContent: "center",
     },
