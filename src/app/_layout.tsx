@@ -13,6 +13,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorScreen } from "@/components/ErrorScreen";
 import { LaunchScreen } from "@/components/launch-screen";
 import { useTheme } from "@/hooks/use-theme";
+import { useLeagueStore } from "@/store/league-store";
 
 // Expo Router renders this instead of a blank screen when any route subtree
 // throws during render; exported from the root layout so it catches app-wide.
@@ -20,7 +21,18 @@ export { ErrorScreen as ErrorBoundary };
 
 void SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
+// Frontis data changes a few times a day: keep it fresh for 5 minutes, so that
+// focusing the browser tab or remounting a screen does not refetch it.
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 5 * 60 * 1000 } },
+});
+
+// Query keys do not include the league (the API client sends it as a header),
+// so drop cached data when it changes instead of serving the previous league's
+// results as fresh.
+useLeagueStore.subscribe((state, prev) => {
+  if (state.selectedLeagueId !== prev.selectedLeagueId) void queryClient.resetQueries();
+});
 
 function RootLayoutNav() {
   const { t } = useTranslation();
