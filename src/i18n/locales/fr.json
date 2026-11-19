@@ -147,5 +147,12 @@
     "rank_a11y": "Rang {{rank}}",
     "empty": "La ligue ne publie pas de classement pour cette catégorie.",
     "error_load": "Impossible de charger le classement."
+  },
+  "head": {
+    "page_title": "{{screen}} · Kancha",
+    "description": "Les compétitions de pelote basque en un coup d'œil : résultats, tableaux et classements de championnat pour chaque ligue.",
+    "results": "Résultats",
+    "club_alerts": "Alertes du club",
+    "not_found": "Page introuvable"
   }
 }

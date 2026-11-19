@@ -147,5 +147,12 @@
     "rank_a11y": "{{rank}}. postua",
     "empty": "Ligak ez du kategoria honetarako sailkapenik argitaratzen.",
     "error_load": "Ezin izan da sailkapena kargatu."
+  },
+  "head": {
+    "page_title": "{{screen}} · Kancha",
+    "description": "Euskal pilotako txapelketak begirada batean: liga bakoitzeko emaitzak, taulak eta txapelketen sailkapenak.",
+    "results": "Emaitzak",
+    "club_alerts": "Klubaren alertak",
+    "not_found": "Orria ez da aurkitu"
   }
 }

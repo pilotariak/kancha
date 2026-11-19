@@ -147,5 +147,12 @@
     "rank_a11y": "Posición {{rank}}",
     "empty": "La liga no publica clasificación para esta categoría.",
     "error_load": "No se pudo cargar la clasificación."
+  },
+  "head": {
+    "page_title": "{{screen}} · Kancha",
+    "description": "Las competiciones de pelota vasca de un vistazo: resultados, cuadros y clasificaciones de campeonato de cada liga.",
+    "results": "Resultados",
+    "club_alerts": "Alertas del club",
+    "not_found": "Página no encontrada"
   }
 }

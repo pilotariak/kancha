@@ -147,5 +147,12 @@
     "rank_a11y": "Rank {{rank}}",
     "empty": "The league publishes no ranking for this category.",
     "error_load": "Could not load the ranking."
+  },
+  "head": {
+    "page_title": "{{screen}} · Kancha",
+    "description": "Basque pelota competitions at a glance: results, brackets and championship rankings for each league.",
+    "results": "Results",
+    "club_alerts": "Club alerts",
+    "not_found": "Page not found"
   }
 }

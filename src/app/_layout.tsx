@@ -12,6 +12,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorScreen } from "@/components/ErrorScreen";
 import { LaunchScreen } from "@/components/launch-screen";
+import { WebDocumentHead } from "@/components/WebDocumentHead";
 import { useTheme } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 
@@ -86,6 +87,7 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <StatusBar style="light" backgroundColor="transparent" translucent />
           <I18nextProvider i18n={hydrated ? i18n : hydrationI18n}>
+            <WebDocumentHead />
             {launching ? <LaunchScreen onFinish={handleLaunchFinish} /> : <RootLayoutNav />}
           </I18nextProvider>
         </SafeAreaProvider>
