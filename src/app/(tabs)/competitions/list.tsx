@@ -4,18 +4,19 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ArrowLeft } from "@/components/icons";
+import { ArrowLeft, ChevronRight, Search } from "@/components/icons";
 import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
 import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import { useCompetitions } from "@/hooks/use-competitions";
-import { useThemedStyles } from "@/hooks/use-theme";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 
 export default function CompetitionsListScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const { data: competitions, isPending, isError, error } = useCompetitions();
   const selectedLeagueId = useLeagueStore((s) => s.selectedLeagueId);
@@ -46,6 +47,26 @@ export default function CompetitionsListScreen() {
             <Text style={styles.title} accessibilityRole="header">{t("competitions.title")}</Text>
             {league && <Text style={styles.subtitle}>{league.name}</Text>}
           </View>
+
+          <PressableScale
+            style={styles.card}
+            onPress={() => router.push("/(tabs)/competitions/player-search")}
+            accessibilityRole="button"
+            accessibilityLabel={t("competitions.find_player")}
+            accessibilityHint={t("competitions.find_player_subtitle")}
+            testID="find-player-card"
+          >
+            <View style={styles.searchRow}>
+              <View style={styles.searchIcon}>
+                <Search color={colors.red} size={18} />
+              </View>
+              <View style={styles.searchBody}>
+                <Text style={styles.cardTitle}>{t("competitions.find_player")}</Text>
+                <Text style={styles.cardMeta}>{t("competitions.find_player_subtitle")}</Text>
+              </View>
+              <ChevronRight color={colors.muted} size={18} />
+            </View>
+          </PressableScale>
 
           {isPending && (
             <View style={styles.centered}>
@@ -162,4 +183,14 @@ const makeStyles = (c: Palette) =>
     cardTitle: { color: c.ink, fontSize: 18, fontWeight: "800", flex: 1 },
     cardLevel: { color: c.muted, fontSize: 13, fontWeight: "600" },
     cardMeta: { color: c.muted, fontSize: 13 },
+    searchRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+    searchIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: c.redSoft,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    searchBody: { flex: 1, gap: 2 },
   });

@@ -37,7 +37,9 @@
     "all_eyebrow": "Todas las competiciones",
     "season_title": "Resumen de temporada",
     "season_subtitle": "Todas las competiciones de esta liga.",
-    "error_load": "Error al cargar las competiciones"
+    "error_load": "Error al cargar las competiciones",
+    "find_player": "Buscar un jugador",
+    "find_player_subtitle": "Títulos, compañeros y clasificaciones por temporada"
   },
   "specialty": {
     "back": "Competiciones",
@@ -147,6 +149,42 @@
     "rank_a11y": "Posición {{rank}}",
     "empty": "La liga no publica clasificación para esta categoría.",
     "error_load": "No se pudo cargar la clasificación."
+  },
+  "player": {
+    "title": "Jugador",
+    "eyebrow": "Jugador",
+    "stat_titles": "Títulos",
+    "stat_runner_ups": "Subcampeonatos",
+    "stat_seasons": "Temporadas",
+    "stat_rankings": "Clasificaciones",
+    "best_eyebrow": "Por especialidad",
+    "best_title": "Mejores posiciones",
+    "best_empty": "Aún no hay clasificación definitiva: todos los campeonatos siguen en curso.",
+    "titles_count_one": "{{count}} título",
+    "titles_count_other": "{{count}} títulos",
+    "partners_eyebrow": "Compañeros",
+    "partners_title": "Ha jugado con",
+    "together_count_one": "{{count}} clasificación juntos",
+    "together_count_other": "{{count}} clasificaciones juntos",
+    "with": "Con {{names}}",
+    "history_eyebrow": "Historial",
+    "history_title": "Temporada a temporada",
+    "empty": "No se encontró ninguna clasificación para esta licencia.",
+    "error_load": "No se pudieron cargar las clasificaciones de este jugador.",
+    "open_hint": "Abre las estadísticas del jugador"
+  },
+  "player_search": {
+    "back": "Competiciones",
+    "eyebrow": "Jugadores",
+    "title": "Buscar un jugador",
+    "subtitle": "Busca por nombre en las clasificaciones de campeonato de la liga.",
+    "label": "Nombre del jugador",
+    "placeholder": "Apellido, nombre",
+    "hint": "Escribe al menos dos letras de un nombre.",
+    "results_count_one": "{{count}} jugador",
+    "results_count_other": "{{count}} jugadores",
+    "empty": "No se encontró ningún jugador con este nombre.",
+    "error_load": "No se pudo buscar a los jugadores."
   },
   "head": {
     "page_title": "{{screen}} · Kancha",

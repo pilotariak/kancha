@@ -64,3 +64,10 @@ export interface TeamRanking {
   final: boolean;
   players: RankedPlayer[];
 }
+
+/** A team ranking from `playerRankings`, which also names its competition, specialty and category. */
+export interface PlayerRanking extends TeamRanking {
+  competition: Competition;
+  specialty: Specialty;
+  category: Category;
+}
