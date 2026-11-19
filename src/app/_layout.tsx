@@ -1,11 +1,12 @@
-import "@/i18n";
+import i18n, { hydrationI18n } from "@/i18n";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { I18nextProvider, useTranslation } from "react-i18next";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -49,10 +50,19 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [launching, setLaunching] = useState(true);
+  // On web the static HTML already holds the route, so show it at once instead
+  // of the launch animation. Platform.OS is "web" in both the static render and
+  // the browser, so hydration sees the same tree.
+  const [launching, setLaunching] = useState(Platform.OS !== "web");
+  // False on web until the root has hydrated, so screens hydrate the English
+  // static HTML with hydrationI18n. Flipping this state, not the global
+  // language, makes React hydrate each pending route boundary with the old
+  // value before it applies the switch.
+  const [hydrated, setHydrated] = useState(Platform.OS !== "web");
 
   useEffect(() => {
     void SplashScreen.hideAsync();
+    setHydrated(true);
   }, []);
 
   const handleLaunchFinish = useCallback(() => {
@@ -64,8 +74,10 @@ export default function RootLayout() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <StatusBar style="light" backgroundColor="transparent" translucent />
-          <WebDocumentHead />
-          {launching ? <LaunchScreen onFinish={handleLaunchFinish} /> : <RootLayoutNav />}
+          <I18nextProvider i18n={hydrated ? i18n : hydrationI18n}>
+            <WebDocumentHead />
+            {launching ? <LaunchScreen onFinish={handleLaunchFinish} /> : <RootLayoutNav />}
+          </I18nextProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
