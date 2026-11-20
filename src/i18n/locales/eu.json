@@ -70,7 +70,6 @@
     "progress_other": "{{played}} / {{count}} partida jokatuta",
     "finished": "Amaituta",
     "specialty_hint": "Espezialitateen zerrenda irekitzen du",
-    "phase_label": "{{round}} {{number}}",
     "today": "Gaur",
     "winner": "Irabazlea"
   },
@@ -87,6 +86,19 @@
     "D": "Erdifinalak",
     "F": "Finala",
     "other": "Partidak"
+  },
+  "rounds_match": {
+    "P": "{{number}}. taldea",
+    "B1T": "1. txandako {{number}}. barragea",
+    "B2T": "2. txandako {{number}}. barragea",
+    "B3T": "3. txandako {{number}}. barragea",
+    "B": "Barragea {{number}}",
+    "BM": "Mailari eusteko barragea {{number}}",
+    "S": "{{number}}. hamaseirena",
+    "H": "{{number}}. zortzirena",
+    "Q": "{{number}}. laurdenfinala",
+    "D": "{{number}}. erdifinala",
+    "F": "Finala {{number}}"
   },
   "about": {
     "tagline": "Pilota txapelketa kudeatzailea",

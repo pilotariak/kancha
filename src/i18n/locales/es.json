@@ -70,7 +70,6 @@
     "progress_other": "{{played}} / {{count}} partidos jugados",
     "finished": "Finalizado",
     "specialty_hint": "Abre la lista de especialidades",
-    "phase_label": "{{round}} {{number}}",
     "today": "Hoy",
     "winner": "Ganador"
   },
@@ -87,6 +86,19 @@
     "D": "Semifinales",
     "F": "Final",
     "other": "Partidos"
+  },
+  "rounds_match": {
+    "P": "Grupo {{number}}",
+    "B1T": "Repechaje 1ª ronda {{number}}",
+    "B2T": "Repechaje 2ª ronda {{number}}",
+    "B3T": "Repechaje 3ª ronda {{number}}",
+    "B": "Repechaje {{number}}",
+    "BM": "Repechaje de permanencia {{number}}",
+    "S": "Dieciseisavo de final {{number}}",
+    "H": "Octavo de final {{number}}",
+    "Q": "Cuarto de final {{number}}",
+    "D": "Semifinal {{number}}",
+    "F": "Final {{number}}"
   },
   "about": {
     "tagline": "Gestor de torneos de pelota",

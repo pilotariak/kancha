@@ -70,7 +70,6 @@
     "progress_other": "{{played}} / {{count}} parties jouées",
     "finished": "Terminé",
     "specialty_hint": "Ouvre la liste des spécialités",
-    "phase_label": "{{round}} {{number}}",
     "today": "Aujourd'hui",
     "winner": "Vainqueur"
   },
@@ -87,6 +86,19 @@
     "D": "Demi-finales",
     "F": "Finale",
     "other": "Parties"
+  },
+  "rounds_match": {
+    "P": "Poule {{number}}",
+    "B1T": "Barrage 1er tour {{number}}",
+    "B2T": "Barrage 2e tour {{number}}",
+    "B3T": "Barrage 3e tour {{number}}",
+    "B": "Barrage {{number}}",
+    "BM": "Barrage maintien {{number}}",
+    "S": "Seizième de finale {{number}}",
+    "H": "Huitième de finale {{number}}",
+    "Q": "Quart de finale {{number}}",
+    "D": "Demi-finale {{number}}",
+    "F": "Finale {{number}}"
   },
   "about": {
     "tagline": "Gestionnaire de tournois de pelote",
