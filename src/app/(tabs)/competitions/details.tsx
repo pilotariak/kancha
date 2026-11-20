@@ -24,6 +24,7 @@ import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import { dateTone, formatMatchDate } from "@/features/competitions/matchDate";
+import { matchPhaseLabel, parsePhase } from "@/features/competitions/matchPhase";
 import { matchProgress } from "@/features/competitions/matchProgress";
 import { parseMatchScore } from "@/features/competitions/matchScore";
 import {
@@ -48,22 +49,7 @@ import {
 import type { PhaseColors, PhaseType } from "@/components/BracketView";
 import type { Result } from "@/types/competition";
 
-// ─── Phase parsing ────────────────────────────────────────────────────────────
-
-interface ParsedPhase {
-  type: PhaseType;
-  number: number;
-}
-
-function parsePhase(phase?: string): ParsedPhase {
-  if (!phase) return { type: "other", number: 0 };
-  // Match B1T/B2T/B3T, then BM (ctpb barrage maintien), then a bare B (ctpb
-  // barrage), then single letters P/Q/D/F/H/S. Order matters: longer/more
-  // specific patterns come first so "BM"/"B1T" aren't swallowed by bare "B".
-  const m = phase.match(/(B[123]T|BM|B|[PQDFHS])\s*(\d+)\s*$/);
-  if (!m) return { type: "other", number: 0 };
-  return { type: m[1] as PhaseType, number: parseInt(m[2], 10) };
-}
+// ─── Grouping ─────────────────────────────────────────────────────────────────
 
 const ROUND_ORDER: Record<PhaseType, number> = {
   P: 0,
@@ -79,8 +65,6 @@ const ROUND_ORDER: Record<PhaseType, number> = {
   F: 10,
   other: 11,
 };
-
-// ─── Grouping ─────────────────────────────────────────────────────────────────
 
 function groupByRound(results: Result[]): RoundGroup[] {
   const map = new Map<PhaseType, Result[]>();
@@ -144,11 +128,7 @@ function MatchCard(
   const { t, i18n } = useTranslation();
   const styles = useThemedStyles(makeStyles);
   const hasScore = parseMatchScore(result.scores) != null;
-  const { number } = parsePhase(result.phase);
-  // "P 3" reads "Pools 3"; a phase the parser does not know is shown as Frontis sent it.
-  const phaseLabel = phaseType === "other"
-    ? result.phase ?? ""
-    : t("details.phase_label", { round: t(`rounds.${phaseType}`), number });
+  const phaseLabel = matchPhaseLabel(result.phase, t);
   // The language the strings resolved to, so a "de" device gets an English date too.
   const dateLabel = formatMatchDate(result.dateMatch, i18n.resolvedLanguage ?? "en");
   const todayTone = dateTone(result.dateMatch);
