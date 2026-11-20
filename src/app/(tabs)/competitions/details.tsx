@@ -1,4 +1,4 @@
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,17 +14,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
-import {
-  ArrowLeft,
-  LayoutList,
-  ListOrdered,
-  Network,
-  Swords,
-  Trophy,
-  Users,
-} from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
+import { LayoutList, ListOrdered, Network, Swords, Trophy, Users } from "@/components/icons";
 import { RankingView } from "@/components/RankingView";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { dateTone, formatMatchDate } from "@/features/competitions/matchDate";
@@ -242,6 +234,7 @@ function ViewToggle(
 
 export default function CompetitionDetailsScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const { id, specialtyId, categoryId } = useLocalSearchParams<{
     id: string;
@@ -268,45 +261,22 @@ export default function CompetitionDetailsScreen() {
   const pendingMatches = totalMatches - playedMatches;
 
   return (
-    <KanchaBackground>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          testID="competition-details-screen"
-        >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel={t("details.back")}
-          >
-            <ArrowLeft color="#FFFFFF" size={20} />
-            <Text style={styles.backLabel}>{t("details.back")}</Text>
-          </Pressable>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        testID="competition-details-screen"
+      >
+        <ScreenHeader
+          backLabel={t("details.back")}
+          title={competition?.name ?? t("common.competition_fallback")}
+          subtitle={[competition?.year, competition?.level].filter(Boolean).join(" · ")}
+          loading={loadingComp}
+        />
 
-          {/* Hero */}
-          <View style={styles.heroCard}>
-            <View style={styles.heroIcon}>
-              <Trophy color="#FFFFFF" size={20} />
-            </View>
-            {loadingComp
-              ? <ActivityIndicator color="#FFFFFF" accessibilityLabel={t("common.loading")} />
-              : (
-                <>
-                  <Text style={styles.heroTitle} accessibilityRole="header">
-                    {competition?.name ?? t("common.competition_fallback")}
-                  </Text>
-                  {(competition?.year != null || competition?.level) && (
-                    <Text style={styles.heroMeta}>
-                      {[competition?.year, competition?.level].filter(Boolean).join(" · ")}
-                    </Text>
-                  )}
-                </>
-              )}
-          </View>
-
+        <View style={styles.body}>
           {/* Context badges */}
           {(specialtyId || categoryId) && (
             <View style={styles.badgeRow}>
@@ -351,7 +321,7 @@ export default function CompetitionDetailsScreen() {
                 {loadingResults && (
                   <View style={styles.centered}>
                     <ActivityIndicator
-                      color="#FFFFFF"
+                      color={colors.red}
                       size="large"
                       accessibilityLabel={t("common.loading")}
                     />
@@ -402,9 +372,9 @@ export default function CompetitionDetailsScreen() {
                 )}
               </>
             )}
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -412,38 +382,10 @@ export default function CompetitionDetailsScreen() {
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 20,
-    },
-    backButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      marginBottom: 4,
-    },
-    backLabel: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
-
-    // Hero
-    heroCard: {
-      borderRadius: 24,
-      backgroundColor: c.redFill,
-      padding: 22,
-      gap: 10,
-    },
-    heroIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
-      backgroundColor: "rgba(0,0,0,0.2)",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    heroTitle: { color: "#FFFFFF", fontSize: 28, fontWeight: "900" },
-    heroMeta: { color: "rgba(255,255,255,0.78)", fontSize: 14, fontWeight: "600" },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 20, gap: 20 },
 
     // Context badges
     badgeRow: { flexDirection: "row", gap: 8 },

@@ -4,8 +4,8 @@ import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CalendarClock, MapPin, Plus } from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
@@ -142,25 +142,23 @@ export default function SlotScreen() {
   const totalSessions = listData.filter((r) => r.type === "session").length;
 
   return (
-    <KanchaBackground>
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <FlatList
-          data={listData}
-          keyExtractor={(item) => item.key}
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          testID="slot-screen"
-          ListHeaderComponent={
-            <>
-              {/* ── Hero ── */}
-              <View style={styles.hero}>
-                <Text style={styles.eyebrow}>Créneau récurrent</Text>
-                <Text style={styles.title} accessibilityRole="header">Slot</Text>
-                <Text style={styles.subtitle}>
-                  {`${totalSessions} séances · ${SLOT_CONFIG.playerCount} joueurs`}
-                </Text>
-              </View>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.key}
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        testID="slot-screen"
+        ListHeaderComponent={
+          <>
+            <ScreenHeader
+              eyebrow="Créneau récurrent"
+              title="Slot"
+              subtitle={`${totalSessions} séances · ${SLOT_CONFIG.playerCount} joueurs`}
+            />
 
+            <View style={styles.headerBody}>
               {/* ── Config card ── */}
               <View style={styles.configCard}>
                 <Text style={styles.configSeason}>{SLOT_CONFIG.seasonName}</Text>
@@ -202,135 +200,120 @@ export default function SlotScreen() {
                   <Text style={styles.legendText}>Dispo</Text>
                 </View>
               </View>
-            </>
-          }
-          renderItem={({ item }) => {
-            if (item.type === "month") {
-              return (
-                <View style={styles.monthRow} testID={`month-${item.key}`}>
-                  <Text style={styles.monthLabel}>{item.label}</Text>
-                </View>
-              );
-            }
-
-            // session row
-            const session = item as SessionRow;
-            const day = session.date.getDate();
-            const dayLabel = DAY_LABELS[session.date.getDay()];
-
+            </View>
+          </>
+        }
+        renderItem={({ item }) => {
+          if (item.type === "month") {
             return (
-              <View
-                style={[
-                  styles.sessionRow,
-                  session.isPast ? styles.sessionRowPast : null,
-                  session.isNext ? styles.sessionRowNext : null,
-                ]}
-                testID={`session-row-${session.key}`}
-              >
-                {/* Date block */}
-                <View
-                  style={[
-                    styles.dateBlock,
-                    session.isNext ? styles.dateBlockNext : null,
-                    session.isPast ? styles.dateBlockPast : null,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.dateDay,
-                      session.isNext ? styles.dateDayNext : null,
-                      session.isPast ? styles.dateDayPast : null,
-                    ]}
-                  >
-                    {day}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.dateDayLabel,
-                      session.isNext ? styles.dateDayLabelNext : null,
-                      session.isPast ? styles.dateDayLabelPast : null,
-                    ]}
-                  >
-                    {dayLabel}
-                  </Text>
-                </View>
-
-                {/* "Prochain" badge */}
-                {session.isNext && (
-                  <View style={styles.nextBadge}>
-                    <Text style={styles.nextBadgeText}>Prochain</Text>
-                  </View>
-                )}
-
-                {/* Spacer so counters align right */}
-                {!session.isNext && <View style={styles.flex} />}
-
-                {/* Counters */}
-                <View style={styles.counters}>
-                  <View style={styles.counter}>
-                    <View style={[styles.counterDot, { backgroundColor: colors.green }]} />
-                    <Text
-                      style={[
-                        styles.counterValue,
-                        session.isPast ? styles.counterValuePast : null,
-                      ]}
-                    >
-                      {session.ok}
-                    </Text>
-                  </View>
-                  <View style={styles.counter}>
-                    <View style={[styles.counterDot, { backgroundColor: "#E53935" }]} />
-                    <Text
-                      style={[
-                        styles.counterValue,
-                        session.isPast ? styles.counterValuePast : null,
-                      ]}
-                    >
-                      {session.ko}
-                    </Text>
-                  </View>
-                  <View style={styles.counter}>
-                    <View style={[styles.counterDot, { backgroundColor: "#D4A017" }]} />
-                    <Text
-                      style={[
-                        styles.counterValue,
-                        session.isPast ? styles.counterValuePast : null,
-                      ]}
-                    >
-                      {session.disponible}
-                    </Text>
-                  </View>
-                </View>
+              <View style={styles.monthRow} testID={`month-${item.key}`}>
+                <Text style={styles.monthLabel}>{item.label}</Text>
               </View>
             );
-          }}
-        />
-      </SafeAreaView>
-    </KanchaBackground>
+          }
+
+          // session row
+          const session = item as SessionRow;
+          const day = session.date.getDate();
+          const dayLabel = DAY_LABELS[session.date.getDay()];
+
+          return (
+            <View
+              style={[
+                styles.sessionRow,
+                session.isPast ? styles.sessionRowPast : null,
+                session.isNext ? styles.sessionRowNext : null,
+              ]}
+              testID={`session-row-${session.key}`}
+            >
+              {/* Date block */}
+              <View
+                style={[
+                  styles.dateBlock,
+                  session.isNext ? styles.dateBlockNext : null,
+                  session.isPast ? styles.dateBlockPast : null,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.dateDay,
+                    session.isNext ? styles.dateDayNext : null,
+                    session.isPast ? styles.dateDayPast : null,
+                  ]}
+                >
+                  {day}
+                </Text>
+                <Text
+                  style={[
+                    styles.dateDayLabel,
+                    session.isNext ? styles.dateDayLabelNext : null,
+                    session.isPast ? styles.dateDayLabelPast : null,
+                  ]}
+                >
+                  {dayLabel}
+                </Text>
+              </View>
+
+              {/* "Prochain" badge */}
+              {session.isNext && (
+                <View style={styles.nextBadge}>
+                  <Text style={styles.nextBadgeText}>Prochain</Text>
+                </View>
+              )}
+
+              {/* Spacer so counters align right */}
+              {!session.isNext && <View style={styles.flex} />}
+
+              {/* Counters */}
+              <View style={styles.counters}>
+                <View style={styles.counter}>
+                  <View style={[styles.counterDot, { backgroundColor: colors.green }]} />
+                  <Text
+                    style={[
+                      styles.counterValue,
+                      session.isPast ? styles.counterValuePast : null,
+                    ]}
+                  >
+                    {session.ok}
+                  </Text>
+                </View>
+                <View style={styles.counter}>
+                  <View style={[styles.counterDot, { backgroundColor: "#E53935" }]} />
+                  <Text
+                    style={[
+                      styles.counterValue,
+                      session.isPast ? styles.counterValuePast : null,
+                    ]}
+                  >
+                    {session.ko}
+                  </Text>
+                </View>
+                <View style={styles.counter}>
+                  <View style={[styles.counterDot, { backgroundColor: "#D4A017" }]} />
+                  <Text
+                    style={[
+                      styles.counterValue,
+                      session.isPast ? styles.counterValuePast : null,
+                    ]}
+                  >
+                    {session.disponible}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          );
+        }}
+      />
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 10,
-    },
-
-    // Hero
-    hero: { gap: 6, marginBottom: 8 },
-    eyebrow: {
-      color: "rgba(255,255,255,0.78)",
-      fontSize: 12,
-      fontWeight: "800",
-      letterSpacing: 1.5,
-      textTransform: "uppercase",
-    },
-    title: { color: "#FFFFFF", fontSize: 34, fontWeight: "900" },
-    subtitle: { color: "rgba(255,255,255,0.82)", fontSize: 14 },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120, gap: 10 },
+    headerBody: { paddingHorizontal: 20, paddingTop: 22, gap: 10 },
 
     // Config card
     configCard: {
@@ -376,6 +359,7 @@ const makeStyles = (c: Palette) =>
 
     // Month separator
     monthRow: {
+      marginHorizontal: 20,
       paddingTop: 10,
       paddingBottom: 4,
       paddingHorizontal: 2,
@@ -390,6 +374,7 @@ const makeStyles = (c: Palette) =>
 
     // Session row
     sessionRow: {
+      marginHorizontal: 20,
       flexDirection: "row",
       alignItems: "center",
       gap: 12,

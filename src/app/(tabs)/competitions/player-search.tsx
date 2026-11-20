@@ -12,9 +12,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ArrowLeft, ChevronRight, RotateCcw, Search, User } from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
+import { ChevronRight, RotateCcw, Search, User } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { findPlayers, searchWords } from "@/features/players/name-match";
 import { usePlayerSearch } from "@/hooks/use-players";
@@ -47,33 +47,23 @@ export default function PlayerSearchScreen() {
   const players = rankings ? findPlayers(rankings, debouncedQuery) : [];
 
   return (
-    <KanchaBackground>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          testID="player-search-screen"
-        >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel={t("player_search.back")}
-          >
-            <ArrowLeft color="#FFFFFF" size={20} />
-            <Text style={styles.backLabel}>{t("player_search.back")}</Text>
-          </Pressable>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        testID="player-search-screen"
+      >
+        <ScreenHeader
+          backLabel={t("player_search.back")}
+          eyebrow={t("player_search.eyebrow")}
+          title={t("player_search.title")}
+          subtitle={t("player_search.subtitle")}
+        />
 
-          <View style={styles.hero}>
-            <Text style={styles.eyebrow}>{t("player_search.eyebrow")}</Text>
-            <Text style={styles.title} accessibilityRole="header">
-              {t("player_search.title")}
-            </Text>
-            <Text style={styles.subtitle}>{t("player_search.subtitle")}</Text>
-          </View>
-
+        <View style={styles.body}>
           <View style={styles.searchBox}>
             <Search color={colors.muted} size={18} />
             <TextInput
@@ -171,38 +161,18 @@ export default function PlayerSearchScreen() {
               </View>
             </View>
           )}
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 22,
-    },
-    backButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      marginBottom: 4,
-    },
-    backLabel: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
-    hero: { gap: 6 },
-    eyebrow: {
-      color: c.onRedSoft,
-      fontSize: 12,
-      fontWeight: "800",
-      letterSpacing: 1.5,
-      textTransform: "uppercase",
-    },
-    title: { color: "#FFFFFF", fontSize: 34, fontWeight: "900" },
-    subtitle: { color: c.onRedStrong, fontSize: 14, lineHeight: 20 },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 22, gap: 22 },
 
     // Search field
     searchBox: {

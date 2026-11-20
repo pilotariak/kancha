@@ -15,10 +15,8 @@ meta:
   # color schema but still need a single source of truth. Ignored by the linter.
   cssExtras:
     shadow: "rgba(103, 18, 31, 0.14)"
-    on-red-strong: "rgba(255,255,255,0.82)"
-    on-red-soft: "rgba(255,255,255,0.78)"
-    hero-circle-one: "rgba(255,255,255,0.08)"
-    hero-circle-two: "rgba(255,255,255,0.06)"
+    on-red-strong: "rgba(255,255,255,0.90)"
+    on-red-soft: "rgba(255,255,255,0.86)"
   # darkColors — full "Ikurriña" dark palette: very dark forest-green surfaces,
   # Basque red and white text, the three colors of the Basque flag. The
   # design.md standard is single-scheme, so the dark variant lives here (every
@@ -45,8 +43,6 @@ meta:
     amberBg: "#2A240F"
     onRedStrong: "rgba(255,255,255,0.90)"
     onRedSoft: "rgba(255,255,255,0.80)"
-    heroCircleOne: "rgba(255,255,255,0.06)"
-    heroCircleTwo: "rgba(255,255,255,0.04)"
     tabBar: "#0F1A15"
     tabBarBorder: "#1F2D27"
     tabIconInactive: "#5E7268"
@@ -58,8 +54,8 @@ meta:
 colors:
   primary: "#C8102E"           # Basque Red — brand anchor, CTAs, hero, scores
   brand: "#C8102E"             # Basque Red — alias of primary
-  brandFill: "#C8102E"         # Basque Red Fill — red surfaces under white text (hero, score panel, buttons)
-  brandDark: "#970D25"         # Fronton Dark Red — gradient stop, pressed, error text
+  brandFill: "#C8102E"         # Basque Red Fill — red surfaces under white text (header band, score panel, buttons)
+  brandDark: "#970D25"         # Fronton Dark Red — pressed, error text
   brandSoft: "#FDE8EC"         # Blush Soft Red — error backgrounds, score chips
   background: "#F7F4EF"        # Warm Limestone Cream — screen canvas (never white)
   surface: "#FFFDFC"           # Pearl Card White — list cards
@@ -275,16 +271,16 @@ components:
 **Core philosophy:**
 
 - A **cream white canvas** (`#F7F4EF`) grounds every screen — never pure white, never cold.
-- A **Basque red** (`#C8102E`) is the single dominant brand color. It drives the hero zone, primary actions, and featured content. It earns every pixel it occupies.
+- A **Basque red** (`#C8102E`) is the single dominant brand color. It drives the header band, primary actions, and featured content. It earns every pixel it occupies.
 - **Dark ink** (`#141414`) for headings and body text. Near-black, not pure black — warm and legible.
 - **Elevation through cards**, not shadows alone. White or cream cards on a cream background are separated by a warm `line` border (`#E5DED6`).
-- The top of every screen runs a **red-to-cream linear gradient** (0 → 300 px), creating a natural hero zone without hard edges.
+- The top of every screen is a **solid red header band** (`redFill`), sized by its content, with 24 px bottom corners. Only the screen header sits on it, in white; everything below it sits on cream. No gradient, so no text ever lands on a half-red, half-cream background.
 
 **Key characteristics:**
 
 - Mobile-first. 20 px horizontal gutters, 24 px card radii, generous touch targets (min 44 pt).
 - **No decorative imagery** — the typography and color do all the expressive work.
-- **Phase-driven layouts**: hero section (red zone) → section header (cream transition) → card list (cream field).
+- **Phase-driven layouts**: header band (solid red) → section header (cream) → card list (cream).
 - Rounded, confident geometry. No sharp corners below 12 px radius.
 
 ---
@@ -294,8 +290,8 @@ components:
 ### Brand & Primary
 
 - **Red** (`#C8102E`): Primary brand color. Red text and icons (scores, errors, active tab indicator). Use at full opacity only — never tint arbitrarily.
-- **Red Fill** (`#C8102E`): Red surfaces that carry white text or icons — hero cards, the top of the hero gradient, the score panel, CTA buttons, the active toggle pill. Same value as Red in light; in dark it stays deep so white text keeps 4.5:1 while Red brightens for text on dark surfaces.
-- **Red Dark** (`#970D25`): Darker red for pressed states, gradient bottom stop, error text on light surfaces.
+- **Red Fill** (`#C8102E`): Red surfaces that carry white text or icons — the screen header band, hero cards, the score panel, CTA buttons, the active toggle pill. Same value as Red in light; in dark it stays deep so white text keeps 4.5:1 while Red brightens for text on dark surfaces.
+- **Red Dark** (`#970D25`): Darker red for pressed states and error text on light surfaces.
 - **Red Soft** (`#FDE8EC`): Light pink tint for error state backgrounds, score badge chips on light cards.
 
 ### Canvas & Surfaces
@@ -329,31 +325,31 @@ The dark palette (`meta.darkColors`) takes the three colors of the Basque flag: 
 
 - **Canvas** (`#0B1411`), **Card** (`#13201A`), **White** (`#1A2922`): three green-black steps, from screen background to elevated match cards.
 - **Red** (`#F5586E`): lifted so red text, scores and pills reach 4.5:1 on every dark surface.
-- **Red Fill** (`#B5142F`): deep red for surfaces under white text — the hero, the score panel and red buttons stay at 4.5:1 or more.
+- **Red Fill** (`#B5142F`): deep red for surfaces under white text — the header band, the score panel and red buttons stay at 4.5:1 or more.
 - **Panel** (`#1E2E26`): the dark score panel, one step lighter than the cards.
 - Every text pair meets WCAG AA (4.5:1); inactive tab icons meet 3:1.
 
 ### Reference table
 
-| Role           | Value                  | Usage                              |
-| -------------- | ---------------------- | ---------------------------------- |
-| `--red`        | `#C8102E`              | Brand, red text, scores, icons     |
-| `--red-fill`   | `#C8102E`              | Hero, CTAs, red under white text   |
-| `--red-dark`   | `#970D25`              | Gradient stop, pressed, error text |
-| `--red-soft`   | `#FDE8EC`              | Error bg, score chips              |
-| `--cream`      | `#F7F4EF`              | Screen background                  |
-| `--card`       | `#FFFDFC`              | List card background               |
-| `--white`      | `#FFFFFF`              | Match cards, modals                |
-| `--line`       | `#E5DED6`              | Borders, dividers                  |
-| `--ink`        | `#141414`              | Headings, titles                   |
-| `--text`       | `#262626`              | Body text                          |
-| `--muted`      | `#7A7A7A`              | Secondary text, metadata           |
-| `--green`      | `#1F7A5A`              | Success, live/today indicator      |
-| `--green-soft` | `#E6F4EE`              | Success pill background            |
-| `--shadow`     | `rgba(103,18,31,0.14)` | Elevated card shadow               |
-| `--panel`      | `#1E1E1E`              | Dark inset on red backgrounds      |
-| `--amber`      | `#C8900A`              | Finale/final round highlight       |
-| `--amber-bg`   | `#FFF8E7`              | Finale pill background             |
+| Role           | Value                  | Usage                          |
+| -------------- | ---------------------- | ------------------------------ |
+| `--red`        | `#C8102E`              | Brand, red text, scores, icons |
+| `--red-fill`   | `#C8102E`              | Header band, CTAs, under white |
+| `--red-dark`   | `#970D25`              | Pressed, error text            |
+| `--red-soft`   | `#FDE8EC`              | Error bg, score chips          |
+| `--cream`      | `#F7F4EF`              | Screen background              |
+| `--card`       | `#FFFDFC`              | List card background           |
+| `--white`      | `#FFFFFF`              | Match cards, modals            |
+| `--line`       | `#E5DED6`              | Borders, dividers              |
+| `--ink`        | `#141414`              | Headings, titles               |
+| `--text`       | `#262626`              | Body text                      |
+| `--muted`      | `#7A7A7A`              | Secondary text, metadata       |
+| `--green`      | `#1F7A5A`              | Success, live/today indicator  |
+| `--green-soft` | `#E6F4EE`              | Success pill background        |
+| `--shadow`     | `rgba(103,18,31,0.14)` | Elevated card shadow           |
+| `--panel`      | `#1E1E1E`              | Dark inset on red backgrounds  |
+| `--amber`      | `#C8900A`              | Finale/final round highlight   |
+| `--amber-bg`   | `#FFF8E7`              | Finale pill background         |
 
 ---
 
@@ -413,7 +409,7 @@ Shadow:        rgba(103,18,31,0.14) 0 4px 16px
 Background:   #171717 or #1E1E1E
 Text/Icon:    #FFFFFF
 Border-radius: 18px (54×54 square FAB)
-Usage:        Create/add action button within red hero zone
+Usage:        Create/add action button in the header band's trailing slot
 ```
 
 ### Cards — Competition / Picker
@@ -435,7 +431,7 @@ Background:   #C8102E
 Border-radius: 24px
 Padding:       20–22px
 Title:         #FFFFFF, 26–28px, weight 900
-Eyebrow:       rgba(255,255,255,0.7), 12px, weight 800, uppercase
+Eyebrow:       onRedSoft, 12px, weight 800, uppercase
 Sub panel:     #161616 bg, #FFFFFF text — inset dark chip for metadata
 Footer:        white text + ChevronRight icon, space-between layout
 ```
@@ -499,7 +495,31 @@ Final variant:
   Icon:        Trophy (gold)
 ```
 
+### Screen Header (red band)
+
+`ScreenHeader` (`src/components/ScreenHeader.tsx`): the one header for every screen.
+
+```
+Background:   redFill, solid, full width, sized by its content
+Corners:      24px bottom-left and bottom-right (rounded.hero), square top
+Padding:      12px top, 20px sides, 24px bottom; 16px between back link and text
+Back link:    optional, ArrowLeft 20px + label, #FFFFFF 15px weight 600
+Eyebrow:      optional, onRedSoft, 12px, weight 800, uppercase, +1.5px tracking
+Title:        #FFFFFF, 34px, weight 900, line-height 37px, accessibilityRole "header"
+Subtitle:     optional, onRedStrong, 14px, line-height 20px
+Trailing:     optional slot right of the text, 16px gap (the About logo, an action button)
+Loading:      white spinner in place of the title and subtitle
+```
+
+| Pair (on redFill)                  | Light (`#C8102E`) | Dark (`#B5142F`) |
+| ---------------------------------- | ----------------- | ---------------- |
+| Title, back link (`#FFFFFF`)       | 5.88:1            | 6.76:1           |
+| Subtitle (onRedStrong, 0.90 white) | 4.95:1            | 5.68:1           |
+| Eyebrow (onRedSoft, 0.86 / 0.80)   | 4.61:1            | 4.73:1           |
+
 ### Section Header
+
+`SectionHeader` (`src/components/SectionHeader.tsx`): section titles on cream, below the band.
 
 ```
 Eyebrow:  #7A7A7A, 12px, weight 800, uppercase, +1.6px tracking
@@ -602,35 +622,35 @@ Every field uses this one style, built from palette tokens so it follows the the
 - **Screen padding:** 20 px left/right, consistent across all screens.
 - **Content gap:** 22 px between major stacked sections within a ScrollView.
 - **Single-column layout** only — no multi-column grids on mobile.
-- **Hero zone:** Top 0–300 px of screen is the red gradient zone. Text here uses white and `rgba(255,255,255,0.78–0.82)` tones. Below 230–300 px, the canvas is cream and text must switch to ink/muted.
+- **Header band:** the screen header (back link, eyebrow, title, subtitle) sits in a solid red band at the top of the scroll view. Its text is white (`#FFFFFF`, `onRedStrong`, `onRedSoft`). Everything below the band is on cream and uses ink/muted, whatever the screen's content height.
 
-### Background gradient architecture
+### Header band architecture
 
 ```
-Position: absolute, top: 0, left: 0, right: 0
-Height:   300px
-Gradient: #C8102E → #970D25 → #F7F4EF
-Stops:    0% / 55% / 100%
-Effect:   Smooth red-to-cream fade, no hard edge
+Position:   first child of the screen's scroll view, outside the 20px gutter (full width)
+Height:     sized by its content, no fixed height
+Fill:       redFill, solid: no gradient, no decorative circles
+Corners:    24px bottom radius (rounded.hero)
+Status bar: the screen's SafeAreaView (edges={["top"]}) has a redFill background and the
+            scroll view a cream one, so the red continues behind the light status bar
+Scrolling:  the band scrolls with the content; the red top edge stays behind the status bar
 ```
 
-Decorative circles reinforce the gradient zone:
-
-- Circle 1: `160×160px`, `top: 70, right: −20`, `rgba(255,255,255,0.08)`
-- Circle 2: `120×120px`, `top: 120, left: −35`, `rgba(255,255,255,0.06)`
+The band holds the screen header only. Section titles, cards, loaders and empty or error states
+sit on cream below it.
 
 ---
 
 ## 6. Depth & Elevation
 
-| Level | Surface             | Method                                               |
-| ----- | ------------------- | ---------------------------------------------------- |
-| 0     | Cream screen bg     | `#F7F4EF` — no border, no shadow                     |
-| 1     | List card           | `#FFFDFC` + `1px solid #E5DED6`                      |
-| 2     | Match card (played) | `#FFFFFF` + `1px solid #E5DED6`                      |
-| 3     | Featured hero card  | `#C8102E` — color itself signals prominence          |
-| 4     | Final match card    | `#FFFFFF` + `2px solid #C8102E`                      |
-| 5     | Logo / FAB button   | Red bg + `rgba(103,18,31,0.14)` shadow, `0 6px 16px` |
+| Level | Surface                    | Method                                               |
+| ----- | -------------------------- | ---------------------------------------------------- |
+| 0     | Cream screen bg            | `#F7F4EF` — no border, no shadow                     |
+| 1     | List card                  | `#FFFDFC` + `1px solid #E5DED6`                      |
+| 2     | Match card (played)        | `#FFFFFF` + `1px solid #E5DED6`                      |
+| 3     | Header band, featured card | `#C8102E` — color itself signals prominence          |
+| 4     | Final match card           | `#FFFFFF` + `2px solid #C8102E`                      |
+| 5     | Logo / FAB button          | Red bg + `rgba(103,18,31,0.14)` shadow, `0 6px 16px` |
 
 **Shadow philosophy:** Shadows are red-tinted (`rgba(103,18,31,0.14)`) — never cool-gray (`rgba(0,0,0,0.x)`). This ties elevation to the brand color and keeps the warm palette coherent. Shadows are used sparingly — only on the About screen logo and action buttons — not on list cards.
 
@@ -646,18 +666,18 @@ Decorative circles reinforce the gradient zone:
 - ✅ Limit red to purposeful elements: hero cards, CTAs, scores, active states. One red element per screen hierarchy level.
 - ✅ Always use uppercase + letter-spacing (+1.4–1.6 px) for eyebrow labels.
 - ✅ Use `line` (`#E5DED6`) as the universal border/divider color on light surfaces.
-- ✅ Switch text to ink/muted when content scrolls below the 230–300 px red gradient zone.
+- ✅ Put the screen header in `ScreenHeader` (white on the red band); use ink/muted for everything below it, on cream.
 - ✅ Use `weight 900` exclusively for hero/screen titles; `weight 800` for card titles and section headers.
 - ✅ Give Final-round content amber (`#C8900A` / `#FFF8E7`) treatment — it is visually distinct from other rounds.
 - ✅ Use `PressableScale` (scale 0.96 on press) for all interactive cards.
-- ✅ Use `SafeAreaView` with `edges={["top"]}` on every screen — never assume safe area.
+- ✅ Use `SafeAreaView` with `edges={["top"]}` on a `redFill` background on every screen, with a cream scroll view — never assume safe area.
 
 ### Don't
 
 - ❌ Don't use `rgba(255,255,255,x)` for text on cream backgrounds — it becomes invisible.
 - ❌ Don't use pure black (`#000000`) anywhere — use ink (`#141414`) or panel (`#1E1E1E`).
 - ❌ Don't use more than one accent color per screen. Red owns primary actions; green is only for success/live states; amber is only for finals.
-- ❌ Don't place dark text (`ink`, `muted`) over the red hero gradient without a card container — use white text instead.
+- ❌ Don't put text on a gradient, and don't place dark text (`ink`, `muted`) on red — header text goes in the solid band, in white.
 - ❌ Don't set `border-radius` below 12 px on any interactive element.
 - ❌ Don't use `font-weight` below 600 for interactive labels, pill text, or metadata that needs to be scannable at glance.
 - ❌ Don't add box-shadows to list cards — border is sufficient.
@@ -717,9 +737,9 @@ Kancha is a **mobile-only native app** (React Native / Expo). No tablet layout e
 
 ### Component prompts
 
-**Hero screen header (red zone):**
+**Screen header (red band):**
 
-> "Build a hero section with a small uppercase eyebrow label in `rgba(255,255,255,0.78)` 12px weight-800 with 1.5px letter-spacing, a 34px weight-900 white title, and a 14px `rgba(255,255,255,0.82)` subtitle. The background is a linear gradient from `#C8102E` to `#970D25` to `#F7F4EF` over 300px."
+> "Use `ScreenHeader`: a full-width solid `#C8102E` band (`#B5142F` in dark), sized by its content, with 24px bottom corners and 12px 20px 24px padding. Inside: an optional white back link (arrow + 15px weight-600 label), a small uppercase eyebrow in `rgba(255,255,255,0.86)` 12px weight-800 with 1.5px letter-spacing, a 34px weight-900 white title, and a 14px `rgba(255,255,255,0.90)` subtitle. Everything below the band sits on the `#F7F4EF` cream canvas."
 
 **Competition list card:**
 
@@ -743,7 +763,7 @@ Kancha is a **mobile-only native app** (React Native / Expo). No tablet layout e
 
 ### Iteration guide
 
-1. **The gradient zone is the contract** — if your content starts at Y > 230 px, switch from white to ink text. Never assume the red extends beyond 300 px.
+1. **The band is the contract** — screen header text goes in the solid red band, in white; everything else sits on cream in ink/muted. Never put text on a gradient, and never let a screen's content height decide a text color.
 2. **Red is earned** — one red element per visual hierarchy level. If two things compete for red, the primary action wins.
 3. **`#F7F4EF` is not `#FFFFFF`** — always verify the cream background is warm, not neutral white.
 4. **Borders replace shadows on cards** — add `1px solid #E5DED6`, remove `box-shadow` from list cards.

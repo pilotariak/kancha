@@ -59,8 +59,6 @@ FIELDS: list[tuple[str, Source]] = [
     ("amberBg", ("c", "championshipSoft")),
     ("onRedStrong", ("x", "on-red-strong")),
     ("onRedSoft", ("x", "on-red-soft")),
-    ("heroCircleOne", ("x", "hero-circle-one")),
-    ("heroCircleTwo", ("x", "hero-circle-two")),
     ("tabBar", ("c", "tabBar")),
     ("tabBarBorder", ("c", "tabBarBorder")),
     ("tabIconInactive", ("c", "tabIconInactive")),

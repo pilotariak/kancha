@@ -20,12 +20,9 @@ export type Palette = {
   shadow: string;
   amber: string;
   amberBg: string;
-  /** Translucent white used for hero overlays on the red gradient. */
+  /** Translucent white for secondary text on redFill: 4.5:1 or more in both themes. */
   onRedStrong: string;
   onRedSoft: string;
-  /** Decorative circles floating in the hero gradient. */
-  heroCircleOne: string;
-  heroCircleTwo: string;
   /** Tab bar surfaces. */
   tabBar: string;
   tabBarBorder: string;
@@ -52,10 +49,8 @@ export const KanchaColorsLight: Palette = {
   shadow: "rgba(103, 18, 31, 0.14)",
   amber: "#C8900A",
   amberBg: "#FFF8E7",
-  onRedStrong: "rgba(255,255,255,0.82)",
-  onRedSoft: "rgba(255,255,255,0.78)",
-  heroCircleOne: "rgba(255,255,255,0.08)",
-  heroCircleTwo: "rgba(255,255,255,0.06)",
+  onRedStrong: "rgba(255,255,255,0.90)",
+  onRedSoft: "rgba(255,255,255,0.86)",
   tabBar: "#FFFFFF",
   tabBarBorder: "#E9E0D6",
   tabIconInactive: "#B8B1AA",
@@ -85,8 +80,6 @@ export const KanchaColorsDark: Palette = {
   amberBg: "#2A240F",
   onRedStrong: "rgba(255,255,255,0.90)",
   onRedSoft: "rgba(255,255,255,0.80)",
-  heroCircleOne: "rgba(255,255,255,0.06)",
-  heroCircleTwo: "rgba(255,255,255,0.04)",
   tabBar: "#0F1A15",
   tabBarBorder: "#1F2D27",
   tabIconInactive: "#5E7268",

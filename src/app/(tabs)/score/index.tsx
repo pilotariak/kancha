@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Trophy, Undo2 } from "@/components/icons";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { INITIAL, reducer, type ScoreAction, type ScoreState } from "@/features/score/scoreMachine";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -83,73 +84,72 @@ function SetupScreen({ onStart }: SetupProps) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.setupHeader}>
-          <Text style={styles.setupTitle} accessibilityRole="header">{t("score.setup_title")}</Text>
-          <Text style={styles.setupSubtitle}>{t("score.setup_subtitle")}</Text>
-        </View>
+        <ScreenHeader title={t("score.setup_title")} subtitle={t("score.setup_subtitle")} />
 
-        <View style={styles.setupForm}>
-          <View style={styles.fieldGroup}>
-            <View style={styles.fieldLabelRow}>
-              <View style={[styles.teamDot, styles.teamDotA]} />
-              <Text style={styles.fieldLabel}>{t("score.label_team_a")}</Text>
+        <View style={styles.setupBody}>
+          <View style={styles.setupForm}>
+            <View style={styles.fieldGroup}>
+              <View style={styles.fieldLabelRow}>
+                <View style={[styles.teamDot, styles.teamDotA]} />
+                <Text style={styles.fieldLabel}>{t("score.label_team_a")}</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                value={teamA}
+                onChangeText={setTeamA}
+                placeholder={t("score.placeholder_team")}
+                placeholderTextColor={colors.placeholder}
+                returnKeyType="next"
+                autoCapitalize="words"
+              />
             </View>
-            <TextInput
-              style={styles.input}
-              value={teamA}
-              onChangeText={setTeamA}
-              placeholder={t("score.placeholder_team")}
-              placeholderTextColor={colors.placeholder}
-              returnKeyType="next"
-              autoCapitalize="words"
-            />
-          </View>
 
-          <View style={styles.fieldGroup}>
-            <View style={styles.fieldLabelRow}>
-              <View style={[styles.teamDot, styles.teamDotB]} />
-              <Text style={styles.fieldLabel}>{t("score.label_team_b")}</Text>
+            <View style={styles.fieldGroup}>
+              <View style={styles.fieldLabelRow}>
+                <View style={[styles.teamDot, styles.teamDotB]} />
+                <Text style={styles.fieldLabel}>{t("score.label_team_b")}</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                value={teamB}
+                onChangeText={setTeamB}
+                placeholder={t("score.placeholder_team")}
+                placeholderTextColor={colors.placeholder}
+                returnKeyType="next"
+                autoCapitalize="words"
+              />
             </View>
-            <TextInput
-              style={styles.input}
-              value={teamB}
-              onChangeText={setTeamB}
-              placeholder={t("score.placeholder_team")}
-              placeholderTextColor={colors.placeholder}
-              returnKeyType="next"
-              autoCapitalize="words"
-            />
+
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>{t("score.label_target")}</Text>
+              <TextInput
+                style={styles.input}
+                value={targetRaw}
+                onChangeText={setTargetRaw}
+                placeholder={t("score.placeholder_target")}
+                placeholderTextColor={colors.placeholder}
+                keyboardType="number-pad"
+                returnKeyType="done"
+              />
+            </View>
           </View>
 
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>{t("score.label_target")}</Text>
-            <TextInput
-              style={styles.input}
-              value={targetRaw}
-              onChangeText={setTargetRaw}
-              placeholder={t("score.placeholder_target")}
-              placeholderTextColor={colors.placeholder}
-              keyboardType="number-pad"
-              returnKeyType="done"
-            />
-          </View>
+          <Pressable
+            style={(
+              { pressed },
+            ) => [
+              styles.startBtn,
+              !canStart && styles.startBtnDisabled,
+              pressed && canStart && styles.startBtnPressed,
+            ]}
+            onPress={() => canStart && onStart(teamA.trim(), teamB.trim(), target)}
+            disabled={!canStart}
+            accessibilityRole="button"
+            accessibilityLabel={t("score.cta_start")}
+          >
+            <Text style={styles.startBtnLabel}>{t("score.cta_start")}</Text>
+          </Pressable>
         </View>
-
-        <Pressable
-          style={(
-            { pressed },
-          ) => [
-            styles.startBtn,
-            !canStart && styles.startBtnDisabled,
-            pressed && canStart && styles.startBtnPressed,
-          ]}
-          onPress={() => canStart && onStart(teamA.trim(), teamB.trim(), target)}
-          disabled={!canStart}
-          accessibilityRole="button"
-          accessibilityLabel={t("score.cta_start")}
-        >
-          <Text style={styles.startBtnLabel}>{t("score.cta_start")}</Text>
-        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -366,10 +366,14 @@ function WinScreen({ state, onNewGame }: WinProps) {
 
 export default function ScoreScreen() {
   const [state, dispatch] = useReducer(reducer, INITIAL);
+  const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  // The top edge sits behind the light status bar: red like the header band and
+  // the top score panel, green like the win screen.
+  const edgeColor = state.phase === "won" ? colors.green : colors.redFill;
 
   return (
-    <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: edgeColor }]} edges={["top", "bottom"]}>
       {state.phase === "setup"
         ? (
           <SetupScreen
@@ -377,7 +381,12 @@ export default function ScoreScreen() {
           />
         )
         : state.phase === "won"
-        ? <WinScreen state={state} onNewGame={() => dispatch({ type: "reset" })} />
+        ? (
+          <WinScreen
+            state={state}
+            onNewGame={() => dispatch({ type: "reset" })}
+          />
+        )
         : <GameScreen state={state} dispatch={dispatch} />}
     </SafeAreaView>
   );
@@ -387,27 +396,12 @@ export default function ScoreScreen() {
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: c.ink },
+    root: { flex: 1 },
 
     // Setup
     setupFlex: { flex: 1, backgroundColor: c.cream },
-    setupContent: {
-      flexGrow: 1,
-      padding: 24,
-      gap: 28,
-      justifyContent: "center",
-    },
-    setupHeader: { gap: 6 },
-    setupTitle: {
-      color: c.ink,
-      fontSize: 32,
-      fontWeight: "900",
-    },
-    setupSubtitle: {
-      color: c.muted,
-      fontSize: 15,
-      fontWeight: "500",
-    },
+    setupContent: { paddingBottom: 24 },
+    setupBody: { paddingHorizontal: 20, paddingTop: 28, gap: 28 },
     setupForm: { gap: 18 },
     fieldGroup: { gap: 8 },
     fieldLabelRow: { flexDirection: "row", alignItems: "center", gap: 8 },

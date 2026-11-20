@@ -2,24 +2,25 @@
 
 ## Color tokens
 
-| Token          | Value                  | Usage                              |
-| -------------- | ---------------------- | ---------------------------------- |
-| `--red`        | `#C8102E`              | Brand, CTAs, hero backgrounds      |
-| `--red-dark`   | `#970D25`              | Gradient stop, pressed, error text |
-| `--red-soft`   | `#FDE8EC`              | Error bg, score chips              |
-| `--cream`      | `#F7F4EF`              | Screen background                  |
-| `--card`       | `#FFFDFC`              | List card background               |
-| `--white`      | `#FFFFFF`              | Match cards, modals                |
-| `--line`       | `#E5DED6`              | Borders, dividers                  |
-| `--ink`        | `#141414`              | Headings, titles                   |
-| `--text`       | `#262626`              | Body text                          |
-| `--muted`      | `#7A7A7A`              | Secondary text, metadata           |
-| `--green`      | `#1F7A5A`              | Success, live/today indicator      |
-| `--green-soft` | `#E6F4EE`              | Success pill background            |
-| `--shadow`     | `rgba(103,18,31,0.14)` | Elevated card shadow               |
-| `--panel`      | `#1E1E1E`              | Dark inset on red backgrounds      |
-| `--amber`      | `#C8900A`              | Finale/final round highlight       |
-| `--amber-bg`   | `#FFF8E7`              | Finale pill background             |
+| Token          | Value                  | Usage                          |
+| -------------- | ---------------------- | ------------------------------ |
+| `--red`        | `#C8102E`              | Brand, red text, scores, icons |
+| `--red-fill`   | `#C8102E`              | Header band, CTAs, under white |
+| `--red-dark`   | `#970D25`              | Pressed, error text            |
+| `--red-soft`   | `#FDE8EC`              | Error bg, score chips          |
+| `--cream`      | `#F7F4EF`              | Screen background              |
+| `--card`       | `#FFFDFC`              | List card background           |
+| `--white`      | `#FFFFFF`              | Match cards, modals            |
+| `--line`       | `#E5DED6`              | Borders, dividers              |
+| `--ink`        | `#141414`              | Headings, titles               |
+| `--text`       | `#262626`              | Body text                      |
+| `--muted`      | `#7A7A7A`              | Secondary text, metadata       |
+| `--green`      | `#1F7A5A`              | Success, live/today indicator  |
+| `--green-soft` | `#E6F4EE`              | Success pill background        |
+| `--shadow`     | `rgba(103,18,31,0.14)` | Elevated card shadow           |
+| `--panel`      | `#1E1E1E`              | Dark inset on red backgrounds  |
+| `--amber`      | `#C8900A`              | Finale/final round highlight   |
+| `--amber-bg`   | `#FFF8E7`              | Finale pill background         |
 
 ## Typography scale
 
@@ -58,10 +59,22 @@ Shape: `border-radius: 9999px`, `padding: 6px 10px`, `font-size: 12px`, `font-we
 
 ## Layout constants
 
-| Property             | Value  |
-| -------------------- | ------ |
-| Horizontal gutter    | 20 px  |
-| Card border-radius   | 20 px  |
-| Hero border-radius   | 24 px  |
-| Minimum touch target | 44 pt  |
-| Hero gradient height | 300 px |
+| Property             | Value                                                  |
+| -------------------- | ------------------------------------------------------ |
+| Horizontal gutter    | 20 px                                                  |
+| Card border-radius   | 20 px                                                  |
+| Hero border-radius   | 24 px                                                  |
+| Minimum touch target | 44 pt                                                  |
+| Header band          | Solid `redFill`, sized by content, 24 px bottom radius |
+
+## Screen header
+
+`ScreenHeader` (`src/components/ScreenHeader.tsx`) is the header of every screen: an optional back
+link, eyebrow, title and subtitle, plus an optional trailing slot right of the text. Section titles
+below the band use `SectionHeader` (`src/components/SectionHeader.tsx`), on cream.
+
+| Text on `redFill`                    | Light (`#C8102E`) | Dark (`#B5142F`) |
+| ------------------------------------ | ----------------- | ---------------- |
+| Title, back link (`#FFFFFF`)         | 5.88:1            | 6.76:1           |
+| Subtitle (`onRedStrong`, 0.90 white) | 4.95:1            | 5.68:1           |
+| Eyebrow (`onRedSoft`, 0.86 / 0.80)   | 4.61:1            | 4.73:1           |

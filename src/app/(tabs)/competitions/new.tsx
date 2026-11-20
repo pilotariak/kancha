@@ -5,8 +5,8 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CalendarDays, ChevronRight, Users2 } from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -58,21 +58,20 @@ export default function NewCompetitionScreen() {
   };
 
   return (
-    <KanchaBackground>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          testID="new-competition-screen"
-        >
-          <View style={styles.hero}>
-            <Text style={styles.title} accessibilityRole="header">
-              {t("new_competition.title")}
-            </Text>
-            <Text style={styles.subtitle}>{t("new_competition.subtitle")}</Text>
-          </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        testID="new-competition-screen"
+      >
+        <ScreenHeader
+          title={t("new_competition.title")}
+          subtitle={t("new_competition.subtitle")}
+        />
 
+        <View style={styles.body}>
           <View style={styles.stepsRow}>
             {stepTitles.map((step, index) => (
               <View key={index} style={styles.stepItem}>
@@ -87,6 +86,7 @@ export default function NewCompetitionScreen() {
                     style={[
                       styles.stepText,
                       index === currentStep ? styles.stepTextActive : null,
+                      index < currentStep ? styles.stepTextDone : null,
                     ]}
                   >
                     {index + 1}
@@ -237,49 +237,41 @@ export default function NewCompetitionScreen() {
               </View>
             </PressableScale>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 22,
-    },
-    hero: { gap: 6 },
-    title: { color: "#FFFFFF", fontSize: 32, fontWeight: "900" },
-    subtitle: {
-      color: "rgba(255,255,255,0.82)",
-      fontSize: 14,
-      lineHeight: 20,
-      maxWidth: 310,
-    },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 22, gap: 22 },
     stepsRow: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
     stepItem: { flex: 1, alignItems: "center", gap: 8 },
     stepCircle: {
       width: 34,
       height: 34,
       borderRadius: 17,
-      backgroundColor: "rgba(255,255,255,0.22)",
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.line,
       alignItems: "center",
       justifyContent: "center",
     },
-    stepCircleActive: { backgroundColor: c.white },
-    stepCircleDone: { backgroundColor: "#F6C0C9" },
-    stepText: { color: "#FFFFFF", fontSize: 14, fontWeight: "800", fontVariant: ["tabular-nums"] },
-    stepTextActive: { color: c.red },
+    stepCircleActive: { backgroundColor: c.redFill, borderColor: c.redFill },
+    stepCircleDone: { backgroundColor: c.redSoft, borderColor: c.redSoft },
+    stepText: { color: c.muted, fontSize: 14, fontWeight: "800", fontVariant: ["tabular-nums"] },
+    stepTextActive: { color: "#FFFFFF" },
+    stepTextDone: { color: c.red },
     stepLabel: {
-      color: "rgba(255,255,255,0.76)",
+      color: c.muted,
       fontSize: 11,
       fontWeight: "700",
     },
-    stepLabelActive: { color: "#FFFFFF" },
+    stepLabelActive: { color: c.ink },
     formCard: {
       borderRadius: 24,
       backgroundColor: c.card,

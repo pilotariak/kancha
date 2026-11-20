@@ -12,11 +12,13 @@ The default screen background is `#F7F4EF` (cream), never pure white. Pure white
 
 ## Red earns its place
 
-`#C8102E` (Basque red) is used sparingly and purposefully. It drives the hero zone at the top of every screen, primary CTAs, active tab indicators, and score text. It is never tinted, diluted, or used as a background for body text. The rule is: red appears where something demands immediate attention or carries primary brand meaning.
+`#C8102E` (Basque red) is used sparingly and purposefully. It drives the header band at the top of every screen, primary CTAs, active tab indicators, and score text. It is never tinted, diluted, or used as a background for body text. The rule is: red appears where something demands immediate attention or carries primary brand meaning.
 
 ## Phase-driven layout
 
-Every screen follows the same compositional logic: a red hero zone (0–300 px gradient), a cream transition, then a cream card field. This three-phase structure creates rhythm and predictability. Users orient themselves immediately because the visual language is consistent across every screen.
+Every screen follows the same compositional logic: a solid red header band, sized by its content, then section headers and a card field on cream. This structure creates rhythm and predictability. Users orient themselves immediately because the visual language is consistent across every screen.
+
+The band replaced a red-to-cream gradient. Whether a line of text landed on red, pink or cream depended on how tall each screen's header was, so dark text sometimes sat on red and white text on pink. With a solid band, the rule no longer depends on content height: header text is white on red, everything else is ink or muted on cream.
 
 ## Typography does the expressive work
 
