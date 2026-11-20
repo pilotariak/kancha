@@ -11,11 +11,6 @@ module.exports = {
     scheme: "kancha",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
-    splash: {
-      image: "./assets/images/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#F7F4EF",
-    },
     ios: {
       supportsTablet: false,
       bundleIdentifier: "io.pilotariak.kancha",
@@ -41,6 +36,20 @@ module.exports = {
       ],
       "expo-font",
       "expo-web-browser",
+      [
+        // The native splash is the launch screen's redFill (DESIGN.md), light
+        // and dark, so start-up shows no cream flash before the red launch screen.
+        "expo-splash-screen",
+        {
+          image: "./assets/images/splash-icon.png",
+          imageWidth: 200,
+          resizeMode: "contain",
+          backgroundColor: "#C8102E",
+          dark: {
+            backgroundColor: "#B5142F",
+          },
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,
