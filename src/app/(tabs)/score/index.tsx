@@ -1,7 +1,8 @@
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Animated,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,51 +14,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Trophy, Undo2 } from "@/components/icons";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
-import { INITIAL, reducer, type ScoreAction, type ScoreState } from "@/features/score/scoreMachine";
 import { useFieldFocus } from "@/hooks/use-interaction-styles";
 import { useTextColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
-
-// ─── Score bar ────────────────────────────────────────────────────────────────
-
-interface ScoreBarProps {
-  score: number;
-  target: number;
-  isWinner: boolean | null;
-  isTop: boolean;
-}
-
-function ScoreBar({ score, target, isWinner, isTop }: ScoreBarProps) {
-  const { colors } = useTheme();
-  const styles = useThemedStyles(makeStyles);
-  const progress = useRef(new Animated.Value(0)).current;
-  const ratio = target > 0 ? Math.min(score / target, 1) : 0;
-
-  useEffect(() => {
-    Animated.timing(progress, {
-      toValue: ratio,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [ratio]);
-
-  const fillColor = isWinner ? colors.green : "rgba(255,255,255,0.55)";
-
-  return (
-    <View style={[styles.barTrack, isTop ? styles.barTrackBottom : styles.barTrackTop]}>
-      <Animated.View
-        style={[
-          styles.barFill,
-          { backgroundColor: fillColor },
-          { width: progress.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }) },
-        ]}
-      />
-    </View>
-  );
-}
 
 // ─── Setup screen ─────────────────────────────────────────────────────────────
 
@@ -168,245 +129,22 @@ function SetupScreen({ onStart }: SetupProps) {
   );
 }
 
-// ─── Score panel ──────────────────────────────────────────────────────────────
-
-interface PanelProps {
-  team: string;
-  score: number;
-  target: number;
-  canUndo: boolean;
-  isWinner: boolean | null;
-  side: "top" | "bottom";
-  onIncrement: () => void;
-  onUndo: () => void;
-}
-
-function ScorePanel(
-  { team, score, target, canUndo, isWinner, side, onIncrement, onUndo }: PanelProps,
-) {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  const styles = useThemedStyles(makeStyles);
-  const column = useTextColumn();
-  const isTop = side === "top";
-  const bg = isTop ? colors.redFill : colors.panel;
-  const winnerBg = colors.green;
-  const activeBg = isWinner ? winnerBg : bg;
-
-  const controls = (
-    <View style={styles.panelControls}>
-      <Pressable
-        style={({ pressed }) => [styles.addBtn, pressed && styles.addBtnPressed]}
-        onPress={onIncrement}
-        disabled={isWinner !== null && !isWinner}
-        accessibilityRole="button"
-        accessibilityLabel={`+1, ${team}`}
-      >
-        <Text style={styles.addBtnLabel}>+1</Text>
-      </Pressable>
-      <Pressable
-        style={({ pressed }) => [
-          styles.undoBtn,
-          !canUndo && styles.undoBtnDisabled,
-          pressed && canUndo && styles.undoBtnPressed,
-        ]}
-        onPress={onUndo}
-        disabled={!canUndo}
-        accessibilityRole="button"
-        accessibilityLabel={t("score.undo")}
-      >
-        <Undo2 color="#FFFFFF" size={18} />
-        <Text style={styles.undoBtnLabel}>{t("score.undo")}</Text>
-      </Pressable>
-    </View>
-  );
-
-  const scoreDisplay = (
-    <View style={styles.scoreDisplayWrap}>
-      <Text style={styles.scoreNumber}>{score}</Text>
-      <Text style={styles.scoreTarget}>/ {target}</Text>
-    </View>
-  );
-
-  const teamLabel = (
-    <View style={styles.teamLabelRow}>
-      {isWinner && <Text style={styles.winnerBadge}>{t("score.winner")}</Text>}
-      <Text style={styles.teamName}>{team}</Text>
-    </View>
-  );
-
-  const bar = <ScoreBar score={score} target={target} isWinner={isWinner} isTop={isTop} />;
-
-  const content = isTop
-    ? (
-      <>
-        {teamLabel}
-        {scoreDisplay}
-        {controls}
-        {bar}
-      </>
-    )
-    : (
-      <>
-        {bar}
-        {controls}
-        {scoreDisplay}
-        {teamLabel}
-      </>
-    );
-
-  // Wider than a phone (web), the panel color stays full width and its content keeps to the
-  // text column.
-  return (
-    <View style={[styles.panel, { backgroundColor: activeBg }]}>
-      {column ? <View style={[styles.panelColumn, column]}>{content}</View> : content}
-    </View>
-  );
-}
-
-// ─── Game screen ──────────────────────────────────────────────────────────────
-
-interface GameProps {
-  state: ScoreState;
-  dispatch: React.Dispatch<ScoreAction>;
-}
-
-function GameScreen({ state, dispatch }: GameProps) {
-  const { t } = useTranslation();
-  const styles = useThemedStyles(makeStyles);
-
-  return (
-    <View style={styles.gameFlex}>
-      <ScorePanel
-        side="top"
-        team={state.teamA}
-        score={state.scoreA}
-        target={state.target}
-        canUndo={state.prev !== null}
-        isWinner={null}
-        onIncrement={() => dispatch({ type: "increment", side: "a" })}
-        onUndo={() => dispatch({ type: "undo" })}
-      />
-
-      <View style={styles.divider}>
-        <Pressable
-          style={({ pressed }) => [styles.resetBtn, pressed && styles.resetBtnPressed]}
-          onPress={() => dispatch({ type: "reset" })}
-          accessibilityRole="button"
-          accessibilityLabel={t("score.reset")}
-        >
-          <Text style={styles.resetLabel}>{t("score.reset")}</Text>
-        </Pressable>
-      </View>
-
-      <ScorePanel
-        side="bottom"
-        team={state.teamB}
-        score={state.scoreB}
-        target={state.target}
-        canUndo={state.prev !== null}
-        isWinner={null}
-        onIncrement={() => dispatch({ type: "increment", side: "b" })}
-        onUndo={() => dispatch({ type: "undo" })}
-      />
-    </View>
-  );
-}
-
-// ─── Win screen ───────────────────────────────────────────────────────────────
-
-interface WinProps {
-  state: ScoreState;
-  onNewGame: () => void;
-}
-
-function WinScreen({ state, onNewGame }: WinProps) {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  const styles = useThemedStyles(makeStyles);
-  const column = useTextColumn();
-  const scale = useRef(new Animated.Value(0.4)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.spring(scale, {
-        toValue: 1,
-        friction: 5,
-        tension: 80,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
-
-  const winnerName = state.winner === "a" ? state.teamA : state.teamB;
-
-  return (
-    <View style={styles.winFlex}>
-      <Animated.View style={[styles.winContent, column, { opacity }]}>
-        <Animated.View style={[styles.winTrophyWrap, { transform: [{ scale }] }]}>
-          <Trophy color={colors.amber} size={64} />
-        </Animated.View>
-
-        <Text style={styles.winLabel}>{t("score.winner")}</Text>
-        <Text style={styles.winTeam} accessibilityRole="header">{winnerName}</Text>
-
-        <View style={styles.winScoreCard}>
-          <View style={styles.winScoreRow}>
-            <Text style={styles.winScoreTeam} numberOfLines={1}>{state.teamA}</Text>
-            <Text style={styles.winScoreNum}>{state.scoreA}</Text>
-          </View>
-          <View style={styles.winScoreDivider} />
-          <View style={styles.winScoreRow}>
-            <Text style={styles.winScoreTeam} numberOfLines={1}>{state.teamB}</Text>
-            <Text style={styles.winScoreNum}>{state.scoreB}</Text>
-          </View>
-        </View>
-      </Animated.View>
-
-      <Pressable
-        style={({ pressed }) => [styles.newGameBtn, column, pressed && styles.newGameBtnPressed]}
-        onPress={onNewGame}
-        accessibilityRole="button"
-        accessibilityLabel={t("score.cta_new_game")}
-      >
-        <Text style={styles.newGameLabel}>{t("score.cta_new_game")}</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 // ─── Root screen ──────────────────────────────────────────────────────────────
 
-export default function ScoreScreen() {
-  const [state, dispatch] = useReducer(reducer, INITIAL);
-  const { colors } = useTheme();
-  const styles = useThemedStyles(makeStyles);
-  // The top edge sits behind the light status bar: red like the header band and
-  // the top score panel, green like the win screen.
-  const edgeColor = state.phase === "won" ? colors.green : colors.redFill;
+// The match itself is the full-screen /match route, over the tabs. The form stays mounted under
+// it, so its keyboard would stay up.
+const startMatch = (teamA: string, teamB: string, target: number) => {
+  Keyboard.dismiss();
+  router.push({ pathname: "/match", params: { teamA, teamB, target: String(target) } });
+};
 
+export default function ScoreScreen() {
+  const styles = useThemedStyles(makeStyles);
+
+  // The top edge sits behind the light status bar: red like the header band.
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: edgeColor }]} edges={["top", "bottom"]}>
-      {state.phase === "setup"
-        ? (
-          <SetupScreen
-            onStart={(teamA, teamB, target) => dispatch({ type: "start", teamA, teamB, target })}
-          />
-        )
-        : state.phase === "won"
-        ? (
-          <WinScreen
-            state={state}
-            onNewGame={() => dispatch({ type: "reset" })}
-          />
-        )
-        : <GameScreen state={state} dispatch={dispatch} />}
+    <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
+      <SetupScreen onStart={startMatch} />
     </SafeAreaView>
   );
 }
@@ -415,7 +153,7 @@ export default function ScoreScreen() {
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    root: { flex: 1 },
+    root: { flex: 1, backgroundColor: c.redFill },
 
     // Setup
     setupFlex: { flex: 1, backgroundColor: c.cream },
@@ -458,201 +196,5 @@ const makeStyles = (c: Palette) =>
       fontSize: 17,
       fontWeight: "900",
       letterSpacing: 0.4,
-    },
-
-    // Game
-    gameFlex: { flex: 1 },
-    panel: {
-      flex: 1,
-      paddingHorizontal: 28,
-      paddingVertical: 20,
-      justifyContent: "space-between",
-    },
-    panelColumn: { flex: 1, justifyContent: "space-between" },
-    teamLabelRow: { gap: 4 },
-    teamName: {
-      color: "#FFFFFF",
-      fontSize: 22,
-      fontWeight: "900",
-      letterSpacing: 0.2,
-    },
-    winnerBadge: {
-      color: "rgba(255,255,255,0.7)",
-      fontSize: 12,
-      fontWeight: "800",
-      textTransform: "uppercase",
-      letterSpacing: 1.2,
-    },
-    scoreDisplayWrap: {
-      flexDirection: "row",
-      alignItems: "flex-end",
-      gap: 8,
-    },
-    scoreNumber: {
-      color: "#FFFFFF",
-      fontSize: 96,
-      fontWeight: "900",
-      lineHeight: 100,
-      fontVariant: ["tabular-nums"],
-    },
-    scoreTarget: {
-      color: "rgba(255,255,255,0.4)",
-      fontSize: 24,
-      fontWeight: "700",
-      marginBottom: 12,
-      fontVariant: ["tabular-nums"],
-    },
-    panelControls: {
-      flexDirection: "row",
-      gap: 12,
-    },
-    addBtn: {
-      flex: 1,
-      borderRadius: 16,
-      backgroundColor: "rgba(255,255,255,0.18)",
-      paddingVertical: 18,
-      alignItems: "center",
-    },
-    addBtnPressed: { backgroundColor: "rgba(255,255,255,0.32)" },
-    addBtnLabel: {
-      color: "#FFFFFF",
-      fontSize: 24,
-      fontWeight: "900",
-    },
-    undoBtn: {
-      borderRadius: 16,
-      backgroundColor: "rgba(255,255,255,0.1)",
-      paddingHorizontal: 20,
-      paddingVertical: 18,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-    },
-    undoBtnDisabled: { opacity: 0.25 },
-    undoBtnPressed: { backgroundColor: "rgba(255,255,255,0.2)" },
-    undoBtnLabel: {
-      color: "#FFFFFF",
-      fontSize: 15,
-      fontWeight: "700",
-    },
-
-    // Divider
-    divider: {
-      height: 52,
-      backgroundColor: c.ink,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    resetBtn: {
-      paddingHorizontal: 24,
-      paddingVertical: 10,
-      borderRadius: 20,
-      backgroundColor: "rgba(255,255,255,0.08)",
-      borderWidth: 1,
-      borderColor: "rgba(255,255,255,0.15)",
-    },
-    resetBtnPressed: { backgroundColor: "rgba(255,255,255,0.16)" },
-    resetLabel: {
-      color: "rgba(255,255,255,0.6)",
-      fontSize: 13,
-      fontWeight: "700",
-      letterSpacing: 0.4,
-    },
-
-    // Win screen
-    winFlex: {
-      flex: 1,
-      backgroundColor: c.green,
-      paddingHorizontal: 28,
-      paddingBottom: 28,
-      paddingTop: 20,
-      justifyContent: "space-between",
-    },
-    winContent: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 12,
-    },
-    winTrophyWrap: {
-      width: 112,
-      height: 112,
-      borderRadius: 36,
-      backgroundColor: c.amberBg,
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: 8,
-    },
-    winLabel: {
-      color: "rgba(255,255,255,0.7)",
-      fontSize: 13,
-      fontWeight: "800",
-      textTransform: "uppercase",
-      letterSpacing: 2,
-    },
-    winTeam: {
-      color: "#FFFFFF",
-      fontSize: 36,
-      fontWeight: "900",
-      textAlign: "center",
-      lineHeight: 40,
-    },
-    winScoreCard: {
-      marginTop: 20,
-      width: "100%",
-      borderRadius: 20,
-      backgroundColor: "rgba(0,0,0,0.15)",
-      overflow: "hidden",
-    },
-    winScoreRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 22,
-      paddingVertical: 16,
-      gap: 12,
-    },
-    winScoreTeam: {
-      flex: 1,
-      color: "#FFFFFF",
-      fontSize: 18,
-      fontWeight: "800",
-    },
-    winScoreNum: {
-      color: "#FFFFFF",
-      fontSize: 32,
-      fontWeight: "900",
-      minWidth: 40,
-      textAlign: "right",
-      fontVariant: ["tabular-nums"],
-    },
-    winScoreDivider: {
-      height: 1,
-      backgroundColor: "rgba(255,255,255,0.15)",
-      marginHorizontal: 22,
-    },
-    newGameBtn: {
-      borderRadius: 18,
-      backgroundColor: c.redFill,
-      paddingVertical: 20,
-      alignItems: "center",
-    },
-    newGameBtnPressed: { opacity: 0.8 },
-    newGameLabel: {
-      color: "#FFFFFF",
-      fontSize: 18,
-      fontWeight: "900",
-      letterSpacing: 0.4,
-    },
-
-    // Score bar
-    barTrack: {
-      height: 6,
-      backgroundColor: "rgba(255,255,255,0.12)",
-      overflow: "hidden",
-    },
-    barTrackBottom: { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 },
-    barTrackTop: { borderTopLeftRadius: 0, borderTopRightRadius: 0 },
-    barFill: {
-      height: "100%",
     },
   });

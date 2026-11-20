@@ -31,11 +31,12 @@ describe("scoreMachine reducer", () => {
     });
 
     it("clears any carried-over scores from a previous game", () => {
-      const stale = playing({ scoreA: 7, scoreB: 9, prev: { scoreA: 6, scoreB: 9 } });
+      const stale = playing({ scoreA: 10, scoreB: 9, phase: "won", winner: "a" });
       const next = reducer(stale, { type: "start", teamA: "A", teamB: "B", target: 10 });
       expect(next.scoreA).toBe(0);
       expect(next.scoreB).toBe(0);
-      expect(next.prev).toBeNull();
+      expect(next.phase).toBe("playing");
+      expect(next.winner).toBeNull();
     });
   });
 
@@ -47,9 +48,9 @@ describe("scoreMachine reducer", () => {
       expect(next.phase).toBe("playing");
     });
 
-    it("records the previous scores so the move can be undone", () => {
+    it("adds one point to side B only", () => {
       const next = reducer(playing({ scoreA: 3, scoreB: 2 }), { type: "increment", side: "b" });
-      expect(next.prev).toEqual({ scoreA: 3, scoreB: 2 });
+      expect(next.scoreA).toBe(3);
       expect(next.scoreB).toBe(3);
     });
 
@@ -71,39 +72,64 @@ describe("scoreMachine reducer", () => {
       expect(next.phase).toBe("won");
       expect(next.winner).toBe("a");
     });
+
+    it("is a no-op once the game is won", () => {
+      const won = reducer(playing({ scoreA: 9, target: 10 }), { type: "increment", side: "a" });
+      expect(reducer(won, { type: "increment", side: "a" })).toBe(won);
+      expect(reducer(won, { type: "increment", side: "b" })).toBe(won);
+    });
+
+    it("is a no-op before the game starts", () => {
+      expect(reducer(INITIAL, { type: "increment", side: "a" })).toBe(INITIAL);
+    });
   });
 
   describe("undo", () => {
-    it("restores the scores captured before the last increment", () => {
-      const afterPoint = reducer(playing({ scoreA: 4, scoreB: 4 }), {
-        type: "increment",
-        side: "a",
-      });
-      const undone = reducer(afterPoint, { type: "undo" });
+    it("removes the last point of the chosen side only", () => {
+      const undone = reducer(playing({ scoreA: 5, scoreB: 4 }), { type: "undo", side: "a" });
       expect(undone.scoreA).toBe(4);
       expect(undone.scoreB).toBe(4);
       expect(undone.phase).toBe("playing");
-      expect(undone.prev).toBeNull();
     });
 
-    it("reverts a winning point back to playing", () => {
+    it("leaves the other side's points alone, whichever scored last", () => {
+      const afterA = reducer(playing({ scoreA: 2, scoreB: 3 }), { type: "increment", side: "a" });
+      const undone = reducer(afterA, { type: "undo", side: "b" });
+      expect(undone.scoreA).toBe(3);
+      expect(undone.scoreB).toBe(2);
+    });
+
+    it("can be chained, one point at a time", () => {
+      let state = playing({ scoreB: 3 });
+      state = reducer(state, { type: "undo", side: "b" });
+      state = reducer(state, { type: "undo", side: "b" });
+      expect(state.scoreB).toBe(1);
+    });
+
+    it("reverts the winning point back to playing", () => {
       const won = reducer(playing({ scoreA: 9, target: 10 }), { type: "increment", side: "a" });
       expect(won.phase).toBe("won");
-      const undone = reducer(won, { type: "undo" });
+      const undone = reducer(won, { type: "undo", side: "a" });
       expect(undone.phase).toBe("playing");
       expect(undone.winner).toBeNull();
       expect(undone.scoreA).toBe(9);
     });
 
-    it("is a no-op when there is nothing to undo", () => {
-      const state = playing({ scoreA: 2 });
-      expect(reducer(state, { type: "undo" })).toBe(state);
+    it("keeps the game won when the loser's point is undone", () => {
+      const won = playing({ scoreA: 10, scoreB: 6, phase: "won", winner: "a" });
+      const undone = reducer(won, { type: "undo", side: "b" });
+      expect(undone.scoreB).toBe(5);
+      expect(undone.phase).toBe("won");
+      expect(undone.winner).toBe("a");
     });
 
-    it("cannot be chained twice (only one step of history is kept)", () => {
-      const first = reducer(playing(), { type: "increment", side: "a" });
-      const undone = reducer(first, { type: "undo" });
-      expect(reducer(undone, { type: "undo" })).toBe(undone);
+    it("is a no-op when the side has no point", () => {
+      const state = playing({ scoreA: 2 });
+      expect(reducer(state, { type: "undo", side: "b" })).toBe(state);
+    });
+
+    it("is a no-op before the game starts", () => {
+      expect(reducer(INITIAL, { type: "undo", side: "a" })).toBe(INITIAL);
     });
   });
 

@@ -127,8 +127,14 @@
     "cta_start": "Hasi",
     "winner": "Garaipena!",
     "cta_new_game": "Partida berria",
-    "undo": "Desegin",
-    "reset": "Berrezarri"
+    "add_point": "{{team}}: gehitu puntu bat, {{score}} / {{target}}",
+    "undo_point": "{{team}}: desegin azken puntua",
+    "undo_last": "Desegin azken puntua",
+    "close_match": "Itxi partida",
+    "confirm_close_title": "Partida itxi nahi duzu?",
+    "confirm_close_message": "Puntuazioa galduko da.",
+    "confirm_close_cancel": "Jarraitu jokatzen",
+    "confirm_close_cta": "Itxi"
   },
   "new_competition": {
     "title": "Txapelketa berria",

@@ -127,8 +127,14 @@
     "cta_start": "Empezar",
     "winner": "¡Victoria!",
     "cta_new_game": "Nuevo partido",
-    "undo": "Deshacer",
-    "reset": "Reiniciar"
+    "add_point": "Añadir un punto a {{team}}, {{score}} de {{target}}",
+    "undo_point": "Deshacer el último punto de {{team}}",
+    "undo_last": "Deshacer el último punto",
+    "close_match": "Cerrar el partido",
+    "confirm_close_title": "¿Cerrar el partido?",
+    "confirm_close_message": "Se perderá el marcador.",
+    "confirm_close_cancel": "Seguir jugando",
+    "confirm_close_cta": "Cerrar"
   },
   "new_competition": {
     "title": "Nueva competición",

@@ -57,6 +57,11 @@ function RootLayoutNav() {
           animation: "fade",
         }}
       />
+      {/* A route of its own, not a tab: it covers the tab bar during a game. */}
+      <Stack.Screen
+        name="match"
+        options={{ presentation: "fullScreenModal", headerShown: false }}
+      />
     </Stack>
   );
 }
