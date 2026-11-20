@@ -1,10 +1,11 @@
-import { router } from "expo-router";
+import { type Href, router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CardGrid } from "@/components/CardGrid";
+import { CardLink } from "@/components/CardLink";
 import { FeaturedCard } from "@/components/FeaturedCard";
 import { ChevronDown, ChevronRight, ChevronUp, Search } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
@@ -27,7 +28,8 @@ import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 import type { Competition } from "@/types/competition";
 
-const openCompetition = (id: string) => router.push(`/(tabs)/competitions/details?id=${id}`);
+const competitionHref = (id: string): Extract<Href, string> =>
+  `/(tabs)/competitions/details?id=${id}`;
 
 interface Tile {
   competition: Competition;
@@ -49,10 +51,10 @@ export default function CompetitionsListScreen() {
   const seasons = useMemo(() => groupBySeason(list), [list]);
 
   const renderCard = (item: Competition) => (
-    <PressableScale
+    <CardLink
       key={item.id}
       style={styles.card}
-      onPress={() => openCompetition(item.id)}
+      href={competitionHref(item.id)}
       accessibilityRole="button"
       accessibilityLabel={[item.name, item.level, item.year].filter(Boolean).join(", ")}
       testID={`competition-card-${item.id}`}
@@ -62,7 +64,7 @@ export default function CompetitionsListScreen() {
         {item.level && <Text style={styles.cardLevel}>{item.level}</Text>}
       </View>
       {item.year != null && <Text style={styles.cardMeta}>{item.year}</Text>}
-    </PressableScale>
+    </CardLink>
   );
 
   // Two tiles per row on a phone, two per grid column on a wider web window: each in a cell
@@ -79,7 +81,7 @@ export default function CompetitionsListScreen() {
               eyebrow={tile.eyebrow}
               title={tile.title}
               variant={variant}
-              onPress={() => openCompetition(tile.competition.id)}
+              href={competitionHref(tile.competition.id)}
               accessibilityLabel={tile.competition.name}
               testID={`competition-card-${tile.competition.id}`}
             />
@@ -136,7 +138,7 @@ export default function CompetitionsListScreen() {
             eyebrow={t("competitions.current_season")}
             title={keepSeasonTogether(lead.competition.name)}
             footer={t("competitions.see_results")}
-            onPress={() => openCompetition(lead.competition.id)}
+            href={competitionHref(lead.competition.id)}
             testID={`competition-card-${lead.competition.id}`}
           />
           {rest.map(({ competition }) => renderCard(competition))}

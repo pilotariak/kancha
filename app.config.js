@@ -12,6 +12,16 @@ module.exports = {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
+      // iOS 18 home screen appearances, both derived from icon.png with no new drawing. Apple
+      // asks for a dark icon on a transparent background, which the system fills, and a
+      // grayscale tinted icon: here the white glyph on opaque black, as Expo fills a tinted
+      // icon's transparency with white. `light` must be set, or the dark image becomes the
+      // default icon.
+      icon: {
+        light: "./assets/images/icon.png",
+        dark: "./assets/images/icon-dark.png",
+        tinted: "./assets/images/icon-tinted.png",
+      },
       supportsTablet: false,
       bundleIdentifier: "io.pilotariak.kancha",
     },

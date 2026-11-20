@@ -1,8 +1,9 @@
+import type { Href } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import { CardLink } from "@/components/CardLink";
 import { ChevronRight } from "@/components/icons";
-import { PressableScale } from "@/components/PressableScale";
 import type { Palette } from "@/constants/colors";
 import { useThemedStyles } from "@/hooks/use-theme";
 
@@ -11,7 +12,8 @@ interface FeaturedCardProps {
   title: string;
   /** The action, shown at the bottom with a chevron: "Voir les résultats". */
   footer: string;
-  onPress: () => void;
+  /** The screen the card opens: a path, for the iOS preview and its Share and Copy link. */
+  href: Extract<Href, string>;
   testID?: string;
 }
 
@@ -19,13 +21,13 @@ interface FeaturedCardProps {
  * The one red card of a screen, for its main content (the current season). It sits on
  * cream, 22px or more below the red header band, so the two read as separate blocks.
  */
-export function FeaturedCard({ eyebrow, title, footer, onPress, testID }: FeaturedCardProps) {
+export function FeaturedCard({ eyebrow, title, footer, href, testID }: FeaturedCardProps) {
   const styles = useThemedStyles(makeStyles);
 
   return (
-    <PressableScale
+    <CardLink
       style={styles.card}
-      onPress={onPress}
+      href={href}
       accessibilityRole="button"
       accessibilityLabel={`${eyebrow}, ${title}`}
       accessibilityHint={footer}
@@ -37,7 +39,7 @@ export function FeaturedCard({ eyebrow, title, footer, onPress, testID }: Featur
         <Text style={styles.footerLabel}>{footer}</Text>
         <ChevronRight color="#FFFFFF" size={18} />
       </View>
-    </PressableScale>
+    </CardLink>
   );
 }
 

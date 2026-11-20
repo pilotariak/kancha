@@ -478,6 +478,15 @@ and focus through `onHoverIn`/`onHoverOut` and `onFocus`/`onBlur` instead. It dr
 only when it carries the card's `style`: a bare wrapper around a styled child has no radius for
 the shadow to follow.
 
+### Link previews (iOS)
+
+`CardLink` (`src/components/CardLink.tsx`) is the `PressableScale` of a card that opens a screen:
+the competition cards, the featured card, the season tiles and the player rows. A press opens the
+screen on every platform. On iOS, a long press also shows the screen in a system preview, with a
+menu: Open, Share, Copy link. Share and Copy link give the screen's public web address
+(`SITE_URL`, `src/constants/site.ts`), which opens the web app: the app has no universal links.
+Android and web keep the plain card, with its hover and focus states on web.
+
 ### Cards — Featured / Hero Card
 
 `FeaturedCard` (`src/components/FeaturedCard.tsx`): the one red card of a screen, for its main
@@ -675,9 +684,38 @@ Gap:      4px between stack items
 
 ### Navigation / Tab Bar
 
-Expo Router tabs. iOS and Android use `src/app/(tabs)/_layout.tsx`; web uses
-`src/app/(tabs)/_layout.web.tsx`, which Expo Router picks over it on web only. `index` and `slot`
-stay hidden (`href: null`) in both.
+Expo Router tabs. iOS and Android use native tabs (`NativeTabs` from
+`expo-router/unstable-native-tabs`, flagged unstable in SDK 54) in `src/app/(tabs)/_layout.tsx`;
+web uses React Navigation's JS tabs in `src/app/(tabs)/_layout.web.tsx`, which Expo Router picks
+over it on web only. Native tabs show only the routes that have a Trigger, so `index` and `slot`
+are no tabs there; web hides them with `href: null`. Competitions is the first tab: a launch on
+`/` lands on it.
+
+iOS: the system tab bar, Liquid Glass on iOS 26.
+
+```
+Active tint:   red (tintColor), the only color set: a background, blur or label color would
+               replace the system glass
+Icons:         SF Symbols, outline at rest and filled when selected: trophy, sportscourt,
+               info.circle (each with .fill)
+Label:         the system's
+Minimize:      the bar shrinks while a screen scrolls down (iOS 26, minimizeBehavior)
+```
+
+Android: the Material 3 bottom navigation, in the colors of the former JS bar.
+
+```
+Background:    tabBar
+Active:        red icon and label on a redSoft pill (indicatorColor)
+Inactive tint: tabIconInactive
+Label:         12px, weight 700
+Icons:         Material Design Icons rendered to images by VectorIcon: trophy-outline,
+               sword-cross, information-outline (`src/components/android-tab-icon.android.tsx`).
+               Native tabs take an image or a drawable, not the Lucide SVG components;
+               drawables come with #99
+```
+
+Web: the bottom bar until two columns fit beside the rail (`RAIL_MIN_WIDTH`, 880px, §5).
 
 ```
 Background:    #FFFFFF
@@ -687,8 +725,7 @@ Inactive tint: #B8B1AA
 Label:         12px, weight 700, paddingBottom 8px
 ```
 
-The bottom bar on iOS, Android, and on web until two columns fit beside the rail
-(`RAIL_MIN_WIDTH`, 880px, §5). From there, web shows a navigation rail on the left instead:
+From there, web shows a navigation rail on the left instead:
 
 ```
 Rail:          128px wide (RAIL_WIDTH), full height, tabBar background, 1px tabBarBorder

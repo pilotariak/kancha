@@ -12,6 +12,11 @@
     "competition_fallback": "Competición",
     "loading": "Cargando"
   },
+  "link": {
+    "open": "Abrir",
+    "share": "Compartir",
+    "copy": "Copiar enlace"
+  },
   "error": {
     "title": "Algo salió mal",
     "subtitle": "Un error inesperado detuvo esta pantalla. Puedes intentarlo de nuevo.",

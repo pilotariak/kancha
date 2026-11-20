@@ -12,6 +12,11 @@
     "competition_fallback": "Txapelketa",
     "loading": "Kargatzen"
   },
+  "link": {
+    "open": "Ireki",
+    "share": "Partekatu",
+    "copy": "Kopiatu esteka"
+  },
   "error": {
     "title": "Zerbaitek huts egin du",
     "subtitle": "Ustekabeko errore batek pantaila hau gelditu du. Berriro saia zaitezke.",

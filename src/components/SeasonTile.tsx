@@ -1,7 +1,8 @@
+import type { Href } from "expo-router";
 import React from "react";
 import { StyleSheet, Text } from "react-native";
 
-import { PressableScale } from "@/components/PressableScale";
+import { CardLink } from "@/components/CardLink";
 import type { Palette } from "@/constants/colors";
 import { useThemedStyles } from "@/hooks/use-theme";
 
@@ -10,7 +11,8 @@ interface SeasonTileProps {
   eyebrow?: string;
   /** "season": a large season ("2025-2026"). "name": a competition label, under a season heading. */
   variant: "season" | "name";
-  onPress: () => void;
+  /** The screen the tile opens: a path, for the iOS preview and its Share and Copy link. */
+  href: Extract<Href, string>;
   /** The full competition name, season included. */
   accessibilityLabel: string;
   testID?: string;
@@ -24,16 +26,16 @@ export function SeasonTile({
   title,
   eyebrow,
   variant,
-  onPress,
+  href,
   accessibilityLabel,
   testID,
 }: SeasonTileProps) {
   const styles = useThemedStyles(makeStyles);
 
   return (
-    <PressableScale
+    <CardLink
       style={[styles.tile, variant === "season" && styles.tileSeason]}
-      onPress={onPress}
+      href={href}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       testID={testID}
@@ -45,7 +47,7 @@ export function SeasonTile({
       >
         {title}
       </Text>
-    </PressableScale>
+    </CardLink>
   );
 }
 

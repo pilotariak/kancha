@@ -12,6 +12,11 @@
     "competition_fallback": "Competition",
     "loading": "Loading"
   },
+  "link": {
+    "open": "Open",
+    "share": "Share",
+    "copy": "Copy link"
+  },
   "error": {
     "title": "Something went wrong",
     "subtitle": "An unexpected error stopped this screen. You can try again.",

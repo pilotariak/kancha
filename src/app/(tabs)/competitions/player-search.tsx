@@ -1,4 +1,4 @@
-import { router, Stack } from "expo-router";
+import { type Href, Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,8 +13,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CardGrid } from "@/components/CardGrid";
+import { CardLink } from "@/components/CardLink";
 import { ChevronRight, RotateCcw, Search, User } from "@/components/icons";
-import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { findPlayers, searchWords } from "@/features/players/name-match";
@@ -24,6 +24,9 @@ import { usePlayerSearch } from "@/hooks/use-players";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 const SEARCH_DELAY_MS = 300;
+
+const playerHref = (licence: string): Extract<Href, string> =>
+  `/(tabs)/competitions/player?licence=${encodeURIComponent(licence)}`;
 
 export default function PlayerSearchScreen() {
   const { t } = useTranslation();
@@ -139,14 +142,10 @@ export default function PlayerSearchScreen() {
               </Text>
               <CardGrid columns={columns} style={styles.list}>
                 {players.map((player) => (
-                  <PressableScale
+                  <CardLink
                     key={player.licence}
                     style={styles.card}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/(tabs)/competitions/player",
-                        params: { licence: player.licence },
-                      })}
+                    href={playerHref(player.licence)}
                     accessibilityRole="button"
                     accessibilityLabel={`${player.name}, ${player.club.name}`}
                     accessibilityHint={t("player.open_hint")}
@@ -162,7 +161,7 @@ export default function PlayerSearchScreen() {
                       </View>
                       <ChevronRight color={colors.muted} size={18} />
                     </View>
-                  </PressableScale>
+                  </CardLink>
                 ))}
               </CardGrid>
             </View>
