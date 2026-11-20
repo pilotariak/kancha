@@ -5,6 +5,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Check, ChevronDown } from "@/components/icons";
 import type { Palette } from "@/constants/colors";
+import { TEXT_MAX_WIDTH } from "@/features/layout/breakpoints";
+import {
+  type InteractionState,
+  showsFocusRing,
+  useInteractionStyles,
+} from "@/hooks/use-interaction-styles";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 interface SelectFieldProps {
@@ -25,14 +32,21 @@ export function SelectField({ label, hint, options, value, onChange, testID }: S
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const interaction = useInteractionStyles();
   const insets = useSafeAreaInsets();
+  const wide = useWebLayout().columns > 1;
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.id === value);
 
   return (
     <>
       <Pressable
-        style={({ pressed }) => [styles.field, pressed && styles.fieldPressed]}
+        style={(state: InteractionState) => [
+          styles.field,
+          state.pressed && styles.fieldPressed,
+          state.hovered && interaction.hover,
+          showsFocusRing(state) && interaction.focusRing,
+        ]}
         onPress={() => setOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={[label, selected?.name].filter(Boolean).join(", ")}
@@ -51,7 +65,13 @@ export function SelectField({ label, hint, options, value, onChange, testID }: S
             accessibilityRole="button"
             accessibilityLabel={t("common.close")}
           />
-          <View style={[styles.sheet, { paddingBottom: 12 + insets.bottom }]}>
+          <View
+            style={[
+              styles.sheet,
+              wide && styles.sheetCentered,
+              { paddingBottom: 12 + insets.bottom },
+            ]}
+          >
             <Text style={styles.sheetTitle} accessibilityRole="header">{label}</Text>
             <ScrollView accessibilityRole="radiogroup">
               {options.map((option) => {
@@ -59,7 +79,11 @@ export function SelectField({ label, hint, options, value, onChange, testID }: S
                 return (
                   <Pressable
                     key={option.id}
-                    style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
+                    style={(state: InteractionState) => [
+                      styles.option,
+                      (state.pressed || state.hovered) && styles.optionPressed,
+                      showsFocusRing(state) && interaction.focusRing,
+                    ]}
                     onPress={() => {
                       setOpen(false);
                       if (!active) onChange(option.id);
@@ -108,6 +132,8 @@ const makeStyles = (c: Palette) =>
       borderTopRightRadius: 24,
       backgroundColor: c.white,
     },
+    // Wider than a phone: the text column width, centered, instead of the window width.
+    sheetCentered: { width: "100%", maxWidth: TEXT_MAX_WIDTH, alignSelf: "center" },
     sheetTitle: {
       paddingHorizontal: 16,
       paddingBottom: 8,
@@ -126,6 +152,7 @@ const makeStyles = (c: Palette) =>
       paddingVertical: 12,
       borderRadius: 16,
     },
+    // Also the hovered row on web.
     optionPressed: { backgroundColor: c.cream },
     optionLabel: { flex: 1, color: c.ink, fontSize: 15, fontWeight: "600" },
     optionLabelActive: { fontWeight: "800" },

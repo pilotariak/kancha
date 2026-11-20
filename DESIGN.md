@@ -34,6 +34,7 @@ meta:
     muted: "#97A89F"
     placeholder: "#97A89F"
     line: "#25362E"
+    lineStrong: "#3B5246"
     card: "#13201A"
     panel: "#1E2E26"
     green: "#3CC489"
@@ -61,6 +62,7 @@ colors:
   surface: "#FFFDFC"           # Pearl Card White — list cards
   surfaceElevated: "#FFFFFF"   # Pure White — match cards, modals, insets
   border: "#E5DED6"            # Warm Greige Line — universal border/divider
+  borderStrong: "#CBBFB2"      # Strong Greige Line — hovered card, chip and field borders (web)
   textPrimary: "#141414"       # Deep Ink — headings, titles
   text: "#262626"              # Charcoal Text — body copy
   textMuted: "#7A7A7A"         # Warm Muted Gray — metadata, eyebrows
@@ -320,6 +322,7 @@ components:
 - **Card** (`#FFFDFC`): Slightly warmer than cream; used for list cards sitting on cream to create a 1-step elevation.
 - **White** (`#FFFFFF`): Match cards, modal surfaces, high-contrast inset content.
 - **Line** (`#E5DED6`): Border and divider color. Warm greige — matches the cream family.
+- **Line Strong** (`#CBBFB2`, `#3B5246` dark): the border of a hovered card, chip or field on web, and the hover tint of an inactive segment. A step darker than Line in light, a step lighter in dark.
 
 ### Ink & Text
 
@@ -351,25 +354,26 @@ The dark palette (`meta.darkColors`) takes the three colors of the Basque flag: 
 
 ### Reference table
 
-| Role           | Value                  | Usage                          |
-| -------------- | ---------------------- | ------------------------------ |
-| `--red`        | `#C8102E`              | Brand, red text, scores, icons |
-| `--red-fill`   | `#C8102E`              | Header band, CTAs, under white |
-| `--red-dark`   | `#970D25`              | Pressed, error text            |
-| `--red-soft`   | `#FDE8EC`              | Error bg, score chips          |
-| `--cream`      | `#F7F4EF`              | Screen background              |
-| `--card`       | `#FFFDFC`              | List card background           |
-| `--white`      | `#FFFFFF`              | Match cards, modals            |
-| `--line`       | `#E5DED6`              | Borders, dividers              |
-| `--ink`        | `#141414`              | Headings, titles               |
-| `--text`       | `#262626`              | Body text                      |
-| `--muted`      | `#7A7A7A`              | Secondary text, metadata       |
-| `--green`      | `#1F7A5A`              | Success, live/today indicator  |
-| `--green-soft` | `#E6F4EE`              | Success pill background        |
-| `--shadow`     | `rgba(103,18,31,0.14)` | Elevated card shadow           |
-| `--panel`      | `#1E1E1E`              | Dark inset on red backgrounds  |
-| `--amber`      | `#C8900A`              | Finale/final round highlight   |
-| `--amber-bg`   | `#FFF8E7`              | Finale pill background         |
+| Role            | Value                  | Usage                          |
+| --------------- | ---------------------- | ------------------------------ |
+| `--red`         | `#C8102E`              | Brand, red text, scores, icons |
+| `--red-fill`    | `#C8102E`              | Header band, CTAs, under white |
+| `--red-dark`    | `#970D25`              | Pressed, error text            |
+| `--red-soft`    | `#FDE8EC`              | Error bg, score chips          |
+| `--cream`       | `#F7F4EF`              | Screen background              |
+| `--card`        | `#FFFDFC`              | List card background           |
+| `--white`       | `#FFFFFF`              | Match cards, modals            |
+| `--line`        | `#E5DED6`              | Borders, dividers              |
+| `--line-strong` | `#CBBFB2`              | Hovered borders (web)          |
+| `--ink`         | `#141414`              | Headings, titles               |
+| `--text`        | `#262626`              | Body text                      |
+| `--muted`       | `#7A7A7A`              | Secondary text, metadata       |
+| `--green`       | `#1F7A5A`              | Success, live/today indicator  |
+| `--green-soft`  | `#E6F4EE`              | Success pill background        |
+| `--shadow`      | `rgba(103,18,31,0.14)` | Elevated and hovered cards     |
+| `--panel`       | `#1E1E1E`              | Dark inset on red backgrounds  |
+| `--amber`       | `#C8900A`              | Finale/final round highlight   |
+| `--amber-bg`    | `#FFF8E7`              | Finale pill background         |
 
 ---
 
@@ -439,10 +443,37 @@ Background:   #FFFDFC
 Border:       1px solid #E5DED6
 Border-radius: 20px
 Padding:       18px
-Shadow:        none (border provides separation)
+Shadow:        none at rest (border provides separation)
 Title:         #141414, 17–18px, weight 800
 Meta:          #7A7A7A, 13px, weight 400
+Hover (web):   lineStrong border, shadow 0 4px 16px (shadow token)
+Focus (web):   2px solid red outline, 2px offset, keyboard focus only
 ```
+
+### Interaction states (web)
+
+Hover and keyboard focus exist on web only; iOS and Android render as before. The styles live in
+`src/hooks/use-interaction-styles.ts` and read the `hovered` and `focused` states that
+react-native-web passes to `Pressable`.
+
+```
+Hover, cards and fields:  lineStrong border + shadow 0 4px 16px in the shadow token
+                          (PressableScale cards, SelectField). A card without a border, such as
+                          the featured card, gets the shadow only
+Hover, chips:             lineStrong border, no shadow: the scrolling chip row would clip it.
+                          A selected chip does not change
+Hover, segments:          lineStrong fill on an inactive segment; the active one does not change
+Hover, back link:         underlined label
+Focus ring:               2px solid red outline, 2px offset (rounded with the element). White,
+                          with a 4px offset, for the back link on the red band
+Mouse focus:              no ring. A click also focuses a Pressable on web, so the ring only
+                          shows when the browser matches :focus-visible (keyboard focus)
+```
+
+`PressableScale` is an `Animated` component, which cannot take a style callback: it tracks hover
+and focus through `onHoverIn`/`onHoverOut` and `onFocus`/`onBlur` instead. It draws the hover
+only when it carries the card's `style`: a bare wrapper around a styled child has no radius for
+the shadow to follow.
 
 ### Cards — Featured / Hero Card
 
@@ -461,6 +492,7 @@ Title:         #FFFFFF, 28px (Hero title), weight 900, line-height 31px. A seaso
 Sub panel:     #161616 bg, #FFFFFF text — inset dark chip for metadata (optional)
 Footer:        #FFFFFF 15px weight 700 + ChevronRight 18px #FFFFFF, space-between, 12px above
 Pressed:       scale(0.96) via PressableScale
+Hover (web):   the shadow only (no border); focus ring as the other cards
 Placement:     on cream, at least 22px below the header band. The band's 24px bottom corners
                and the cream gap keep the two red blocks apart in both themes; never let the
                card touch the band
@@ -476,9 +508,10 @@ The season comes from the competition name (`src/features/competitions/seasons.t
 has no season field; a league with no season in any name keeps the plain list of competition
 cards.
 
-`SeasonTile` (`src/components/SeasonTile.tsx`): a half-width tile, two per row, 12px apart. Each
-tile fills a `flex: 1` cell without padding, so an odd last tile keeps its half width next to an
-empty cell. Every tile opens the results of one competition.
+`SeasonTile` (`src/components/SeasonTile.tsx`): a half-width tile, two per row, 12px apart (on
+web, two per grid column: half a card). Each tile fills a `flex: 1` cell without padding, and
+empty cells fill a short last row, so every tile keeps the same width. Every tile opens the
+results of one competition.
 
 ```
 Tile:      #FFFDFC (card), 1px solid #E5DED6 (line), 20px radius, 16px padding, content spread
@@ -504,7 +537,8 @@ Season:    #141414 (ink), 22px, weight 900, tabular-nums, one line ("2025-2026")
 ```
 Toggle:    full width, min height 44px, pill radius, #FFFFFF (white), 1px solid #E5DED6 (line),
            #141414 (ink) 15px weight 700 label + 18px chevron, 8px gap. Pressed: #E5DED6 (line).
-           aria-expanded carries the state. No red: showing more is not an action
+           aria-expanded carries the state. No red: showing more is not an action. On web from
+           two columns: one cell wide, centered under the tiles
 ```
 
 | Pair                               | Light  | Dark (Ikurriña) |
@@ -536,7 +570,31 @@ No red:       a regular match card carries no red. The Final keeps its amber rou
               amber phase label and 2px red border.
 Bracket node: same team rows at 14px names, 17px sets (22px Final), min width 24px (30px
               Final), no header
+Grid:         web, from two columns (§5 Columns): one card per grid column, in a `CardGrid`.
+              Each card fills its `flex: 1` cell, so the cards of a row share its height and a
+              short last row keeps its cards at the same width. Round dividers span the whole
+              results column
+Interaction:  none: a match card is not pressable, so it has no hover or focus state
 ```
+
+On a phone, the bracket (`BracketView`) is a row of round columns one card wide (350px),
+connected by a chevron, that scrolls sideways and bleeds over the gutter.
+
+From two columns (web, `columns` prop), the bracket takes the fit layout: nothing scrolls
+sideways.
+
+```
+Knockout:  every round but the pools (barrages, 16ths to the final), side by side in one row,
+           24px apart, no chevron. They share the width: 220px at least (names stay readable),
+           one card (350px) at most; more rounds than fit wrap onto a new line. The nodes take
+           their column's width
+Pools:     below, 24px under the knockout row: the round pill, then the nodes in a CardGrid of
+           the screen's columns, each filling its cell so a row shares its height. Phases the
+           parser does not know ("Parties") go there too
+```
+
+The knockout rounds come first: they are what a reader looks for, and they are short. Pools
+are not a knockout bracket, and their 18 or 20 matches as a column left the later rounds empty.
 
 ### Status Pills
 
@@ -588,6 +646,11 @@ Trailing:     optional slot right of the text, 16px gap (the About logo, an acti
 Loading:      white spinner in place of the title and subtitle
 Compact:      `compact` prop, for a screen with filters under the band (results): title 28px
               (Hero title), line-height 31px; 16px bottom padding, 12px between back link and text
+Width:        always full width. On a grid screen its content keeps the 20px gutter, like the
+              grid below. A text screen passes its text column (`column` prop), and the
+              band's content keeps to it
+Back link:    hover underlines the label; keyboard focus draws a 2px white outline, 4px offset
+              (a red ring would not show on the band)
 ```
 
 | Pair (on redFill)                  | Light (`#C8102E`) | Dark (`#B5142F`) |
@@ -609,12 +672,33 @@ Gap:      4px between stack items
 
 ### Navigation / Tab Bar
 
+Expo Router tabs. iOS and Android use `src/app/(tabs)/_layout.tsx`; web uses
+`src/app/(tabs)/_layout.web.tsx`, which Expo Router picks over it on web only. `index` and `slot`
+stay hidden (`href: null`) in both.
+
 ```
 Background:    #FFFFFF
 Border top:    1px solid #E9E0D6
 Active tint:   #C8102E
 Inactive tint: #B8B1AA
 Label:         12px, weight 700, paddingBottom 8px
+```
+
+The bottom bar on iOS, Android, and on web until two columns fit beside the rail
+(`RAIL_MIN_WIDTH`, 880px, §5). From there, web shows a navigation rail on the left instead:
+
+```
+Rail:          128px wide (RAIL_WIDTH), full height, tabBar background, 1px tabBarBorder
+               right border, 8px side padding. React Navigation's left tab bar, material variant
+Logo:          KanchaLogo 48px, centered, 20px from the top, 16px above the tabs; on-light in
+               the light theme, on-dark in the dark one. Decorative: it sits on the tab bar's
+               background layer
+Tab:           24px icon above a 12px weight 700 label, 16px radius
+Active:        red icon and label on a redSoft pill
+Inactive:      text icon and label (not tabIconInactive: the labels need 4.5:1)
+Hover:         React Navigation's overlay (8% of its theme text color): visible in light, faint
+               in dark, as the app sets no navigation theme
+Focus:         the browser's default focus ring on the tab link
 ```
 
 ### Select Field
@@ -631,6 +715,9 @@ List:      a sheet from the bottom of the screen: #FFFFFF, 24px top corners, scr
            (rgba(103,18,31,0.14)), uppercase muted title (12px, weight 800, +1.5px tracking)
 Rows:      min height 48px, 16px sides, full name #141414 15px weight 600; the current one
            weight 800 with an ink Check (18px, stroke 3). A row or the scrim closes the sheet
+Web:       hover and focus as cards (lineStrong border, shadow, red ring); a hovered row turns
+           cream like a pressed one. From two columns the sheet is the text column (752px) at
+           most, centered
 ```
 
 ### Filter Chip
@@ -646,6 +733,11 @@ Selected:  #141414 (ink) fill and border, #F7F4EF (cream) text. No red
 Pressed:   #E5DED6 (line) fill
 Overflow:  a 40px fade from transparent cream to cream on the right edge while chips remain to
            the right. A selected chip that starts off screen scrolls to the gutter
+Web:       hover gives an unselected chip a lineStrong border; keyboard focus the red ring. The
+           row gains 4px above and below inside the scroll view (and loses it outside), so the
+           ring is not clipped
+Wrap:      `wrap` prop, from two columns (web): the chips flow onto several lines inside the
+           gutter, with no scrolling, no bleed and no fade
 ```
 
 ### Segmented Control
@@ -659,6 +751,7 @@ Segment:   flex 1, min height 38px, 14px icon + 13px label, centered, pill radiu
 Inactive:  no fill, #262626 (text), weight 600
 Active:    #FFFFFF (white) segment, #141414 (ink) icon and label, weight 800
 No red:    picking a view is not an action
+Web:       hover tints an inactive segment lineStrong; keyboard focus draws the red ring
 ```
 
 | Pair                                  | Light  | Dark (Ikurriña) |
@@ -681,7 +774,36 @@ On the results screen, a row in place of the old Total / Played / Pending strip:
 Label:     "27 / 27 parties jouées", #262626 (text), 13px, weight 700, tabular-nums
 Bar:       flex 1, 6px, pill radius, #E5DED6 (line) track, #141414 (ink) fill
 Done:      a dark StatusPill ("Terminé") at the end of the row once every match has a score
+Grid:      from two columns (web), the row moves to the filters: under the segmented control in
+           the filter column, on its own line in the filter bar
 ```
+
+### Results screen in the grid
+
+On web, from two columns (§5 Columns). On a phone the screen keeps its order: filters,
+progress, results.
+
+From three columns, the list and the ranking give the filters the first grid column:
+
+```
+Filters:   one cell wide, 12px from the results: SelectField, FilterChips (wrap),
+           SegmentedControl, ResultsProgress. position: sticky, 16px from the top: they stay in
+           view while the matches scroll
+Results:   the other columns: the match grid or the ranking cards, one card per column
+```
+
+With two columns, and always for the bracket, which needs the whole width to fit its rounds,
+the filters sit in a bar above the results, and the results get every column:
+
+```
+Filter bar: one wrapping row, 12px gap: SelectField (a cell wide), FilterChips (wrap, the
+            rest of the line, 200px at least), SegmentedControl (a cell wide). ResultsProgress
+            on its own line under them. When the line is too short, the segmented control
+            drops to a second line
+Results:    the match grid, the ranking cards or the fit bracket, over every column
+```
+
+Switching to the bracket moves the filters from the column to the bar.
 
 ### Error State
 
@@ -756,7 +878,42 @@ Every field uses this one style, built from palette tokens so it follows the the
 
 - **Screen padding:** 20 px left/right, consistent across all screens.
 - **Content gap:** 22 px between major stacked sections within a ScrollView.
-- **Single-column layout** only — no multi-column grids on mobile.
+- **Single-column layout** on a phone. On web, wider windows add columns of cards (below).
+- **Grid screens** (leagues, competitions, results, ranking, player search, player): their
+  lists of cards go through `CardGrid` (`src/components/CardGrid.tsx`), with `columns` from
+  `useWebLayout()`. In one column, `CardGrid` is the list as it was. Season tiles are half a
+  card: two per column. Nothing caps the width: a wider window gets more columns.
+- **Text screens** (About, Score): their content keeps to the text column, `useTextColumn()`
+  (`src/hooks/use-layout.ts`): two cards wide, 752 px with its gutters, centered. Add it to the
+  view that holds the 20 px gutter, and pass it to `ScreenHeader` (`column`).
+
+### Columns (web)
+
+`src/features/layout/breakpoints.ts`. The breakpoints come from the phone card, not from device
+sizes: the card is 350 px (a 390 px screen less its 20 px gutters), cards sit 12 px apart, and
+a column is added each time one more card fits. iOS and Android always use the phone layout.
+
+```
+gridWidth(n)  = n × 350 + (n − 1) × 12 + 2 × 20     content width that holds n cards
+columnsFor(w) = the most cards that fit in w, one at least
+rail          = from gridWidth(2) + 128 (the rail) = 880px: two columns still fit beside it
+text column   = gridWidth(2) = 752px
+```
+
+| Columns | Content width | Window, bottom tabs | Window, with the rail |
+| ------- | ------------- | ------------------- | --------------------- |
+| 1       | below 752px   | below 752px         | —                     |
+| 2       | 752px         | 752–879px           | 880–1241px            |
+| 3       | 1,114px       | —                   | 1,242–1,603px         |
+| 4       | 1,476px       | —                   | 1,604–1,965px         |
+
+Cards fill their cells: a card is 350 px at least, and grows until one more card fits (at most
+about 530 px, with two columns). Below 752 px the web is the phone layout.
+
+The static web export renders without a window, so its HTML holds the phone layout. React
+hydrates that layout, then switches to the window's size: a wide window shows the phone layout
+for a moment while the page loads.
+
 - **Header band:** the screen header (back link, eyebrow, title, subtitle) sits in a solid red band at the top of the scroll view. Its text is white (`#FFFFFF`, `onRedStrong`, `onRedSoft`). Everything below the band is on cream and uses ink/muted, whatever the screen's content height.
 
 ### Header band architecture
@@ -787,7 +944,7 @@ sit on cream below it.
 | 4     | Final match card           | `#FFFFFF` + `2px solid #C8102E`                      |
 | 5     | Logo / FAB button          | Red bg + `rgba(103,18,31,0.14)` shadow, `0 6px 16px` |
 
-**Shadow philosophy:** Shadows are red-tinted (`rgba(103,18,31,0.14)`) — never cool-gray (`rgba(0,0,0,0.x)`). This ties elevation to the brand color and keeps the warm palette coherent. Shadows are used sparingly — only on the About screen logo and action buttons — not on list cards.
+**Shadow philosophy:** Shadows are red-tinted (`rgba(103,18,31,0.14)`) — never cool-gray (`rgba(0,0,0,0.x)`). This ties elevation to the brand color and keeps the warm palette coherent. Shadows are used sparingly — only on the About screen logo and action buttons — not on resting list cards. On web, a hovered card or field lifts with `0 4px 16px` in the shadow token (§4 Interaction states).
 
 **Depth through border color, not shadow stacking.** The `line` color (`#E5DED6`) is warm enough to separate white cards from cream without needing elevation.
 
@@ -815,7 +972,7 @@ sit on cream below it.
 - ❌ Don't put text on a gradient, and don't place dark text (`ink`, `muted`) on red — header text goes in the solid band, in white.
 - ❌ Don't set `border-radius` below 12 px on any interactive element.
 - ❌ Don't use `font-weight` below 600 for interactive labels, pill text, or metadata that needs to be scannable at glance.
-- ❌ Don't add box-shadows to list cards — border is sufficient.
+- ❌ Don't add box-shadows to resting list cards — border is sufficient. The web hover shadow is the one exception.
 - ❌ Don't use `rgba(255,255,255,0.08)` backgrounds on cream — they are invisible. Use `#FFFFFF` with a `line` border instead.
 - ❌ Don't skip the 22 px section gap between major content blocks — visual breathing room is load-bearing.
 
@@ -823,7 +980,7 @@ sit on cream below it.
 
 ## 8. Responsive Behavior
 
-Kancha is a **mobile-only native app** (React Native / Expo). No tablet layout exists. The design system targets:
+The **iOS and Android apps are phone-only** (React Native / Expo, `ios.supportsTablet: false`): they always use the phone layout. The **web build** adds a column of cards each time one more fits, and a navigation rail from 880px (§5 Columns). The phone layout targets:
 
 | Target      | Width      | Notes                              |
 | ----------- | ---------- | ---------------------------------- |

@@ -18,6 +18,7 @@ import {
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
+import { useTextColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { type SupportedLanguage, useLanguageStore } from "@/store/language-store";
 import { type ThemeMode, useThemeStore } from "@/store/theme-store";
@@ -51,6 +52,7 @@ export default function AboutScreen() {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const column = useTextColumn();
   const { language, setLanguage } = useLanguageStore();
   const { mode: themeMode, setMode: setThemeMode } = useThemeStore();
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -67,6 +69,7 @@ export default function AboutScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader
+          column={column}
           eyebrow={t("tabs.about")}
           title="Kancha"
           subtitle={t("about.tagline")}
@@ -81,7 +84,7 @@ export default function AboutScreen() {
           }
         />
 
-        <View style={styles.body}>
+        <View style={[styles.body, column]}>
           <View style={styles.cards}>
             <View style={styles.card} testID="about-version">
               <Text style={styles.cardLabel}>{t("about.version")}</Text>

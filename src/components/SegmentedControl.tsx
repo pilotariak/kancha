@@ -3,6 +3,11 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { Palette } from "@/constants/colors";
+import {
+  type InteractionState,
+  showsFocusRing,
+  useInteractionStyles,
+} from "@/hooks/use-interaction-styles";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 export interface Segment<T extends string> {
@@ -27,6 +32,7 @@ export function SegmentedControl<T extends string>(
 ) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const interaction = useInteractionStyles();
 
   return (
     <View style={styles.track} accessibilityRole="tablist" testID={testID}>
@@ -35,7 +41,11 @@ export function SegmentedControl<T extends string>(
         return (
           <Pressable
             key={option}
-            style={[styles.segment, active && styles.segmentActive]}
+            style={(state: InteractionState) => [
+              styles.segment,
+              active ? styles.segmentActive : state.hovered && styles.segmentHovered,
+              showsFocusRing(state) && interaction.focusRing,
+            ]}
             onPress={() => onChange(option)}
             accessibilityRole="tab"
             accessibilityLabel={label}
@@ -74,6 +84,8 @@ const makeStyles = (c: Palette) =>
       borderRadius: 9999,
     },
     segmentActive: { backgroundColor: c.white },
+    // Web only: a tint on an inactive segment under the pointer.
+    segmentHovered: { backgroundColor: c.lineStrong },
     label: { color: c.text, fontSize: 13, fontWeight: "600" },
     labelActive: { color: c.ink, fontWeight: "800" },
   });

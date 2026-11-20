@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CardGrid } from "@/components/CardGrid";
 import { ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
@@ -18,6 +19,7 @@ import {
   type SeasonHistory,
   type SpecialtyBest,
 } from "@/features/players/stats";
+import { useWebLayout } from "@/hooks/use-layout";
 import { usePlayerRankings } from "@/hooks/use-players";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
@@ -157,6 +159,7 @@ function HistoryCard({ entry }: { entry: HistoryEntry }) {
 
 function SeasonSection({ season }: { season: SeasonHistory }) {
   const styles = useThemedStyles(makeStyles);
+  const { columns } = useWebLayout();
   return (
     <View style={styles.seasonSection}>
       <View style={styles.seasonDivider}>
@@ -166,9 +169,9 @@ function SeasonSection({ season }: { season: SeasonHistory }) {
         </Text>
         <View style={styles.seasonDividerLine} />
       </View>
-      <View style={styles.list}>
+      <CardGrid columns={columns} style={styles.list}>
         {season.rankings.map((entry) => <HistoryCard key={entry.id} entry={entry} />)}
-      </View>
+      </CardGrid>
     </View>
   );
 }
@@ -179,6 +182,7 @@ export default function PlayerScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { columns } = useWebLayout();
   const { licence = "" } = useLocalSearchParams<{ licence: string }>();
   // `isPending`, not `isLoading`: the static web export renders without the
   // licence, so the query is disabled there. Both stay pending, and the static
@@ -255,11 +259,11 @@ export default function PlayerScreen() {
                 <SectionHeader eyebrow={t("player.best_eyebrow")} title={t("player.best_title")} />
                 {stats.specialties.length > 0
                   ? (
-                    <View style={styles.list}>
+                    <CardGrid columns={columns} style={styles.list}>
                       {stats.specialties.map((best) => (
                         <SpecialtyCard key={best.specialty.id} best={best} />
                       ))}
-                    </View>
+                    </CardGrid>
                   )
                   : (
                     <View style={styles.emptyBox}>
@@ -274,11 +278,11 @@ export default function PlayerScreen() {
                     eyebrow={t("player.partners_eyebrow")}
                     title={t("player.partners_title")}
                   />
-                  <View style={styles.list}>
+                  <CardGrid columns={columns} style={styles.list}>
                     {stats.partners.map((partner) => (
                       <PartnerCard key={partner.licence} partner={partner} />
                     ))}
-                  </View>
+                  </CardGrid>
                 </View>
               )}
 

@@ -4,14 +4,16 @@ import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   ScrollView,
+  type StyleProp,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
+  type ViewStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
+import { CardGrid } from "@/components/CardGrid";
 import { FilterChips } from "@/components/FilterChips";
 import { LayoutList, ListOrdered, Network, Swords, Trophy, Users } from "@/components/icons";
 import { RankingView } from "@/components/RankingView";
@@ -29,8 +31,10 @@ import {
   resolveSelection,
   withSelected,
 } from "@/features/competitions/resultFilters";
+import { GRID_GAP } from "@/features/layout/breakpoints";
 import { useCategories } from "@/hooks/use-categories";
 import { useCompetition, useResultFilters } from "@/hooks/use-competitions";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useResultsByCompetition } from "@/hooks/use-matches";
 import { useSpecialties } from "@/hooks/use-specialties";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -129,7 +133,14 @@ function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
 
 // ─── Match card ───────────────────────────────────────────────────────────────
 
-function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType }) {
+function MatchCard(
+  { result, phaseType, fill = false }: {
+    result: Result;
+    phaseType: PhaseType;
+    /** Fills its grid cell, so the two cards of a row share its height. */
+    fill?: boolean;
+  },
+) {
   const { t, i18n } = useTranslation();
   const styles = useThemedStyles(makeStyles);
   const hasScore = parseMatchScore(result.scores) != null;
@@ -147,6 +158,7 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
   const cardStyle = [
     styles.matchCard,
     !hasScore && styles.matchCardPending,
+    fill && styles.matchCardFill,
     { borderColor: colors.cardBorder, borderWidth: isFinal ? 2 : 1 },
   ];
 
@@ -206,8 +218,15 @@ export default function CompetitionDetailsScreen() {
   const id = params.id ?? "";
   const { specialtyId, categoryId } = params;
 
-  const { width: screenWidth } = useWindowDimensions();
+  const { columns, cellWidth, contentWidth } = useWebLayout();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
+  // Wider than a phone (web), the results use the grid. From three columns, the filters take
+  // the first one and stay in view; with two, and always for the bracket, they sit in a bar
+  // above the results, which then get every column.
+  const grid = columns > 1;
+  const filterColumn = columns > 2 && viewMode !== "bracket";
+  const filterBar = grid && !filterColumn;
+  const resultColumns = filterColumn ? columns - 1 : columns;
 
   const leagueId = useLeagueStore((s) => s.selectedLeagueId);
   const league = LEAGUES.find((l) => l.id === leagueId);
@@ -303,37 +322,57 @@ export default function CompetitionDetailsScreen() {
     </View>
   );
 
+  // The matches of the list and bracket views, once loaded. In the grid, their progress moves
+  // to the filters.
+  const listed = hasPair && viewMode !== "ranking" && !isError && !loadingResults
+      && results && results.length > 0
+    ? results
+    : null;
+
+  // On a phone, the bracket scrolls sideways and bleeds over the gutter to the screen's edges.
+  const bracket = grid
+    ? <BracketView rounds={rounds} columns={columns} />
+    : (
+      <View style={[styles.bracketWrapper, { width: contentWidth }]}>
+        <BracketView rounds={rounds} />
+      </View>
+    );
+
+  // In the filter bar, each filter gets its own width; elsewhere they stack.
+  const barItem = (style: StyleProp<ViewStyle>, node: React.ReactNode) =>
+    filterBar ? <View style={style}>{node}</View> : node;
+  const cell = { width: cellWidth };
+
   function renderResults() {
     if (isPairsError && !hasPair) return errorBox(pairsError);
     if (selection === null && !hasPair) return empty;
     if (!hasPair) return spinner;
     if (viewMode === "ranking") {
-      return <RankingView competitionId={id} specialtyId={specialtyId} categoryId={categoryId} />;
+      return (
+        <RankingView
+          competitionId={id}
+          specialtyId={specialtyId}
+          categoryId={categoryId}
+          columns={resultColumns}
+        />
+      );
     }
     if (isError) return errorBox(error);
     if (loadingResults) return spinner;
-    if (!results || results.length === 0) return empty;
+    if (!listed) return empty;
     return (
       <>
-        <ResultsProgress results={results} />
+        {grid ? null : <ResultsProgress results={listed} />}
         {viewMode === "bracket"
-          ? (
-            <View style={[styles.bracketWrapper, { width: screenWidth }]}>
-              <BracketView rounds={rounds} />
-            </View>
-          )
+          ? bracket
           : rounds.map((round) => (
             <View key={round.type} style={styles.roundSection}>
               <RoundHeader type={round.type} count={round.results.length} />
-              <View style={styles.matchList}>
+              <CardGrid columns={resultColumns} style={styles.matchList}>
                 {round.results.map((r) => (
-                  <MatchCard
-                    key={r.id}
-                    result={r}
-                    phaseType={round.type}
-                  />
+                  <MatchCard key={r.id} result={r} phaseType={round.type} fill={grid} />
                 ))}
-              </View>
+              </CardGrid>
             </View>
           ))}
       </>
@@ -358,9 +397,16 @@ export default function CompetitionDetailsScreen() {
           compact
         />
 
-        <View style={styles.body}>
-          <View style={styles.filters}>
-            {specialtyOptions.length > 0 && (
+        <View style={[styles.body, filterColumn && styles.bodyFilterColumn]}>
+          <View
+            style={[
+              styles.filters,
+              filterColumn && [styles.filterColumn, cell],
+              filterBar && styles.filterBar,
+            ]}
+          >
+            {specialtyOptions.length > 0 && barItem(
+              cell,
               <SelectField
                 label={t("specialty.title")}
                 hint={t("details.specialty_hint")}
@@ -368,26 +414,34 @@ export default function CompetitionDetailsScreen() {
                 value={specialtyId}
                 onChange={selectSpecialty}
                 testID="specialty-select"
-              />
+              />,
             )}
-            {categoryOptions.length > 0 && (
+            {categoryOptions.length > 0 && barItem(
+              styles.barChips,
               <FilterChips
                 accessibilityLabel={t("category.title")}
                 options={categoryOptions}
                 value={categoryId}
                 onChange={(next) => router.setParams({ categoryId: next })}
+                wrap={grid}
                 testID="category-chips"
-              />
+              />,
             )}
-            <SegmentedControl
-              segments={segments}
-              value={viewMode}
-              onChange={setViewMode}
-              testID="view-mode"
-            />
+            {barItem(
+              cell,
+              <SegmentedControl
+                segments={segments}
+                value={viewMode}
+                onChange={setViewMode}
+                testID="view-mode"
+              />,
+            )}
+            {grid && listed ? barItem(styles.barFull, <ResultsProgress results={listed} />) : null}
           </View>
 
-          {renderResults()}
+          {filterColumn
+            ? <View style={styles.resultsBesideFilters}>{renderResults()}</View>
+            : renderResults()}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -403,6 +457,21 @@ const makeStyles = (c: Palette) =>
     content: { paddingBottom: 120 },
     body: { paddingHorizontal: 20, paddingTop: 14, gap: 12 },
     filters: { gap: 10 },
+
+    // Three grid columns or more: the filters take the first one, one cell wide, and stay in
+    // view while the matches scroll.
+    bodyFilterColumn: { flexDirection: "row", alignItems: "flex-start", gap: GRID_GAP },
+    filterColumn: {
+      // Web only, and missing from React Native's position type.
+      position: "sticky" as ViewStyle["position"],
+      top: 16,
+    },
+    resultsBesideFilters: { flex: 1, minWidth: 0, gap: 12 },
+    // Two columns, and the bracket: the filters on a line above the results (two when the
+    // window is narrow), the progress on the next. The field and the segments are a cell wide.
+    filterBar: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: GRID_GAP },
+    barChips: { flexGrow: 1, flexBasis: 200 },
+    barFull: { width: "100%" },
 
     // States
     centered: { paddingVertical: 40, alignItems: "center" },
@@ -498,6 +567,7 @@ const makeStyles = (c: Palette) =>
       overflow: "hidden",
     },
     matchCardPending: { backgroundColor: c.card },
+    matchCardFill: { flex: 1 },
     matchHeader: {
       flexDirection: "row",
       alignItems: "center",
