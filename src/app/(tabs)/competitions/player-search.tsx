@@ -18,6 +18,7 @@ import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { findPlayers, searchWords } from "@/features/players/name-match";
+import { useFieldFocus } from "@/hooks/use-interaction-styles";
 import { useWebLayout } from "@/hooks/use-layout";
 import { usePlayerSearch } from "@/hooks/use-players";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -29,6 +30,7 @@ export default function PlayerSearchScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const { columns } = useWebLayout();
+  const searchFocus = useFieldFocus();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -67,10 +69,11 @@ export default function PlayerSearchScreen() {
         />
 
         <View style={styles.body}>
-          <View style={styles.searchBox}>
+          <View style={[styles.searchBox, searchFocus.focusStyle]}>
             <Search color={colors.muted} size={18} />
             <TextInput
-              style={styles.searchInput}
+              {...searchFocus.focusProps}
+              style={[styles.searchInput, searchFocus.inputStyle]}
               value={query}
               onChangeText={setQuery}
               placeholder={t("player_search.placeholder")}

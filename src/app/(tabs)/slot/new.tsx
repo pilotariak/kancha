@@ -9,6 +9,7 @@ import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
+import { useFieldFocus } from "@/hooks/use-interaction-styles";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 type PlayerStatus = "ok" | "ko" | "disponible";
@@ -59,6 +60,12 @@ export default function NewSlotScreen() {
     [locale],
   );
   const [currentStep, setCurrentStep] = useState(0);
+  const seasonFocus = useFieldFocus();
+  const startFocus = useFieldFocus();
+  const endFocus = useFieldFocus();
+  const timeFromFocus = useFieldFocus();
+  const timeToFocus = useFieldFocus();
+  const venueFocus = useFieldFocus();
 
   // Step 0 — Période. Null until edited, so the default follows the language.
   const [seasonName, setSeasonName] = useState<string | null>(null);
@@ -81,6 +88,7 @@ export default function NewSlotScreen() {
   const [players, setPlayers] = useState<SlotPlayer[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
   const playerInputRef = useRef<TextInput>(null);
+  const playerFocus = useFieldFocus(playerInputRef);
 
   const addPlayer = () => {
     const name = newPlayerName.trim();
@@ -182,17 +190,19 @@ export default function NewSlotScreen() {
 
                 <Text style={styles.label}>{t("new_slot.label_season")}</Text>
                 <TextInput
+                  {...seasonFocus.focusProps}
                   value={season}
                   onChangeText={setSeasonName}
-                  style={styles.input}
+                  style={[styles.input, seasonFocus.inputStyle, seasonFocus.focusStyle]}
                   testID="input-season-name"
                 />
 
                 <Text style={styles.label}>{t("new_slot.label_start")}</Text>
                 <TextInput
+                  {...startFocus.focusProps}
                   value={start}
                   onChangeText={setStartDate}
-                  style={styles.input}
+                  style={[styles.input, startFocus.inputStyle, startFocus.focusStyle]}
                   placeholder={t("new_slot.placeholder_example", { value: defaultStart })}
                   placeholderTextColor={colors.placeholder}
                   testID="input-start-date"
@@ -200,9 +210,10 @@ export default function NewSlotScreen() {
 
                 <Text style={styles.label}>{t("new_slot.label_end")}</Text>
                 <TextInput
+                  {...endFocus.focusProps}
                   value={end}
                   onChangeText={setEndDate}
-                  style={styles.input}
+                  style={[styles.input, endFocus.inputStyle, endFocus.focusStyle]}
                   placeholder={t("new_slot.placeholder_example", { value: defaultEnd })}
                   placeholderTextColor={colors.placeholder}
                   testID="input-end-date"
@@ -253,18 +264,30 @@ export default function NewSlotScreen() {
                 <Text style={styles.label}>{t("new_slot.label_time")}</Text>
                 <View style={styles.timeRow}>
                   <TextInput
+                    {...timeFromFocus.focusProps}
                     value={timeFrom}
                     onChangeText={setTimeFrom}
-                    style={[styles.input, styles.inputHalf]}
+                    style={[
+                      styles.input,
+                      styles.inputHalf,
+                      timeFromFocus.inputStyle,
+                      timeFromFocus.focusStyle,
+                    ]}
                     placeholder="18:00"
                     placeholderTextColor={colors.placeholder}
                     testID="input-time-from"
                   />
                   <Text style={styles.timeSep}>→</Text>
                   <TextInput
+                    {...timeToFocus.focusProps}
                     value={timeTo}
                     onChangeText={setTimeTo}
-                    style={[styles.input, styles.inputHalf]}
+                    style={[
+                      styles.input,
+                      styles.inputHalf,
+                      timeToFocus.inputStyle,
+                      timeToFocus.focusStyle,
+                    ]}
                     placeholder="20:00"
                     placeholderTextColor={colors.placeholder}
                     testID="input-time-to"
@@ -272,12 +295,13 @@ export default function NewSlotScreen() {
                 </View>
 
                 <Text style={styles.label}>{t("new_slot.label_venue")}</Text>
-                <View style={styles.inputWithIcon}>
+                <View style={[styles.inputWithIcon, venueFocus.focusStyle]}>
                   <MapPin color={colors.muted} size={16} />
                   <TextInput
+                    {...venueFocus.focusProps}
                     value={venue}
                     onChangeText={setVenue}
-                    style={styles.inputFlexible}
+                    style={[styles.inputFlexible, venueFocus.inputStyle]}
                     placeholder={t("new_slot.placeholder_venue")}
                     placeholderTextColor={colors.placeholder}
                     testID="input-venue"
@@ -300,12 +324,13 @@ export default function NewSlotScreen() {
                   {t("new_slot.players_heading", { total: players.length })}
                 </Text>
 
-                <View style={styles.inputWithIcon}>
+                <View style={[styles.inputWithIcon, playerFocus.focusStyle]}>
                   <TextInput
+                    {...playerFocus.focusProps}
                     ref={playerInputRef}
                     value={newPlayerName}
                     onChangeText={setNewPlayerName}
-                    style={styles.inputFlexible}
+                    style={[styles.inputFlexible, playerFocus.inputStyle]}
                     placeholder={t("new_slot.placeholder_player")}
                     placeholderTextColor={colors.placeholder}
                     onSubmitEditing={addPlayer}
