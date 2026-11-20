@@ -596,17 +596,34 @@ Toggle:    full width, min height 44px, pill radius, #FFFFFF (white), 1px solid 
 | Tile eyebrow (text) on card        | 14.9:1 | 13.2:1          |
 | Toggle label (ink) on white        | 18.4:1 | 14.0:1          |
 
-### Cards — Match Card
+### Cards — Match Day Card
+
+The list view groups each round's matches by match day (`groupByDay` in
+`src/features/competitions/matchDays.ts`): one card per day, in date order, under the round
+divider. Matches without a readable date come last, in a "Date à venir" card.
 
 ```
-Background:   #FFFFFF (played) / #FFFDFC (pending)
-Border:       1px solid #E5DED6
-Border-radius: 16px (normal) / 20px + 2px red border (Final)
-Header:       14px side padding — phase in words left ("Poules 1": rounds.* label + phase
-              number), localized date right ("sam. 17 janv."), both #7A7A7A 12px weight 600.
-              Final: phase label in amber #C8900A. Today: a green StatusPill replaces the date.
-Inner:        14px side padding, team rows with paddingVertical 8px
-Team row:     16px winner slot | name + club (flex 1) | one score column per set
+Background:   #FFFFFF once one of the day's matches has a score / #FFFDFC while all are to play
+Border:       1px solid #E5DED6; Final round: 2px solid red
+Border-radius: 16px
+Gap:          10px between day cards, as between a round divider and its first card
+Day header:   a button, min height 44px, 10px × 14px padding: the long date in full and
+              capitalized ("Dimanche 13 septembre", Intl in the app's language), #141414 15px
+              weight 800, then " · 3 parties" (details.matches_count) #7A7A7A 13px weight 600.
+              Today: a green StatusPill after the text. ChevronDown 18px #7A7A7A on the right,
+              turned up when open. A 1px #E5DED6 hairline under it when open
+Collapsed:    the header alone, one line. Days before the most recent day with a score, across
+              every round, start collapsed; that day, today, later days and "Date à venir" start
+              open (all open before the first score). A press opens or closes a day; the choice
+              lasts until the specialty or category changes
+Motion:       opening fades the matches in and turns the chevron over (200ms); closing removes
+              the matches at once. With reduce motion (`useReducedMotion`), both switch at once
+Matches:      one row per match, split by full-width 1px #E5DED6 hairlines. Each match: its
+              phase in words above the teams ("Poule 4": rounds_match.* label), #7A7A7A 12px
+              weight 600 (amber #C8900A in the Final), then the team rows; 14px side padding,
+              10px top, 6px bottom. No date on a match: the day header carries it
+Team row:     8px top and bottom; 16px winner slot | name + club (flex 1) | one score column
+              per set
 Divider:      1px solid #E5DED6 between team rows
 Sets:         one column per set ("07/15 04/15" → 7 4 against 15 15), 22px (28px Final),
               right-aligned, min width 30px (38px Final), 12px apart, tabular-nums
@@ -615,16 +632,45 @@ Winner:       team that won more sets — green #1F7A5A Check (16px, stroke 3) i
 Loser:        name #141414 weight 600, sets #7A7A7A weight 400
 No winner:    score missing or sets even — no Check, names and sets #141414 weight 700
 Score pending: "—", #7A7A7A, 20px, weight 300
-No red:       a regular match card carries no red. The Final keeps its amber round pill,
+No red:       a regular day card carries no red. The Final keeps its amber round pill,
               amber phase label and 2px red border.
 Bracket node: same team rows at 14px names, 17px sets (22px Final), min width 24px (30px
               Final), no header
-Grid:         web, from two columns (§5 Columns): one card per grid column, in a `CardGrid`.
-              Each card fills its `flex: 1` cell, so the cards of a row share its height and a
-              short last row keeps its cards at the same width. Round dividers span the whole
-              results column
-Interaction:  none: a match card is not pressable, so it has no hover or focus state
+Grid:         web, from two columns (§5 Columns): a day card spans the whole results column,
+              like the round dividers, and lays its matches out as many to a row as the results
+              have columns, each in a `flex: 1` cell split from the next by a 1px #E5DED6
+              hairline. A match keeps a phone card's width, the days stay one under the other,
+              and a short last row keeps empty cells
+Interaction:  the day header only. Pressed: cream fill. Web hover: the card takes the card hover
+              (lineStrong border and shadow; the Final keeps its red border). Keyboard focus:
+              the red ring inside the card (−2px offset), as the header is its top row.
+              `aria-expanded` gives the state (accessibilityState is dropped on web); the
+              accessible name is the date, "Aujourd'hui" on the day, and the count
 ```
+
+**Current day strip.** Once a day header scrolls under the pinned filters (§ Screen Header,
+collapsed), a strip under them repeats it: the day being read, with the header's text styles and
+its Today pill.
+
+```
+Strip:        36px high, cream, 1px #E5DED6 bottom edge; text inset to the day header's text
+Width:        full width on a phone and under the filter bar; beside the filter column, the
+              results column only, so the sticky filters stay uncovered
+Placement:    hangs under the pinned header (`PinnedHeader`'s `strip`), positioned on its own:
+              it takes no room, so the results never move when it comes or goes
+Current day:  the first day once its card's top reaches the pinned header's bottom edge, then
+              each next day as its card's top reaches the strip's bottom edge, so the strip
+              covers each header as it takes its place. Hidden above the first day, and in the
+              bracket and ranking views
+Behavior:     no touches (pointer-events none), hidden from screen readers: the day headers
+              carry the same text
+```
+
+The day headers are not sticky headers of the scroll view: on iOS and Android, the next sticky
+header pushes the previous one out (`ScrollViewStickyHeader`), and it would push the pinned
+filters away. The strip follows the scroll offset and the measured top of each day card instead
+(`measureLayout` against the results body, on every resize of that body), so it behaves the same
+on iOS, Android and web.
 
 On a phone, the bracket (`BracketView`) is a row of round columns one card wide (350px),
 connected by a chevron, that scrolls sideways and bleeds over the gutter.
@@ -657,8 +703,8 @@ are not a knockout bracket, and their 18 or 20 matches as a column left the late
 
 Shape: `border-radius: 9999px`, `padding: 6px 10px`, `font-size: 12px`, `font-weight: 700`.
 
-A past date is not a warning: match cards show no pill for a played match, only the green "Today"
-pill on the day of the match.
+A past date is not a warning: day cards show no pill for a played day, only the green "Today"
+pill in the header of the day's card.
 
 ### Round Section Dividers
 
@@ -678,6 +724,9 @@ Final variant:
   Count:       #C8900A
   Icon:        Trophy (gold)
 ```
+
+In the list view, a round's day cards follow its divider (Cards — Match Day Card); the count
+stays the round's number of matches. The bracket keeps the rounds without days.
 
 ### Screen Header (red band)
 
@@ -1111,9 +1160,9 @@ sit on cream below it.
 | ----- | -------------------------- | ---------------------------------------------------- |
 | 0     | Cream screen bg            | `#F7F4EF` — no border, no shadow                     |
 | 1     | List card                  | `#FFFDFC` + `1px solid #E5DED6`                      |
-| 2     | Match card (played)        | `#FFFFFF` + `1px solid #E5DED6`                      |
+| 2     | Day card (played)          | `#FFFFFF` + `1px solid #E5DED6`                      |
 | 3     | Header band, featured card | `#C8102E` — color itself signals prominence          |
-| 4     | Final match card           | `#FFFFFF` + `2px solid #C8102E`                      |
+| 4     | Final day card             | `#FFFFFF` + `2px solid #C8102E`                      |
 | 5     | Logo / FAB button          | Red bg + `rgba(103,18,31,0.14)` shadow, `0 6px 16px` |
 
 **Shadow philosophy:** Shadows are red-tinted (`rgba(103,18,31,0.14)`) — never cool-gray (`rgba(0,0,0,0.x)`). This ties elevation to the brand color and keeps the warm palette coherent. Shadows are used sparingly — only on the About screen logo and action buttons — not on resting list cards. On web, a hovered card or field lifts with `0 4px 16px` in the shadow token (§4 Interaction states).
