@@ -6,6 +6,7 @@
   },
   "common": {
     "back": "Volver",
+    "close": "Cerrar",
     "choose": "Elegir",
     "soon": "Pronto",
     "competition_fallback": "Competición",
@@ -41,34 +42,24 @@
     "find_player_subtitle": "Títulos, compañeros y clasificaciones por temporada"
   },
   "specialty": {
-    "back": "Competiciones",
-    "title": "Especialidad",
-    "subtitle": "Selecciona una especialidad para ver los resultados de esta competición.",
-    "error_load": "Error al cargar las especialidades."
+    "title": "Especialidad"
   },
   "category": {
-    "back": "Especialidad",
-    "title": "Categoría",
-    "subtitle": "Selecciona una categoría para ver los resultados de esta especialidad.",
-    "error_load": "Error al cargar las categorías.",
-    "empty": "No se encontraron categorías para esta especialidad."
+    "title": "Categoría"
   },
   "details": {
-    "back": "Categoría",
+    "back": "Competiciones",
     "error_load": "Error al cargar los resultados",
     "empty": "No se encontraron resultados para esta competición.",
-    "tableau_eyebrow": "Cuadro",
-    "tournament_title": "Torneo",
     "matches_count_one": "{{count}} partido",
     "matches_count_other": "{{count}} partidos",
-    "rounds_count_one": "{{count}} ronda",
-    "rounds_count_other": "{{count}} rondas",
     "view_list": "Lista",
     "view_bracket": "Cuadro",
-    "stat_total": "Total",
-    "stat_played": "Jugados",
-    "stat_pending": "Pendientes",
     "view_ranking": "Clasificación",
+    "progress_one": "{{played}} / {{count}} partido jugado",
+    "progress_other": "{{played}} / {{count}} partidos jugados",
+    "finished": "Finalizado",
+    "specialty_hint": "Abre la lista de especialidades",
     "phase_label": "{{round}} {{number}}",
     "today": "Hoy",
     "winner": "Ganador"

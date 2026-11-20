@@ -6,6 +6,7 @@
   },
   "common": {
     "back": "Atzera",
+    "close": "Itxi",
     "choose": "Aukeratu",
     "soon": "Laster",
     "competition_fallback": "Txapelketa",
@@ -41,34 +42,24 @@
     "find_player_subtitle": "Txapelak, bikotekideak eta sailkapenak denboraldika"
   },
   "specialty": {
-    "back": "Txapelketak",
-    "title": "Espezialitatea",
-    "subtitle": "Hautatu espezialitate bat txapelketa honetako emaitzak ikusteko.",
-    "error_load": "Errorea espezialitateak kargatzean."
+    "title": "Espezialitatea"
   },
   "category": {
-    "back": "Espezialitatea",
-    "title": "Kategoria",
-    "subtitle": "Hautatu kategoria bat espezialitate honetako emaitzak ikusteko.",
-    "error_load": "Errorea kategoriak kargatzean.",
-    "empty": "Ez da kategorialik aurkitu espezialitate honetarako."
+    "title": "Kategoria"
   },
   "details": {
-    "back": "Kategoria",
+    "back": "Txapelketak",
     "error_load": "Errorea emaitzak kargatzean",
     "empty": "Ez da emaitzarik aurkitu txapelketa honetarako.",
-    "tableau_eyebrow": "Taula",
-    "tournament_title": "Txapelketa",
     "matches_count_one": "{{count}} partida",
     "matches_count_other": "{{count}} partida",
-    "rounds_count_one": "{{count}} txanda",
-    "rounds_count_other": "{{count}} txanda",
     "view_list": "Zerrenda",
     "view_bracket": "Taula",
-    "stat_total": "Guztira",
-    "stat_played": "Jokatuta",
-    "stat_pending": "Jokateke",
     "view_ranking": "Sailkapena",
+    "progress_one": "{{played}} / {{count}} partida jokatuta",
+    "progress_other": "{{played}} / {{count}} partida jokatuta",
+    "finished": "Amaituta",
+    "specialty_hint": "Espezialitateen zerrenda irekitzen du",
     "phase_label": "{{round}} {{number}}",
     "today": "Gaur",
     "winner": "Irabazlea"

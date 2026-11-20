@@ -39,12 +39,14 @@ const LIST_RESULTS = `
     $specialtyId: ID
     $categoryId: ID
     $phase: String
+    $limit: Int
   ) {
     results(
       competitionId: $competitionId
       specialtyId: $specialtyId
       categoryId: $categoryId
       phase: $phase
+      limit: $limit
     ) {
       ${RESULT_SUMMARY_FIELDS}
     }
@@ -64,6 +66,8 @@ interface ListResultsParams {
   specialtyId?: string;
   categoryId?: string;
   phase?: string;
+  /** Frontis returns 100 results unless told otherwise, and 500 at most. */
+  limit?: number;
 }
 
 export const matchesApi = {

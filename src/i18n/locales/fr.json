@@ -6,6 +6,7 @@
   },
   "common": {
     "back": "Retour",
+    "close": "Fermer",
     "choose": "Choisir",
     "soon": "Bientôt",
     "competition_fallback": "Compétition",
@@ -41,34 +42,24 @@
     "find_player_subtitle": "Titres, partenaires et classements par saison"
   },
   "specialty": {
-    "back": "Compétitions",
-    "title": "Spécialité",
-    "subtitle": "Sélectionnez une spécialité pour voir les résultats de cette compétition.",
-    "error_load": "Échec du chargement des spécialités."
+    "title": "Spécialité"
   },
   "category": {
-    "back": "Spécialité",
-    "title": "Catégorie",
-    "subtitle": "Sélectionnez une catégorie pour voir les résultats de cette spécialité.",
-    "error_load": "Échec du chargement des catégories.",
-    "empty": "Aucune catégorie trouvée pour cette spécialité."
+    "title": "Catégorie"
   },
   "details": {
-    "back": "Catégorie",
+    "back": "Compétitions",
     "error_load": "Échec du chargement des résultats",
     "empty": "Aucun résultat trouvé pour cette compétition.",
-    "tableau_eyebrow": "Tableau",
-    "tournament_title": "Tournoi",
     "matches_count_one": "{{count}} partie",
     "matches_count_other": "{{count}} parties",
-    "rounds_count_one": "{{count}} tour",
-    "rounds_count_other": "{{count}} tours",
     "view_list": "Liste",
     "view_bracket": "Tableau",
-    "stat_total": "Total",
-    "stat_played": "Joués",
-    "stat_pending": "À jouer",
     "view_ranking": "Classement",
+    "progress_one": "{{played}} / {{count}} partie jouée",
+    "progress_other": "{{played}} / {{count}} parties jouées",
+    "finished": "Terminé",
+    "specialty_hint": "Ouvre la liste des spécialités",
     "phase_label": "{{round}} {{number}}",
     "today": "Aujourd'hui",
     "winner": "Vainqueur"
