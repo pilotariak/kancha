@@ -1,16 +1,15 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { CalendarClock, Info, Swords, Trophy } from "@/components/icons";
-import type { Palette } from "@/constants/colors";
-import { useTheme, useThemedStyles } from "@/hooks/use-theme";
+import { Info, Swords, Trophy } from "@/components/icons";
+import { useTheme } from "@/hooks/use-theme";
 
 export default function TabLayout() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
@@ -20,6 +19,9 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.tabBarBorder,
+          // The default 49px bar clips the 12px label under its 8px bottom padding. A custom
+          // height replaces the default one as-is, so it must include the bottom inset.
+          height: 64 + insets.bottom,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -36,27 +38,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Trophy color={color} size={size} />,
         }}
       />
-      <Tabs.Screen
-        name="slot"
-        options={{
-          title: t("tabs.slot"),
-          tabBarIcon: ({ size }) => <CalendarClock color={colors.muted} size={size} />,
-          tabBarButton: () => (
-            <View
-              pointerEvents="none"
-              style={styles.disabledTab}
-              accessible
-              accessibilityRole="tab"
-              accessibilityState={{ disabled: true }}
-              accessibilityLabel={`${t("tabs.slot")}, ${t("tabs.soon")}`}
-            >
-              <CalendarClock color={colors.muted} size={24} />
-              <Text style={styles.disabledTabLabel}>{t("tabs.slot")}</Text>
-              <Text style={styles.disabledTabBadge}>{t("tabs.soon")}</Text>
-            </View>
-          ),
-        }}
-      />
+      <Tabs.Screen name="slot" options={{ href: null }} />
       <Tabs.Screen
         name="score"
         options={{
@@ -74,28 +56,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const makeStyles = (c: Palette) =>
-  StyleSheet.create({
-    disabledTab: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      paddingTop: 6,
-      gap: 2,
-      opacity: 0.45,
-    },
-    disabledTabLabel: {
-      fontSize: 12,
-      fontWeight: "700",
-      color: c.muted,
-    },
-    disabledTabBadge: {
-      fontSize: 9,
-      fontWeight: "800",
-      color: c.muted,
-      textTransform: "uppercase",
-      letterSpacing: 0.6,
-      marginTop: 1,
-    },
-  });
