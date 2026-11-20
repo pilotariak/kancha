@@ -95,7 +95,8 @@
     "website": "Website",
     "leagues_title": "Leagues & committees",
     "leagues_eyebrow": "Supported committees",
-    "leagues_description": "Kancha is currently connected to one committee, with more integrations planned as development progresses."
+    "leagues_description_one": "Kancha is currently connected to one committee, with more integrations planned as development progresses.",
+    "leagues_description_other": "Kancha is currently connected to {{count}} committees, with more integrations planned as development progresses."
   },
   "language": {
     "label": "Language",

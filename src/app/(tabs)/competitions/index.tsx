@@ -5,7 +5,8 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CardGrid } from "@/components/CardGrid";
-import { ChevronRight, Shield } from "@/components/icons";
+import { ChevronRight } from "@/components/icons";
+import { LeagueIcon } from "@/components/LeagueIcon";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { SectionHeader } from "@/components/SectionHeader";
@@ -59,12 +60,7 @@ export default function LeaguePickerScreen() {
                 accessibilityHint={league.supported ? t("leagues.open_hint") : undefined}
                 testID={`league-card-${league.id}`}
               >
-                <View style={[styles.cardIcon, !league.supported && styles.cardIconDisabled]}>
-                  <Shield
-                    color={league.supported ? colors.red : colors.muted}
-                    size={18}
-                  />
-                </View>
+                <LeagueIcon supported={league.supported} />
                 <Text style={[styles.cardTitle, !league.supported && styles.cardTitleDisabled]}>
                   {league.name}
                 </Text>
@@ -101,17 +97,6 @@ const makeStyles = (c: Palette) =>
       backgroundColor: c.cream,
       borderColor: c.line,
       opacity: 0.6,
-    },
-    cardIcon: {
-      width: 36,
-      height: 36,
-      borderRadius: 12,
-      backgroundColor: c.redSoft,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    cardIconDisabled: {
-      backgroundColor: c.line,
     },
     cardTitle: { color: c.ink, fontSize: 18, fontWeight: "800", flex: 1 },
     cardTitleDisabled: { color: c.muted },

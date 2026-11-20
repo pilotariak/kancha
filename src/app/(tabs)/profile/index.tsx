@@ -15,6 +15,7 @@ import {
   Sun,
   SunMoon,
 } from "@/components/icons";
+import { LeagueIcon } from "@/components/LeagueIcon";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
@@ -26,10 +27,6 @@ import { type ThemeMode, useThemeStore } from "@/store/theme-store";
 const WEBSITE_URL = "https://pilotariak.com";
 const APP_VERSION = Constants.expoConfig?.version ?? "—";
 const COPYRIGHT_YEAR = new Date().getFullYear();
-
-const LEAGUE_LOGOS: Record<string, string> = {
-  lcapb: "https://www.ccapb.net/wp-content/uploads/2016/09/logo1.png",
-};
 
 const LANGUAGES: { code: SupportedLanguage; flag: string }[] = [
   { code: "en", flag: "🇬🇧" },
@@ -232,29 +229,21 @@ export default function AboutScreen() {
           <View style={styles.leaguesSection}>
             <Text style={styles.sectionEyebrow}>{t("about.leagues_eyebrow")}</Text>
             <Text style={styles.sectionTitle}>{t("about.leagues_title")}</Text>
-            <Text style={styles.sectionDescription}>{t("about.leagues_description")}</Text>
+            <Text style={styles.sectionDescription}>
+              {t("about.leagues_description", { count: supportedLeagues.length })}
+            </Text>
 
             <View style={styles.leagueList}>
-              {supportedLeagues.map((league) => {
-                const logo = LEAGUE_LOGOS[league.id];
-                return (
-                  <View
-                    key={league.id}
-                    style={styles.leagueCard}
-                    testID={`about-league-${league.id}`}
-                  >
-                    {logo && (
-                      <Image
-                        source={{ uri: logo }}
-                        style={styles.leagueLogo}
-                        contentFit="contain"
-                        transition={200}
-                      />
-                    )}
-                    <Text style={styles.leagueName}>{league.name}</Text>
-                  </View>
-                );
-              })}
+              {supportedLeagues.map((league) => (
+                <View
+                  key={league.id}
+                  style={styles.leagueCard}
+                  testID={`about-league-${league.id}`}
+                >
+                  <LeagueIcon supported={league.supported} />
+                  <Text style={styles.leagueName}>{league.name}</Text>
+                </View>
+              ))}
             </View>
           </View>
         </View>
@@ -399,11 +388,6 @@ const makeStyles = (c: Palette) =>
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
-    },
-    leagueLogo: {
-      width: 48,
-      height: 48,
-      borderRadius: 8,
     },
     leagueName: {
       color: c.ink,
