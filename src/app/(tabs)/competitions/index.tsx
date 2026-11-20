@@ -9,7 +9,6 @@ import { ChevronRight } from "@/components/icons";
 import { LeagueIcon } from "@/components/LeagueIcon";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
-import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import { useWebLayout } from "@/hooks/use-layout";
@@ -43,8 +42,6 @@ export default function LeaguePickerScreen() {
         />
 
         <View style={styles.body}>
-          <SectionHeader eyebrow={t("common.choose")} title={t("leagues.your_league")} />
-
           <CardGrid columns={columns} style={styles.list}>
             {LEAGUES.map((league) => (
               <PressableScale
@@ -60,7 +57,7 @@ export default function LeaguePickerScreen() {
                 accessibilityHint={league.supported ? t("leagues.open_hint") : undefined}
                 testID={`league-card-${league.id}`}
               >
-                <LeagueIcon supported={league.supported} />
+                <LeagueIcon league={league} />
                 <Text style={[styles.cardTitle, !league.supported && styles.cardTitleDisabled]}>
                   {league.name}
                 </Text>

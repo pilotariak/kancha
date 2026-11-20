@@ -240,7 +240,7 @@ export default function AboutScreen() {
                   style={styles.leagueCard}
                   testID={`about-league-${league.id}`}
                 >
-                  <LeagueIcon supported={league.supported} />
+                  <LeagueIcon league={league} />
                   <Text style={styles.leagueName}>{league.name}</Text>
                 </View>
               ))}

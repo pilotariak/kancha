@@ -450,6 +450,41 @@ Hover (web):   lineStrong border, shadow 0 4px 16px (shadow token)
 Focus (web):   2px solid red outline, 2px offset, keyboard focus only
 ```
 
+### League Tile
+
+`LeagueIcon` (`src/components/LeagueIcon.tsx`): the league's code, in front of its name on the
+Leagues and About screens, and in the header band of the competitions list. Every league gets
+the same tile: its letters tell it apart, not a color.
+
+```
+Tile:      44 × 44px, 12px radius (rounded.icon), redFill, code centered
+Code:      #FFFFFF (the literal: the white token is dark green in dark), 15px, weight 800,
+           +0.5px tracking. Text scaling capped at 1.3×, so "IDF" stays inside the tile
+Muted:     a league Kancha does not cover yet (Béarn, Leagues screen only): line fill, code in
+           text (#262626), not muted: muted on line is 3.2:1 in light
+On band:   `onBand`, in the header band's trailing slot (competitions list): a 2px #FFFFFF ring,
+           as a redFill tile has no edge on the redFill band. 44px fits beside the 34px title
+Hidden:    aria-hidden. Screen readers read the full league name, from the card's label or the
+           text beside the tile
+Logo:      an official league logo, once a committee provides one, replaces the tile at the same
+           size, stored in assets/. Never a remote image
+```
+
+Codes come from `League.code` (`src/constants/leagues.ts`): CA (lcapb), PB (ctpb), BÉ (cbp), LA
+(llpb), IDF (lidfpb). They are proposals, still to be confirmed by each committee. Keep a code
+precomposed (NFC): "BÉ" written as E + U+0301 can take its accent from a fallback font on web.
+
+| Pair                                        | Light  | Dark (Ikurriña) |
+| ------------------------------------------- | ------ | --------------- |
+| Code (#FFFFFF) on redFill                   | 5.88:1 | 6.76:1          |
+| Ring (#FFFFFF) on the band (redFill)        | 5.88:1 | 6.76:1          |
+| Muted code (text) on line                   | 11.4:1 | 10.0:1          |
+| Muted code (text) on line, in the 0.6 card  | 3.6:1  | 4.8:1           |
+| Muted on line (rejected for the muted code) | 3.2:1  | 5.1:1           |
+
+The Béarn card is disabled at 0.6 opacity over cream, which takes the muted code to 3.6:1 in
+light. WCAG 1.4.3 exempts an inactive component.
+
 ### Interaction states (web)
 
 Hover and keyboard focus exist on web only; iOS and Android render as before. The styles live in
