@@ -386,24 +386,25 @@ The dark palette (`meta.darkColors`) takes the three colors of the Basque flag: 
 
 **Scale and hierarchy:**
 
-| Role              | Size | Weight | Line height | Letter spacing | Notes                              |
-| ----------------- | ---- | ------ | ----------- | -------------- | ---------------------------------- |
-| Screen title      | 34px | 900    | 1.1         | 0              | Main hero title per screen         |
-| Hero title (card) | 28px | 900    | 1.1         | 0              | Featured card / detail hero        |
-| Section title     | 28px | 800    | 1.15        | −0.8px         | Section header titles              |
-| Card title        | 18px | 800    | 1.2         | 0              | Competition/specialty cards        |
-| Card subtitle     | 17px | 800    | 1.2         | 0              | Picker card labels                 |
-| Body              | 15px | 400    | 1.4         | 0              | General readable text              |
-| Body strong       | 15px | 700    | 1.4         | 0              | Team names, links, footers         |
-| Meta / secondary  | 14px | 400    | 1.43        | 0              | Subtitles, hero sub                |
-| Meta strong       | 14px | 600    | 1.43        | 0              | Hero meta, card level text         |
-| Eyebrow           | 12px | 800    | 1.2         | +1.4–1.6px     | Section labels, always `uppercase` |
-| Score (large)     | 28px | 900    | 1.0         | 0              | Final match score                  |
-| Score (normal)    | 22px | 900    | 1.0         | 0              | Match score                        |
-| Score pending     | 20px | 300    | 1.0         | 0              | "—" placeholder score              |
-| Phase chip        | 12px | 600    | 1.2         | 0              | Match phase label in footer        |
-| Pill label        | 12px | 700    | 1.2         | 0              | Status pills                       |
-| Round divider     | 13px | 800    | 1.2         | +0.8px         | Round section headers, `uppercase` |
+| Role              | Size  | Weight | Line height | Letter spacing | Notes                              |
+| ----------------- | ----- | ------ | ----------- | -------------- | ---------------------------------- |
+| Screen title      | 34px  | 900    | 1.1         | 0              | Main hero title per screen         |
+| Hero title (card) | 28px  | 900    | 1.1         | 0              | Featured card / detail hero        |
+| Section title     | 28px  | 800    | 1.15        | −0.8px         | Section header titles              |
+| Card title        | 18px  | 800    | 1.2         | 0              | Competition/specialty cards        |
+| Card subtitle     | 17px  | 800    | 1.2         | 0              | Picker card labels                 |
+| Body              | 15px  | 400    | 1.4         | 0              | General readable text              |
+| Body strong       | 15px  | 700    | 1.4         | 0              | Team names, links, footers         |
+| Meta / secondary  | 14px  | 400    | 1.43        | 0              | Subtitles, hero sub                |
+| Meta strong       | 14px  | 600    | 1.43        | 0              | Hero meta, card level text         |
+| Eyebrow           | 12px  | 800    | 1.2         | +1.4–1.6px     | Section labels, always `uppercase` |
+| Score (large)     | 28px  | 900    | 1.0         | 0              | Final match score                  |
+| Score (match)     | 112px | 900    | 1.0         | 0              | Match mode score, `tabular-nums`   |
+| Score (normal)    | 22px  | 900    | 1.0         | 0              | Match score                        |
+| Score pending     | 20px  | 300    | 1.0         | 0              | "—" placeholder score              |
+| Phase chip        | 12px  | 600    | 1.2         | 0              | Match phase label in footer        |
+| Pill label        | 12px  | 700    | 1.2         | 0              | Status pills                       |
+| Round divider     | 13px  | 800    | 1.2         | +0.8px         | Round section headers, `uppercase` |
 
 **Principles:**
 
@@ -815,6 +816,38 @@ Results:    the match grid, the ranking cards or the fit bracket, over every col
 ```
 
 Switching to the bracket moves the filters from the column to the bar.
+
+### Score — Match mode
+
+The Score tab holds the setup. Start opens the match: the route `/match`
+(`src/app/match.tsx`), outside the tabs, in the root Stack with `presentation: "fullScreenModal"`.
+It covers the tab bar, and the rail on web, until the match is closed. The teams and the target
+go to it as params. Without valid params, as on a reload, it goes back to the setup.
+
+```
+Halves:      two flex 1 halves: team A on redFill (top), team B on panel (bottom), each padded
+             by the safe area on its screen edge. The whole half is the +1 button, labeled with
+             the team, its score and the target. Pressed: 8% white over the half
+Content:     24px side padding, in the text column on web (useTextColumn). Top half: team row,
+             score row, bar. The bottom half mirrors it, so the bars meet at the seam
+Team row:    name #FFFFFF 22px weight 900, one line, then the undo button in the outer corner
+Undo:        48×48, radius 16, rgba(255,255,255,0.16) (pressed 0.30), Undo2 22px #FFFFFF,
+             labeled "Undo the last point of <team>". Disabled, 35% opacity, at 0
+Score:       112px weight 900, line height 1.0, tabular-nums, #FFFFFF. "/ target" 28px weight
+             700 onRedSoft. A "+1" pill (rgba(255,255,255,0.16), 20px weight 900) ends the row.
+             Hidden from screen readers: the +1 label carries the score
+Bar:         6px, pill radius, rgba(255,255,255,0.18) track, #FFFFFF fill, score / target
+Close:       48px #FFFFFF circle centered on the seam, X 22px in panel, shadow
+             0 4px 16px rgba(0,0,0,0.25). At any score but 0–0 it asks first: Alert on iOS and
+             Android, window.confirm on web
+Focus (web): a 2px #FFFFFF ring, as red disappears on red: inside the half (offset −6px),
+             outside the buttons (offset 2px)
+Win:         the green screen: trophy, winner, both scores. "Undo last point" (outlined, 1px
+             rgba(255,255,255,0.4)) above "New match" (redFill), which goes back to the setup
+Device:      the screen stays on while a game is played, not on the win screen (expo-keep-awake,
+             the Wake Lock API on web). Haptics on iOS and Android: an impact per point, a
+             selection tick per undo, a success on the win
+```
 
 ### Error State
 

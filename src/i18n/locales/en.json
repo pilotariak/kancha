@@ -129,8 +129,14 @@
     "cta_start": "Start",
     "winner": "Victory!",
     "cta_new_game": "New match",
-    "undo": "Undo",
-    "reset": "Reset"
+    "add_point": "Add a point for {{team}}, {{score}} of {{target}}",
+    "undo_point": "Undo the last point of {{team}}",
+    "undo_last": "Undo last point",
+    "close_match": "Close the match",
+    "confirm_close_title": "Close the match?",
+    "confirm_close_message": "The score will be lost.",
+    "confirm_close_cancel": "Keep playing",
+    "confirm_close_cta": "Close"
   },
   "new_competition": {
     "title": "New competition",
