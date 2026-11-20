@@ -48,6 +48,7 @@ FIELDS: list[tuple[str, Source]] = [
     ("ink", ("c", "textPrimary")),
     ("text", ("c", "text")),
     ("muted", ("c", "textMuted")),
+    ("placeholder", ("c", "textPlaceholder")),
     ("line", ("c", "border")),
     ("card", ("c", "surface")),
     ("panel", ("c", "panel")),

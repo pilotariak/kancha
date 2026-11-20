@@ -34,6 +34,7 @@ meta:
     ink: "#F3F7F4"
     text: "#DCE6E0"
     muted: "#97A89F"
+    placeholder: "#97A89F"
     line: "#25362E"
     card: "#13201A"
     panel: "#1E2E26"
@@ -66,7 +67,8 @@ colors:
   border: "#E5DED6"            # Warm Greige Line — universal border/divider
   textPrimary: "#141414"       # Deep Ink — headings, titles
   text: "#262626"              # Charcoal Text — body copy
-  textMuted: "#7A7A7A"         # Warm Muted Gray — metadata, eyebrows, placeholders
+  textMuted: "#7A7A7A"         # Warm Muted Gray — metadata, eyebrows
+  textPlaceholder: "#6E6E6E"   # Placeholder Gray — input placeholders, 5.1:1 on white
   success: "#1F7A5A"           # Tournament Green — live/success/today
   successSoft: "#E6F4EE"       # Tournament Green Soft — success pill bg
   championship: "#C8900A"      # Championship Amber — finals/trophy highlights
@@ -248,6 +250,16 @@ components:
     typography: "{typography.meta}"
     rounded: "{rounded.chip}"
     padding: "20px"
+  textField:
+    backgroundColor: "{colors.surfaceElevated}"
+    textColor: "{colors.textPrimary}"
+    rounded: "{rounded.chip}"
+    padding: "16px 18px"
+  textFieldPlaceholder:
+    backgroundColor: "{colors.surfaceElevated}"
+    textColor: "{colors.textPlaceholder}"
+    rounded: "{rounded.chip}"
+    padding: "16px 18px"
 ---
 
 # Design System — Kancha Mobile App
@@ -297,7 +309,8 @@ components:
 
 - **Ink** (`#141414`): Headings, card titles, primary body text on light backgrounds.
 - **Text** (`#262626`): Body text, slightly softer than Ink.
-- **Muted** (`#7A7A7A`): Secondary text, eyebrow labels, metadata, placeholder text.
+- **Muted** (`#7A7A7A`): Secondary text, eyebrow labels, metadata.
+- **Placeholder** (`#6E6E6E`): Placeholder text in input fields. Darker than Muted so it reaches 4.5:1 on White (5.1:1); `#97A89F` in the dark theme (6.1:1 on the dark White).
 
 ### Semantic
 
@@ -519,6 +532,28 @@ Border-radius: 16px
 Padding:       20px, centered
 Text:         #7A7A7A, 14px, weight 600
 ```
+
+### Inputs — Text Field
+
+```
+Background:    #FFFFFF (white)
+Border:        1px solid #E5DED6 (line)
+Border-radius: 16px
+Padding:       16px 18px
+Text:          #141414 (ink), 16px, weight 700
+Placeholder:   #6E6E6E (placeholder)
+Label:         #141414, 13px, weight 800, uppercase, +0.8px tracking, 8px above the field
+Team marker:   10px dot before the label, 8px gap: red for team A, ink for team B
+```
+
+Every field uses this one style, built from palette tokens so it follows the theme. Never tell fields apart by their fill: put a marker next to the label instead. Keep the text at 16px: mobile Safari zooms the page into a focused field set smaller.
+
+| Pair                          | Light  | Dark (Ikurriña) |
+| ----------------------------- | ------ | --------------- |
+| Typed text (ink) on the field | 18.4:1 | 14.0:1          |
+| Placeholder on the field      | 5.1:1  | 6.1:1           |
+| Team A marker (red) on cream  | 5.4:1  | 5.8:1           |
+| Team B marker (ink) on cream  | 16.8:1 | 17.3:1          |
 
 ---
 

@@ -10,6 +10,8 @@ export type Palette = {
   ink: string;
   text: string;
   muted: string;
+  /** Placeholder text in input fields: 4.5:1 or more on white in both themes. */
+  placeholder: string;
   line: string;
   card: string;
   panel: string;
@@ -41,6 +43,7 @@ export const KanchaColorsLight: Palette = {
   ink: "#141414",
   text: "#262626",
   muted: "#7A7A7A",
+  placeholder: "#6E6E6E",
   line: "#E5DED6",
   card: "#FFFDFC",
   panel: "#1E1E1E",
@@ -71,6 +74,7 @@ export const KanchaColorsDark: Palette = {
   ink: "#F3F7F4",
   text: "#DCE6E0",
   muted: "#97A89F",
+  placeholder: "#97A89F",
   line: "#25362E",
   card: "#13201A",
   panel: "#1E2E26",
