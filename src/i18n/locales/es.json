@@ -68,7 +68,10 @@
     "stat_total": "Total",
     "stat_played": "Jugados",
     "stat_pending": "Pendientes",
-    "view_ranking": "Clasificación"
+    "view_ranking": "Clasificación",
+    "phase_label": "{{round}} {{number}}",
+    "today": "Hoy",
+    "winner": "Ganador"
   },
   "rounds": {
     "P": "Grupos",

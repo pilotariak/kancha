@@ -446,24 +446,39 @@ Footer:        white text + ChevronRight icon, space-between layout
 Background:   #FFFFFF (played) / #FFFDFC (pending)
 Border:       1px solid #E5DED6
 Border-radius: 16px (normal) / 20px + 2px red border (Final)
-Inner:        14px padding, team rows with paddingVertical 8px
+Header:       14px side padding — phase in words left ("Poules 1": rounds.* label + phase
+              number), localized date right ("sam. 17 janv."), both #7A7A7A 12px weight 600.
+              Final: phase label in amber #C8900A. Today: a green StatusPill replaces the date.
+Inner:        14px side padding, team rows with paddingVertical 8px
+Team row:     16px winner slot | name + club (flex 1) | one score column per set
 Divider:      1px solid #E5DED6 between team rows
-Footer:       rgba(0,0,0,0.02) bg + 1px top border — holds StatusPill + phase chip
-Score:        #C8102E, 22–28px, weight 900
-Score pending: #7A7A7A, 20px, weight 300
+Sets:         one column per set ("07/15 04/15" → 7 4 against 15 15), 22px (28px Final),
+              right-aligned, min width 30px (38px Final), 12px apart, tabular-nums
+Winner:       team that won more sets — green #1F7A5A Check (16px, stroke 3) in the slot,
+              name #141414 weight 800, sets #141414 weight 900
+Loser:        name #141414 weight 600, sets #7A7A7A weight 400
+No winner:    score missing or sets even — no Check, names and sets #141414 weight 700
+Score pending: "—", #7A7A7A, 20px, weight 300
+No red:       a regular match card carries no red. The Final keeps its amber round pill,
+              amber phase label and 2px red border.
+Bracket node: same team rows at 14px names, 17px sets (22px Final), min width 24px (30px
+              Final), no header
 ```
 
 ### Status Pills
 
 | Tone  | Background | Text      | Usage                  |
 | ----- | ---------- | --------- | ---------------------- |
-| red   | `#F9D8DE`  | `#970D25` | Past dates, warnings   |
+| red   | `#F9D8DE`  | `#970D25` | Warnings, forfeits     |
 | green | `#E6F4EE`  | `#1F7A5A` | Today, live, confirmed |
 | dark  | `#262626`  | `#FFFFFF` | Finals, completed      |
 | soft  | `#EFE8DE`  | `#5D5145` | Neutral / upcoming     |
 | amber | `#FFF3DC`  | `#8A5E00` | Semi-final, attention  |
 
 Shape: `border-radius: 9999px`, `padding: 6px 10px`, `font-size: 12px`, `font-weight: 700`.
+
+A past date is not a warning: match cards show no pill for a played match, only the green "Today"
+pill on the day of the match.
 
 ### Round Section Dividers
 
@@ -712,11 +727,11 @@ Kancha is a **mobile-only native app** (React Native / Expo). No tablet layout e
 
 **Match card with score:**
 
-> "Two team rows, each with `paddingVertical: 8px`, team name `#141414` 15px weight-700 flex-1, score `#C8102E` 22px weight-900. Rows separated by a 1px `#E5DED6` divider. Below: a footer strip `rgba(0,0,0,0.02)` background, `border-top: 1px solid #E5DED6`, holding a StatusPill and a 12px muted phase chip."
+> "A header row: the phase in words on the left (`Poules 1`) and the localized date on the right (`sam. 17 janv.`), both `#7A7A7A` 12px weight-600; on the day of the match a green 'Today' pill replaces the date. Then two team rows, each with `paddingVertical: 8px`: a 16px slot, the team name `#141414` 15px flex-1, and one right-aligned 22px tabular-nums column per set, min width 30px, 12px apart, so `07/15 04/15` reads 7 4 against 15 15. The team that won more sets gets a green `#1F7A5A` check in the slot, name weight-800 and sets `#141414` weight-900; the other team name weight-600 and sets `#7A7A7A` weight-400. No check when the score is missing (show a light `—`) or the sets are even. Rows separated by a 1px `#E5DED6` divider. No red anywhere in a regular match card; the Final keeps its amber phase label and round pill."
 
 **Status pill:**
 
-> "Render a pill with `border-radius: 9999px`, `padding: 6px 10px`, `font-size: 12px`, `font-weight: 700`. Use background `#F9D8DE` + text `#970D25` for past/warning. Use `#E6F4EE` + `#1F7A5A` for success/today."
+> "Render a pill with `border-radius: 9999px`, `padding: 6px 10px`, `font-size: 12px`, `font-weight: 700`. Use background `#F9D8DE` + text `#970D25` for warnings and forfeits, never for past dates. Use `#E6F4EE` + `#1F7A5A` for success/today."
 
 **Round section divider:**
 

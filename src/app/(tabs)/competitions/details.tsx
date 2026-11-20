@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { BracketView, RoundGroup, usePhaseColors } from "@/components/BracketView";
+import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
 import {
   ArrowLeft,
   LayoutList,
@@ -27,7 +27,8 @@ import { KanchaBackground } from "@/components/KanchaBackground";
 import { RankingView } from "@/components/RankingView";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
-import { dateTone } from "@/features/competitions/matchDate";
+import { dateTone, formatMatchDate } from "@/features/competitions/matchDate";
+import { parseMatchScore } from "@/features/competitions/matchScore";
 import { useCategories } from "@/hooks/use-categories";
 import { useCompetition } from "@/hooks/use-competitions";
 import { useResultsByCompetition } from "@/hooks/use-matches";
@@ -36,24 +37,6 @@ import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 import type { PhaseColors, PhaseType } from "@/components/BracketView";
 import type { Result } from "@/types/competition";
-
-// ─── Score parsing ────────────────────────────────────────────────────────────
-
-function parseScores(scores?: string): { scoreA: string | null; scoreB: string | null } {
-  if (!scores) return { scoreA: null, scoreB: null };
-  const sets = scores.trim().split(/\s+/);
-  const aScores: string[] = [];
-  const bScores: string[] = [];
-  for (const set of sets) {
-    const [a, b] = set.split("/");
-    if (a !== undefined && b !== undefined) {
-      aScores.push(a);
-      bScores.push(b);
-    }
-  }
-  if (aScores.length === 0) return { scoreA: null, scoreB: null };
-  return { scoreA: aScores.join("–"), scoreB: bScores.join("–") };
-}
 
 // ─── Phase parsing ────────────────────────────────────────────────────────────
 
@@ -108,18 +91,6 @@ function groupByRound(results: Result[]): RoundGroup[] {
     }));
 }
 
-// ─── Date helpers ─────────────────────────────────────────────────────────────
-
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return "—";
-  return dateStr;
-}
-
-function formatLineup(lineup?: { player1?: { name: string }; player2?: { name: string } }): string {
-  if (!lineup) return "";
-  return [lineup.player1?.name, lineup.player2?.name].filter(Boolean).join(" / ");
-}
-
 // ─── Round header ─────────────────────────────────────────────────────────────
 
 function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
@@ -153,14 +124,17 @@ function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
 // ─── Match card ───────────────────────────────────────────────────────────────
 
 function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType }) {
+  const { t, i18n } = useTranslation();
   const styles = useThemedStyles(makeStyles);
-  const { scoreA, scoreB } = parseScores(result.scores);
-  const hasScore = scoreA != null && scoreB != null;
-  const lineupA = formatLineup(result.clubALineup);
-  const lineupB = formatLineup(result.clubBLineup);
-  const pillLabel = formatDate(result.dateMatch);
-  const pillTone = dateTone(result.dateMatch);
-  const phaseLabel = result.phase ?? "";
+  const hasScore = parseMatchScore(result.scores) != null;
+  const { number } = parsePhase(result.phase);
+  // "P 3" reads "Pools 3"; a phase the parser does not know is shown as Frontis sent it.
+  const phaseLabel = phaseType === "other"
+    ? result.phase ?? ""
+    : t("details.phase_label", { round: t(`rounds.${phaseType}`), number });
+  // The language the strings resolved to, so a "de" device gets an English date too.
+  const dateLabel = formatMatchDate(result.dateMatch, i18n.resolvedLanguage ?? "en");
+  const todayTone = dateTone(result.dateMatch);
   const colors: PhaseColors = usePhaseColors()[phaseType];
   const isFinal = phaseType === "F";
 
@@ -172,36 +146,21 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
 
   return (
     <View style={cardStyle} testID={`result-card-${result.id}`}>
-      <View style={styles.matchCardInner}>
-        <View style={styles.teamRow}>
-          <View style={styles.teamInfo}>
-            <Text style={[styles.teamName, isFinal && styles.teamNameFinal]}>
-              {lineupA || result.clubA.name}
-            </Text>
-            {lineupA ? <Text style={styles.teamClub}>{result.clubA.name}</Text> : null}
-          </View>
-          {hasScore
-            ? <Text style={[styles.score, isFinal && styles.scoreFinal]}>{scoreA}</Text>
-            : <Text style={styles.scorePending}>—</Text>}
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.teamRow}>
-          <View style={styles.teamInfo}>
-            <Text style={[styles.teamName, isFinal && styles.teamNameFinal]}>
-              {lineupB || result.clubB.name}
-            </Text>
-            {lineupB ? <Text style={styles.teamClub}>{result.clubB.name}</Text> : null}
-          </View>
-          {hasScore
-            ? <Text style={[styles.score, isFinal && styles.scoreFinal]}>{scoreB}</Text>
-            : <Text style={styles.scorePending}>—</Text>}
-        </View>
-      </View>
-      <View style={styles.matchMeta}>
-        <StatusPill label={pillLabel} tone={pillTone} />
-        {phaseLabel
-          ? <Text style={[styles.phaseChip, { color: colors.label }]}>{phaseLabel}</Text>
+      <View style={styles.matchHeader}>
+        <Text
+          style={[styles.matchHeaderText, styles.matchPhase, isFinal && { color: colors.label }]}
+          numberOfLines={1}
+        >
+          {phaseLabel}
+        </Text>
+        {todayTone
+          ? <StatusPill label={t("details.today")} tone={todayTone} />
+          : dateLabel
+          ? <Text style={styles.matchHeaderText}>{dateLabel}</Text>
           : null}
+      </View>
+      <View style={styles.matchCardInner}>
+        <TeamRows result={result} isFinal={isFinal} size="card" />
       </View>
     </View>
   );
@@ -651,62 +610,16 @@ const makeStyles = (c: Palette) =>
       overflow: "hidden",
     },
     matchCardPending: { backgroundColor: c.card },
-    matchCardInner: { padding: 14, gap: 0 },
-    teamRow: {
+    matchHeader: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingVertical: 8,
       gap: 12,
-    },
-    teamInfo: {
-      flex: 1,
-      gap: 2,
-    },
-    teamName: {
-      color: c.ink,
-      fontSize: 15,
-      fontWeight: "700",
-    },
-    teamClub: {
-      color: c.muted,
-      fontSize: 12,
-      fontWeight: "600",
-    },
-    teamNameFinal: { fontSize: 16, fontWeight: "800" },
-    score: {
-      color: c.red,
-      fontSize: 22,
-      fontWeight: "900",
-      minWidth: 28,
-      textAlign: "right",
-      fontVariant: ["tabular-nums"],
-    },
-    scoreFinal: { fontSize: 28 },
-    scorePending: {
-      color: c.muted,
-      fontSize: 20,
-      fontWeight: "300",
-      minWidth: 28,
-      textAlign: "right",
-    },
-    divider: {
-      height: 1,
-      backgroundColor: c.line,
-    },
-    matchMeta: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
+      minHeight: 26,
       paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderTopWidth: 1,
-      borderTopColor: c.line,
-      backgroundColor: "rgba(0,0,0,0.02)",
+      paddingTop: 10,
     },
-    phaseChip: {
-      color: c.muted,
-      fontSize: 12,
-      fontWeight: "600",
-    },
+    matchHeaderText: { color: c.muted, fontSize: 12, fontWeight: "600" },
+    matchPhase: { flexShrink: 1 },
+    matchCardInner: { paddingHorizontal: 14, paddingTop: 2, paddingBottom: 6 },
   });
