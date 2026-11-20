@@ -2,10 +2,11 @@ import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { CardGrid } from "@/components/CardGrid";
 import { Check, ChevronRight, Swords, Trophy, Users } from "@/components/icons";
 import { type Palette } from "@/constants/colors";
 import { parseMatchScore, type Side } from "@/features/competitions/matchScore";
-import { useLayoutSize } from "@/hooks/use-layout";
+import { CARD_WIDTH } from "@/features/layout/breakpoints";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import type { Result } from "@/types/competition";
 
@@ -266,32 +267,19 @@ function RoundColumn({ group, fill = false }: { group: RoundGroup; fill?: boolea
 
 // ─── Round grid ───────────────────────────────────────────────────────────────
 
-/** A round of group matches as a grid: GRID_COLUMNS nodes per row. */
-function RoundGrid({ group }: { group: RoundGroup }) {
+/** A round of group matches as a grid of `columns` nodes per row. */
+function RoundGrid({ group, columns }: { group: RoundGroup; columns: number }) {
   const styles = useThemedStyles(makeStyles);
   const colors = usePhaseColors()[group.type];
-  const rows: Result[][] = [];
-  for (let i = 0; i < group.results.length; i += GRID_COLUMNS) {
-    rows.push(group.results.slice(i, i + GRID_COLUMNS));
-  }
 
   return (
     <View style={styles.grid}>
       <RoundPill group={group} />
-      {rows.map((row) => (
-        <View key={row[0].id} style={styles.gridRow}>
-          {row.map((r) => (
-            <View key={r.id} style={styles.gridCell}>
-              <MatchNode result={r} isFinal={false} colors={colors} fill="cell" />
-            </View>
-          ))}
-          {/* Empty cells keep a short last row's nodes at the same width. */}
-          {Array.from(
-            { length: GRID_COLUMNS - row.length },
-            (_, i) => <View key={`empty-${i}`} style={styles.gridCell} />,
-          )}
-        </View>
-      ))}
+      <CardGrid columns={columns}>
+        {group.results.map((r) => (
+          <MatchNode key={r.id} result={r} isFinal={false} colors={colors} fill="cell" />
+        ))}
+      </CardGrid>
     </View>
   );
 }
@@ -314,19 +302,14 @@ function RoundConnector() {
 const GROUP_ROUNDS: ReadonlySet<PhaseType> = new Set(["P", "other"]);
 
 /**
- * The rounds side by side, in a row that scrolls sideways. With `layout="fit"` (desktop web),
- * nothing scrolls sideways: the knockout rounds share the width, and the group rounds follow
- * as grids.
+ * The rounds side by side, in a row that scrolls sideways (one column, the phone layout). With
+ * more `columns` (web), nothing scrolls sideways: the knockout rounds share the width, and the
+ * group rounds follow as grids of that many nodes per row.
  */
-export function BracketView(
-  { rounds, layout = "scroll" }: { rounds: RoundGroup[]; layout?: "scroll" | "fit" },
-) {
+export function BracketView({ rounds, columns = 1 }: { rounds: RoundGroup[]; columns?: number }) {
   const styles = useThemedStyles(makeStyles);
-  // From 600px on web, where a mouse has no sideways swipe, the scroll bar leads to the
-  // other rounds. A phone, native or web, keeps the swipe alone.
-  const scrollBar = useLayoutSize() !== "phone";
 
-  if (layout === "fit") {
+  if (columns > 1) {
     const knockout = rounds.filter((group) => !GROUP_ROUNDS.has(group.type));
     const groups = rounds.filter((group) => GROUP_ROUNDS.has(group.type));
     return (
@@ -336,7 +319,7 @@ export function BracketView(
             {knockout.map((group) => <RoundColumn key={group.type} group={group} fill />)}
           </View>
         )}
-        {groups.map((group) => <RoundGrid key={group.type} group={group} />)}
+        {groups.map((group) => <RoundGrid key={group.type} group={group} columns={columns} />)}
       </View>
     );
   }
@@ -344,7 +327,7 @@ export function BracketView(
   return (
     <ScrollView
       horizontal
-      showsHorizontalScrollIndicator={scrollBar}
+      showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
       {rounds.map((group, i) => (
@@ -359,11 +342,14 @@ export function BracketView(
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const COLUMN_WIDTH = 350;
-/** Fit layout: a knockout column is never narrower; more rounds than fit wrap onto a new line. */
+/** The phone card width: a round column holds the same match nodes as a phone shows. */
+const COLUMN_WIDTH = CARD_WIDTH;
+/**
+ * Fit layout: the narrowest a knockout column gets while names stay readable; more rounds than
+ * fit wrap onto a new line.
+ */
 const FIT_MIN_COLUMN_WIDTH = 220;
 const FIT_GAP = 24;
-const GRID_COLUMNS = 3;
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
@@ -387,8 +373,6 @@ const makeStyles = (c: Palette) =>
     fit: { gap: FIT_GAP, paddingTop: 4 },
     fitRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", gap: FIT_GAP },
     grid: { gap: 10 },
-    gridRow: { flexDirection: "row", gap: 10 },
-    gridCell: { flex: 1 },
     columnHeader: {
       flexDirection: "row",
       alignItems: "center",

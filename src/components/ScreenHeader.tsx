@@ -1,12 +1,11 @@
 import { router } from "expo-router";
 import React, { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { ArrowLeft } from "@/components/icons";
 import type { Palette } from "@/constants/colors";
 import { type InteractionState, showsFocusRing } from "@/hooks/use-interaction-styles";
-import { useContentColumn } from "@/hooks/use-layout";
 import { useThemedStyles } from "@/hooks/use-theme";
 
 interface ScreenHeaderProps {
@@ -23,6 +22,8 @@ interface ScreenHeaderProps {
   trailing?: ReactNode;
   /** A 28px title and tighter padding, for screens with filters under the band. */
   compact?: boolean;
+  /** The screen's text column (`useTextColumn()`): the band's content keeps to it. */
+  column?: ViewStyle;
 }
 
 /**
@@ -31,8 +32,8 @@ interface ScreenHeaderProps {
  * outside the 20px gutter, so the band spans the full width. Give the screen's
  * top-edge SafeAreaView a redFill background and the scroll view a cream one:
  * the band then continues behind the light status bar and scrolls away under it.
- * From 600px on web, the band stays full width and its content lines up with the
- * screen's content column.
+ * On a text screen wider than a phone, the band stays full width and its content keeps to
+ * the screen's text column.
  */
 export function ScreenHeader({
   title,
@@ -43,10 +44,10 @@ export function ScreenHeader({
   loading = false,
   trailing,
   compact = false,
+  column,
 }: ScreenHeaderProps) {
   const { t } = useTranslation();
   const styles = useThemedStyles(makeStyles);
-  const column = useContentColumn();
 
   const content = (
     <>
@@ -122,7 +123,7 @@ const makeStyles = (c: Palette) =>
       gap: 16,
     },
     bandCompact: { paddingBottom: 16, gap: 12 },
-    // Web from 600px: the gutter moves to the inner column.
+    // With a text column: the gutter moves to the inner column.
     bandFullWidth: { paddingHorizontal: 0 },
     inner: { paddingHorizontal: 20, gap: 16 },
     innerCompact: { gap: 12 },

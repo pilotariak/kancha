@@ -3,6 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { CardGrid } from "@/components/CardGrid";
 import { ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StatusPill } from "@/components/StatusPill";
@@ -87,9 +88,13 @@ interface RankingViewProps {
   competitionId: string;
   specialtyId: string;
   categoryId: string;
+  /** Ranking cards per row, from the web grid; one on a phone. */
+  columns?: number;
 }
 
-export function RankingView({ competitionId, specialtyId, categoryId }: RankingViewProps) {
+export function RankingView(
+  { competitionId, specialtyId, categoryId, columns = 1 }: RankingViewProps,
+) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
@@ -166,9 +171,9 @@ export function RankingView({ competitionId, specialtyId, categoryId }: RankingV
       )}
 
       {rows.length > 0 && (
-        <View style={styles.rankList}>
+        <CardGrid columns={columns} style={styles.rankList}>
           {rows.map((row) => <RankingCard key={row.id} row={row} />)}
-        </View>
+        </CardGrid>
       )}
     </View>
   );

@@ -12,12 +12,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CardGrid } from "@/components/CardGrid";
 import { ChevronRight, RotateCcw, Search, User } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { findPlayers, searchWords } from "@/features/players/name-match";
-import { useContentColumn } from "@/hooks/use-layout";
+import { useWebLayout } from "@/hooks/use-layout";
 import { usePlayerSearch } from "@/hooks/use-players";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
@@ -27,7 +28,7 @@ export default function PlayerSearchScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const column = useContentColumn();
+  const { columns } = useWebLayout();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -65,7 +66,7 @@ export default function PlayerSearchScreen() {
           subtitle={t("player_search.subtitle")}
         />
 
-        <View style={[styles.body, column]}>
+        <View style={styles.body}>
           <View style={styles.searchBox}>
             <Search color={colors.muted} size={18} />
             <TextInput
@@ -133,7 +134,7 @@ export default function PlayerSearchScreen() {
               <Text style={styles.resultsCount} accessibilityLiveRegion="polite">
                 {t("player_search.results_count", { count: players.length })}
               </Text>
-              <View style={styles.list}>
+              <CardGrid columns={columns} style={styles.list}>
                 {players.map((player) => (
                   <PressableScale
                     key={player.licence}
@@ -160,7 +161,7 @@ export default function PlayerSearchScreen() {
                     </View>
                   </PressableScale>
                 ))}
-              </View>
+              </CardGrid>
             </View>
           )}
         </View>

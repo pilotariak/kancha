@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   ScrollView,
+  type StyleProp,
   StyleSheet,
   Text,
   View,
@@ -12,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
+import { CardGrid } from "@/components/CardGrid";
 import { FilterChips } from "@/components/FilterChips";
 import { LayoutList, ListOrdered, Network, Swords, Trophy, Users } from "@/components/icons";
 import { RankingView } from "@/components/RankingView";
@@ -29,9 +31,10 @@ import {
   resolveSelection,
   withSelected,
 } from "@/features/competitions/resultFilters";
+import { GRID_GAP } from "@/features/layout/breakpoints";
 import { useCategories } from "@/hooks/use-categories";
 import { useCompetition, useResultFilters } from "@/hooks/use-competitions";
-import { useContentColumn, useContentWidth, useLayoutSize } from "@/hooks/use-layout";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useResultsByCompetition } from "@/hooks/use-matches";
 import { useSpecialties } from "@/hooks/use-specialties";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -215,14 +218,15 @@ export default function CompetitionDetailsScreen() {
   const id = params.id ?? "";
   const { specialtyId, categoryId } = params;
 
-  const desktop = useLayoutSize() === "desktop";
-  const column = useContentColumn();
-  const contentWidth = useContentWidth();
+  const { columns, cellWidth, contentWidth } = useWebLayout();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  // Desktop: the list and the ranking sit right of a filter column; the bracket takes the whole
-  // column, under a filter bar, so that its rounds fit without scrolling sideways.
-  const filterBar = desktop && viewMode === "bracket";
-  const filterColumn = desktop && !filterBar;
+  // Wider than a phone (web), the results use the grid. From three columns, the filters take
+  // the first one and stay in view; with two, and always for the bracket, they sit in a bar
+  // above the results, which then get every column.
+  const grid = columns > 1;
+  const filterColumn = columns > 2 && viewMode !== "bracket";
+  const filterBar = grid && !filterColumn;
+  const resultColumns = filterColumn ? columns - 1 : columns;
 
   const leagueId = useLeagueStore((s) => s.selectedLeagueId);
   const league = LEAGUES.find((l) => l.id === leagueId);
@@ -318,67 +322,57 @@ export default function CompetitionDetailsScreen() {
     </View>
   );
 
-  // The matches of the list and bracket views, once loaded. On desktop, their progress moves
-  // to the filter column.
+  // The matches of the list and bracket views, once loaded. In the grid, their progress moves
+  // to the filters.
   const listed = hasPair && viewMode !== "ranking" && !isError && !loadingResults
       && results && results.length > 0
     ? results
     : null;
 
-  // Two cards per row on desktop, each in a cell without padding, so an odd last card keeps
-  // its half width next to an empty cell.
-  function renderMatches(round: RoundGroup) {
-    if (!desktop) {
-      return round.results.map((r) => <MatchCard key={r.id} result={r} phaseType={round.type} />);
-    }
-    const rows: Result[][] = [];
-    for (let i = 0; i < round.results.length; i += 2) rows.push(round.results.slice(i, i + 2));
-    return rows.map((row) => (
-      <View key={row[0].id} style={styles.matchRow}>
-        {row.map((r) => (
-          <View key={r.id} style={styles.matchCell}>
-            <MatchCard result={r} phaseType={round.type} fill />
-          </View>
-        ))}
-        {row.length === 1 && <View style={styles.matchCell} />}
-      </View>
-    ));
-  }
-
-  // Below desktop, the bracket scrolls sideways and bleeds over the gutter to the column's edges.
-  const bracket = desktop
-    ? <BracketView rounds={rounds} layout="fit" />
+  // On a phone, the bracket scrolls sideways and bleeds over the gutter to the screen's edges.
+  const bracket = grid
+    ? <BracketView rounds={rounds} columns={columns} />
     : (
       <View style={[styles.bracketWrapper, { width: contentWidth }]}>
         <BracketView rounds={rounds} />
       </View>
     );
 
-  // In the desktop filter bar, each filter gets its own width; elsewhere they stack.
-  const barItem = (style: ViewStyle, node: React.ReactNode) =>
+  // In the filter bar, each filter gets its own width; elsewhere they stack.
+  const barItem = (style: StyleProp<ViewStyle>, node: React.ReactNode) =>
     filterBar ? <View style={style}>{node}</View> : node;
+  const cell = { width: cellWidth };
 
   function renderResults() {
     if (isPairsError && !hasPair) return errorBox(pairsError);
     if (selection === null && !hasPair) return empty;
     if (!hasPair) return spinner;
     if (viewMode === "ranking") {
-      return <RankingView competitionId={id} specialtyId={specialtyId} categoryId={categoryId} />;
+      return (
+        <RankingView
+          competitionId={id}
+          specialtyId={specialtyId}
+          categoryId={categoryId}
+          columns={resultColumns}
+        />
+      );
     }
     if (isError) return errorBox(error);
     if (loadingResults) return spinner;
     if (!listed) return empty;
     return (
       <>
-        {desktop ? null : <ResultsProgress results={listed} />}
+        {grid ? null : <ResultsProgress results={listed} />}
         {viewMode === "bracket"
           ? bracket
           : rounds.map((round) => (
             <View key={round.type} style={styles.roundSection}>
               <RoundHeader type={round.type} count={round.results.length} />
-              <View style={[styles.matchList, desktop && styles.matchListDesktop]}>
-                {renderMatches(round)}
-              </View>
+              <CardGrid columns={resultColumns} style={styles.matchList}>
+                {round.results.map((r) => (
+                  <MatchCard key={r.id} result={r} phaseType={round.type} fill={grid} />
+                ))}
+              </CardGrid>
             </View>
           ))}
       </>
@@ -403,16 +397,16 @@ export default function CompetitionDetailsScreen() {
           compact
         />
 
-        <View style={[styles.body, column, filterColumn && styles.bodyDesktop]}>
+        <View style={[styles.body, filterColumn && styles.bodyFilterColumn]}>
           <View
             style={[
               styles.filters,
-              filterColumn && styles.filtersDesktop,
+              filterColumn && [styles.filterColumn, cell],
               filterBar && styles.filterBar,
             ]}
           >
             {specialtyOptions.length > 0 && barItem(
-              styles.barFixed,
+              cell,
               <SelectField
                 label={t("specialty.title")}
                 hint={t("details.specialty_hint")}
@@ -429,12 +423,12 @@ export default function CompetitionDetailsScreen() {
                 options={categoryOptions}
                 value={categoryId}
                 onChange={(next) => router.setParams({ categoryId: next })}
-                wrap={desktop}
+                wrap={grid}
                 testID="category-chips"
               />,
             )}
             {barItem(
-              styles.barFixed,
+              cell,
               <SegmentedControl
                 segments={segments}
                 value={viewMode}
@@ -442,13 +436,11 @@ export default function CompetitionDetailsScreen() {
                 testID="view-mode"
               />,
             )}
-            {desktop && listed
-              ? barItem(styles.barFull, <ResultsProgress results={listed} />)
-              : null}
+            {grid && listed ? barItem(styles.barFull, <ResultsProgress results={listed} />) : null}
           </View>
 
           {filterColumn
-            ? <View style={styles.resultsDesktop}>{renderResults()}</View>
+            ? <View style={styles.resultsBesideFilters}>{renderResults()}</View>
             : renderResults()}
         </View>
       </ScrollView>
@@ -458,10 +450,6 @@ export default function CompetitionDetailsScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-/** The phone column width (390px less its gutters): the view segments fit as on a phone. */
-const FILTERS_WIDTH = 350;
-const DESKTOP_COLUMN_GAP = 32;
-
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: c.redFill },
@@ -470,20 +458,18 @@ const makeStyles = (c: Palette) =>
     body: { paddingHorizontal: 20, paddingTop: 14, gap: 12 },
     filters: { gap: 10 },
 
-    // Desktop (web, 1024px and up): the filters in a column on the left that stays in view
-    // while the matches scroll, the matches on the right.
-    bodyDesktop: { flexDirection: "row", alignItems: "flex-start", gap: DESKTOP_COLUMN_GAP },
-    filtersDesktop: {
-      width: FILTERS_WIDTH,
+    // Three grid columns or more: the filters take the first one, one cell wide, and stay in
+    // view while the matches scroll.
+    bodyFilterColumn: { flexDirection: "row", alignItems: "flex-start", gap: GRID_GAP },
+    filterColumn: {
       // Web only, and missing from React Native's position type.
       position: "sticky" as ViewStyle["position"],
       top: 16,
     },
-    resultsDesktop: { flex: 1, minWidth: 0, gap: 12 },
-    // Desktop bracket: the filters on one line above it (two when the window is narrow), the
-    // progress on the next.
-    filterBar: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 12 },
-    barFixed: { width: FILTERS_WIDTH },
+    resultsBesideFilters: { flex: 1, minWidth: 0, gap: 12 },
+    // Two columns, and the bracket: the filters on a line above the results (two when the
+    // window is narrow), the progress on the next. The field and the segments are a cell wide.
+    filterBar: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: GRID_GAP },
     barChips: { flexGrow: 1, flexBasis: 200 },
     barFull: { width: "100%" },
 
@@ -571,9 +557,6 @@ const makeStyles = (c: Palette) =>
 
     // Match list
     matchList: { gap: 8 },
-    matchListDesktop: { gap: 12 },
-    matchRow: { flexDirection: "row", gap: 12 },
-    matchCell: { flex: 1 },
 
     // Match card
     matchCard: {

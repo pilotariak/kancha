@@ -4,13 +4,14 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CardGrid } from "@/components/CardGrid";
 import { ChevronRight, Shield } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
-import { useContentColumn } from "@/hooks/use-layout";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 
@@ -18,7 +19,7 @@ export default function LeaguePickerScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const column = useContentColumn();
+  const { columns } = useWebLayout();
   const setLeague = useLeagueStore((s) => s.setLeague);
 
   function handleSelect(id: string) {
@@ -40,10 +41,10 @@ export default function LeaguePickerScreen() {
           subtitle={t("leagues.subtitle")}
         />
 
-        <View style={[styles.body, column]}>
+        <View style={styles.body}>
           <SectionHeader eyebrow={t("common.choose")} title={t("leagues.your_league")} />
 
-          <View style={styles.list}>
+          <CardGrid columns={columns} style={styles.list}>
             {LEAGUES.map((league) => (
               <PressableScale
                 key={league.id}
@@ -72,7 +73,7 @@ export default function LeaguePickerScreen() {
                   : <Text style={styles.comingSoon}>{t("common.soon")}</Text>}
               </PressableScale>
             ))}
-          </View>
+          </CardGrid>
         </View>
       </ScrollView>
     </SafeAreaView>

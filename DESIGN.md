@@ -508,9 +508,10 @@ The season comes from the competition name (`src/features/competitions/seasons.t
 has no season field; a league with no season in any name keeps the plain list of competition
 cards.
 
-`SeasonTile` (`src/components/SeasonTile.tsx`): a half-width tile, two per row, 12px apart. Each
-tile fills a `flex: 1` cell without padding, so an odd last tile keeps its half width next to an
-empty cell. Every tile opens the results of one competition.
+`SeasonTile` (`src/components/SeasonTile.tsx`): a half-width tile, two per row, 12px apart (on
+web, two per grid column: half a card). Each tile fills a `flex: 1` cell without padding, and
+empty cells fill a short last row, so every tile keeps the same width. Every tile opens the
+results of one competition.
 
 ```
 Tile:      #FFFDFC (card), 1px solid #E5DED6 (line), 20px radius, 16px padding, content spread
@@ -536,7 +537,8 @@ Season:    #141414 (ink), 22px, weight 900, tabular-nums, one line ("2025-2026")
 ```
 Toggle:    full width, min height 44px, pill radius, #FFFFFF (white), 1px solid #E5DED6 (line),
            #141414 (ink) 15px weight 700 label + 18px chevron, 8px gap. Pressed: #E5DED6 (line).
-           aria-expanded carries the state. No red: showing more is not an action
+           aria-expanded carries the state. No red: showing more is not an action. On web from
+           two columns: one cell wide, centered under the tiles
 ```
 
 | Pair                               | Light  | Dark (Ikurriña) |
@@ -568,26 +570,27 @@ No red:       a regular match card carries no red. The Final keeps its amber rou
               amber phase label and 2px red border.
 Bracket node: same team rows at 14px names, 17px sets (22px Final), min width 24px (30px
               Final), no header
-Desktop grid: web from 1024px, two cards per row, 12px apart both ways. Each card fills a
-              `flex: 1` cell without padding, so the two cards of a row share its height and an
-              odd last card keeps its half width next to an empty cell. Round dividers span the
-              whole results column
+Grid:         web, from two columns (§5 Columns): one card per grid column, in a `CardGrid`.
+              Each card fills its `flex: 1` cell, so the cards of a row share its height and a
+              short last row keeps its cards at the same width. Round dividers span the whole
+              results column
 Interaction:  none: a match card is not pressable, so it has no hover or focus state
 ```
 
-Below 1024px, the bracket (`BracketView`) is a row of 350px round columns, connected by a
-chevron, that scrolls sideways and bleeds over the gutter. From 600px on web the scroll bar shows.
+On a phone, the bracket (`BracketView`) is a row of round columns one card wide (350px),
+connected by a chevron, that scrolls sideways and bleeds over the gutter.
 
-On desktop (web, 1024px and up), the bracket takes the fit layout (`layout="fit"`): nothing
-scrolls sideways.
+From two columns (web, `columns` prop), the bracket takes the fit layout: nothing scrolls
+sideways.
 
 ```
 Knockout:  every round but the pools (barrages, 16ths to the final), side by side in one row,
-           24px apart, no chevron. They share the width: 220px at least, 350px at most; more
-           rounds than fit wrap onto a new line. The nodes take their column's width
-Pools:     below, 24px under the knockout row: the round pill, then the nodes in a grid of three
-           per row, 10px apart, each filling a padding-less cell so a row shares its height.
-           Phases the parser does not know ("Parties") go there too
+           24px apart, no chevron. They share the width: 220px at least (names stay readable),
+           one card (350px) at most; more rounds than fit wrap onto a new line. The nodes take
+           their column's width
+Pools:     below, 24px under the knockout row: the round pill, then the nodes in a CardGrid of
+           the screen's columns, each filling its cell so a row shares its height. Phases the
+           parser does not know ("Parties") go there too
 ```
 
 The knockout rounds come first: they are what a reader looks for, and they are short. Pools
@@ -643,8 +646,9 @@ Trailing:     optional slot right of the text, 16px gap (the About logo, an acti
 Loading:      white spinner in place of the title and subtitle
 Compact:      `compact` prop, for a screen with filters under the band (results): title 28px
               (Hero title), line-height 31px; 16px bottom padding, 12px between back link and text
-Web ≥ 600px:  the band stays full width; its content sits in the screen's content column, so
-              it lines up with the content below
+Width:        always full width. On a grid screen its content keeps the 20px gutter, like the
+              grid below. A text screen passes its text column (`column` prop), and the
+              band's content keeps to it
 Back link:    hover underlines the label; keyboard focus draws a 2px white outline, 4px offset
               (a red ring would not show on the band)
 ```
@@ -680,8 +684,8 @@ Inactive tint: #B8B1AA
 Label:         12px, weight 700, paddingBottom 8px
 ```
 
-The bottom bar on iOS, Android and on web below 1024px. From 1024px, web shows a navigation rail
-on the left instead:
+The bottom bar on iOS, Android, and on web until two columns fit beside the rail
+(`RAIL_MIN_WIDTH`, 880px, §5). From there, web shows a navigation rail on the left instead:
 
 ```
 Rail:          128px wide (RAIL_WIDTH), full height, tabBar background, 1px tabBarBorder
@@ -712,7 +716,8 @@ List:      a sheet from the bottom of the screen: #FFFFFF, 24px top corners, scr
 Rows:      min height 48px, 16px sides, full name #141414 15px weight 600; the current one
            weight 800 with an ink Check (18px, stroke 3). A row or the scrim closes the sheet
 Web:       hover and focus as cards (lineStrong border, shadow, red ring); a hovered row turns
-           cream like a pressed one. From 600px the sheet is 720px at most, centered
+           cream like a pressed one. From two columns the sheet is the text column (752px) at
+           most, centered
 ```
 
 ### Filter Chip
@@ -731,8 +736,8 @@ Overflow:  a 40px fade from transparent cream to cream on the right edge while c
 Web:       hover gives an unselected chip a lineStrong border; keyboard focus the red ring. The
            row gains 4px above and below inside the scroll view (and loses it outside), so the
            ring is not clipped
-Wrap:      `wrap` prop, for the desktop filter column: the chips flow onto several lines inside
-           the gutter, with no scrolling, no bleed and no fade
+Wrap:      `wrap` prop, from two columns (web): the chips flow onto several lines inside the
+           gutter, with no scrolling, no bleed and no fade
 ```
 
 ### Segmented Control
@@ -769,33 +774,36 @@ On the results screen, a row in place of the old Total / Played / Pending strip:
 Label:     "27 / 27 parties jouées", #262626 (text), 13px, weight 700, tabular-nums
 Bar:       flex 1, 6px, pill radius, #E5DED6 (line) track, #141414 (ink) fill
 Done:      a dark StatusPill ("Terminé") at the end of the row once every match has a score
-Desktop:   web from 1024px, the row moves to the filters: under the segmented control in the
-           filter column, on its own line in the bracket's filter bar
+Grid:      from two columns (web), the row moves to the filters: under the segmented control in
+           the filter column, on its own line in the filter bar
 ```
 
-### Results screen on desktop
+### Results screen in the grid
 
-Web from 1024px, the list and the ranking split the content column in two:
+On web, from two columns (§5 Columns). On a phone the screen keeps its order: filters,
+progress, results.
 
-```
-Filters:   left, 350px (the phone column width), 32px from the results: SelectField,
-           FilterChips (wrap), SegmentedControl, ResultsProgress. position: sticky, 16px from
-           the top: they stay in view while the matches scroll
-Results:   right, the rest of the column: the match grid (two per row) or the ranking
-```
-
-The bracket needs the whole column to fit its rounds, so it puts the filters in a bar above it:
+From three columns, the list and the ranking give the filters the first grid column:
 
 ```
-Filter bar: one wrapping row, 12px gap: SelectField (350px), FilterChips (wrap, the rest of
-            the line, 200px at least), SegmentedControl (350px). ResultsProgress on its own
-            line under them. Below about 1,100px of column, the segmented control drops to a
-            second line
-Results:    the fit bracket, full column width
+Filters:   one cell wide, 12px from the results: SelectField, FilterChips (wrap),
+           SegmentedControl, ResultsProgress. position: sticky, 16px from the top: they stay in
+           view while the matches scroll
+Results:   the other columns: the match grid or the ranking cards, one card per column
 ```
 
-Switching between the list and the bracket moves the filters between the column and the bar.
-Below 1024px the screen keeps the phone order: filters, progress, results.
+With two columns, and always for the bracket, which needs the whole width to fit its rounds,
+the filters sit in a bar above the results, and the results get every column:
+
+```
+Filter bar: one wrapping row, 12px gap: SelectField (a cell wide), FilterChips (wrap, the
+            rest of the line, 200px at least), SegmentedControl (a cell wide). ResultsProgress
+            on its own line under them. When the line is too short, the segmented control
+            drops to a second line
+Results:    the match grid, the ranking cards or the fit bracket, over every column
+```
+
+Switching to the bracket moves the filters from the column to the bar.
 
 ### Error State
 
@@ -870,21 +878,37 @@ Every field uses this one style, built from palette tokens so it follows the the
 
 - **Screen padding:** 20 px left/right, consistent across all screens.
 - **Content gap:** 22 px between major stacked sections within a ScrollView.
-- **Single-column layout** on a phone. On web from 1024px, the results screen has a filter
-  column and a two-card match grid (§4 Results screen on desktop).
-- **Content column:** on web from 600px, every screen's content sits in one centered column,
-  capped by `useContentColumn()` (`src/hooks/use-layout.ts`). Add its style to the view that
-  holds the 20 px gutter, so the gutter sits inside the cap. The header band stays full width.
+- **Single-column layout** on a phone. On web, wider windows add columns of cards (below).
+- **Grid screens** (leagues, competitions, results, ranking, player search, player): their
+  lists of cards go through `CardGrid` (`src/components/CardGrid.tsx`), with `columns` from
+  `useWebLayout()`. In one column, `CardGrid` is the list as it was. Season tiles are half a
+  card: two per column. Nothing caps the width: a wider window gets more columns.
+- **Text screens** (About, Score): their content keeps to the text column, `useTextColumn()`
+  (`src/hooks/use-layout.ts`): two cards wide, 752 px with its gutters, centered. Add it to the
+  view that holds the 20 px gutter, and pass it to `ScreenHeader` (`column`).
 
-### Breakpoints (web)
+### Columns (web)
 
-`src/features/layout/breakpoints.ts`. iOS and Android always use the phone layout.
+`src/features/layout/breakpoints.ts`. The breakpoints come from the phone card, not from device
+sizes: the card is 350 px (a 390 px screen less its 20 px gutters), cards sit 12 px apart, and
+a column is added each time one more card fits. iOS and Android always use the phone layout.
 
-| Size    | Window width | Navigation       | Content column, gutters included |
-| ------- | ------------ | ---------------- | -------------------------------- |
-| phone   | below 600px  | bottom tab bar   | full width                       |
-| tablet  | 600–1023px   | bottom tab bar   | 720 px at most, centered         |
-| desktop | 1024px up    | 128 px left rail | 1,120 px at most, centered       |
+```
+gridWidth(n)  = n × 350 + (n − 1) × 12 + 2 × 20     content width that holds n cards
+columnsFor(w) = the most cards that fit in w, one at least
+rail          = from gridWidth(2) + 128 (the rail) = 880px: two columns still fit beside it
+text column   = gridWidth(2) = 752px
+```
+
+| Columns | Content width | Window, bottom tabs | Window, with the rail |
+| ------- | ------------- | ------------------- | --------------------- |
+| 1       | below 752px   | below 752px         | —                     |
+| 2       | 752px         | 752–879px           | 880–1241px            |
+| 3       | 1,114px       | —                   | 1,242–1,603px         |
+| 4       | 1,476px       | —                   | 1,604–1,965px         |
+
+Cards fill their cells: a card is 350 px at least, and grows until one more card fits (at most
+about 530 px, with two columns). Below 752 px the web is the phone layout.
 
 The static web export renders without a window, so its HTML holds the phone layout. React
 hydrates that layout, then switches to the window's size: a wide window shows the phone layout
@@ -956,7 +980,7 @@ sit on cream below it.
 
 ## 8. Responsive Behavior
 
-The **iOS and Android apps are phone-only** (React Native / Expo, `ios.supportsTablet: false`): they always use the phone layout. The **web build** adapts to the window width with three layout sizes (§5 Breakpoints): phone below 600px, a centered 720 px column with bottom tabs from 600px, and a left rail with a 1,120 px column from 1024px. The phone layout targets:
+The **iOS and Android apps are phone-only** (React Native / Expo, `ios.supportsTablet: false`): they always use the phone layout. The **web build** adds a column of cards each time one more fits, and a navigation rail from 880px (§5 Columns). The phone layout targets:
 
 | Target      | Width      | Notes                              |
 | ----------- | ---------- | ---------------------------------- |

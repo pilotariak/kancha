@@ -17,7 +17,7 @@ import { Trophy, Undo2 } from "@/components/icons";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { INITIAL, reducer, type ScoreAction, type ScoreState } from "@/features/score/scoreMachine";
-import { useContentColumn } from "@/hooks/use-layout";
+import { useTextColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 // ─── Score bar ────────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ function SetupScreen({ onStart }: SetupProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const column = useContentColumn();
+  const column = useTextColumn();
   const [teamA, setTeamA] = useState("");
   const [teamB, setTeamB] = useState("");
   const [targetRaw, setTargetRaw] = useState("");
@@ -86,7 +86,11 @@ function SetupScreen({ onStart }: SetupProps) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader title={t("score.setup_title")} subtitle={t("score.setup_subtitle")} />
+        <ScreenHeader
+          column={column}
+          title={t("score.setup_title")}
+          subtitle={t("score.setup_subtitle")}
+        />
 
         <View style={[styles.setupBody, column]}>
           <View style={styles.setupForm}>
@@ -176,7 +180,7 @@ function ScorePanel(
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const column = useContentColumn();
+  const column = useTextColumn();
   const isTop = side === "top";
   const bg = isTop ? colors.redFill : colors.panel;
   const winnerBg = colors.green;
@@ -244,7 +248,8 @@ function ScorePanel(
       </>
     );
 
-  // From 600px on web, the panel color stays full width and its content keeps to the column.
+  // Wider than a phone (web), the panel color stays full width and its content keeps to the
+  // text column.
   return (
     <View style={[styles.panel, { backgroundColor: activeBg }]}>
       {column ? <View style={[styles.panelColumn, column]}>{content}</View> : content}
@@ -312,7 +317,7 @@ function WinScreen({ state, onNewGame }: WinProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const column = useContentColumn();
+  const column = useTextColumn();
   const scale = useRef(new Animated.Value(0.4)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 

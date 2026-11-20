@@ -5,13 +5,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Check, ChevronDown } from "@/components/icons";
 import type { Palette } from "@/constants/colors";
-import { CONTENT_MAX_WIDTH } from "@/features/layout/breakpoints";
+import { TEXT_MAX_WIDTH } from "@/features/layout/breakpoints";
 import {
   type InteractionState,
   showsFocusRing,
   useInteractionStyles,
 } from "@/hooks/use-interaction-styles";
-import { useLayoutSize } from "@/hooks/use-layout";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 interface SelectFieldProps {
@@ -34,7 +34,7 @@ export function SelectField({ label, hint, options, value, onChange, testID }: S
   const styles = useThemedStyles(makeStyles);
   const interaction = useInteractionStyles();
   const insets = useSafeAreaInsets();
-  const wide = useLayoutSize() !== "phone";
+  const wide = useWebLayout().columns > 1;
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.id === value);
 
@@ -132,8 +132,8 @@ const makeStyles = (c: Palette) =>
       borderTopRightRadius: 24,
       backgroundColor: c.white,
     },
-    // Web from 600px: the tablet column width, centered, instead of the window width.
-    sheetCentered: { width: "100%", maxWidth: CONTENT_MAX_WIDTH.tablet, alignSelf: "center" },
+    // Wider than a phone: the text column width, centered, instead of the window width.
+    sheetCentered: { width: "100%", maxWidth: TEXT_MAX_WIDTH, alignSelf: "center" },
     sheetTitle: {
       paddingHorizontal: 16,
       paddingBottom: 8,

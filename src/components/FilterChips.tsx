@@ -8,7 +8,7 @@ import {
   showsFocusRing,
   useInteractionStyles,
 } from "@/hooks/use-interaction-styles";
-import { useContentWidth } from "@/hooks/use-layout";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 interface FilterChipsProps {
@@ -40,7 +40,7 @@ function ChipRow({ options, value, onChange, accessibilityLabel, wrap, testID }:
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const interaction = useInteractionStyles();
-  const viewportWidth = useContentWidth();
+  const viewportWidth = useWebLayout().contentWidth;
   const scrollRef = useRef<ScrollView>(null);
   const [frameWidth, setFrameWidth] = useState(0);
   const [contentWidth, setContentWidth] = useState(0);

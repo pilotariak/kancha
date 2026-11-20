@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Info, Swords, Trophy } from "@/components/icons";
 import { KanchaLogo } from "@/components/KanchaLogo";
 import { RAIL_WIDTH } from "@/features/layout/breakpoints";
-import { useLayoutSize } from "@/hooks/use-layout";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme } from "@/hooks/use-theme";
 
 const LOGO_SIZE = 48;
@@ -16,14 +16,14 @@ const LOGO_BOTTOM = 16;
 
 /**
  * The web tabs. Expo Router picks this file over `_layout.tsx` on web only, so iOS and
- * Android keep theirs. Below 1024px, the same bottom tab bar as on a phone; from 1024px,
- * a navigation rail on the left, under the Kancha logo.
+ * Android keep theirs. The same bottom tab bar as on a phone until two card columns fit
+ * beside a rail (`RAIL_MIN_WIDTH`); then a navigation rail on the left, under the Kancha logo.
  */
 export default function TabLayout() {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const rail = useLayoutSize() === "desktop";
+  const { rail } = useWebLayout();
 
   return (
     <Tabs

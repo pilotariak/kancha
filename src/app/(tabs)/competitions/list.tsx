@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CardGrid } from "@/components/CardGrid";
 import { FeaturedCard } from "@/components/FeaturedCard";
 import { ChevronDown, ChevronRight, ChevronUp, Search } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
@@ -21,7 +22,7 @@ import {
   toSeasonBlocks,
 } from "@/features/competitions/seasons";
 import { useCompetitions } from "@/hooks/use-competitions";
-import { useContentColumn } from "@/hooks/use-layout";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 import type { Competition } from "@/types/competition";
@@ -38,7 +39,7 @@ export default function CompetitionsListScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const column = useContentColumn();
+  const { columns, cellWidth } = useWebLayout();
   const { data: competitions, isPending, isError, error } = useCompetitions();
   const selectedLeagueId = useLeagueStore((s) => s.selectedLeagueId);
   const [expanded, setExpanded] = useState(false);
@@ -64,11 +65,12 @@ export default function CompetitionsListScreen() {
     </PressableScale>
   );
 
-  // Two tiles per row, each in a cell without padding, so an odd last tile keeps its half
-  // width next to the empty cell.
+  // Two tiles per row on a phone, two per grid column on a wider web window: each in a cell
+  // without padding, so a short last row keeps its tiles at the same width as the others.
+  const tilesPerRow = 2 * columns;
   const renderTiles = (tiles: Tile[], variant: "season" | "name") => {
     const rows: Tile[][] = [];
-    for (let i = 0; i < tiles.length; i += 2) rows.push(tiles.slice(i, i + 2));
+    for (let i = 0; i < tiles.length; i += tilesPerRow) rows.push(tiles.slice(i, i + tilesPerRow));
     return rows.map((row) => (
       <View key={row[0].competition.id} style={styles.gridRow}>
         {row.map((tile) => (
@@ -83,7 +85,10 @@ export default function CompetitionsListScreen() {
             />
           </View>
         ))}
-        {row.length === 1 && <View style={styles.gridCell} />}
+        {Array.from(
+          { length: tilesPerRow - row.length },
+          (_, e) => <View key={`empty-${e}`} style={styles.gridCell} />,
+        )}
       </View>
     ));
   };
@@ -126,7 +131,7 @@ export default function CompetitionsListScreen() {
 
     return (
       <>
-        <View style={styles.list}>
+        <CardGrid columns={columns} style={styles.list}>
           <FeaturedCard
             eyebrow={t("competitions.current_season")}
             title={keepSeasonTogether(lead.competition.name)}
@@ -135,7 +140,7 @@ export default function CompetitionsListScreen() {
             testID={`competition-card-${lead.competition.id}`}
           />
           {rest.map(({ competition }) => renderCard(competition))}
-        </View>
+        </CardGrid>
 
         {shown.length > 0 && (
           <>
@@ -147,7 +152,12 @@ export default function CompetitionsListScreen() {
               {renderSeasonGrid(expanded ? seasons.previous : shown)}
               {hidden.length > 0 && (
                 <Pressable
-                  style={({ pressed }) => [styles.toggle, pressed && styles.togglePressed]}
+                  style={({ pressed }) => [
+                    styles.toggle,
+                    // In the grid, a cell wide and centered under the tiles, not the full width.
+                    columns > 1 && { width: cellWidth, alignSelf: "center" },
+                    pressed && styles.togglePressed,
+                  ]}
                   onPress={() => setExpanded((value) => !value)}
                   accessibilityRole="button"
                   aria-expanded={expanded}
@@ -171,7 +181,9 @@ export default function CompetitionsListScreen() {
               eyebrow={t("competitions.others_eyebrow")}
               title={t("competitions.others_title")}
             />
-            <View style={styles.list}>{seasons.others.map(renderCard)}</View>
+            <CardGrid columns={columns} style={styles.list}>
+              {seasons.others.map(renderCard)}
+            </CardGrid>
           </>
         )}
       </>
@@ -193,24 +205,27 @@ export default function CompetitionsListScreen() {
           subtitle={league?.name}
         />
 
-        <View style={[styles.body, column]}>
-          <PressableScale
-            style={[styles.card, styles.searchRow]}
-            onPress={() => router.push("/(tabs)/competitions/player-search")}
-            accessibilityRole="button"
-            accessibilityLabel={t("competitions.find_player")}
-            accessibilityHint={t("competitions.find_player_subtitle")}
-            testID="find-player-card"
-          >
-            <View style={styles.searchIcon}>
-              <Search color={colors.red} size={18} />
-            </View>
-            <View style={styles.searchBody}>
-              <Text style={styles.cardTitle}>{t("competitions.find_player")}</Text>
-              <Text style={styles.cardMeta}>{t("competitions.find_player_subtitle")}</Text>
-            </View>
-            <ChevronRight color={colors.muted} size={18} />
-          </PressableScale>
+        <View style={styles.body}>
+          {/* A card like the others: one cell wide in the grid. */}
+          <CardGrid columns={columns}>
+            <PressableScale
+              style={[styles.card, styles.searchRow]}
+              onPress={() => router.push("/(tabs)/competitions/player-search")}
+              accessibilityRole="button"
+              accessibilityLabel={t("competitions.find_player")}
+              accessibilityHint={t("competitions.find_player_subtitle")}
+              testID="find-player-card"
+            >
+              <View style={styles.searchIcon}>
+                <Search color={colors.red} size={18} />
+              </View>
+              <View style={styles.searchBody}>
+                <Text style={styles.cardTitle}>{t("competitions.find_player")}</Text>
+                <Text style={styles.cardMeta}>{t("competitions.find_player_subtitle")}</Text>
+              </View>
+              <ChevronRight color={colors.muted} size={18} />
+            </PressableScale>
+          </CardGrid>
 
           {isPending && (
             <View style={styles.centered}>
@@ -243,7 +258,7 @@ export default function CompetitionsListScreen() {
                 title={t("competitions.season_title")}
                 subtitle={t("competitions.season_subtitle")}
               />
-              <View style={styles.list}>{list.map(renderCard)}</View>
+              <CardGrid columns={columns} style={styles.list}>{list.map(renderCard)}</CardGrid>
             </>
           )}
         </View>
