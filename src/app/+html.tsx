@@ -5,10 +5,10 @@ import React, { type PropsWithChildren } from "react";
 import { useTranslation } from "react-i18next";
 
 import { KanchaColorsDark, KanchaColorsLight } from "@/constants/colors";
+import { SITE_URL } from "@/constants/site";
 import { APP_NAME } from "@/features/document-head/screen-title";
 
 // Link previews are fetched by crawlers that run no JavaScript and need an absolute image URL.
-const SITE_URL = "https://kancha.pilotariak.com";
 const SHARE_IMAGE = `${SITE_URL}/icons/icon-512.png`;
 
 /**

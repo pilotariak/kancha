@@ -11,6 +11,11 @@
     "competition_fallback": "Compétition",
     "loading": "Chargement"
   },
+  "link": {
+    "open": "Ouvrir",
+    "share": "Partager",
+    "copy": "Copier le lien"
+  },
   "error": {
     "title": "Une erreur est survenue",
     "subtitle": "Une erreur inattendue a interrompu cet écran. Vous pouvez réessayer.",
