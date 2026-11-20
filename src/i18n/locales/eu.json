@@ -95,7 +95,8 @@
     "website": "Webgunea",
     "leagues_title": "Ligak eta batzordeak",
     "leagues_eyebrow": "Onartutako batzordeak",
-    "leagues_description": "Kancha gaur egun batzorde batekin konektatuta dago, eta garapenak aurrera egin ahala integrazio gehiago planifikatuta daude."
+    "leagues_description_one": "Kancha gaur egun batzorde batekin konektatuta dago, eta garapenak aurrera egin ahala integrazio gehiago planifikatuta daude.",
+    "leagues_description_other": "Kancha gaur egun {{count}} batzorderekin konektatuta dago, eta garapenak aurrera egin ahala integrazio gehiago planifikatuta daude."
   },
   "language": {
     "label": "Hizkuntza",
