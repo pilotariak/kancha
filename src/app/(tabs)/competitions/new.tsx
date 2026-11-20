@@ -9,6 +9,7 @@ import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
+import { useFieldFocus } from "@/hooks/use-interaction-styles";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 const disciplines = [
@@ -29,6 +30,9 @@ export default function NewCompetitionScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const nameFocus = useFieldFocus();
+  const dateFocus = useFieldFocus();
+  const venueFocus = useFieldFocus();
   const stepTitles = [
     t("new_competition.step_info"),
     t("new_competition.step_format"),
@@ -107,18 +111,20 @@ export default function NewCompetitionScreen() {
           <View style={styles.formCard}>
             <Text style={styles.label}>{t("new_competition.label_name")}</Text>
             <TextInput
+              {...nameFocus.focusProps}
               value={name}
               onChangeText={setName}
-              style={styles.input}
+              style={[styles.input, nameFocus.inputStyle, nameFocus.focusStyle]}
               testID="input-competition-name"
             />
 
             <Text style={styles.label}>{t("new_competition.label_date")}</Text>
-            <View style={styles.inputWithIcon}>
+            <View style={[styles.inputWithIcon, dateFocus.focusStyle]}>
               <TextInput
+                {...dateFocus.focusProps}
                 value={date}
                 onChangeText={setDate}
-                style={styles.inputFlexible}
+                style={[styles.inputFlexible, dateFocus.inputStyle]}
                 testID="input-competition-date"
               />
               <CalendarDays color={colors.ink} size={18} />
@@ -126,9 +132,10 @@ export default function NewCompetitionScreen() {
 
             <Text style={styles.label}>{t("new_competition.label_venue")}</Text>
             <TextInput
+              {...venueFocus.focusProps}
               value={venue}
               onChangeText={setVenue}
-              style={styles.input}
+              style={[styles.input, venueFocus.inputStyle, venueFocus.focusStyle]}
               testID="input-competition-venue"
             />
 

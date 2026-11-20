@@ -454,7 +454,8 @@ Focus (web):   2px solid red outline, 2px offset, keyboard focus only
 
 Hover and keyboard focus exist on web only; iOS and Android render as before. The styles live in
 `src/hooks/use-interaction-styles.ts` and read the `hovered` and `focused` states that
-react-native-web passes to `Pressable`.
+react-native-web passes to `Pressable`. Text fields take their focus style from `useFieldFocus`
+in the same file.
 
 ```
 Hover, cards and fields:  lineStrong border + shadow 0 4px 16px in the shadow token
@@ -468,6 +469,8 @@ Focus ring:               2px solid red outline, 2px offset (rounded with the el
                           with a 4px offset, for the back link on the red band
 Mouse focus:              no ring. A click also focuses a Pressable on web, so the ring only
                           shows when the browser matches :focus-visible (keyboard focus)
+Focus, text fields:       a 2px red edge instead of the browser outline, after a click too:
+                          typing goes to the field however it was focused (Inputs — Text Field)
 ```
 
 `PressableScale` is an `Animated` component, which cannot take a style callback: it tracks hover
@@ -836,16 +839,24 @@ Text:          #141414 (ink), 16px, weight 700
 Placeholder:   #6E6E6E (placeholder)
 Label:         #141414, 13px, weight 800, uppercase, +0.8px tracking, 8px above the field
 Team marker:   10px dot before the label, 8px gap: red for team A, ink for team B
+Focus (web):   2px red edge (#C8102E light, #F5586E dark), mouse or keyboard. No browser outline
 ```
 
 Every field uses this one style, built from palette tokens so it follows the theme. Never tell fields apart by their fill: put a marker next to the label instead. Keep the text at 16px: mobile Safari zooms the page into a focused field set smaller.
 
-| Pair                          | Light  | Dark (Ikurriña) |
-| ----------------------------- | ------ | --------------- |
-| Typed text (ink) on the field | 18.4:1 | 14.0:1          |
-| Placeholder on the field      | 5.1:1  | 6.1:1           |
-| Team A marker (red) on cream  | 5.4:1  | 5.8:1           |
-| Team B marker (ink) on cream  | 16.8:1 | 17.3:1          |
+On web, a focused field drops the browser's outline (`outlineStyle: "none"` on the input) and shows a red edge: the 1px border turns red and an inset 1px red shadow draws the second pixel inside it. The field keeps its size, as the border stays 1px wide: a 2px border would need each field's padding cut by 1px, and a box that gets its height from its input has no padding to cut. The edge goes on whichever element draws the border: the input itself or, on a field with an icon (player search, date, venue, player name), the box around the input and its icon. Use `useFieldFocus` (`src/hooks/use-interaction-styles.ts`) for every new field. Unlike a Pressable's ring, the edge also shows after a click, and on a field the browser focused before React hydrated (`autoFocus`). iOS and Android are unchanged.
+
+| Pair                                 | Light  | Dark (Ikurriña) |
+| ------------------------------------ | ------ | --------------- |
+| Typed text (ink) on the field        | 18.4:1 | 14.0:1          |
+| Placeholder on the field             | 5.1:1  | 6.1:1           |
+| Team A marker (red) on cream         | 5.4:1  | 5.8:1           |
+| Team B marker (ink) on cream         | 16.8:1 | 17.3:1          |
+| Focus edge (red) on the field        | 5.9:1  | 4.7:1           |
+| Focus edge (red) on cream, around it | 5.4:1  | 5.8:1           |
+| Focus edge (red) on card, around it  | 5.8:1  | 5.2:1           |
+
+The edge stays above the 3:1 that WCAG 1.4.11 asks of a focus indicator, against the field and against the surface around it (cream on the score and player search screens, card in the form cards).
 
 ---
 

@@ -17,6 +17,7 @@ import { Trophy, Undo2 } from "@/components/icons";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { INITIAL, reducer, type ScoreAction, type ScoreState } from "@/features/score/scoreMachine";
+import { useFieldFocus } from "@/hooks/use-interaction-styles";
 import { useTextColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
@@ -69,6 +70,9 @@ function SetupScreen({ onStart }: SetupProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const column = useTextColumn();
+  const teamAFocus = useFieldFocus();
+  const teamBFocus = useFieldFocus();
+  const targetFocus = useFieldFocus();
   const [teamA, setTeamA] = useState("");
   const [teamB, setTeamB] = useState("");
   const [targetRaw, setTargetRaw] = useState("");
@@ -100,7 +104,8 @@ function SetupScreen({ onStart }: SetupProps) {
                 <Text style={styles.fieldLabel}>{t("score.label_team_a")}</Text>
               </View>
               <TextInput
-                style={styles.input}
+                {...teamAFocus.focusProps}
+                style={[styles.input, teamAFocus.inputStyle, teamAFocus.focusStyle]}
                 value={teamA}
                 onChangeText={setTeamA}
                 placeholder={t("score.placeholder_team")}
@@ -116,7 +121,8 @@ function SetupScreen({ onStart }: SetupProps) {
                 <Text style={styles.fieldLabel}>{t("score.label_team_b")}</Text>
               </View>
               <TextInput
-                style={styles.input}
+                {...teamBFocus.focusProps}
+                style={[styles.input, teamBFocus.inputStyle, teamBFocus.focusStyle]}
                 value={teamB}
                 onChangeText={setTeamB}
                 placeholder={t("score.placeholder_team")}
@@ -129,7 +135,8 @@ function SetupScreen({ onStart }: SetupProps) {
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>{t("score.label_target")}</Text>
               <TextInput
-                style={styles.input}
+                {...targetFocus.focusProps}
+                style={[styles.input, targetFocus.inputStyle, targetFocus.focusStyle]}
                 value={targetRaw}
                 onChangeText={setTargetRaw}
                 placeholder={t("score.placeholder_target")}
