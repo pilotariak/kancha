@@ -20,6 +20,8 @@ interface SegmentedControlProps<T extends string> {
   segments: readonly Segment<T>[];
   value: T;
   onChange: (value: T) => void;
+  /** Icons only, in 44px segments, for a control beside other filters; labels name them. */
+  iconOnly?: boolean;
   testID?: string;
 }
 
@@ -38,7 +40,7 @@ const MIN_SEGMENT_WITH_ICON = 124;
  * segment in white with a ring and a shadow, ink text. No red: picking a view is not an action.
  */
 export function SegmentedControl<T extends string>(
-  { segments, value, onChange, testID }: SegmentedControlProps<T>,
+  { segments, value, onChange, iconOnly = false, testID }: SegmentedControlProps<T>,
 ) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
@@ -57,7 +59,7 @@ export function SegmentedControl<T extends string>(
   return (
     <View
       style={styles.track}
-      onLayout={onTrackLayout}
+      onLayout={iconOnly ? undefined : onTrackLayout}
       accessibilityRole="tablist"
       testID={testID}
     >
@@ -68,6 +70,7 @@ export function SegmentedControl<T extends string>(
             key={option}
             style={(state: InteractionState) => [
               styles.segment,
+              iconOnly ? styles.segmentIconOnly : styles.segmentLabeled,
               active ? styles.segmentActive : state.hovered && styles.segmentHovered,
               showsFocusRing(state) && interaction.focusRing,
             ]}
@@ -77,12 +80,16 @@ export function SegmentedControl<T extends string>(
             aria-selected={active}
             testID={testID ? `${testID}-${option}` : undefined}
           >
-            {Icon && showIcons
-              ? <Icon size={14} color={active ? colors.ink : colors.text} />
+            {Icon && (showIcons || iconOnly)
+              ? <Icon size={iconOnly ? 18 : 14} color={active ? colors.ink : colors.text} />
               : null}
-            <Text style={[styles.label, active && styles.labelActive]} numberOfLines={1}>
-              {label}
-            </Text>
+            {iconOnly
+              ? null
+              : (
+                <Text style={[styles.label, active && styles.labelActive]} numberOfLines={1}>
+                  {label}
+                </Text>
+              )}
           </Pressable>
         );
       })}
@@ -101,7 +108,6 @@ const makeStyles = (c: Palette) =>
       backgroundColor: c.line,
     },
     segment: {
-      flex: 1,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
@@ -110,6 +116,8 @@ const makeStyles = (c: Palette) =>
       paddingHorizontal: 8,
       borderRadius: 9999,
     },
+    segmentLabeled: { flex: 1 },
+    segmentIconOnly: { width: 44, paddingHorizontal: 0 },
     // The thumb barely contrasts with the track (1.3:1 light, 1.2:1 dark): a lineStrong ring and
     // a shadow, not a bolder label, mark it, so the label keeps its width when selected. A
     // shadow takes no room from the label, where a border would.
