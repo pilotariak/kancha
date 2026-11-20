@@ -751,8 +751,13 @@ content, such as Liste / Tableau / Classement.
 ```
 Track:     #E5DED6 (line), pill radius, 3px padding, 2px between segments, 44px tall
 Segment:   flex 1, min height 38px, 14px icon + 13px label, centered, pill radius
-Inactive:  no fill, #262626 (text), weight 600
-Active:    #FFFFFF (white) segment, #141414 (ink) icon and label, weight 800
+Inactive:  no fill, #262626 (text), weight 700
+Active:    #FFFFFF (white) segment, 1px #CBBFB2 (lineStrong) ring and a 0 1px 4px shadow
+           (shadow), #141414 (ink) icon and label, weight 700
+Icons:     shown only when each segment is 124px wide or more (a 382px track for three),
+           read from the track's width, not the window's: narrower, the longest label
+           ("Clasificación", es) no longer fits beside its icon. On the results screen, labels
+           only at 360, 390, 768 and 1280px wide; icons at 1024 and 1440px
 No red:    picking a view is not an action
 Web:       hover tints an inactive segment lineStrong; keyboard focus draws the red ring
 ```
@@ -764,10 +769,13 @@ Web:       hover tints an inactive segment lineStrong; keyboard focus draws the 
 | Inactive segment label (text) on line | 11.4:1 | 10.0:1          |
 | Active segment label (ink) on white   | 18.4:1 | 14.0:1          |
 | Active segment (white) on the track   | 1.3:1  | 1.2:1           |
+| Active ring (lineStrong) on the track | 1.4:1  | 1.5:1           |
+| Active ring (lineStrong) on white     | 1.8:1  | 1.8:1           |
 
 The active segment stands out from the track by less than 3:1, and in dark it is darker than the
-track. The label weight (800 against 600) and `aria-selected` carry the state; a stronger thumb is
-a follow-up.
+track. The lineStrong ring, the shadow and `aria-selected` carry the state. Both labels share one
+weight, so the active label is no wider than the others: a bolder one was cut short ("Classeme…"
+in French at 390px). The ring and the shadow take no room from the label, where a border would.
 
 ### Results Progress
 
