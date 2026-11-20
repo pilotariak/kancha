@@ -464,9 +464,10 @@ Hover, cards and fields:  lineStrong border + shadow 0 4px 16px in the shadow to
 Hover, chips:             lineStrong border, no shadow: the scrolling chip row would clip it.
                           A selected chip does not change
 Hover, segments:          lineStrong fill on an inactive segment; the active one does not change
-Hover, back link:         underlined label
+Hover, back link:         underlined label; redDark circle behind the collapsed bar's arrow
 Focus ring:               2px solid red outline, 2px offset (rounded with the element). White,
-                          with a 4px offset, for the back link on the red band
+                          with a 4px offset, for the back link on the red band (2px around the
+                          collapsed bar's round back button)
 Mouse focus:              no ring. A click also focuses a Pressable on web, so the ring only
                           shows when the browser matches :focus-visible (keyboard focus)
 Focus, text fields:       a 2px red edge instead of the browser outline, after a click too:
@@ -656,11 +657,39 @@ Back link:    hover underlines the label; keyboard focus draws a 2px white outli
               (a red ring would not show on the band)
 ```
 
+**Collapsed** (`collapsed` prop): the bar a compact band collapses to while the results scroll.
+The band itself scrolls away as on every screen; the bar pins at the top in its place, above the
+filters.
+
+```
+Bar:          52px (BAR_HEIGHT), redFill, full width, the band's 24px bottom corners, so it
+              fades in over the band without a seam. Cream behind the corners once pinned
+Back button:  ArrowLeft 20px, #FFFFFF, in a 36px circle (hitSlop to 44px) centered where the
+              band's arrow sits, 20px from the edge; accessible name: the back label
+Title:        #FFFFFF, 17px (Card subtitle), weight 800, one line with an ellipsis, 8px after
+              the button, 20px from the right edge. Not a header: the band's title is the
+              screen's heading
+Loading:      white spinner in place of the title
+Hover, press: redDark circle behind the arrow
+Focus (web):  2px white outline, 2px offset, keyboard focus only
+Hidden:       `inert` until it shows: no touches, out of the tab order (tabIndex -1), hidden
+              from screen readers (aria-hidden)
+```
+
+The bar's top 52px overlap the band's bottom, and it shows in two steps over the last 24px of
+scroll before it pins (`scrollY` interpolation, native driver on iOS and Android): its fill first,
+hiding the band's title, then its arrow and title, so the two titles never show over each other.
+It takes touches, focus and screen readers from the second step. With "reduce motion" on (system
+setting, or `prefers-reduced-motion` on web, read by `useReducedMotion` in
+`src/hooks/use-reduced-motion.ts`), the bar switches from hidden to shown at that point, with no
+fade.
+
 | Pair (on redFill)                  | Light (`#C8102E`) | Dark (`#B5142F`) |
 | ---------------------------------- | ----------------- | ---------------- |
 | Title, back link (`#FFFFFF`)       | 5.88:1            | 6.76:1           |
 | Subtitle (onRedStrong, 0.90 white) | 4.95:1            | 5.68:1           |
 | Eyebrow (onRedSoft, 0.86 / 0.80)   | 4.61:1            | 4.73:1           |
+| Bar arrow on its hover circle      | 8.75:1 (redDark)  | 12.11:1          |
 
 ### Section Header
 
@@ -741,6 +770,8 @@ Web:       hover gives an unselected chip a lineStrong border; keyboard focus th
            ring is not clipped
 Wrap:      `wrap` prop, from two columns (web): the chips flow onto several lines inside the
            gutter, with no scrolling, no bleed and no fade
+Bleed:     `bleed="start"`: the row bleeds over the left gutter only and ends where the control
+           after it starts, the fade at that end (the view switch on the results screen, phone)
 ```
 
 ### Segmented Control
@@ -757,7 +788,10 @@ Active:    #FFFFFF (white) segment, 1px #CBBFB2 (lineStrong) ring and a 0 1px 4p
 Icons:     shown only when each segment is 124px wide or more (a 382px track for three),
            read from the track's width, not the window's: narrower, the longest label
            ("Clasificación", es) no longer fits beside its icon. On the results screen, labels
-           only at 360, 390, 768 and 1280px wide; icons at 1024 and 1440px
+           only at 768 and 1280px wide; icons at 1024 and 1440px
+Icon only: `iconOnly` prop: 44px segments, an 18px icon and no label (142px for three); the
+           label stays each segment's accessible name. The results screen uses it on a phone,
+           beside the category chips
 No red:    picking a view is not an action
 Web:       hover tints an inactive segment lineStrong; keyboard focus draws the red ring
 ```
@@ -785,21 +819,34 @@ On the results screen, a row in place of the old Total / Played / Pending strip:
 Label:     "27 / 27 parties jouées", #262626 (text), 13px, weight 700, tabular-nums
 Bar:       flex 1, 6px, pill radius, #E5DED6 (line) track, #141414 (ink) fill
 Done:      a dark StatusPill ("Terminé") at the end of the row once every match has a score
-Grid:      from two columns (web), the row moves to the filters: under the segmented control in
-           the filter column, on its own line in the filter bar
+Grid:      from two columns (web), in the filter column the row moves under the segmented
+           control; with the filter bar it stays on its own line under the bar
+Scrolling: never pinned: outside the filter column, it scrolls away with the results
 ```
 
 ### Results screen in the grid
 
 On web, from two columns (§5 Columns). On a phone the screen keeps its order: filters,
-progress, results.
+progress, results. The filters there are two rows, pinned under the collapsed bar (§4 Screen
+Header) on cream, 14px under the bar and 12px above a 1px line that shows once collapsed:
+
+```
+Row 1:     SelectField, full width: specialty names differ at their end
+Row 2:     FilterChips (bleed="start"), then SegmentedControl (iconOnly), 8px apart
+```
+
+The pinned block (`PinnedHeader` in `details.tsx`) is the ScrollView's second child, pinned by
+`stickyHeaderIndices` on iOS and Android and by `position: sticky` on web (react-native-web
+renders `stickyHeaderIndices` that way). Whatever else must stay in view goes in it, under the
+filters.
 
 From three columns, the list and the ranking give the filters the first grid column:
 
 ```
 Filters:   one cell wide, 12px from the results: SelectField, FilterChips (wrap),
-           SegmentedControl, ResultsProgress. position: sticky, 16px from the top: they stay in
-           view while the matches scroll
+           SegmentedControl, ResultsProgress. position: sticky, 68px from the top (the 52px
+           collapsed bar and 16px): they stay in view under the bar while the matches scroll.
+           The bar alone is pinned
 Results:   the other columns: the match grid or the ranking cards, one card per column
 ```
 
@@ -808,9 +855,9 @@ the filters sit in a bar above the results, and the results get every column:
 
 ```
 Filter bar: one wrapping row, 12px gap: SelectField (a cell wide), FilterChips (wrap, the
-            rest of the line, 200px at least), SegmentedControl (a cell wide). ResultsProgress
-            on its own line under them. When the line is too short, the segmented control
-            drops to a second line
+            rest of the line, 200px at least), SegmentedControl (a cell wide), pinned under the
+            collapsed bar as on a phone. ResultsProgress on its own line under them, with the
+            results. When the line is too short, the segmented control drops to a second line
 Results:    the match grid, the ranking cards or the fit bracket, over every column
 ```
 
@@ -944,7 +991,8 @@ Fill:       redFill, solid: no gradient, no decorative circles
 Corners:    24px bottom radius (rounded.hero)
 Status bar: the screen's SafeAreaView (edges={["top"]}) has a redFill background and the
             scroll view a cream one, so the red continues behind the light status bar
-Scrolling:  the band scrolls with the content; the red top edge stays behind the status bar
+Scrolling:  the band scrolls with the content; the red top edge stays behind the status bar.
+            On the results screen, the collapsed bar pins in its place (§4 Screen Header)
 ```
 
 The band holds the screen header only. Section titles, cards, loaders and empty or error states
@@ -1050,7 +1098,7 @@ The **iOS and Android apps are phone-only** (React Native / Expo, `ios.supportsT
 
 **Screen header (red band):**
 
-> "Use `ScreenHeader`: a full-width solid `#C8102E` band (`#B5142F` in dark), sized by its content, with 24px bottom corners and 12px 20px 24px padding. Inside: an optional white back link (arrow + 15px weight-600 label), a small uppercase eyebrow in `rgba(255,255,255,0.86)` 12px weight-800 with 1.5px letter-spacing, a 34px weight-900 white title, and a 14px `rgba(255,255,255,0.90)` subtitle. Everything below the band sits on the `#F7F4EF` cream canvas. On a screen with filters under the band (results), pass `compact`: a 28px title, 16px bottom padding."
+> "Use `ScreenHeader`: a full-width solid `#C8102E` band (`#B5142F` in dark), sized by its content, with 24px bottom corners and 12px 20px 24px padding. Inside: an optional white back link (arrow + 15px weight-600 label), a small uppercase eyebrow in `rgba(255,255,255,0.86)` 12px weight-800 with 1.5px letter-spacing, a 34px weight-900 white title, and a 14px `rgba(255,255,255,0.90)` subtitle. Everything below the band sits on the `#F7F4EF` cream canvas. On a screen with filters under the band (results), pass `compact`: a 28px title, 16px bottom padding. To keep the filters in reach while the results scroll, pin a second `ScreenHeader` with `collapsed` above them: a 52px red bar, white arrow and one-line 17px weight-800 title, shown once the band has scrolled away (no fade when reduce motion is on)."
 
 **Competition list card:**
 
