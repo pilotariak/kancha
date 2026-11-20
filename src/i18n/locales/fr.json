@@ -7,7 +7,6 @@
   "common": {
     "back": "Retour",
     "close": "Fermer",
-    "choose": "Choisir",
     "soon": "Bientôt",
     "competition_fallback": "Compétition",
     "loading": "Chargement"
@@ -27,7 +26,6 @@
     "eyebrow": "Tableau des compétitions",
     "title": "Ligues",
     "subtitle": "Sélectionnez une ligue pour parcourir ses compétitions.",
-    "your_league": "Votre ligue",
     "open_hint": "Ouvre les compétitions de la ligue"
   },
   "competitions": {

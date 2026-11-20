@@ -7,7 +7,6 @@
   "common": {
     "back": "Atzera",
     "close": "Itxi",
-    "choose": "Aukeratu",
     "soon": "Laster",
     "competition_fallback": "Txapelketa",
     "loading": "Kargatzen"
@@ -27,7 +26,6 @@
     "eyebrow": "Txapelketa mahai",
     "title": "Ligak",
     "subtitle": "Hautatu liga bat bere txapelketak ikusteko.",
-    "your_league": "Zure liga",
     "open_hint": "Ligaren lehiaketak irekitzen ditu"
   },
   "competitions": {

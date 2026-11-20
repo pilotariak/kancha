@@ -7,7 +7,6 @@
   "common": {
     "back": "Volver",
     "close": "Cerrar",
-    "choose": "Elegir",
     "soon": "Pronto",
     "competition_fallback": "Competición",
     "loading": "Cargando"
@@ -27,7 +26,6 @@
     "eyebrow": "Panel de competiciones",
     "title": "Ligas",
     "subtitle": "Selecciona una liga para ver sus competiciones.",
-    "your_league": "Tu liga",
     "open_hint": "Abre las competiciones de la liga"
   },
   "competitions": {

@@ -7,7 +7,6 @@
   "common": {
     "back": "Back",
     "close": "Close",
-    "choose": "Choose",
     "soon": "Soon",
     "competition_fallback": "Competition",
     "loading": "Loading"
@@ -27,7 +26,6 @@
     "eyebrow": "Competition desk",
     "title": "Leagues",
     "subtitle": "Select a league to browse its competitions.",
-    "your_league": "Your league",
     "open_hint": "Opens the league's competitions"
   },
   "competitions": {

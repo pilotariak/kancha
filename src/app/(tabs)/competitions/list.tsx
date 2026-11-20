@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { CardGrid } from "@/components/CardGrid";
 import { FeaturedCard } from "@/components/FeaturedCard";
 import { ChevronDown, ChevronRight, ChevronUp, Search } from "@/components/icons";
+import { LeagueIcon } from "@/components/LeagueIcon";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { SeasonTile } from "@/components/SeasonTile";
@@ -203,6 +204,7 @@ export default function CompetitionsListScreen() {
           eyebrow={t("competitions.eyebrow")}
           title={t("competitions.title")}
           subtitle={league?.name}
+          trailing={league && <LeagueIcon league={league} onBand />}
         />
 
         <View style={styles.body}>
