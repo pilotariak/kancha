@@ -1,10 +1,8 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import type { LucideIcon } from "lucide-react-native";
-import React, { useState } from "react";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,18 +12,34 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
+import { FilterChips } from "@/components/FilterChips";
 import { LayoutList, ListOrdered, Network, Swords, Trophy, Users } from "@/components/icons";
 import { RankingView } from "@/components/RankingView";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { type Segment, SegmentedControl } from "@/components/SegmentedControl";
+import { SelectField } from "@/components/SelectField";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
+import { LEAGUES } from "@/constants/leagues";
 import { dateTone, formatMatchDate } from "@/features/competitions/matchDate";
+import { matchProgress } from "@/features/competitions/matchProgress";
 import { parseMatchScore } from "@/features/competitions/matchScore";
+import {
+  buildFilterOptions,
+  resolveSelection,
+  withSelected,
+} from "@/features/competitions/resultFilters";
 import { useCategories } from "@/hooks/use-categories";
-import { useCompetition } from "@/hooks/use-competitions";
+import { useCompetition, useResultFilters } from "@/hooks/use-competitions";
 import { useResultsByCompetition } from "@/hooks/use-matches";
 import { useSpecialties } from "@/hooks/use-specialties";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
+import { useLeagueStore } from "@/store/league-store";
+import {
+  selectionKey,
+  useResultsFilterHydrated,
+  useResultsFilterStore,
+} from "@/store/results-filter-store";
 
 import type { PhaseColors, PhaseType } from "@/components/BracketView";
 import type { Result } from "@/types/competition";
@@ -158,107 +172,173 @@ function MatchCard({ result, phaseType }: { result: Result; phaseType: PhaseType
   );
 }
 
-// ─── Stats strip ─────────────────────────────────────────────────────────────
+// ─── Progress ─────────────────────────────────────────────────────────────────
 
-interface StatsStripProps {
-  total: number;
-  played: number;
-  pending: number;
-}
-
-function StatCell({ value, label }: { value: number; label: string }) {
-  const styles = useThemedStyles(makeStyles);
-  return (
-    <View style={styles.statCell}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
-function StatsStrip({ total, played, pending }: StatsStripProps) {
+function ResultsProgress({ results }: { results: Result[] }) {
   const { t } = useTranslation();
   const styles = useThemedStyles(makeStyles);
+  const { played, total, finished } = matchProgress(results);
+
   return (
-    <View style={styles.statsStrip}>
-      <StatCell value={total} label={t("details.stat_total")} />
-      <View style={styles.statDivider} />
-      <StatCell value={played} label={t("details.stat_played")} />
-      <View style={styles.statDivider} />
-      <StatCell value={pending} label={t("details.stat_pending")} />
-    </View>
-  );
-}
-
-// ─── View toggle ──────────────────────────────────────────────────────────────
-
-type ViewMode = "list" | "bracket" | "ranking";
-
-const VIEW_MODES: { mode: ViewMode; icon: LucideIcon; labelKey: string }[] = [
-  { mode: "list", icon: LayoutList, labelKey: "details.view_list" },
-  { mode: "bracket", icon: Network, labelKey: "details.view_bracket" },
-  { mode: "ranking", icon: ListOrdered, labelKey: "details.view_ranking" },
-];
-
-function ViewToggle(
-  { mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void },
-) {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  const styles = useThemedStyles(makeStyles);
-  return (
-    <View style={styles.toggleRow}>
-      {VIEW_MODES.map(({ mode: option, icon: Icon, labelKey }) => {
-        const active = mode === option;
-        return (
-          <Pressable
-            key={option}
-            style={[styles.togglePill, active && styles.togglePillActive]}
-            onPress={() => onChange(option)}
-            accessibilityRole="button"
-            accessibilityLabel={t(labelKey)}
-            accessibilityState={{ selected: active }}
-          >
-            <Icon size={12} color={active ? "#FFFFFF" : colors.muted} />
-            <Text style={[styles.togglePillLabel, active && styles.togglePillLabelActive]}>
-              {t(labelKey)}
-            </Text>
-          </Pressable>
-        );
-      })}
+    <View style={styles.progress} testID="results-progress">
+      <Text style={styles.progressLabel}>{t("details.progress", { played, count: total })}</Text>
+      <View style={styles.progressTrack}>
+        <View style={[styles.progressFill, { width: `${(played / total) * 100}%` }]} />
+      </View>
+      {finished ? <StatusPill label={t("details.finished")} tone="dark" /> : null}
     </View>
   );
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
+type ViewMode = "list" | "bracket" | "ranking";
+
 export default function CompetitionDetailsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const { id, specialtyId, categoryId } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     id: string;
-    specialtyId: string;
-    categoryId: string;
+    specialtyId?: string;
+    categoryId?: string;
   }>();
+  const id = params.id ?? "";
+  const { specialtyId, categoryId } = params;
 
   const { width: screenWidth } = useWindowDimensions();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
-  const { data: competition, isPending: loadingComp } = useCompetition(id ?? "");
+  const leagueId = useLeagueStore((s) => s.selectedLeagueId);
+  const league = LEAGUES.find((l) => l.id === leagueId);
+  const storeKey = selectionKey(leagueId, id);
+  const lastViewed = useResultsFilterStore((s) => s.selections[storeKey]);
+  const remember = useResultsFilterStore((s) => s.remember);
+  const storeReady = useResultsFilterHydrated();
+
+  const { data: competition, isPending: loadingComp } = useCompetition(id);
   const { data: specialties } = useSpecialties();
   const { data: categories } = useCategories();
+  const { data: pairs, isError: isPairsError, error: pairsError } = useResultFilters(id);
+  const options = useMemo(
+    () =>
+      pairs && specialties && categories
+        ? buildFilterOptions(pairs, specialties, categories)
+        : null,
+    [pairs, specialties, categories],
+  );
+  // Undefined until the options and the saved pairs load; null when the
+  // competition has no results to pick from.
+  const selection = storeReady && options
+    ? resolveSelection(options, { specialtyId, categoryId }, lastViewed)
+    : undefined;
+  const nextSpecialtyId = selection?.specialtyId;
+  const nextCategoryId = selection?.categoryId;
+
+  // Write the pair on screen to the URL, so a reload or a shared link shows it too.
+  useEffect(() => {
+    if (!nextSpecialtyId || !nextCategoryId) return;
+    if (nextSpecialtyId !== specialtyId || nextCategoryId !== categoryId) {
+      router.setParams({ specialtyId: nextSpecialtyId, categoryId: nextCategoryId });
+    }
+  }, [nextSpecialtyId, nextCategoryId, specialtyId, categoryId]);
+
+  useEffect(() => {
+    if (storeReady && id && specialtyId && categoryId) {
+      remember(storeKey, { specialtyId, categoryId });
+    }
+  }, [storeReady, id, specialtyId, categoryId, storeKey, remember]);
+
   const {
     data: results,
     isPending: loadingResults,
     isError,
     error,
-  } = useResultsByCompetition(id ?? "", specialtyId, categoryId);
+  } = useResultsByCompetition(id, specialtyId, categoryId);
 
+  const hasPair = !!specialtyId && !!categoryId;
   const rounds = results ? groupByRound(results) : [];
-  const totalMatches = results?.length ?? 0;
-  const playedMatches = results?.filter((r) => r.scores).length ?? 0;
-  const pendingMatches = totalMatches - playedMatches;
+  const specialtyOptions = withSelected(options?.specialties ?? [], specialtyId, specialties);
+  const categoryOptions = withSelected(
+    (specialtyId && options?.categories[specialtyId]) || [],
+    categoryId,
+    categories,
+  );
+
+  const segments: Segment<ViewMode>[] = [
+    { value: "list", label: t("details.view_list"), icon: LayoutList },
+    { value: "bracket", label: t("details.view_bracket"), icon: Network },
+    { value: "ranking", label: t("details.view_ranking"), icon: ListOrdered },
+  ];
+
+  function selectSpecialty(next: string) {
+    if (!options) return;
+    // Keep the category when the new specialty has results in it.
+    const pair = resolveSelection(options, { specialtyId: next }, {
+      specialtyId: next,
+      categoryId: categoryId ?? "",
+    });
+    router.setParams(pair ? { ...pair } : { specialtyId: next });
+  }
+
+  // Back to the list: pops to it when it is under this screen, and replaces this
+  // screen with it after a deep link or a reload, where the stack holds the leagues.
+  const goBack = () => router.dismissTo("/(tabs)/competitions/list");
+
+  const spinner = (
+    <View style={styles.centered}>
+      <ActivityIndicator color={colors.red} size="large" accessibilityLabel={t("common.loading")} />
+    </View>
+  );
+  const empty = (
+    <View style={styles.emptyBox}>
+      <Text style={styles.emptyText}>{t("details.empty")}</Text>
+    </View>
+  );
+  const errorBox = (e: unknown) => (
+    <View style={styles.errorBox} accessibilityRole="alert">
+      <Text style={styles.errorText}>
+        {e instanceof Error ? e.message : t("details.error_load")}
+      </Text>
+    </View>
+  );
+
+  function renderResults() {
+    if (isPairsError && !hasPair) return errorBox(pairsError);
+    if (selection === null && !hasPair) return empty;
+    if (!hasPair) return spinner;
+    if (viewMode === "ranking") {
+      return <RankingView competitionId={id} specialtyId={specialtyId} categoryId={categoryId} />;
+    }
+    if (isError) return errorBox(error);
+    if (loadingResults) return spinner;
+    if (!results || results.length === 0) return empty;
+    return (
+      <>
+        <ResultsProgress results={results} />
+        {viewMode === "bracket"
+          ? (
+            <View style={[styles.bracketWrapper, { width: screenWidth }]}>
+              <BracketView rounds={rounds} />
+            </View>
+          )
+          : rounds.map((round) => (
+            <View key={round.type} style={styles.roundSection}>
+              <RoundHeader type={round.type} count={round.results.length} />
+              <View style={styles.matchList}>
+                {round.results.map((r) => (
+                  <MatchCard
+                    key={r.id}
+                    result={r}
+                    phaseType={round.type}
+                  />
+                ))}
+              </View>
+            </View>
+          ))}
+      </>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -271,107 +351,43 @@ export default function CompetitionDetailsScreen() {
       >
         <ScreenHeader
           backLabel={t("details.back")}
+          onBack={goBack}
+          eyebrow={league?.name}
           title={competition?.name ?? t("common.competition_fallback")}
-          subtitle={[competition?.year, competition?.level].filter(Boolean).join(" · ")}
           loading={loadingComp}
+          compact
         />
 
         <View style={styles.body}>
-          {/* Context badges */}
-          {(specialtyId || categoryId) && (
-            <View style={styles.badgeRow}>
-              {specialtyId && specialties && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
-                    {specialties.find((s) => s.id === specialtyId)?.name ?? specialtyId}
-                  </Text>
-                </View>
-              )}
-              {categoryId && categories && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
-                    {categories.find((c) => c.id === categoryId)?.name ?? categoryId}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          <ViewToggle mode={viewMode} onChange={setViewMode} />
-
-          {viewMode === "ranking"
-            ? (
-              <RankingView
-                competitionId={id ?? ""}
-                specialtyId={specialtyId ?? ""}
-                categoryId={categoryId ?? ""}
+          <View style={styles.filters}>
+            {specialtyOptions.length > 0 && (
+              <SelectField
+                label={t("specialty.title")}
+                hint={t("details.specialty_hint")}
+                options={specialtyOptions}
+                value={specialtyId}
+                onChange={selectSpecialty}
+                testID="specialty-select"
               />
-            )
-            : (
-              <>
-                {/* States */}
-                {isError && (
-                  <View style={styles.errorBox} accessibilityRole="alert">
-                    <Text style={styles.errorText}>
-                      {error instanceof Error ? error.message : t("details.error_load")}
-                    </Text>
-                  </View>
-                )}
-
-                {loadingResults && (
-                  <View style={styles.centered}>
-                    <ActivityIndicator
-                      color={colors.red}
-                      size="large"
-                      accessibilityLabel={t("common.loading")}
-                    />
-                  </View>
-                )}
-
-                {!loadingResults && !isError && totalMatches === 0 && (
-                  <View style={styles.emptyBox}>
-                    <Text style={styles.emptyText}>{t("details.empty")}</Text>
-                  </View>
-                )}
-
-                {/* Tournament rounds */}
-                {!loadingResults && !isError && rounds.length > 0 && (
-                  <>
-                    <View style={styles.tournamentHeader}>
-                      <Text style={styles.tournamentEyebrow}>{t("details.tableau_eyebrow")}</Text>
-                      <Text style={styles.tournamentTitle} accessibilityRole="header">
-                        {t("details.tournament_title")}
-                      </Text>
-                      <Text style={styles.tournamentSub}>
-                        {t("details.rounds_count", { count: rounds.length })}
-                      </Text>
-                      <StatsStrip
-                        total={totalMatches}
-                        played={playedMatches}
-                        pending={pendingMatches}
-                      />
-                    </View>
-
-                    {viewMode === "bracket"
-                      ? (
-                        <View style={[styles.bracketWrapper, { width: screenWidth }]}>
-                          <BracketView rounds={rounds} />
-                        </View>
-                      )
-                      : rounds.map((round) => (
-                        <View key={round.type} style={styles.roundSection}>
-                          <RoundHeader type={round.type} count={round.results.length} />
-                          <View style={styles.matchList}>
-                            {round.results.map((r) => (
-                              <MatchCard key={r.id} result={r} phaseType={round.type} />
-                            ))}
-                          </View>
-                        </View>
-                      ))}
-                  </>
-                )}
-              </>
             )}
+            {categoryOptions.length > 0 && (
+              <FilterChips
+                accessibilityLabel={t("category.title")}
+                options={categoryOptions}
+                value={categoryId}
+                onChange={(next) => router.setParams({ categoryId: next })}
+                testID="category-chips"
+              />
+            )}
+            <SegmentedControl
+              segments={segments}
+              value={viewMode}
+              onChange={setViewMode}
+              testID="view-mode"
+            />
+          </View>
+
+          {renderResults()}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -385,17 +401,8 @@ const makeStyles = (c: Palette) =>
     safeArea: { flex: 1, backgroundColor: c.redFill },
     scroll: { backgroundColor: c.cream },
     content: { paddingBottom: 120 },
-    body: { paddingHorizontal: 20, paddingTop: 20, gap: 20 },
-
-    // Context badges
-    badgeRow: { flexDirection: "row", gap: 8 },
-    badge: {
-      borderRadius: 20,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      backgroundColor: c.white,
-    },
-    badgeText: { color: c.red, fontSize: 13, fontWeight: "800" },
+    body: { paddingHorizontal: 20, paddingTop: 14, gap: 12 },
+    filters: { gap: 10 },
 
     // States
     centered: { paddingVertical: 40, alignItems: "center" },
@@ -422,83 +429,22 @@ const makeStyles = (c: Palette) =>
       textAlign: "center",
     },
 
-    // Tournament header
-    tournamentHeader: { gap: 4 },
-    tournamentEyebrow: {
-      color: c.muted,
-      fontSize: 12,
-      fontWeight: "800",
-      textTransform: "uppercase",
-      letterSpacing: 1.4,
-    },
-    tournamentTitle: { color: c.ink, fontSize: 28, fontWeight: "800" },
-    tournamentSub: { color: c.muted, fontSize: 13 },
-
-    // Stats strip
-    statsStrip: {
-      flexDirection: "row",
-      borderRadius: 16,
-      backgroundColor: c.white,
-      borderWidth: 1,
-      borderColor: c.line,
-      overflow: "hidden",
-      marginTop: 12,
-    },
-    statCell: {
-      flex: 1,
-      alignItems: "center",
-      paddingVertical: 14,
-      gap: 4,
-    },
-    statValue: {
-      color: c.ink,
-      fontSize: 26,
-      fontWeight: "900",
-      lineHeight: 28,
+    // Progress
+    progress: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 26 },
+    progressLabel: {
+      color: c.text,
+      fontSize: 13,
+      fontWeight: "700",
       fontVariant: ["tabular-nums"],
     },
-    statLabel: {
-      color: c.muted,
-      fontSize: 11,
-      fontWeight: "700",
-      textTransform: "uppercase",
-      letterSpacing: 0.8,
-    },
-    statDivider: {
-      width: 1,
-      backgroundColor: c.line,
-      marginVertical: 12,
-    },
-
-    // View toggle
-    toggleRow: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 8,
-    },
-    togglePill: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      paddingHorizontal: 14,
-      paddingVertical: 8,
+    progressTrack: {
+      flex: 1,
+      height: 6,
       borderRadius: 9999,
-      backgroundColor: c.card,
-      borderWidth: 1,
-      borderColor: c.line,
+      backgroundColor: c.line,
+      overflow: "hidden",
     },
-    togglePillActive: {
-      backgroundColor: c.redFill,
-      borderColor: c.redFill,
-    },
-    togglePillLabel: {
-      fontSize: 12,
-      fontWeight: "700",
-      color: c.muted,
-    },
-    togglePillLabelActive: {
-      color: "#FFFFFF",
-    },
+    progressFill: { height: "100%", borderRadius: 9999, backgroundColor: c.ink },
 
     bracketWrapper: {
       marginLeft: -20,

@@ -33,6 +33,12 @@ export interface Category {
   enabled?: boolean;
 }
 
+/** A specialty and category of a competition: a pair that holds results, or the pair on screen. */
+export interface SpecialtyCategory {
+  specialtyId: string;
+  categoryId: string;
+}
+
 export interface Result {
   id: string;
   competition: Competition;

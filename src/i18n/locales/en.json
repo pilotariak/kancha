@@ -6,6 +6,7 @@
   },
   "common": {
     "back": "Back",
+    "close": "Close",
     "choose": "Choose",
     "soon": "Soon",
     "competition_fallback": "Competition",
@@ -41,34 +42,24 @@
     "find_player_subtitle": "Titles, partners and rankings by season"
   },
   "specialty": {
-    "back": "Competitions",
-    "title": "Specialty",
-    "subtitle": "Select a specialty to view the results for this competition.",
-    "error_load": "Failed to load specialties."
+    "title": "Specialty"
   },
   "category": {
-    "back": "Specialty",
-    "title": "Category",
-    "subtitle": "Select a category to view the results for this specialty.",
-    "error_load": "Failed to load categories.",
-    "empty": "No categories found for this specialty."
+    "title": "Category"
   },
   "details": {
-    "back": "Category",
+    "back": "Competitions",
     "error_load": "Failed to load results",
     "empty": "No results found for this competition.",
-    "tableau_eyebrow": "Bracket",
-    "tournament_title": "Tournament",
     "matches_count_one": "{{count}} match",
     "matches_count_other": "{{count}} matches",
-    "rounds_count_one": "{{count}} round",
-    "rounds_count_other": "{{count}} rounds",
     "view_list": "List",
     "view_bracket": "Bracket",
-    "stat_total": "Total",
-    "stat_played": "Played",
-    "stat_pending": "Pending",
     "view_ranking": "Ranking",
+    "progress_one": "{{played}} / {{count}} match played",
+    "progress_other": "{{played}} / {{count}} matches played",
+    "finished": "Finished",
+    "specialty_hint": "Opens the list of specialties",
     "phase_label": "{{round}} {{number}}",
     "today": "Today",
     "winner": "Winner"

@@ -88,7 +88,7 @@ export default function CompetitionsListScreen() {
                   <PressableScale
                     key={item.id}
                     style={styles.card}
-                    onPress={() => router.push(`/(tabs)/competitions/specialty?id=${item.id}`)}
+                    onPress={() => router.push(`/(tabs)/competitions/details?id=${item.id}`)}
                     accessibilityRole="button"
                     accessibilityLabel={[item.name, item.level, item.year].filter(Boolean).join(
                       ", ",

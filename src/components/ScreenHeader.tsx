@@ -19,6 +19,8 @@ interface ScreenHeaderProps {
   loading?: boolean;
   /** Rendered to the right of the text, e.g. a logo or an action button. */
   trailing?: ReactNode;
+  /** A 28px title and tighter padding, for screens with filters under the band. */
+  compact?: boolean;
 }
 
 /**
@@ -36,12 +38,13 @@ export function ScreenHeader({
   onBack,
   loading = false,
   trailing,
+  compact = false,
 }: ScreenHeaderProps) {
   const { t } = useTranslation();
   const styles = useThemedStyles(makeStyles);
 
   return (
-    <View style={styles.band}>
+    <View style={[styles.band, compact && styles.bandCompact]}>
       {backLabel
         ? (
           <Pressable
@@ -69,7 +72,12 @@ export function ScreenHeader({
             )
             : (
               <>
-                <Text style={styles.title} accessibilityRole="header">{title}</Text>
+                <Text
+                  style={[styles.title, compact && styles.titleCompact]}
+                  accessibilityRole="header"
+                >
+                  {title}
+                </Text>
                 {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
               </>
             )}
@@ -91,6 +99,7 @@ const makeStyles = (c: Palette) =>
       paddingBottom: 24,
       gap: 16,
     },
+    bandCompact: { paddingBottom: 16, gap: 12 },
     back: {
       flexDirection: "row",
       alignItems: "center",
@@ -108,6 +117,7 @@ const makeStyles = (c: Palette) =>
       textTransform: "uppercase",
     },
     title: { color: "#FFFFFF", fontSize: 34, fontWeight: "900", lineHeight: 37 },
+    titleCompact: { fontSize: 28, lineHeight: 31 },
     subtitle: { color: c.onRedStrong, fontSize: 14, lineHeight: 20 },
     spinner: { alignSelf: "flex-start", paddingVertical: 8 },
   });

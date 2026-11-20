@@ -228,12 +228,32 @@ components:
     typography: "{typography.pill}"
     rounded: "{rounded.pill}"
     padding: "6px 10px"
-  contextBadge:
+  selectField:
     backgroundColor: "{colors.surfaceElevated}"
-    textColor: "{colors.primary}"
-    typography: "{typography.metaStrong}"
-    rounded: "{rounded.round}"
-    padding: "8px 16px"
+    textColor: "{colors.textPrimary}"
+    typography: "{typography.bodyStrong}"
+    rounded: "{rounded.chip}"
+    padding: "0 16px"
+  filterChip:
+    backgroundColor: "{colors.surfaceElevated}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.pill}"
+    padding: "0 14px"
+  filterChipSelected:
+    backgroundColor: "{colors.textPrimary}"
+    textColor: "{colors.background}"
+    rounded: "{rounded.pill}"
+    padding: "0 14px"
+  segmentedControl:
+    backgroundColor: "{colors.border}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.pill}"
+    padding: "3px"
+  segmentedControlActive:
+    backgroundColor: "{colors.surfaceElevated}"
+    textColor: "{colors.textPrimary}"
+    rounded: "{rounded.pill}"
+    padding: "0 8px"
   errorState:
     backgroundColor: "{colors.brandSoft}"
     textColor: "{colors.brandDark}"
@@ -290,7 +310,7 @@ components:
 ### Brand & Primary
 
 - **Red** (`#C8102E`): Primary brand color. Red text and icons (scores, errors, active tab indicator). Use at full opacity only — never tint arbitrarily.
-- **Red Fill** (`#C8102E`): Red surfaces that carry white text or icons — the screen header band, hero cards, the score panel, CTA buttons, the active toggle pill. Same value as Red in light; in dark it stays deep so white text keeps 4.5:1 while Red brightens for text on dark surfaces.
+- **Red Fill** (`#C8102E`): Red surfaces that carry white text or icons — the screen header band, hero cards, the score panel, CTA buttons. Same value as Red in light; in dark it stays deep so white text keeps 4.5:1 while Red brightens for text on dark surfaces.
 - **Red Dark** (`#970D25`): Darker red for pressed states and error text on light surfaces.
 - **Red Soft** (`#FDE8EC`): Light pink tint for error state backgrounds, score badge chips on light cards.
 
@@ -509,6 +529,8 @@ Title:        #FFFFFF, 34px, weight 900, line-height 37px, accessibilityRole "he
 Subtitle:     optional, onRedStrong, 14px, line-height 20px
 Trailing:     optional slot right of the text, 16px gap (the About logo, an action button)
 Loading:      white spinner in place of the title and subtitle
+Compact:      `compact` prop, for a screen with filters under the band (results): title 28px
+              (Hero title), line-height 31px; 16px bottom padding, 12px between back link and text
 ```
 
 | Pair (on redFill)                  | Light (`#C8102E`) | Dark (`#B5142F`) |
@@ -538,14 +560,70 @@ Inactive tint: #B8B1AA
 Label:         12px, weight 700, paddingBottom 8px
 ```
 
-### Context Badges (breadcrumb)
+### Select Field
+
+`SelectField` (`src/components/SelectField.tsx`): one choice among long names, such as the
+specialty on the results screen.
 
 ```
-Background:   #FFFFFF
-Text:         #C8102E, 13px, weight 800
-Border-radius: 20px
-Padding:       8px 16px
-Usage:        Specialty/category labels on detail screens
+Field:     #FFFFFF (white), 1px solid #E5DED6 (line), 16px radius, min height 44px, 16px sides
+Value:     #141414 (ink), 15px, weight 700, one line with an ellipsis
+Chevron:   ChevronDown 18px, #7A7A7A (muted), right, 8px gap
+Pressed:   #FFFDFC (card)
+List:      a sheet from the bottom of the screen: #FFFFFF, 24px top corners, scrim in shadow
+           (rgba(103,18,31,0.14)), uppercase muted title (12px, weight 800, +1.5px tracking)
+Rows:      min height 48px, 16px sides, full name #141414 15px weight 600; the current one
+           weight 800 with an ink Check (18px, stroke 3). A row or the scrim closes the sheet
+```
+
+### Filter Chip
+
+`FilterChips` (`src/components/FilterChips.tsx`): one choice among short names, such as the
+category on the results screen.
+
+```
+Row:       horizontal scroll that bleeds over the 20px gutter (content padded 20px), 8px gap
+Chip:      min height 34px (hitSlop to 44px), 14px sides, pill radius, one line
+Resting:   #FFFFFF (white), 1px solid #E5DED6 (line), #262626 (text) 13px weight 700
+Selected:  #141414 (ink) fill and border, #F7F4EF (cream) text. No red
+Pressed:   #E5DED6 (line) fill
+Overflow:  a 40px fade from transparent cream to cream on the right edge while chips remain to
+           the right. A selected chip that starts off screen scrolls to the gutter
+```
+
+### Segmented Control
+
+`SegmentedControl` (`src/components/SegmentedControl.tsx`): switches between views of the same
+content, such as Liste / Tableau / Classement.
+
+```
+Track:     #E5DED6 (line), pill radius, 3px padding, 2px between segments, 44px tall
+Segment:   flex 1, min height 38px, 14px icon + 13px label, centered, pill radius
+Inactive:  no fill, #262626 (text), weight 600
+Active:    #FFFFFF (white) segment, #141414 (ink) icon and label, weight 800
+No red:    picking a view is not an action
+```
+
+| Pair                                  | Light  | Dark (Ikurriña) |
+| ------------------------------------- | ------ | --------------- |
+| Chip label (text) on white            | 15.1:1 | 11.9:1          |
+| Selected chip label (cream) on ink    | 16.8:1 | 17.3:1          |
+| Inactive segment label (text) on line | 11.4:1 | 10.0:1          |
+| Active segment label (ink) on white   | 18.4:1 | 14.0:1          |
+| Active segment (white) on the track   | 1.3:1  | 1.2:1           |
+
+The active segment stands out from the track by less than 3:1, and in dark it is darker than the
+track. The label weight (800 against 600) and `aria-selected` carry the state; a stronger thumb is
+a follow-up.
+
+### Results Progress
+
+On the results screen, a row in place of the old Total / Played / Pending strip:
+
+```
+Label:     "27 / 27 parties jouées", #262626 (text), 13px, weight 700, tabular-nums
+Bar:       flex 1, 6px, pill radius, #E5DED6 (line) track, #141414 (ink) fill
+Done:      a dark StatusPill ("Terminé") at the end of the row once every match has a score
 ```
 
 ### Error State
@@ -739,7 +817,7 @@ Kancha is a **mobile-only native app** (React Native / Expo). No tablet layout e
 
 **Screen header (red band):**
 
-> "Use `ScreenHeader`: a full-width solid `#C8102E` band (`#B5142F` in dark), sized by its content, with 24px bottom corners and 12px 20px 24px padding. Inside: an optional white back link (arrow + 15px weight-600 label), a small uppercase eyebrow in `rgba(255,255,255,0.86)` 12px weight-800 with 1.5px letter-spacing, a 34px weight-900 white title, and a 14px `rgba(255,255,255,0.90)` subtitle. Everything below the band sits on the `#F7F4EF` cream canvas."
+> "Use `ScreenHeader`: a full-width solid `#C8102E` band (`#B5142F` in dark), sized by its content, with 24px bottom corners and 12px 20px 24px padding. Inside: an optional white back link (arrow + 15px weight-600 label), a small uppercase eyebrow in `rgba(255,255,255,0.86)` 12px weight-800 with 1.5px letter-spacing, a 34px weight-900 white title, and a 14px `rgba(255,255,255,0.90)` subtitle. Everything below the band sits on the `#F7F4EF` cream canvas. On a screen with filters under the band (results), pass `compact`: a 28px title, 16px bottom padding."
 
 **Competition list card:**
 

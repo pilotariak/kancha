@@ -16,3 +16,11 @@ export function useCompetition(id: string) {
     enabled: !!id,
   });
 }
+
+export function useResultFilters(id: string) {
+  return useQuery({
+    queryKey: ["competitions", id, "result-filters"],
+    queryFn: () => competitionsApi.resultFilters(id),
+    enabled: !!id,
+  });
+}
