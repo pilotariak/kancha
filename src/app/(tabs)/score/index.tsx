@@ -90,26 +90,32 @@ function SetupScreen({ onStart }: SetupProps) {
 
         <View style={styles.setupForm}>
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>{t("score.label_team_a")}</Text>
+            <View style={styles.fieldLabelRow}>
+              <View style={[styles.teamDot, styles.teamDotA]} />
+              <Text style={styles.fieldLabel}>{t("score.label_team_a")}</Text>
+            </View>
             <TextInput
-              style={[styles.input, styles.inputRed]}
+              style={styles.input}
               value={teamA}
               onChangeText={setTeamA}
               placeholder={t("score.placeholder_team")}
-              placeholderTextColor="rgba(200,16,46,0.35)"
+              placeholderTextColor={colors.placeholder}
               returnKeyType="next"
               autoCapitalize="words"
             />
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>{t("score.label_team_b")}</Text>
+            <View style={styles.fieldLabelRow}>
+              <View style={[styles.teamDot, styles.teamDotB]} />
+              <Text style={styles.fieldLabel}>{t("score.label_team_b")}</Text>
+            </View>
             <TextInput
-              style={[styles.input, styles.inputDark]}
+              style={styles.input}
               value={teamB}
               onChangeText={setTeamB}
               placeholder={t("score.placeholder_team")}
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholderTextColor={colors.placeholder}
               returnKeyType="next"
               autoCapitalize="words"
             />
@@ -118,11 +124,11 @@ function SetupScreen({ onStart }: SetupProps) {
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>{t("score.label_target")}</Text>
             <TextInput
-              style={[styles.input, styles.inputNeutral]}
+              style={styles.input}
               value={targetRaw}
               onChangeText={setTargetRaw}
               placeholder={t("score.placeholder_target")}
-              placeholderTextColor={colors.muted}
+              placeholderTextColor={colors.placeholder}
               keyboardType="number-pad"
               returnKeyType="done"
             />
@@ -404,6 +410,7 @@ const makeStyles = (c: Palette) =>
     },
     setupForm: { gap: 18 },
     fieldGroup: { gap: 8 },
+    fieldLabelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     fieldLabel: {
       color: c.ink,
       fontSize: 13,
@@ -411,19 +418,19 @@ const makeStyles = (c: Palette) =>
       textTransform: "uppercase",
       letterSpacing: 0.8,
     },
+    teamDot: { width: 10, height: 10, borderRadius: 5 },
+    teamDotA: { backgroundColor: c.red },
+    teamDotB: { backgroundColor: c.ink },
     input: {
-      borderRadius: 14,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: c.line,
+      borderRadius: 16,
       paddingHorizontal: 18,
       paddingVertical: 16,
       fontSize: 16,
       fontWeight: "700",
-      color: "#FFFFFF",
-    },
-    inputRed: { backgroundColor: c.redFill },
-    inputDark: { backgroundColor: c.panel },
-    inputNeutral: {
-      backgroundColor: c.ink,
-      color: "#FFFFFF",
+      color: c.ink,
     },
     startBtn: {
       borderRadius: 16,
