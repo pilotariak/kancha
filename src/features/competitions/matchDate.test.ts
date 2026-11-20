@@ -1,4 +1,4 @@
-import { comparePlainDates, dateTone, parsePlainDate } from "./matchDate";
+import { comparePlainDates, dateTone, formatMatchDate, parsePlainDate } from "./matchDate";
 
 // Expected values were recorded from @js-temporal/polyfill 0.5.1 before it was removed.
 describe("parsePlainDate", () => {
@@ -70,25 +70,59 @@ describe("dateTone", () => {
   // Months are 0-based in the Date constructor: this is 18 November 2026, 23:30 local time.
   const now = new Date(2026, 10, 18, 23, 30);
 
-  it("is red for a past match, green today and dark for a future match", () => {
-    expect(dateTone("17/11/2026", now)).toBe("red");
+  it("is green today and gives no tone to a past or future match", () => {
     expect(dateTone("18/11/2026", now)).toBe("green");
-    expect(dateTone("19/11/2026", now)).toBe("dark");
+    expect(dateTone("17/11/2026", now)).toBeNull();
+    expect(dateTone("17/01/2026", now)).toBeNull();
+    expect(dateTone("19/11/2026", now)).toBeNull();
   });
 
   it("uses the local calendar date of now", () => {
     expect(dateTone("18/11/2026", new Date(2026, 10, 18, 0, 0))).toBe("green");
-    expect(dateTone("18/11/2026", new Date(2026, 10, 19, 0, 0))).toBe("red");
+    expect(dateTone("18/11/2026", new Date(2026, 10, 19, 0, 0))).toBeNull();
   });
 
   it("compares a clamped date, so 31/11 reads as 30/11", () => {
     expect(dateTone("31/11/2026", new Date(2026, 10, 30, 12, 0))).toBe("green");
   });
 
-  it("is dark when the date is missing or unreadable", () => {
-    expect(dateTone(undefined, now)).toBe("dark");
-    expect(dateTone("", now)).toBe("dark");
-    expect(dateTone("TBD", now)).toBe("dark");
-    expect(dateTone("0/11/2026", now)).toBe("dark");
+  it("gives no tone when the date is missing or unreadable", () => {
+    expect(dateTone(undefined, now)).toBeNull();
+    expect(dateTone("", now)).toBeNull();
+    expect(dateTone("TBD", now)).toBeNull();
+    expect(dateTone("0/11/2026", now)).toBeNull();
+  });
+});
+
+describe("formatMatchDate", () => {
+  // ICU versions differ in spaces and abbreviation dots, so compare with Intl itself.
+  const short = (locale: string, date: Date) =>
+    new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short" })
+      .format(date);
+
+  it.each(["en", "fr", "es", "eu"])("formats the calendar day in %s", (locale) => {
+    expect(formatMatchDate("17/01/2026", locale)).toBe(short(locale, new Date(2026, 0, 17)));
+  });
+
+  it("keeps the calendar day of the match", () => {
+    const formatted = formatMatchDate("17/01/2026", "en");
+    expect(formatted).toContain("17");
+    expect(formatted).toContain("Sat");
+    expect(formatMatchDate("01/03/2026", "en")).toContain("Sun");
+  });
+
+  it("formats the clamped date, so 31/02 reads as 28/02", () => {
+    expect(formatMatchDate("31/02/2026", "en")).toBe(short("en", new Date(2026, 1, 28)));
+  });
+
+  it("returns an unreadable date as Frontis sent it", () => {
+    expect(formatMatchDate("TBD", "fr")).toBe("TBD");
+    expect(formatMatchDate(" 2026-01-17 ", "fr")).toBe("2026-01-17");
+  });
+
+  it("returns null when the date is missing", () => {
+    expect(formatMatchDate(undefined, "fr")).toBeNull();
+    expect(formatMatchDate("", "fr")).toBeNull();
+    expect(formatMatchDate("  ", "fr")).toBeNull();
   });
 });

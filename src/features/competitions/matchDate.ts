@@ -40,14 +40,29 @@ export function parsePlainDate(dateStr: string): PlainDate | null {
   return date;
 }
 
-/** Past matches are red, today's green, future and unreadable dates dark. */
-export function dateTone(dateStr?: string, now: Date = new Date()): "red" | "green" | "dark" {
-  if (!dateStr) return "dark";
+/**
+ * A match played today gets a green pill. Past, future and unreadable dates get
+ * none: a past date is not a warning.
+ */
+export function dateTone(dateStr?: string, now: Date = new Date()): "green" | null {
+  if (!dateStr) return null;
   const date = parsePlainDate(dateStr);
-  if (!date) return "dark";
+  if (!date) return null;
   const today = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
-  const cmp = comparePlainDates(date, today);
-  if (cmp < 0) return "red";
-  if (cmp > 0) return "dark";
-  return "green";
+  return comparePlainDates(date, today) === 0 ? "green" : null;
+}
+
+/**
+ * Short weekday, day and month in `locale` ("sam. 17 janv." in French). An
+ * unreadable date is returned as Frontis sent it, a missing one as null.
+ */
+export function formatMatchDate(dateStr: string | undefined, locale: string): string | null {
+  const raw = dateStr?.trim();
+  if (!raw) return null;
+  const date = parsePlainDate(raw);
+  if (!date) return raw;
+  // Local midnight, so the calendar day never shifts with the time zone.
+  const local = new Date(date.year, date.month - 1, date.day);
+  return new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short" })
+    .format(local);
 }

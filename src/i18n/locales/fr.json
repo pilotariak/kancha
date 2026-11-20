@@ -68,7 +68,10 @@
     "stat_total": "Total",
     "stat_played": "Joués",
     "stat_pending": "À jouer",
-    "view_ranking": "Classement"
+    "view_ranking": "Classement",
+    "phase_label": "{{round}} {{number}}",
+    "today": "Aujourd'hui",
+    "winner": "Vainqueur"
   },
   "rounds": {
     "P": "Poules",

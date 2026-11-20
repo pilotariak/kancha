@@ -68,7 +68,10 @@
     "stat_total": "Total",
     "stat_played": "Played",
     "stat_pending": "Pending",
-    "view_ranking": "Ranking"
+    "view_ranking": "Ranking",
+    "phase_label": "{{round}} {{number}}",
+    "today": "Today",
+    "winner": "Winner"
   },
   "rounds": {
     "P": "Pools",

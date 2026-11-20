@@ -68,7 +68,10 @@
     "stat_total": "Guztira",
     "stat_played": "Jokatuta",
     "stat_pending": "Jokateke",
-    "view_ranking": "Sailkapena"
+    "view_ranking": "Sailkapena",
+    "phase_label": "{{round}} {{number}}",
+    "today": "Gaur",
+    "winner": "Irabazlea"
   },
   "rounds": {
     "P": "Taldeak",

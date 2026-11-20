@@ -2,8 +2,9 @@ import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { ChevronRight, Swords, Trophy, Users } from "@/components/icons";
+import { Check, ChevronRight, Swords, Trophy, Users } from "@/components/icons";
 import { type Palette } from "@/constants/colors";
+import { parseMatchScore, type Side } from "@/features/competitions/matchScore";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import type { Result } from "@/types/competition";
 
@@ -75,27 +76,113 @@ export function usePhaseColors(): Record<PhaseType, PhaseColors> {
   return useMemo(() => makePhaseColors(colors), [colors]);
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function parseScores(scores?: string): { scoreA: string | null; scoreB: string | null } {
-  if (!scores) return { scoreA: null, scoreB: null };
-  const sets = scores.trim().split(/\s+/);
-  const aScores: string[] = [];
-  const bScores: string[] = [];
-  for (const set of sets) {
-    const [a, b] = set.split("/");
-    if (a !== undefined && b !== undefined) {
-      aScores.push(a);
-      bScores.push(b);
-    }
-  }
-  if (aScores.length === 0) return { scoreA: null, scoreB: null };
-  return { scoreA: aScores.join("–"), scoreB: bScores.join("–") };
-}
+// ─── Team rows (shared with the match cards in details.tsx) ──────────────────
 
 function formatLineup(lineup?: { player1?: { name: string }; player2?: { name: string } }): string {
   if (!lineup) return "";
   return [lineup.player1?.name, lineup.player2?.name].filter(Boolean).join(" / ");
+}
+
+/** "card" for the list view, "node" for the narrower bracket columns. */
+export type TeamRowsSize = "card" | "node";
+
+interface TeamRowProps {
+  name: string;
+  club: string | null;
+  points: number[] | null;
+  outcome: "won" | "lost" | "even";
+  isFinal: boolean;
+  size: TeamRowsSize;
+}
+
+function TeamRow({ name, club, points, outcome, isFinal, size }: TeamRowProps) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  const node = size === "node";
+
+  return (
+    <View style={[styles.teamRow, node && styles.teamRowNode]}>
+      <View style={styles.winnerSlot}>
+        {outcome === "won" && (
+          <View accessible accessibilityRole="image" accessibilityLabel={t("details.winner")}>
+            <Check color={colors.green} size={node ? 14 : 16} strokeWidth={3} />
+          </View>
+        )}
+      </View>
+      <View style={styles.teamInfo}>
+        <Text
+          style={[
+            styles.teamName,
+            node && styles.teamNameNode,
+            isFinal && (node ? styles.teamNameNodeFinal : styles.teamNameFinal),
+            outcome === "won" && styles.teamNameWon,
+            outcome === "lost" && styles.teamNameLost,
+          ]}
+        >
+          {name}
+        </Text>
+        {club ? <Text style={[styles.teamClub, node && styles.teamClubNode]}>{club}</Text> : null}
+      </View>
+      {points
+        ? (
+          <View style={styles.sets}>
+            {points.map((p, i) => (
+              <Text
+                key={i}
+                style={[
+                  styles.set,
+                  node && styles.setNode,
+                  isFinal && (node ? styles.setNodeFinal : styles.setFinal),
+                  outcome === "won" && styles.setWon,
+                  outcome === "lost" && styles.setLost,
+                ]}
+              >
+                {p}
+              </Text>
+            ))}
+          </View>
+        )
+        : <Text style={[styles.scorePending, node && styles.scorePendingNode]}>—</Text>}
+    </View>
+  );
+}
+
+/**
+ * Both teams of a match, one score column per set. The team that won more sets
+ * gets a green check, bold ink sets; the other one muted sets. No mark when the
+ * score is missing or the sets are even.
+ */
+export function TeamRows(
+  { result, isFinal, size }: { result: Result; isFinal: boolean; size: TeamRowsSize },
+) {
+  const styles = useThemedStyles(makeStyles);
+  const score = parseMatchScore(result.scores);
+  const lineupA = formatLineup(result.clubALineup);
+  const lineupB = formatLineup(result.clubBLineup);
+  const outcome = (side: Side) => !score?.winner ? "even" : score.winner === side ? "won" : "lost";
+
+  return (
+    <View>
+      <TeamRow
+        name={lineupA || result.clubA.name}
+        club={lineupA ? result.clubA.name : null}
+        points={score ? score.sets.map((s) => s.a) : null}
+        outcome={outcome("A")}
+        isFinal={isFinal}
+        size={size}
+      />
+      <View style={styles.teamDivider} />
+      <TeamRow
+        name={lineupB || result.clubB.name}
+        club={lineupB ? result.clubB.name : null}
+        points={score ? score.sets.map((s) => s.b) : null}
+        outcome={outcome("B")}
+        isFinal={isFinal}
+        size={size}
+      />
+    </View>
+  );
 }
 
 // ─── Match node ───────────────────────────────────────────────────────────────
@@ -104,12 +191,7 @@ function MatchNode(
   { result, isFinal, colors }: { result: Result; isFinal: boolean; colors: PhaseColors },
 ) {
   const styles = useThemedStyles(makeStyles);
-  const { scoreA, scoreB } = parseScores(result.scores);
-  const hasScore = scoreA != null && scoreB != null;
-  const lineupA = formatLineup(result.clubALineup);
-  const lineupB = formatLineup(result.clubBLineup);
-  const nameA = lineupA || result.clubA.name;
-  const nameB = lineupB || result.clubB.name;
+  const hasScore = parseMatchScore(result.scores) != null;
 
   return (
     <View
@@ -119,29 +201,7 @@ function MatchNode(
         { borderColor: colors.cardBorder, borderWidth: isFinal ? 2 : 1 },
       ]}
     >
-      <View style={styles.nodeRow}>
-        <View style={styles.nodeTeamInfo}>
-          <Text style={[styles.nodeTeam, isFinal && styles.nodeTeamFinal]}>
-            {nameA}
-          </Text>
-          {lineupA ? <Text style={styles.nodeClub}>{result.clubA.name}</Text> : null}
-        </View>
-        {hasScore
-          ? <Text style={[styles.nodeScore, isFinal && styles.nodeScoreFinal]}>{scoreA}</Text>
-          : <Text style={styles.nodeScorePending}>—</Text>}
-      </View>
-      <View style={styles.nodeDivider} />
-      <View style={styles.nodeRow}>
-        <View style={styles.nodeTeamInfo}>
-          <Text style={[styles.nodeTeam, isFinal && styles.nodeTeamFinal]}>
-            {nameB}
-          </Text>
-          {lineupB ? <Text style={styles.nodeClub}>{result.clubB.name}</Text> : null}
-        </View>
-        {hasScore
-          ? <Text style={[styles.nodeScore, isFinal && styles.nodeScoreFinal]}>{scoreB}</Text>
-          : <Text style={styles.nodeScorePending}>—</Text>}
-      </View>
+      <TeamRows result={result} isFinal={isFinal} size="node" />
     </View>
   );
 }
@@ -259,47 +319,47 @@ const makeStyles = (c: Palette) =>
       overflow: "hidden",
     },
     matchNodePending: { backgroundColor: c.card },
-    nodeRow: {
+
+    // Team rows: "card" sizes first, then the "node" and final overrides.
+    teamRow: {
       flexDirection: "row",
-      alignItems: "flex-start",
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      gap: 10,
+      alignItems: "center",
+      paddingVertical: 8,
+      gap: 8,
     },
-    nodeTeamInfo: {
-      flex: 1,
-      gap: 2,
-    },
-    nodeTeam: {
+    teamRowNode: { paddingHorizontal: 14, paddingVertical: 10 },
+    winnerSlot: { width: 16, alignItems: "center" },
+    teamInfo: { flex: 1, gap: 2 },
+    teamName: { color: c.ink, fontSize: 15, fontWeight: "700" },
+    teamNameNode: { fontSize: 14, lineHeight: 20 },
+    teamNameFinal: { fontSize: 16 },
+    teamNameNodeFinal: { fontSize: 15 },
+    teamNameWon: { fontWeight: "800" },
+    teamNameLost: { fontWeight: "600" },
+    teamClub: { color: c.muted, fontSize: 12, fontWeight: "600" },
+    teamClubNode: { fontSize: 11 },
+    // A fixed column per set, right-aligned, keeps 7 above 15 in both rows.
+    sets: { flexDirection: "row", gap: 12 },
+    set: {
       color: c.ink,
-      fontSize: 14,
+      fontSize: 22,
       fontWeight: "700",
-      lineHeight: 20,
-    },
-    nodeClub: {
-      color: c.muted,
-      fontSize: 11,
-      fontWeight: "600",
-    },
-    nodeTeamFinal: { fontSize: 15, fontWeight: "800" },
-    nodeScore: {
-      color: c.red,
-      fontSize: 17,
-      fontWeight: "900",
-      minWidth: 28,
+      minWidth: 30,
       textAlign: "right",
       fontVariant: ["tabular-nums"],
     },
-    nodeScoreFinal: { fontSize: 22 },
-    nodeScorePending: {
+    setNode: { fontSize: 17, minWidth: 24 },
+    setFinal: { fontSize: 28, minWidth: 38 },
+    setNodeFinal: { fontSize: 22, minWidth: 30 },
+    setWon: { fontWeight: "900" },
+    setLost: { color: c.muted, fontWeight: "400" },
+    scorePending: {
       color: c.muted,
-      fontSize: 16,
+      fontSize: 20,
       fontWeight: "300",
-      minWidth: 18,
+      minWidth: 28,
       textAlign: "right",
     },
-    nodeDivider: {
-      height: 1,
-      backgroundColor: c.line,
-    },
+    scorePendingNode: { fontSize: 16, minWidth: 18 },
+    teamDivider: { height: 1, backgroundColor: c.line },
   });
