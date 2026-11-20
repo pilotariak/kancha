@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -12,12 +13,11 @@ import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 // ── Slot configuration (will come from wizard state/storage) ──────────────────
 
 const SLOT_CONFIG = {
-  seasonName: "Saison 2025–2026",
+  season: "2025–2026",
   // JS months are 0-indexed: 8 = September, 7 = August
   start: new Date(2025, 8, 1),
   end: new Date(2026, 7, 31),
   weekday: 4, // 0=Sun 1=Mon … 4=Thu … 6=Sat
-  weekdayLabel: "Jeudi",
   timeFrom: "18:00",
   timeTo: "20:00",
   venue: "Fronton municipal, Biarritz",
@@ -53,22 +53,12 @@ function mockStatusCounts(
   return { ok, ko, disponible };
 }
 
-const MONTH_LABELS = [
-  "Janvier",
-  "Février",
-  "Mars",
-  "Avril",
-  "Mai",
-  "Juin",
-  "Juillet",
-  "Août",
-  "Septembre",
-  "Octobre",
-  "Novembre",
-  "Décembre",
-];
+// 7 January 2024 is a Sunday, so `weekday` (0 = Sunday) falls on the 7 + weekday.
+const weekdayDate = (weekday: number) => new Date(2024, 0, 7 + weekday);
 
-const DAY_LABELS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+// Intl gives lowercase weekday names in French, Spanish and Basque.
+const capitalize = (text: string, locale: string) =>
+  text.charAt(0).toLocaleUpperCase(locale) + text.slice(1);
 
 // ── List item types ───────────────────────────────────────────────────────────
 
@@ -96,6 +86,16 @@ type ListRow = MonthRow | SessionRow;
 export default function SlotScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? "en";
+  const formats = useMemo(
+    () => ({
+      month: new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }),
+      weekday: new Intl.DateTimeFormat(locale, { weekday: "long" }),
+      weekdayShort: new Intl.DateTimeFormat(locale, { weekday: "short" }),
+    }),
+    [locale],
+  );
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -121,7 +121,7 @@ export default function SlotScreen() {
         rows.push({
           type: "month",
           key: `month-${date.getFullYear()}-${month}`,
-          label: `${MONTH_LABELS[month]} ${date.getFullYear()}`,
+          label: formats.month.format(date),
         });
         lastMonth = month;
       }
@@ -137,7 +137,7 @@ export default function SlotScreen() {
     });
 
     return rows;
-  }, [today]);
+  }, [today, formats]);
 
   const totalSessions = listData.filter((r) => r.type === "session").length;
 
@@ -153,20 +153,26 @@ export default function SlotScreen() {
         ListHeaderComponent={
           <>
             <ScreenHeader
-              eyebrow="Créneau récurrent"
-              title="Slot"
-              subtitle={`${totalSessions} séances · ${SLOT_CONFIG.playerCount} joueurs`}
+              eyebrow={t("slot.eyebrow")}
+              title={t("tabs.slot")}
+              subtitle={`${t("slot.sessions_count", { count: totalSessions })} · ${
+                t("slot.players_count", { count: SLOT_CONFIG.playerCount })
+              }`}
             />
 
             <View style={styles.headerBody}>
               {/* ── Config card ── */}
               <View style={styles.configCard}>
-                <Text style={styles.configSeason}>{SLOT_CONFIG.seasonName}</Text>
+                <Text style={styles.configSeason}>
+                  {t("slot.season", { season: SLOT_CONFIG.season })}
+                </Text>
 
                 <View style={styles.configRow}>
                   <CalendarClock color={colors.red} size={15} />
                   <Text style={styles.configInfo}>
-                    {`${SLOT_CONFIG.weekdayLabel}s · ${SLOT_CONFIG.timeFrom}–${SLOT_CONFIG.timeTo}`}
+                    {`${
+                      capitalize(formats.weekday.format(weekdayDate(SLOT_CONFIG.weekday)), locale)
+                    } · ${SLOT_CONFIG.timeFrom}–${SLOT_CONFIG.timeTo}`}
                   </Text>
                 </View>
 
@@ -180,24 +186,24 @@ export default function SlotScreen() {
               <PressableScale
                 onPress={() => router.push("/(tabs)/slot/new")}
                 accessibilityRole="button"
-                accessibilityLabel="Nouveau slot"
+                accessibilityLabel={t("slot.new")}
               >
                 <View style={styles.ctaButton} testID="slot-new-button">
                   <Plus color={colors.ink} size={17} />
-                  <Text style={styles.ctaText}>Nouveau slot</Text>
+                  <Text style={styles.ctaText}>{t("slot.new")}</Text>
                 </View>
               </PressableScale>
 
               {/* ── List header ── */}
               <View style={styles.listHeader}>
-                <Text style={styles.listHeaderTitle}>Toutes les séances</Text>
+                <Text style={styles.listHeaderTitle}>{t("slot.all_sessions")}</Text>
                 <View style={styles.legendRow}>
                   <View style={[styles.legendDot, { backgroundColor: colors.green }]} />
-                  <Text style={styles.legendText}>OK</Text>
-                  <View style={[styles.legendDot, { backgroundColor: "#E53935" }]} />
-                  <Text style={styles.legendText}>KO</Text>
-                  <View style={[styles.legendDot, { backgroundColor: "#D4A017" }]} />
-                  <Text style={styles.legendText}>Dispo</Text>
+                  <Text style={styles.legendText}>{t("slot.status.ok")}</Text>
+                  <View style={[styles.legendDot, { backgroundColor: colors.red }]} />
+                  <Text style={styles.legendText}>{t("slot.status.ko")}</Text>
+                  <View style={[styles.legendDot, { backgroundColor: colors.amber }]} />
+                  <Text style={styles.legendText}>{t("slot.status.disponible")}</Text>
                 </View>
               </View>
             </View>
@@ -215,13 +221,12 @@ export default function SlotScreen() {
           // session row
           const session = item as SessionRow;
           const day = session.date.getDate();
-          const dayLabel = DAY_LABELS[session.date.getDay()];
+          const dayLabel = formats.weekdayShort.format(session.date);
 
           return (
             <View
               style={[
                 styles.sessionRow,
-                session.isPast ? styles.sessionRowPast : null,
                 session.isNext ? styles.sessionRowNext : null,
               ]}
               testID={`session-row-${session.key}`}
@@ -247,7 +252,6 @@ export default function SlotScreen() {
                   style={[
                     styles.dateDayLabel,
                     session.isNext ? styles.dateDayLabelNext : null,
-                    session.isPast ? styles.dateDayLabelPast : null,
                   ]}
                 >
                   {dayLabel}
@@ -257,7 +261,7 @@ export default function SlotScreen() {
               {/* "Prochain" badge */}
               {session.isNext && (
                 <View style={styles.nextBadge}>
-                  <Text style={styles.nextBadgeText}>Prochain</Text>
+                  <Text style={styles.nextBadgeText}>{t("slot.next")}</Text>
                 </View>
               )}
 
@@ -278,7 +282,7 @@ export default function SlotScreen() {
                   </Text>
                 </View>
                 <View style={styles.counter}>
-                  <View style={[styles.counterDot, { backgroundColor: "#E53935" }]} />
+                  <View style={[styles.counterDot, { backgroundColor: colors.red }]} />
                   <Text
                     style={[
                       styles.counterValue,
@@ -289,7 +293,7 @@ export default function SlotScreen() {
                   </Text>
                 </View>
                 <View style={styles.counter}>
-                  <View style={[styles.counterDot, { backgroundColor: "#D4A017" }]} />
+                  <View style={[styles.counterDot, { backgroundColor: colors.amber }]} />
                   <Text
                     style={[
                       styles.counterValue,
@@ -334,7 +338,7 @@ const makeStyles = (c: Palette) =>
       borderRadius: 14,
       backgroundColor: c.white,
       borderWidth: 1,
-      borderColor: "#D8CFC6",
+      borderColor: c.line,
       paddingHorizontal: 16,
       paddingVertical: 14,
       flexDirection: "row",
@@ -385,13 +389,9 @@ const makeStyles = (c: Palette) =>
       paddingHorizontal: 14,
       paddingVertical: 12,
     },
-    sessionRowPast: {
-      backgroundColor: "#FAF8F5",
-      borderColor: "#EDE8E1",
-    },
     sessionRowNext: {
       backgroundColor: c.redSoft,
-      borderColor: "#F1B9C4",
+      borderColor: c.redSoft,
     },
 
     // Date block
@@ -409,8 +409,8 @@ const makeStyles = (c: Palette) =>
       lineHeight: 22,
       fontVariant: ["tabular-nums"],
     },
-    dateDayNext: { color: c.redDark },
-    dateDayPast: { color: "#B0A89E" },
+    dateDayNext: { color: c.red },
+    dateDayPast: { color: c.muted },
     dateDayLabel: {
       color: c.muted,
       fontSize: 11,
@@ -418,7 +418,6 @@ const makeStyles = (c: Palette) =>
       textTransform: "uppercase",
     },
     dateDayLabelNext: { color: c.red },
-    dateDayLabelPast: { color: "#C4BBB2" },
 
     // "Prochain" badge
     nextBadge: {
@@ -430,7 +429,7 @@ const makeStyles = (c: Palette) =>
       alignSelf: "center",
     },
     nextBadgeText: {
-      color: "#FFFFFF",
+      color: c.onRedStrong,
       fontSize: 11,
       fontWeight: "800",
     },
@@ -442,5 +441,5 @@ const makeStyles = (c: Palette) =>
     counter: { flexDirection: "row", alignItems: "center", gap: 5, minWidth: 26 },
     counterDot: { width: 8, height: 8, borderRadius: 4 },
     counterValue: { color: c.ink, fontSize: 14, fontWeight: "800", fontVariant: ["tabular-nums"] },
-    counterValuePast: { color: "#B0A89E" },
+    counterValuePast: { color: c.muted },
   });

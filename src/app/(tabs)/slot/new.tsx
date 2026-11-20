@@ -1,5 +1,6 @@
 import { router, Stack } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,28 +20,59 @@ interface SlotPlayer {
   selected: boolean;
 }
 
-const STEP_TITLES = ["Période", "Fréquence", "Joueurs", "Statuts", "Sélection", "Résumé"] as const;
+const STEPS = ["period", "frequency", "players", "statuses", "selection", "summary"] as const;
 
-const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"] as const;
+// Monday first; 0 = Sunday, as in Date.getDay().
+const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0] as const;
 
-const STATUS_OPTIONS: { value: PlayerStatus; label: string; tone: "green" | "red" | "amber" }[] = [
-  { value: "ok", label: "OK", tone: "green" },
-  { value: "ko", label: "KO", tone: "red" },
-  { value: "disponible", label: "Dispo", tone: "amber" },
-];
+// 7 January 2024 is a Sunday, so `weekday` (0 = Sunday) falls on the 7 + weekday.
+const weekdayDate = (weekday: number) => new Date(2024, 0, 7 + weekday);
+
+// Intl gives lowercase weekday names in French, Spanish and Basque.
+const capitalize = (text: string, locale: string) =>
+  text.charAt(0).toLocaleUpperCase(locale) + text.slice(1);
+
+const STATUSES: PlayerStatus[] = ["ok", "ko", "disponible"];
+
+const STATUS_TONES: Record<PlayerStatus, "green" | "red" | "amber"> = {
+  ok: "green",
+  ko: "red",
+  disponible: "amber",
+};
+
+// Mock defaults: the wizard shows them in the active language until the user edits a field.
+const DEFAULT_SEASON = "2025–2026";
+const DEFAULT_START = new Date(2025, 8, 1);
+const DEFAULT_END = new Date(2026, 7, 1);
 
 export default function NewSlotScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? "en";
+  const formats = useMemo(
+    () => ({
+      monthYear: new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }),
+      weekday: new Intl.DateTimeFormat(locale, { weekday: "long" }),
+      weekdayShort: new Intl.DateTimeFormat(locale, { weekday: "short" }),
+    }),
+    [locale],
+  );
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Step 0 — Période
-  const [seasonName, setSeasonName] = useState("Saison 2025–2026");
-  const [startDate, setStartDate] = useState("Septembre 2025");
-  const [endDate, setEndDate] = useState("Août 2026");
+  // Step 0 — Période. Null until edited, so the default follows the language.
+  const [seasonName, setSeasonName] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
+  const defaultStart = formats.monthYear.format(DEFAULT_START);
+  const defaultEnd = formats.monthYear.format(DEFAULT_END);
+  const season = seasonName ?? t("slot.season", { season: DEFAULT_SEASON });
+  const start = startDate ?? defaultStart;
+  const end = endDate ?? defaultEnd;
 
   // Step 1 — Fréquence
-  const [weekday, setWeekday] = useState("Jeudi");
+  const [weekday, setWeekday] = useState(4);
+  const weekdayLabel = capitalize(formats.weekday.format(weekdayDate(weekday)), locale);
   const [timeFrom, setTimeFrom] = useState("18:00");
   const [timeTo, setTimeTo] = useState("20:00");
   const [venue, setVenue] = useState("Fronton municipal, Biarritz");
@@ -73,17 +105,17 @@ export default function NewSlotScreen() {
     setPlayers((prev) => prev.map((p) => (p.id === id ? { ...p, selected: !p.selected } : p)));
   };
 
-  const goNext = () => setCurrentStep((s) => (s < STEP_TITLES.length - 1 ? s + 1 : s));
+  const goNext = () => setCurrentStep((s) => (s < STEPS.length - 1 ? s + 1 : s));
 
   const goBack = () => setCurrentStep((s) => (s > 0 ? s - 1 : s));
 
-  const isLastStep = currentStep === STEP_TITLES.length - 1;
+  const isLastStep = currentStep === STEPS.length - 1;
 
   const nextLabel = useMemo(() => {
-    if (isLastStep) return "Créer le slot";
-    if (currentStep === 2 && players.length === 0) return "Passer";
-    return "Continuer";
-  }, [currentStep, isLastStep, players.length]);
+    if (isLastStep) return t("new_slot.cta_create");
+    if (currentStep === 2 && players.length === 0) return t("new_slot.cta_skip");
+    return t("new_slot.cta_continue");
+  }, [currentStep, isLastStep, players.length, t]);
 
   const handleConfirm = () => {
     router.replace("/(tabs)/slot");
@@ -100,16 +132,16 @@ export default function NewSlotScreen() {
         testID="new-slot-screen"
       >
         <ScreenHeader
-          backLabel={currentStep > 0 ? "Retour" : undefined}
+          backLabel={currentStep > 0 ? t("common.back") : undefined}
           onBack={goBack}
-          title="Nouveau slot"
-          subtitle="Configurez votre créneau récurrent pas à pas."
+          title={t("slot.new")}
+          subtitle={t("new_slot.subtitle")}
         />
 
         <View style={styles.body}>
           {/* ── Step indicator ── */}
           <View style={styles.stepsRow}>
-            {STEP_TITLES.map((step, index) => (
+            {STEPS.map((step, index) => (
               <View key={step} style={styles.stepItem}>
                 <View
                   style={[
@@ -135,7 +167,7 @@ export default function NewSlotScreen() {
                     index === currentStep ? styles.stepLabelActive : null,
                   ]}
                 >
-                  {step}
+                  {t(`new_slot.step_${step}`)}
                 </Text>
               </View>
             ))}
@@ -146,40 +178,40 @@ export default function NewSlotScreen() {
             {/* STEP 0 — Période */}
             {currentStep === 0 && (
               <>
-                <Text style={styles.stepHeading}>Quelle est la période ?</Text>
+                <Text style={styles.stepHeading}>{t("new_slot.period_heading")}</Text>
 
-                <Text style={styles.label}>Nom de la saison</Text>
+                <Text style={styles.label}>{t("new_slot.label_season")}</Text>
                 <TextInput
-                  value={seasonName}
+                  value={season}
                   onChangeText={setSeasonName}
                   style={styles.input}
                   testID="input-season-name"
                 />
 
-                <Text style={styles.label}>Date de début</Text>
+                <Text style={styles.label}>{t("new_slot.label_start")}</Text>
                 <TextInput
-                  value={startDate}
+                  value={start}
                   onChangeText={setStartDate}
                   style={styles.input}
-                  placeholder="ex : Septembre 2025"
-                  placeholderTextColor={colors.muted}
+                  placeholder={t("new_slot.placeholder_example", { value: defaultStart })}
+                  placeholderTextColor={colors.placeholder}
                   testID="input-start-date"
                 />
 
-                <Text style={styles.label}>Date de fin</Text>
+                <Text style={styles.label}>{t("new_slot.label_end")}</Text>
                 <TextInput
-                  value={endDate}
+                  value={end}
                   onChangeText={setEndDate}
                   style={styles.input}
-                  placeholder="ex : Août 2026"
-                  placeholderTextColor={colors.muted}
+                  placeholder={t("new_slot.placeholder_example", { value: defaultEnd })}
+                  placeholderTextColor={colors.placeholder}
                   testID="input-end-date"
                 />
 
                 <View style={styles.previewBox}>
                   <CalendarClock color={colors.red} size={16} />
                   <Text style={styles.previewText}>
-                    {seasonName || "—"} · {startDate || "?"} → {endDate || "?"}
+                    {season || "—"} · {start || "?"} → {end || "?"}
                   </Text>
                 </View>
               </>
@@ -188,16 +220,16 @@ export default function NewSlotScreen() {
             {/* STEP 1 — Fréquence */}
             {currentStep === 1 && (
               <>
-                <Text style={styles.stepHeading}>À quelle fréquence ?</Text>
+                <Text style={styles.stepHeading}>{t("new_slot.frequency_heading")}</Text>
 
-                <Text style={styles.label}>Jour de la semaine</Text>
+                <Text style={styles.label}>{t("new_slot.label_weekday")}</Text>
                 <View style={styles.chipsWrap}>
                   {WEEKDAYS.map((day) => (
                     <PressableScale
                       key={day}
                       onPress={() => setWeekday(day)}
                       accessibilityRole="button"
-                      accessibilityLabel={day}
+                      accessibilityLabel={formats.weekday.format(weekdayDate(day))}
                     >
                       <View
                         style={[
@@ -211,21 +243,21 @@ export default function NewSlotScreen() {
                             day === weekday ? styles.chipTextActive : null,
                           ]}
                         >
-                          {day.slice(0, 3)}
+                          {capitalize(formats.weekdayShort.format(weekdayDate(day)), locale)}
                         </Text>
                       </View>
                     </PressableScale>
                   ))}
                 </View>
 
-                <Text style={styles.label}>Horaire</Text>
+                <Text style={styles.label}>{t("new_slot.label_time")}</Text>
                 <View style={styles.timeRow}>
                   <TextInput
                     value={timeFrom}
                     onChangeText={setTimeFrom}
                     style={[styles.input, styles.inputHalf]}
                     placeholder="18:00"
-                    placeholderTextColor={colors.muted}
+                    placeholderTextColor={colors.placeholder}
                     testID="input-time-from"
                   />
                   <Text style={styles.timeSep}>→</Text>
@@ -234,20 +266,20 @@ export default function NewSlotScreen() {
                     onChangeText={setTimeTo}
                     style={[styles.input, styles.inputHalf]}
                     placeholder="20:00"
-                    placeholderTextColor={colors.muted}
+                    placeholderTextColor={colors.placeholder}
                     testID="input-time-to"
                   />
                 </View>
 
-                <Text style={styles.label}>Lieu</Text>
+                <Text style={styles.label}>{t("new_slot.label_venue")}</Text>
                 <View style={styles.inputWithIcon}>
                   <MapPin color={colors.muted} size={16} />
                   <TextInput
                     value={venue}
                     onChangeText={setVenue}
                     style={styles.inputFlexible}
-                    placeholder="Fronton municipal…"
-                    placeholderTextColor={colors.muted}
+                    placeholder={t("new_slot.placeholder_venue")}
+                    placeholderTextColor={colors.placeholder}
                     testID="input-venue"
                   />
                 </View>
@@ -255,7 +287,7 @@ export default function NewSlotScreen() {
                 <View style={styles.previewBox}>
                   <CalendarClock color={colors.red} size={16} />
                   <Text style={styles.previewText}>
-                    {`${weekday}s · ${timeFrom || "?"} – ${timeTo || "?"}`}
+                    {`${weekdayLabel} · ${timeFrom || "?"} – ${timeTo || "?"}`}
                   </Text>
                 </View>
               </>
@@ -265,7 +297,7 @@ export default function NewSlotScreen() {
             {currentStep === 2 && (
               <>
                 <Text style={styles.stepHeading}>
-                  {`Ajoutez vos joueurs (${players.length})`}
+                  {t("new_slot.players_heading", { total: players.length })}
                 </Text>
 
                 <View style={styles.inputWithIcon}>
@@ -274,8 +306,8 @@ export default function NewSlotScreen() {
                     value={newPlayerName}
                     onChangeText={setNewPlayerName}
                     style={styles.inputFlexible}
-                    placeholder="Nom du joueur…"
-                    placeholderTextColor={colors.muted}
+                    placeholder={t("new_slot.placeholder_player")}
+                    placeholderTextColor={colors.placeholder}
                     onSubmitEditing={addPlayer}
                     returnKeyType="done"
                     testID="input-player-name"
@@ -283,18 +315,16 @@ export default function NewSlotScreen() {
                   <PressableScale
                     onPress={addPlayer}
                     accessibilityRole="button"
-                    accessibilityLabel="Ajouter le joueur"
+                    accessibilityLabel={t("new_slot.add_player")}
                   >
                     <View style={styles.addBtn}>
-                      <Plus color="#FFFFFF" size={16} />
+                      <Plus color={colors.onRedStrong} size={16} />
                     </View>
                   </PressableScale>
                 </View>
 
                 {players.length === 0 && (
-                  <Text style={styles.emptyHint}>
-                    Entrez un nom et appuyez sur + pour ajouter un joueur.
-                  </Text>
+                  <Text style={styles.emptyHint}>{t("new_slot.players_hint")}</Text>
                 )}
 
                 {players.map((p) => (
@@ -308,7 +338,7 @@ export default function NewSlotScreen() {
                     <PressableScale
                       onPress={() => removePlayer(p.id)}
                       accessibilityRole="button"
-                      accessibilityLabel={`Supprimer ${p.name}`}
+                      accessibilityLabel={t("new_slot.remove_player", { name: p.name })}
                     >
                       <View style={styles.removeBtn}>
                         <X color={colors.muted} size={14} />
@@ -322,12 +352,12 @@ export default function NewSlotScreen() {
             {/* STEP 3 — Statuts */}
             {currentStep === 3 && (
               <>
-                <Text style={styles.stepHeading}>Statut de chaque joueur</Text>
-                <Text style={styles.stepHint}>
-                  OK = peut jouer · KO = absent · Dispo = disponible si besoin
-                </Text>
+                <Text style={styles.stepHeading}>{t("new_slot.statuses_heading")}</Text>
+                <Text style={styles.stepHint}>{t("new_slot.statuses_hint")}</Text>
 
-                {players.length === 0 && <Text style={styles.emptyHint}>Aucun joueur ajouté.</Text>}
+                {players.length === 0 && (
+                  <Text style={styles.emptyHint}>{t("new_slot.no_players")}</Text>
+                )}
 
                 {players.map((p) => (
                   <View key={p.id} style={styles.statusRow}>
@@ -338,18 +368,18 @@ export default function NewSlotScreen() {
                       {p.name}
                     </Text>
                     <View style={styles.statusChips}>
-                      {STATUS_OPTIONS.map((opt) => (
+                      {STATUSES.map((status) => (
                         <PressableScale
-                          key={opt.value}
-                          onPress={() => setStatus(p.id, opt.value)}
+                          key={status}
+                          onPress={() => setStatus(p.id, status)}
                           accessibilityRole="button"
-                          accessibilityLabel={opt.label}
-                          accessibilityState={{ selected: p.status === opt.value }}
+                          accessibilityLabel={t(`slot.status.${status}`)}
+                          accessibilityState={{ selected: p.status === status }}
                         >
                           <View
                             style={[
                               styles.statusChip,
-                              p.status === opt.value
+                              p.status === status
                                 ? styles.statusChipActive
                                 : null,
                             ]}
@@ -357,12 +387,12 @@ export default function NewSlotScreen() {
                             <Text
                               style={[
                                 styles.statusChipText,
-                                p.status === opt.value
+                                p.status === status
                                   ? styles.statusChipTextActive
                                   : null,
                               ]}
                             >
-                              {opt.label}
+                              {t(`slot.status.${status}`)}
                             </Text>
                           </View>
                         </PressableScale>
@@ -377,13 +407,15 @@ export default function NewSlotScreen() {
             {currentStep === 4 && (
               <>
                 <Text style={styles.stepHeading}>
-                  {`Sélection du jour (${players.filter((p) => p.selected).length})`}
+                  {t("new_slot.selection_heading", {
+                    total: players.filter((p) => p.selected).length,
+                  })}
                 </Text>
-                <Text style={styles.stepHint}>
-                  Appuyez pour sélectionner ou désélectionner un joueur.
-                </Text>
+                <Text style={styles.stepHint}>{t("new_slot.selection_hint")}</Text>
 
-                {players.length === 0 && <Text style={styles.emptyHint}>Aucun joueur ajouté.</Text>}
+                {players.length === 0 && (
+                  <Text style={styles.emptyHint}>{t("new_slot.no_players")}</Text>
+                )}
 
                 {players.map((p) => (
                   <PressableScale
@@ -406,7 +438,7 @@ export default function NewSlotScreen() {
                         ]}
                       >
                         {p.selected
-                          ? <UserCheck color="#FFFFFF" size={16} />
+                          ? <UserCheck color={colors.cream} size={16} />
                           : <Text style={styles.playerInitialText}>{p.name.charAt(0)}</Text>}
                       </View>
                       <Text
@@ -419,8 +451,8 @@ export default function NewSlotScreen() {
                         {p.name}
                       </Text>
                       <StatusPill
-                        label={STATUS_OPTIONS.find((o) => o.value === p.status)?.label ?? p.status}
-                        tone={STATUS_OPTIONS.find((o) => o.value === p.status)?.tone ?? "soft"}
+                        label={t(`slot.status.${p.status}`)}
+                        tone={STATUS_TONES[p.status]}
                       />
                     </View>
                   </PressableScale>
@@ -431,22 +463,22 @@ export default function NewSlotScreen() {
             {/* STEP 5 — Résumé */}
             {currentStep === 5 && (
               <>
-                <Text style={styles.stepHeading}>Récapitulatif</Text>
+                <Text style={styles.stepHeading}>{t("new_slot.summary_heading")}</Text>
 
                 <View style={styles.summarySection}>
-                  <Text style={styles.summaryLabel}>Saison</Text>
-                  <Text style={styles.summaryValue}>{seasonName || "—"}</Text>
+                  <Text style={styles.summaryLabel}>{t("new_slot.summary_season")}</Text>
+                  <Text style={styles.summaryValue}>{season || "—"}</Text>
                   <Text style={styles.summaryMeta}>
-                    {`${startDate || "?"} → ${endDate || "?"}`}
+                    {`${start || "?"} → ${end || "?"}`}
                   </Text>
                 </View>
 
                 <View style={styles.divider} />
 
                 <View style={styles.summarySection}>
-                  <Text style={styles.summaryLabel}>Créneau</Text>
+                  <Text style={styles.summaryLabel}>{t("new_slot.summary_slot")}</Text>
                   <Text style={styles.summaryValue}>
-                    {`${weekday}s · ${timeFrom}–${timeTo}`}
+                    {`${weekdayLabel} · ${timeFrom}–${timeTo}`}
                   </Text>
                   <View style={styles.summaryRow}>
                     <MapPin color={colors.muted} size={13} />
@@ -458,7 +490,7 @@ export default function NewSlotScreen() {
 
                 <View style={styles.summarySection}>
                   <Text style={styles.summaryLabel}>
-                    {`Joueurs (${players.length})`}
+                    {t("new_slot.summary_players", { total: players.length })}
                   </Text>
                   <View style={styles.summaryPlayers}>
                     {players.map((p) => (
@@ -467,14 +499,15 @@ export default function NewSlotScreen() {
                           {p.name}
                         </Text>
                         <StatusPill
-                          label={STATUS_OPTIONS.find((o) => o.value === p.status)?.label
-                            ?? p.status}
-                          tone={STATUS_OPTIONS.find((o) => o.value === p.status)?.tone ?? "soft"}
+                          label={t(`slot.status.${p.status}`)}
+                          tone={STATUS_TONES[p.status]}
                         />
                         {p.selected && <UserCheck color={colors.green} size={14} />}
                       </View>
                     ))}
-                    {players.length === 0 && <Text style={styles.emptyHint}>Aucun joueur.</Text>}
+                    {players.length === 0 && (
+                      <Text style={styles.emptyHint}>{t("new_slot.summary_no_players")}</Text>
+                    )}
                   </View>
                 </View>
               </>
@@ -523,7 +556,7 @@ const makeStyles = (c: Palette) =>
     stepCircleActive: { backgroundColor: c.redFill, borderColor: c.redFill },
     stepCircleDone: { backgroundColor: c.redSoft, borderColor: c.redSoft },
     stepText: { color: c.muted, fontSize: 13, fontWeight: "800", fontVariant: ["tabular-nums"] },
-    stepTextActive: { color: "#FFFFFF" },
+    stepTextActive: { color: c.onRedStrong },
     stepLabel: {
       color: c.muted,
       fontSize: 10,
@@ -553,7 +586,7 @@ const makeStyles = (c: Palette) =>
     },
 
     label: {
-      color: "#8E857C",
+      color: c.muted,
       fontSize: 12,
       fontWeight: "800",
       textTransform: "uppercase",
@@ -562,7 +595,7 @@ const makeStyles = (c: Palette) =>
     input: {
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: "#D8CFC6",
+      borderColor: c.line,
       backgroundColor: c.white,
       paddingHorizontal: 16,
       paddingVertical: 14,
@@ -574,7 +607,7 @@ const makeStyles = (c: Palette) =>
     inputWithIcon: {
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: "#D8CFC6",
+      borderColor: c.line,
       backgroundColor: c.white,
       paddingHorizontal: 16,
       flexDirection: "row",
@@ -595,14 +628,14 @@ const makeStyles = (c: Palette) =>
     chip: {
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: "#D8CFC6",
+      borderColor: c.line,
       backgroundColor: c.white,
       paddingHorizontal: 14,
       paddingVertical: 12,
     },
-    chipActive: { backgroundColor: c.redSoft, borderColor: "#F1B9C4" },
+    chipActive: { backgroundColor: c.redSoft, borderColor: c.redSoft },
     chipText: { color: c.ink, fontSize: 14, fontWeight: "700" },
-    chipTextActive: { color: c.redDark },
+    chipTextActive: { color: c.red },
 
     addBtn: {
       width: 36,
@@ -645,7 +678,7 @@ const makeStyles = (c: Palette) =>
       width: 28,
       height: 28,
       borderRadius: 14,
-      backgroundColor: "#EFE8DE",
+      backgroundColor: c.line,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -663,7 +696,7 @@ const makeStyles = (c: Palette) =>
     statusChip: {
       borderRadius: 10,
       borderWidth: 1,
-      borderColor: "#D8CFC6",
+      borderColor: c.line,
       backgroundColor: c.white,
       paddingHorizontal: 10,
       paddingVertical: 6,
@@ -685,12 +718,12 @@ const makeStyles = (c: Palette) =>
     },
     selectionRowActive: {
       backgroundColor: c.greenSoft,
-      borderColor: "#B8E0D0",
+      borderColor: c.greenSoft,
     },
 
     previewBox: {
       borderRadius: 14,
-      backgroundColor: "#F5EEE6",
+      backgroundColor: c.cream,
       padding: 14,
       flexDirection: "row",
       alignItems: "center",
@@ -702,7 +735,7 @@ const makeStyles = (c: Palette) =>
 
     summarySection: { gap: 6 },
     summaryLabel: {
-      color: "#8E857C",
+      color: c.muted,
       fontSize: 11,
       fontWeight: "800",
       textTransform: "uppercase",
@@ -732,7 +765,7 @@ const makeStyles = (c: Palette) =>
       borderRadius: 16,
       backgroundColor: c.white,
       borderWidth: 1,
-      borderColor: "#D8CFC6",
+      borderColor: c.line,
       paddingHorizontal: 18,
       paddingVertical: 16,
       flexDirection: "row",
