@@ -2,6 +2,8 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, {
   type ReactElement,
   type ReactNode,
+  type Ref,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -12,6 +14,7 @@ import {
   ActivityIndicator,
   Animated,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -20,9 +23,16 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
-import { CardGrid } from "@/components/CardGrid";
 import { FilterChips } from "@/components/FilterChips";
-import { LayoutList, ListOrdered, Network, Swords, Trophy, Users } from "@/components/icons";
+import {
+  ChevronDown,
+  LayoutList,
+  ListOrdered,
+  Network,
+  Swords,
+  Trophy,
+  Users,
+} from "@/components/icons";
 import { RankingView } from "@/components/RankingView";
 import { BAR_HEIGHT, ScreenHeader } from "@/components/ScreenHeader";
 import { type Segment, SegmentedControl } from "@/components/SegmentedControl";
@@ -30,7 +40,7 @@ import { SelectField } from "@/components/SelectField";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
-import { dateTone, formatMatchDate } from "@/features/competitions/matchDate";
+import { formatMatchDay, groupByDay, type MatchDay } from "@/features/competitions/matchDays";
 import { matchPhaseLabel, parsePhase } from "@/features/competitions/matchPhase";
 import { matchProgress } from "@/features/competitions/matchProgress";
 import { parseMatchScore } from "@/features/competitions/matchScore";
@@ -39,9 +49,10 @@ import {
   resolveSelection,
   withSelected,
 } from "@/features/competitions/resultFilters";
-import { GRID_GAP } from "@/features/layout/breakpoints";
+import { GRID_GAP, GUTTER } from "@/features/layout/breakpoints";
 import { useCategories } from "@/hooks/use-categories";
 import { useCompetition, useResultFilters } from "@/hooks/use-competitions";
+import { showsFocusRing, useInteractionStyles } from "@/hooks/use-interaction-styles";
 import { useWebLayout } from "@/hooks/use-layout";
 import { useResultsByCompetition } from "@/hooks/use-matches";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
@@ -54,7 +65,7 @@ import {
   useResultsFilterStore,
 } from "@/store/results-filter-store";
 
-import type { PhaseColors, PhaseType } from "@/components/BracketView";
+import type { PhaseType } from "@/components/BracketView";
 import type { Result } from "@/types/competition";
 
 // ─── Grouping ─────────────────────────────────────────────────────────────────
@@ -123,51 +134,172 @@ function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
   );
 }
 
-// ─── Match card ───────────────────────────────────────────────────────────────
+// ─── Match days ───────────────────────────────────────────────────────────────
 
-function MatchCard(
-  { result, phaseType, fill = false }: {
-    result: Result;
-    phaseType: PhaseType;
-    /** Fills its grid cell, so the two cards of a row share its height. */
-    fill?: boolean;
-  },
-) {
+/** The day header's words: the date in full, or "date to come", and the match count. */
+function useDayTitle(day: MatchDay): { title: string; count: string } {
   const { t, i18n } = useTranslation();
+  return {
+    // The language the strings resolved to, so a "de" device gets an English date too.
+    title: day.date
+      ? formatMatchDay(day.date, i18n.resolvedLanguage ?? "en")
+      : t("details.date_to_come"),
+    count: t("details.matches_count", { count: day.results.length }),
+  };
+}
+
+/** One match of a day card: its phase in a small label, then both teams. */
+function MatchRow({ result, phaseType }: { result: Result; phaseType: PhaseType }) {
+  const { t } = useTranslation();
   const styles = useThemedStyles(makeStyles);
-  const hasScore = parseMatchScore(result.scores) != null;
-  const phaseLabel = matchPhaseLabel(result.phase, t);
-  // The language the strings resolved to, so a "de" device gets an English date too.
-  const dateLabel = formatMatchDate(result.dateMatch, i18n.resolvedLanguage ?? "en");
-  const todayTone = dateTone(result.dateMatch);
-  const colors: PhaseColors = usePhaseColors()[phaseType];
+  const colors = usePhaseColors()[phaseType];
   const isFinal = phaseType === "F";
 
-  const cardStyle = [
-    styles.matchCard,
-    !hasScore && styles.matchCardPending,
-    fill && styles.matchCardFill,
-    { borderColor: colors.cardBorder, borderWidth: isFinal ? 2 : 1 },
-  ];
+  return (
+    <View style={styles.matchRow} testID={`result-${result.id}`}>
+      <Text style={[styles.matchPhase, isFinal && { color: colors.label }]} numberOfLines={1}>
+        {matchPhaseLabel(result.phase, t)}
+      </Text>
+      <TeamRows result={result} isFinal={isFinal} size="card" />
+    </View>
+  );
+}
+
+/**
+ * The matches of one day in one card, under a header that collapses them to one line. Its
+ * matches lie `columns` to a row, split by hairlines, so a match keeps a phone card's width in
+ * the grid.
+ */
+function DayCard(
+  { day, phaseType, columns, open, onToggle, reduceMotion, cardRef }: {
+    day: MatchDay;
+    phaseType: PhaseType;
+    columns: number;
+    open: boolean;
+    onToggle: () => void;
+    reduceMotion: boolean;
+    /** The card, measured to show the day under the pinned filters. */
+    cardRef: Ref<View>;
+  },
+) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  const interaction = useInteractionStyles();
+  const phaseColors = usePhaseColors()[phaseType];
+  const [hovered, setHovered] = useState(false);
+  const { title, count } = useDayTitle(day);
+  const isFinal = phaseType === "F";
+  const played = day.results.some((r) => parseMatchScore(r.scores) != null);
+
+  // Opening fades the matches in and turns the chevron over; with reduce motion, both switch
+  // at once. Closing removes the matches at once.
+  const progress = useRef(new Animated.Value(open ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduceMotion) {
+      progress.setValue(open ? 1 : 0);
+      return;
+    }
+    const animation = Animated.timing(progress, {
+      toValue: open ? 1 : 0,
+      duration: 200,
+      useNativeDriver: Platform.OS !== "web",
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [open, reduceMotion, progress]);
+  const rotate = useMemo(
+    () => progress.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "180deg"] }),
+    [progress],
+  );
+
+  const rows: Result[][] = [];
+  for (let i = 0; i < day.results.length; i += columns) {
+    rows.push(day.results.slice(i, i + columns));
+  }
 
   return (
-    <View style={cardStyle} testID={`result-card-${result.id}`}>
-      <View style={styles.matchHeader}>
-        <Text
-          style={[styles.matchHeaderText, styles.matchPhase, isFinal && { color: colors.label }]}
-          numberOfLines={1}
-        >
-          {phaseLabel}
+    <View
+      ref={cardRef}
+      style={[
+        styles.dayCard,
+        !played && styles.dayCardPending,
+        { borderColor: phaseColors.cardBorder, borderWidth: isFinal ? 2 : 1 },
+        // The Final keeps its red border under the hover shadow.
+        hovered && [interaction.hover, isFinal && { borderColor: phaseColors.cardBorder }],
+      ]}
+      testID={`match-day-${phaseType}-${day.key}`}
+    >
+      <Pressable
+        onPress={onToggle}
+        onHoverIn={() => setHovered(true)}
+        onHoverOut={() => setHovered(false)}
+        accessibilityRole="button"
+        accessibilityLabel={[title, day.today ? t("details.today") : null, count]
+          .filter(Boolean)
+          .join(", ")}
+        aria-expanded={open}
+        style={(state) => [
+          styles.dayHeader,
+          open && styles.dayHeaderOpen,
+          state.pressed && styles.dayHeaderPressed,
+          showsFocusRing(state) && [interaction.focusRing, styles.dayHeaderFocus],
+        ]}
+        testID={`match-day-toggle-${phaseType}-${day.key}`}
+      >
+        <Text style={styles.dayTitle}>
+          {title}
+          <Text style={styles.dayCount}>{` · ${count}`}</Text>
         </Text>
-        {todayTone
-          ? <StatusPill label={t("details.today")} tone={todayTone} />
-          : dateLabel
-          ? <Text style={styles.matchHeaderText}>{dateLabel}</Text>
-          : null}
-      </View>
-      <View style={styles.matchCardInner}>
-        <TeamRows result={result} isFinal={isFinal} size="card" />
-      </View>
+        {day.today ? <StatusPill label={t("details.today")} tone="green" /> : null}
+        <Animated.View style={{ transform: [{ rotate }] }}>
+          <ChevronDown color={colors.muted} size={18} />
+        </Animated.View>
+      </Pressable>
+      {open
+        ? (
+          <Animated.View style={{ opacity: progress }}>
+            {rows.map((row, r) => (
+              <View key={r} style={[styles.dayRow, r > 0 && styles.dayRowLine]}>
+                {row.map((result, c) => (
+                  <View key={result.id} style={[styles.dayCell, c > 0 && styles.dayCellLine]}>
+                    <MatchRow result={result} phaseType={phaseType} />
+                  </View>
+                ))}
+                {Array.from(
+                  { length: columns - row.length },
+                  (_, e) => <View key={`empty-${e}`} style={styles.dayCell} />,
+                )}
+              </View>
+            ))}
+          </Animated.View>
+        )
+        : null}
+    </View>
+  );
+}
+
+/** Height of the current day strip: one line of the day header's text. */
+const DAY_STRIP_HEIGHT = 36;
+/** From a day card's edge to its header's text: the card's border and the header's padding. */
+const DAY_HEADER_INSET = 15;
+
+/**
+ * The day being read, under the pinned filters, once its header has scrolled beneath them. It
+ * repeats that header, so it takes no touches and screen readers skip it.
+ */
+function DayStrip({ day, inset }: { day: MatchDay; inset: ViewStyle }) {
+  const { t } = useTranslation();
+  const styles = useThemedStyles(makeStyles);
+  const { title, count } = useDayTitle(day);
+
+  return (
+    <View style={[styles.dayStrip, inset]} aria-hidden testID="day-strip">
+      <Text style={styles.dayTitle} numberOfLines={1}>
+        {title}
+        <Text style={styles.dayCount}>{` · ${count}`}</Text>
+      </Text>
+      {day.today ? <StatusPill label={t("details.today")} tone="green" /> : null}
     </View>
   );
 }
@@ -204,13 +336,19 @@ const BAR_FADE = 24;
  * the filters, goes in `children` too. Its top `BAR_HEIGHT` overlaps the band's bottom, so the
  * bar, invisible at rest, fades in over the band and pins as the band leaves. `opacity` is the
  * bar's fill; the bar's own `contentOpacity` follows it.
+ *
+ * `strip` hangs under it, over the results, and takes no room: it comes and goes while the
+ * results scroll, and a header that grew would move them. In the filter column layout, where
+ * there are no `children`, it sits right under the bar.
  */
 function PinnedHeader(
-  { bar, opacity, children }: {
+  { bar, opacity, children, strip }: {
     /** The `collapsed` ScreenHeader. */
     bar: ReactElement;
     opacity: Animated.AnimatedInterpolation<number> | number;
     children?: ReactNode;
+    /** The current day strip, positioned on its own. */
+    strip?: ReactNode;
   },
 ) {
   const styles = useThemedStyles(makeStyles);
@@ -225,6 +363,7 @@ function PinnedHeader(
           </View>
         )
         : null}
+      {strip}
     </View>
   );
 }
@@ -303,7 +442,30 @@ export default function CompetitionDetailsScreen() {
   } = useResultsByCompetition(id, specialtyId, categoryId);
 
   const hasPair = !!specialtyId && !!categoryId;
-  const rounds = results ? groupByRound(results) : [];
+  const rounds = useMemo(() => (results ? groupByRound(results) : []), [results]);
+  // The list view splits each round by match day; the bracket keeps the rounds.
+  const roundDays = useMemo(() => groupByDay(rounds.map((round) => round.results)), [rounds]);
+  const daysByKey = useMemo(
+    () =>
+      new Map<string, MatchDay>(
+        rounds.flatMap((round, i) =>
+          roundDays[i].map((day) => [`${round.type}:${day.key}`, day] as const)
+        ),
+      ),
+    [rounds, roundDays],
+  );
+  // The days the reader opened or closed, for the pair on screen: another pair starts over.
+  const pairKey = `${storeKey}/${specialtyId}/${categoryId}`;
+  const [toggled, setToggled] = useState<{ pair: string; open: Record<string, boolean> }>({
+    pair: "",
+    open: {},
+  });
+  const opened = toggled.pair === pairKey ? toggled.open : {};
+  const toggleDay = (key: string, open: boolean) =>
+    setToggled((prev) => ({
+      pair: pairKey,
+      open: { ...(prev.pair === pairKey ? prev.open : {}), [key]: !open },
+    }));
   const specialtyOptions = withSelected(options?.specialties ?? [], specialtyId, specialties);
   const categoryOptions = withSelected(
     (specialtyId && options?.categories[specialtyId]) || [],
@@ -367,6 +529,59 @@ export default function CompetitionDetailsScreen() {
   const shown = collapsed ? 1 : 0;
   const barOpacity = !bandHeight ? 0 : reduceMotion ? shown : fillFade;
   const barContentOpacity = reduceMotion ? shown : contentFade;
+
+  // The current day strip. Day cards are measured from the top of the body, the scroll view's
+  // third child, which the pinned header covers by `scrollY - collapseAt` once pinned. The first
+  // day becomes current as its card reaches the pinned header's bottom edge, the next ones as
+  // they reach the strip's, so the strip covers each header as it takes its place.
+  const bodyRef = useRef<View>(null);
+  const dayCards = useRef(new Map<string, View>()).current;
+  const dayTops = useRef<{ key: string; top: number }[]>([]);
+  const lastScrollY = useRef(0);
+  const [currentDay, setCurrentDay] = useState<string | null>(null);
+  const pickDay = useCallback((y: number) => {
+    lastScrollY.current = y;
+    const covered = y - collapseAt;
+    const tops = dayTops.current;
+    let key: string | null = null;
+    if (bandHeight && tops.length > 0 && tops[0].top < covered) {
+      for (const day of tops) {
+        if (day.top >= covered + DAY_STRIP_HEIGHT) break;
+        key = day.key;
+      }
+    }
+    setCurrentDay(key);
+  }, [bandHeight, collapseAt]);
+  useEffect(() => {
+    const id = scrollY.addListener(({ value }) => pickDay(value));
+    return () => scrollY.removeListener(id);
+  }, [scrollY, pickDay]);
+  // The body changes size whenever a day opens or closes, the results change or the columns do:
+  // measure the cards again then. On web, onLayout reports size changes only, so the cards
+  // below a day that opened would never report their move themselves.
+  const measureDays = useCallback(() => {
+    const body = bodyRef.current;
+    const cards = [...dayCards];
+    if (!body || cards.length === 0) {
+      dayTops.current = [];
+      pickDay(lastScrollY.current);
+      return;
+    }
+    const tops: { key: string; top: number }[] = [];
+    let pending = cards.length;
+    const done = () => {
+      if (--pending > 0) return;
+      dayTops.current = tops.sort((a, b) => a.top - b.top);
+      pickDay(lastScrollY.current);
+    };
+    for (const [key, card] of cards) {
+      card.measureLayout(body, (_x, y) => {
+        tops.push({ key, top: y });
+        done();
+      }, done);
+    }
+  }, [dayCards, pickDay]);
+  const stripDay = viewMode === "list" && currentDay ? daysByKey.get(currentDay) : undefined;
 
   const spinner = (
     <View style={styles.centered}>
@@ -485,14 +700,28 @@ export default function CompetitionDetailsScreen() {
         {filterColumn ? null : <ResultsProgress results={listed} />}
         {viewMode === "bracket"
           ? bracket
-          : rounds.map((round) => (
+          : rounds.map((round, i) => (
             <View key={round.type} style={styles.roundSection}>
               <RoundHeader type={round.type} count={round.results.length} />
-              <CardGrid columns={resultColumns} style={styles.matchList}>
-                {round.results.map((r) => (
-                  <MatchCard key={r.id} result={r} phaseType={round.type} fill={grid} />
-                ))}
-              </CardGrid>
+              {roundDays[i].map((day) => {
+                const key = `${round.type}:${day.key}`;
+                const open = opened[key] ?? day.open;
+                return (
+                  <DayCard
+                    key={key}
+                    day={day}
+                    phaseType={round.type}
+                    columns={resultColumns}
+                    open={open}
+                    onToggle={() => toggleDay(key, open)}
+                    reduceMotion={reduceMotion}
+                    cardRef={(card) => {
+                      if (card) dayCards.set(key, card);
+                      else dayCards.delete(key);
+                    }}
+                  />
+                );
+              })}
             </View>
           ))}
       </>
@@ -541,11 +770,30 @@ export default function CompetitionDetailsScreen() {
             />
           }
           opacity={barOpacity}
+          strip={stripDay
+            ? (
+              <DayStrip
+                day={stripDay}
+                // Over the results only: beside the filter column in that layout.
+                inset={filterColumn
+                  ? {
+                    left: GUTTER + cellWidth + GRID_GAP,
+                    paddingLeft: DAY_HEADER_INSET,
+                    paddingRight: GUTTER + DAY_HEADER_INSET,
+                  }
+                  : { left: 0, paddingHorizontal: GUTTER + DAY_HEADER_INSET }}
+              />
+            )
+            : null}
         >
           {pinnedFilters}
         </PinnedHeader>
 
-        <View style={[styles.body, filterColumn && styles.bodyFilterColumn]}>
+        <View
+          ref={bodyRef}
+          onLayout={measureDays}
+          style={[styles.body, filterColumn && styles.bodyFilterColumn]}
+        >
           {filterColumn
             ? (
               <>
@@ -700,29 +948,56 @@ const makeStyles = (c: Palette) =>
       fontWeight: "600",
     },
 
-    // Match list
-    matchList: { gap: 8 },
-
-    // Match card
-    matchCard: {
+    // Day card: white once one of its matches has a score, card-colored while all are to play.
+    dayCard: {
       borderRadius: 16,
       backgroundColor: c.white,
       borderWidth: 1,
       borderColor: c.line,
-      overflow: "hidden",
     },
-    matchCardPending: { backgroundColor: c.card },
-    matchCardFill: { flex: 1 },
-    matchHeader: {
+    dayCardPending: { backgroundColor: c.card },
+    dayHeader: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
-      gap: 12,
-      minHeight: 26,
+      gap: 8,
+      minHeight: 44,
       paddingHorizontal: 14,
-      paddingTop: 10,
+      paddingVertical: 10,
+      borderRadius: 15,
     },
-    matchHeaderText: { color: c.muted, fontSize: 12, fontWeight: "600" },
-    matchPhase: { flexShrink: 1 },
-    matchCardInner: { paddingHorizontal: 14, paddingTop: 2, paddingBottom: 6 },
+    dayHeaderOpen: {
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+      borderBottomWidth: 1,
+      borderBottomColor: c.line,
+    },
+    dayHeaderPressed: { backgroundColor: c.cream },
+    // The ring stays inside the card's border.
+    dayHeaderFocus: { outlineOffset: -2 },
+    dayTitle: { flex: 1, color: c.ink, fontSize: 15, fontWeight: "800", lineHeight: 20 },
+    dayCount: { color: c.muted, fontSize: 13, fontWeight: "600" },
+    // One row of matches, split from the next one by a hairline, and its cells by another.
+    dayRow: { flexDirection: "row" },
+    dayRowLine: { borderTopWidth: 1, borderTopColor: c.line },
+    dayCell: { flex: 1, minWidth: 0 },
+    dayCellLine: { borderLeftWidth: 1, borderLeftColor: c.line },
+
+    // A match in a day card: its phase above the teams.
+    matchRow: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6 },
+    matchPhase: { color: c.muted, fontSize: 12, fontWeight: "600", marginBottom: 2 },
+
+    // Current day strip: under the pinned header, cream over the results scrolling beneath.
+    dayStrip: {
+      position: "absolute",
+      top: "100%",
+      right: 0,
+      height: DAY_STRIP_HEIGHT,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      backgroundColor: c.cream,
+      borderBottomWidth: 1,
+      borderBottomColor: c.line,
+      pointerEvents: "none",
+    },
   });

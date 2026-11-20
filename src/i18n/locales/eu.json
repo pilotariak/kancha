@@ -66,6 +66,7 @@
     "empty": "Ez da emaitzarik aurkitu txapelketa honetarako.",
     "matches_count_one": "{{count}} partida",
     "matches_count_other": "{{count}} partida",
+    "date_to_come": "Data zehazteke",
     "view_list": "Zerrenda",
     "view_bracket": "Taula",
     "view_ranking": "Sailkapena",

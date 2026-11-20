@@ -66,6 +66,7 @@
     "empty": "No se encontraron resultados para esta competición.",
     "matches_count_one": "{{count}} partido",
     "matches_count_other": "{{count}} partidos",
+    "date_to_come": "Fecha por confirmar",
     "view_list": "Lista",
     "view_bracket": "Cuadro",
     "view_ranking": "Clasificación",

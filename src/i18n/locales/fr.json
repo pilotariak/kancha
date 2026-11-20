@@ -66,6 +66,7 @@
     "empty": "Aucun résultat trouvé pour cette compétition.",
     "matches_count_one": "{{count}} partie",
     "matches_count_other": "{{count}} parties",
+    "date_to_come": "Date à venir",
     "view_list": "Liste",
     "view_bracket": "Tableau",
     "view_ranking": "Classement",
