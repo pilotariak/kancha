@@ -1,12 +1,12 @@
 import { router } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ArrowLeft, ChevronRight, Search } from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
+import { ChevronRight, Search } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
@@ -25,29 +25,21 @@ export default function CompetitionsListScreen() {
   const list = competitions ?? [];
 
   return (
-    <KanchaBackground>
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          testID="competitions-screen"
-        >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel={t("competitions.back")}
-          >
-            <ArrowLeft color="#FFFFFF" size={20} />
-            <Text style={styles.backLabel}>{t("competitions.back")}</Text>
-          </Pressable>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        testID="competitions-screen"
+      >
+        <ScreenHeader
+          backLabel={t("competitions.back")}
+          eyebrow={t("competitions.eyebrow")}
+          title={t("competitions.title")}
+          subtitle={league?.name}
+        />
 
-          <View style={styles.hero}>
-            <Text style={styles.eyebrow}>{t("competitions.eyebrow")}</Text>
-            <Text style={styles.title} accessibilityRole="header">{t("competitions.title")}</Text>
-            {league && <Text style={styles.subtitle}>{league.name}</Text>}
-          </View>
-
+        <View style={styles.body}>
           <PressableScale
             style={[styles.card, styles.searchRow]}
             onPress={() => router.push("/(tabs)/competitions/player-search")}
@@ -69,7 +61,7 @@ export default function CompetitionsListScreen() {
           {isPending && (
             <View style={styles.centered}>
               <ActivityIndicator
-                color="#FFFFFF"
+                color={colors.red}
                 size="large"
                 accessibilityLabel={t("common.loading")}
               />
@@ -113,56 +105,30 @@ export default function CompetitionsListScreen() {
               </View>
             </>
           )}
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 22,
-    },
-    backButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      marginBottom: 4,
-    },
-    backLabel: {
-      color: "#FFFFFF",
-      fontSize: 15,
-      fontWeight: "600",
-    },
-    hero: { gap: 6 },
-    eyebrow: {
-      color: c.onRedSoft,
-      fontSize: 12,
-      fontWeight: "800",
-      letterSpacing: 1.5,
-      textTransform: "uppercase",
-    },
-    title: { color: "#FFFFFF", fontSize: 34, fontWeight: "900" },
-    subtitle: { color: c.onRedStrong, fontSize: 14, lineHeight: 20 },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 22, gap: 22 },
     centered: {
       paddingVertical: 60,
       alignItems: "center",
     },
     errorBox: {
       borderRadius: 16,
-      backgroundColor: "rgba(255,60,60,0.15)",
+      backgroundColor: c.redSoft,
       padding: 16,
+      borderWidth: 1,
+      borderColor: "rgba(200,16,46,0.2)",
     },
-    errorText: {
-      color: "#FFFFFF",
-      fontSize: 14,
-      fontWeight: "600",
-    },
+    errorText: { color: c.red, fontSize: 14, fontWeight: "600" },
     list: { gap: 12 },
     card: {
       borderRadius: 20,

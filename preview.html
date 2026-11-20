@@ -24,8 +24,8 @@
     --amber-bg: #FFF8E7;
     --panel: #1E1E1E;
     --shadow: rgba(103, 18, 31, 0.14);
-    --on-red-strong: rgba(255, 255, 255, 0.82);
-    --on-red-soft: rgba(255, 255, 255, 0.78);
+    --on-red-strong: rgba(255, 255, 255, 0.90);
+    --on-red-soft: rgba(255, 255, 255, 0.86);
     --pill-dark-bg: var(--text);
     --pill-dark-text: var(--bg);
     --pill-soft-bg: var(--line);
@@ -64,18 +64,13 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
 
-  /* ── Top bar / hero ───────────────────────────────────────────────────────── */
+  /* ── Top bar / hero: the solid red header band, sized by its content ──────── */
   .hero {
-    background: linear-gradient(180deg, var(--red-fill) 0%, var(--red-dark) 55%, var(--bg) 100%);
-    padding: 40px 20px 72px;
+    background: var(--red-fill);
+    border-radius: 0 0 24px 24px;
+    padding: 40px 20px 28px;
     position: relative;
-    overflow: hidden;
   }
-  .hero::before, .hero::after {
-    content: ""; position: absolute; border-radius: 9999px;
-  }
-  .hero::before { width: 160px; height: 160px; top: 30px; right: -20px; background: rgba(255,255,255,0.08); }
-  .hero::after  { width: 120px; height: 120px; top: 80px; left: -35px; background: rgba(255,255,255,0.06); }
   .hero-eyebrow {
     color: var(--on-red-soft); font-size: 12px; font-weight: 800;
     text-transform: uppercase; letter-spacing: 1.5px; margin: 0;
@@ -91,7 +86,7 @@
   .toggle:hover { background: rgba(255,255,255,0.24); }
 
   /* ── Layout ───────────────────────────────────────────────────────────────── */
-  main { max-width: 960px; margin: -40px auto 0; padding: 0 20px 80px; position: relative; }
+  main { max-width: 960px; margin: 0 auto; padding: 0 20px 80px; position: relative; }
   section { margin-top: 48px; }
   .eyebrow {
     color: var(--muted); font-size: 12px; font-weight: 800;
@@ -137,6 +132,15 @@
   .type-row:last-child { border-bottom: 0; }
   .type-label { flex: 0 0 150px; color: var(--muted); font-size: 12px; font-weight: 600; }
   .type-specimen { color: var(--ink); flex: 1; min-width: 200px; }
+
+  /* ── Screen header (ScreenHeader) ──────────────────────────────────────────── */
+  .screen-header {
+    background: var(--red-fill); border-radius: 0 0 24px 24px;
+    padding: 12px 20px 24px; max-width: 390px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .screen-header .sh-back { color: #fff; font-size: 15px; font-weight: 600; margin: 0; }
+  .screen-header .hero-title { margin: 6px 0; }
 
   /* ── Cards gallery ────────────────────────────────────────────────────────── */
   .card {
@@ -388,6 +392,15 @@
     button: (b) => `<button class="btn btn-primary ${b.mod || ""}">${b.label}</button>`,
     darkButton: (label) => `<button class="btn btn-dark">${label}</button>`,
     badge: (text) => `<span class="context-badge">${text}</span>`,
+    screenHeader: (h) => `
+      <div class="screen-header">
+        ${h.back ? `<p class="sh-back">← ${h.back}</p>` : ""}
+        <div>
+          <p class="hero-eyebrow">${h.eyebrow}</p>
+          <p class="hero-title">${h.title}</p>
+          <p class="hero-sub">${h.subtitle}</p>
+        </div>
+      </div>`,
     card: (c) => `
       <div class="card">
         <p class="c-title">${c.title}</p>
@@ -428,8 +441,8 @@
   // ── Data — mirrors DESIGN.md frontmatter & the StatusPill runtime ───────────
   const COLORS = [
     { name: "Red",        var: "--red",       role: "Red text, scores, icons" },
-    { name: "Red Fill",   var: "--red-fill",  role: "Hero, CTAs, under white text" },
-    { name: "Red Dark",   var: "--red-dark",  role: "Gradient stop, pressed" },
+    { name: "Red Fill",   var: "--red-fill",  role: "Header band, CTAs, under white text" },
+    { name: "Red Dark",   var: "--red-dark",  role: "Pressed, error text" },
     { name: "Red Soft",   var: "--red-soft",  role: "Error bg, score chips" },
     { name: "Cream",      var: "--bg",        role: "Screen canvas" },
     { name: "Card",       var: "--surface",   role: "List card" },
@@ -478,6 +491,9 @@
     { label: "Pressed", mod: "pressed" },
     { label: "Disabled", mod: "disabled" },
   ];
+  const SCREEN_HEADERS = [
+    { back: "Leagues", eyebrow: "Competition desk", title: "Competitions", subtitle: "Comité Territorial Pays Basque" },
+  ];
   const CARDS = [
     { title: "Championnat du Pays Basque", meta: "2026 · 42 matches" },
   ];
@@ -511,7 +527,8 @@
       kind: "do", title: "✅ Do",
       items: [
         "Use cream <code>#F7F4EF</code> as the canvas — never white or cold gray.",
-        "Limit red to purposeful elements: hero, CTAs, scores, active states.",
+        "Put the screen header in the solid red band, in white; everything below it on cream.",
+        "Limit red to purposeful elements: header band, CTAs, scores, active states.",
         "Uppercase + ≥1.4px letter-spacing on every eyebrow label.",
         "Use the warm <code>line</code> border to separate cards — not shadows.",
         "Weight 900 for hero titles; weight 800 for section titles.",
@@ -521,6 +538,7 @@
     {
       kind: "dont", title: "❌ Don't",
       items: [
+        "Don't put text on a gradient — its color would depend on the content height.",
         "Don't put <code>rgba(255,255,255,x)</code> text on cream — invisible.",
         "Don't use pure black — use ink <code>#141414</code> or panel.",
         "Don't use more than one accent color per screen.",
@@ -537,6 +555,7 @@
       BUTTONS.map(C.button).join("") + C.darkButton("+1")),
     () => C.group("Status pills", "gallery-pills",
       PILLS.map(([tone, label]) => C.pill(tone, label)).join("")),
+    () => C.group("Screen header", null, SCREEN_HEADERS.map(C.screenHeader).join("")),
     () => C.group("Context badge", null, C.badge("Main nue · Senior")),
     () => C.group("Cards", "gallery-cards",
       CARDS.map(C.card).join("") + FEATURED.map(C.featured).join("")),

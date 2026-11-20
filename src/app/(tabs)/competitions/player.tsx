@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ArrowLeft, ChevronRight, RotateCcw, Trophy, User } from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
+import { ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
@@ -195,51 +195,29 @@ export default function PlayerScreen() {
   const stats = rankings ? buildPlayerStats(licence, rankings) : null;
   const isEmpty = rankings?.length === 0;
   const name = stats?.name ?? null;
+  const heroMeta = [
+    name && licence ? t("ranking.licence", { licence }) : null,
+    stats && stats.clubs.length > 0 ? stats.clubs.map((c) => c.name).join(" · ") : null,
+  ].filter(Boolean).join("\n");
 
   return (
-    <KanchaBackground>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          testID="player-screen"
-        >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel={t("common.back")}
-          >
-            <ArrowLeft color="#FFFFFF" size={20} />
-            <Text style={styles.backLabel}>{t("common.back")}</Text>
-          </Pressable>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        testID="player-screen"
+      >
+        <ScreenHeader
+          backLabel={t("common.back")}
+          eyebrow={t("player.eyebrow")}
+          title={name ?? t("ranking.licence", { licence })}
+          subtitle={heroMeta}
+          loading={isPending}
+        />
 
-          {/* Hero */}
-          <View style={styles.heroCard}>
-            <View style={styles.heroIcon}>
-              <User color="#FFFFFF" size={20} />
-            </View>
-            <Text style={styles.heroEyebrow}>{t("player.eyebrow")}</Text>
-            {isPending
-              ? <ActivityIndicator color="#FFFFFF" accessibilityLabel={t("common.loading")} />
-              : (
-                <>
-                  <Text style={styles.heroTitle} accessibilityRole="header">
-                    {name ?? t("ranking.licence", { licence })}
-                  </Text>
-                  {name && licence
-                    ? <Text style={styles.heroMeta}>{t("ranking.licence", { licence })}</Text>
-                    : null}
-                  {stats && stats.clubs.length > 0 && (
-                    <Text style={styles.heroMeta}>
-                      {stats.clubs.map((c) => c.name).join(" · ")}
-                    </Text>
-                  )}
-                </>
-              )}
-          </View>
-
+        <View style={styles.body}>
           {/* States */}
           {isError && (
             <View style={styles.errorBox} accessibilityRole="alert">
@@ -315,9 +293,9 @@ export default function PlayerScreen() {
               </View>
             </>
           )}
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -325,46 +303,10 @@ export default function PlayerScreen() {
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 22,
-    },
-    backButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      marginBottom: 4,
-    },
-    backLabel: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
-
-    // Hero
-    heroCard: {
-      borderRadius: 24,
-      backgroundColor: c.redFill,
-      padding: 22,
-      gap: 8,
-    },
-    heroIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
-      backgroundColor: "rgba(0,0,0,0.2)",
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: 2,
-    },
-    heroEyebrow: {
-      color: c.onRedSoft,
-      fontSize: 12,
-      fontWeight: "800",
-      letterSpacing: 1.5,
-      textTransform: "uppercase",
-    },
-    heroTitle: { color: "#FFFFFF", fontSize: 28, fontWeight: "900" },
-    heroMeta: { color: c.onRedStrong, fontSize: 14, fontWeight: "600" },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 22, gap: 22 },
 
     // States
     errorBox: {

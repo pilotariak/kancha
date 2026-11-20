@@ -4,8 +4,9 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ArrowLeft, ChevronRight, Trophy } from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
+import { ChevronRight } from "@/components/icons";
+import { ScreenHeader } from "@/components/ScreenHeader";
+import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { useCompetition } from "@/hooks/use-competitions";
 import { useSpecialties } from "@/hooks/use-specialties";
@@ -25,56 +26,32 @@ export default function SpecialtyPickerScreen() {
   }
 
   return (
-    <KanchaBackground>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          testID="specialty-picker-screen"
-        >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel={t("specialty.back")}
-          >
-            <ArrowLeft color="#FFFFFF" size={20} />
-            <Text style={styles.backLabel}>{t("specialty.back")}</Text>
-          </Pressable>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        testID="specialty-picker-screen"
+      >
+        <ScreenHeader
+          backLabel={t("specialty.back")}
+          title={competition?.name ?? t("common.competition_fallback")}
+          subtitle={[competition?.year, competition?.level].filter(Boolean).join(" · ")}
+          loading={loadingComp}
+        />
 
-          <View style={styles.heroCard}>
-            <View style={styles.heroIcon}>
-              <Trophy color="#FFFFFF" size={20} />
-            </View>
-            {loadingComp
-              ? <ActivityIndicator color="#FFFFFF" accessibilityLabel={t("common.loading")} />
-              : (
-                <>
-                  <Text style={styles.heroTitle} accessibilityRole="header">
-                    {competition?.name ?? t("common.competition_fallback")}
-                  </Text>
-                  {(competition?.year != null || competition?.level) && (
-                    <Text style={styles.heroMeta}>
-                      {[competition?.year, competition?.level].filter(Boolean).join(" · ")}
-                    </Text>
-                  )}
-                </>
-              )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionEyebrow}>{t("common.choose")}</Text>
-            <Text style={styles.sectionTitle} accessibilityRole="header">
-              {t("specialty.title")}
-            </Text>
-            <Text style={styles.sectionSubtitle}>{t("specialty.subtitle")}</Text>
-          </View>
+        <View style={styles.body}>
+          <SectionHeader
+            eyebrow={t("common.choose")}
+            title={t("specialty.title")}
+            subtitle={t("specialty.subtitle")}
+          />
 
           {loadingSpecialties && (
             <View style={styles.centered}>
               <ActivityIndicator
-                color="#FFFFFF"
+                color={colors.red}
                 size="large"
                 accessibilityLabel={t("common.loading")}
               />
@@ -104,58 +81,18 @@ export default function SpecialtyPickerScreen() {
               ))}
             </View>
           )}
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 22,
-    },
-    backButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      marginBottom: 4,
-    },
-    backLabel: {
-      color: "#FFFFFF",
-      fontSize: 15,
-      fontWeight: "600",
-    },
-    heroCard: {
-      borderRadius: 24,
-      backgroundColor: c.redFill,
-      padding: 22,
-      gap: 10,
-    },
-    heroIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
-      backgroundColor: "rgba(0,0,0,0.2)",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    heroTitle: { color: "#FFFFFF", fontSize: 28, fontWeight: "900" },
-    heroMeta: { color: "rgba(255,255,255,0.78)", fontSize: 14, fontWeight: "600" },
-    section: { gap: 4 },
-    sectionEyebrow: {
-      color: c.muted,
-      fontSize: 12,
-      fontWeight: "800",
-      textTransform: "uppercase",
-      letterSpacing: 1.4,
-    },
-    sectionTitle: { color: c.ink, fontSize: 28, fontWeight: "900" },
-    sectionSubtitle: { color: c.muted, fontSize: 14, lineHeight: 20, marginTop: 2 },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 22, gap: 22 },
     centered: { paddingVertical: 40, alignItems: "center" },
     errorBox: {
       borderRadius: 16,

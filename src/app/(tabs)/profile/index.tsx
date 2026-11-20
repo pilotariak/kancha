@@ -15,7 +15,7 @@ import {
   Sun,
   SunMoon,
 } from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -60,24 +60,28 @@ export default function AboutScreen() {
   const currentEntry = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
 
   return (
-    <KanchaBackground>
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.hero}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <ScreenHeader
+          eyebrow={t("tabs.about")}
+          title="Kancha"
+          subtitle={t("about.tagline")}
+          trailing={
             <View style={styles.logoBox}>
               <Image
                 source={require("../../../../assets/images/icon.png")}
-                style={{ width: 64, height: 64 }}
+                style={styles.logo}
                 contentFit="contain"
               />
             </View>
-            <Text style={styles.appName} accessibilityRole="header">Kancha</Text>
-            <Text style={styles.tagline}>{t("about.tagline")}</Text>
-          </View>
+          }
+        />
 
+        <View style={styles.body}>
           <View style={styles.cards}>
             <View style={styles.card} testID="about-version">
               <Text style={styles.cardLabel}>{t("about.version")}</Text>
@@ -250,29 +254,22 @@ export default function AboutScreen() {
               })}
             </View>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 32,
-      paddingBottom: 120,
-      gap: 32,
-    },
-    hero: {
-      alignItems: "center",
-      gap: 10,
-    },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 24, gap: 32 },
     logoBox: {
-      width: 80,
-      height: 80,
-      borderRadius: 26,
+      width: 64,
+      height: 64,
+      borderRadius: 20,
       backgroundColor: c.white,
       alignItems: "center",
       justifyContent: "center",
@@ -282,16 +279,7 @@ const makeStyles = (c: Palette) =>
       shadowRadius: 16,
       elevation: 8,
     },
-    appName: {
-      color: c.ink,
-      fontSize: 32,
-      fontWeight: "900",
-      letterSpacing: -0.5,
-    },
-    tagline: {
-      color: c.muted,
-      fontSize: 14,
-    },
+    logo: { width: 52, height: 52 },
     cards: {
       gap: 10,
     },

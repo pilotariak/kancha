@@ -5,8 +5,9 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ChevronRight, Shield } from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
 import { PressableScale } from "@/components/PressableScale";
+import { ScreenHeader } from "@/components/ScreenHeader";
+import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -24,25 +25,21 @@ export default function LeaguePickerScreen() {
   }
 
   return (
-    <KanchaBackground>
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          testID="league-picker-screen"
-        >
-          <View style={styles.hero}>
-            <Text style={styles.eyebrow}>{t("leagues.eyebrow")}</Text>
-            <Text style={styles.title} accessibilityRole="header">{t("leagues.title")}</Text>
-            <Text style={styles.subtitle}>{t("leagues.subtitle")}</Text>
-          </View>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        testID="league-picker-screen"
+      >
+        <ScreenHeader
+          eyebrow={t("leagues.eyebrow")}
+          title={t("leagues.title")}
+          subtitle={t("leagues.subtitle")}
+        />
 
-          <View style={styles.section}>
-            <Text style={styles.sectionEyebrow}>{t("common.choose")}</Text>
-            <Text style={styles.sectionTitle} accessibilityRole="header">
-              {t("leagues.your_league")}
-            </Text>
-          </View>
+        <View style={styles.body}>
+          <SectionHeader eyebrow={t("common.choose")} title={t("leagues.your_league")} />
 
           <View style={styles.list}>
             {LEAGUES.map((league) => (
@@ -74,40 +71,18 @@ export default function LeaguePickerScreen() {
               </PressableScale>
             ))}
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 22,
-    },
-    hero: { gap: 6 },
-    eyebrow: {
-      color: c.onRedSoft,
-      fontSize: 12,
-      fontWeight: "800",
-      letterSpacing: 1.5,
-      textTransform: "uppercase",
-    },
-    title: { color: "#FFFFFF", fontSize: 34, fontWeight: "900" },
-    subtitle: { color: c.onRedStrong, fontSize: 14, lineHeight: 20 },
-    section: { gap: 4 },
-    sectionEyebrow: {
-      color: c.muted,
-      fontSize: 12,
-      fontWeight: "800",
-      textTransform: "uppercase",
-      letterSpacing: 1.4,
-    },
-    sectionTitle: { color: c.ink, fontSize: 28, fontWeight: "800" },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 22, gap: 22 },
     list: { gap: 12 },
     card: {
       borderRadius: 20,

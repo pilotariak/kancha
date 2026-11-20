@@ -3,18 +3,9 @@ import React, { useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  ArrowLeft,
-  CalendarClock,
-  Check,
-  ChevronRight,
-  MapPin,
-  Plus,
-  UserCheck,
-  X,
-} from "@/components/icons";
-import { KanchaBackground } from "@/components/KanchaBackground";
+import { CalendarClock, Check, ChevronRight, MapPin, Plus, UserCheck, X } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -99,36 +90,23 @@ export default function NewSlotScreen() {
   };
 
   return (
-    <KanchaBackground>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          testID="new-slot-screen"
-        >
-          {/* ── Hero ── */}
-          <View style={styles.heroRow}>
-            {currentStep > 0 && (
-              <PressableScale
-                onPress={goBack}
-                accessibilityRole="button"
-                accessibilityLabel="Retour"
-              >
-                <View style={styles.backBtn}>
-                  <ArrowLeft color="#FFFFFF" size={20} />
-                </View>
-              </PressableScale>
-            )}
-            <View style={styles.heroText}>
-              <Text style={styles.title} accessibilityRole="header">Nouveau slot</Text>
-              <Text style={styles.subtitle}>
-                Configurez votre créneau récurrent pas à pas.
-              </Text>
-            </View>
-          </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        testID="new-slot-screen"
+      >
+        <ScreenHeader
+          backLabel={currentStep > 0 ? "Retour" : undefined}
+          onBack={goBack}
+          title="Nouveau slot"
+          subtitle="Configurez votre créneau récurrent pas à pas."
+        />
 
+        <View style={styles.body}>
           {/* ── Step indicator ── */}
           <View style={styles.stepsRow}>
             {STEP_TITLES.map((step, index) => (
@@ -517,39 +495,18 @@ export default function NewSlotScreen() {
               </View>
             </PressableScale>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </KanchaBackground>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    safeArea: { flex: 1 },
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 120,
-      gap: 22,
-    },
-
-    heroRow: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
-    backBtn: {
-      width: 38,
-      height: 38,
-      borderRadius: 19,
-      backgroundColor: "rgba(255,255,255,0.18)",
-      alignItems: "center",
-      justifyContent: "center",
-      marginTop: 4,
-    },
-    heroText: { flex: 1, gap: 6 },
-    title: { color: "#FFFFFF", fontSize: 32, fontWeight: "900" },
-    subtitle: {
-      color: "rgba(255,255,255,0.82)",
-      fontSize: 14,
-      lineHeight: 20,
-    },
+    safeArea: { flex: 1, backgroundColor: c.redFill },
+    scroll: { backgroundColor: c.cream },
+    content: { paddingBottom: 120 },
+    body: { paddingHorizontal: 20, paddingTop: 22, gap: 22 },
 
     stepsRow: { flexDirection: "row", justifyContent: "space-between", gap: 4 },
     stepItem: { flex: 1, alignItems: "center", gap: 6 },
@@ -557,21 +514,23 @@ const makeStyles = (c: Palette) =>
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: "rgba(255,255,255,0.22)",
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.line,
       alignItems: "center",
       justifyContent: "center",
     },
-    stepCircleActive: { backgroundColor: c.white },
-    stepCircleDone: { backgroundColor: "#F6C0C9" },
-    stepText: { color: "#FFFFFF", fontSize: 13, fontWeight: "800", fontVariant: ["tabular-nums"] },
-    stepTextActive: { color: c.red },
+    stepCircleActive: { backgroundColor: c.redFill, borderColor: c.redFill },
+    stepCircleDone: { backgroundColor: c.redSoft, borderColor: c.redSoft },
+    stepText: { color: c.muted, fontSize: 13, fontWeight: "800", fontVariant: ["tabular-nums"] },
+    stepTextActive: { color: "#FFFFFF" },
     stepLabel: {
-      color: "rgba(255,255,255,0.65)",
+      color: c.muted,
       fontSize: 10,
       fontWeight: "700",
       textAlign: "center",
     },
-    stepLabelActive: { color: "#FFFFFF" },
+    stepLabelActive: { color: c.ink },
 
     formCard: {
       borderRadius: 24,
