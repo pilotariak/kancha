@@ -39,7 +39,17 @@
     "season_subtitle": "Todas las competiciones de esta liga.",
     "error_load": "Error al cargar las competiciones",
     "find_player": "Buscar un jugador",
-    "find_player_subtitle": "Títulos, compañeros y clasificaciones por temporada"
+    "find_player_subtitle": "Títulos, compañeros y clasificaciones por temporada",
+    "current_season": "Temporada actual",
+    "see_results": "Ver resultados",
+    "previous_eyebrow": "Historial",
+    "previous_title": "Temporadas anteriores",
+    "season_heading": "Temporada {{season}}",
+    "all_seasons": "Todas las temporadas",
+    "fewer_seasons": "Menos temporadas",
+    "others_eyebrow": "Sin temporada",
+    "others_title": "Otras competiciones",
+    "empty": "Ninguna competición en esta liga."
   },
   "specialty": {
     "title": "Especialidad"
