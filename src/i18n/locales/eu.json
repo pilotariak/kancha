@@ -39,7 +39,17 @@
     "season_subtitle": "Liga honetako txapelketa guztiak.",
     "error_load": "Errorea txapelketak kargatzean",
     "find_player": "Jokalari bat bilatu",
-    "find_player_subtitle": "Txapelak, bikotekideak eta sailkapenak denboraldika"
+    "find_player_subtitle": "Txapelak, bikotekideak eta sailkapenak denboraldika",
+    "current_season": "Uneko denboraldia",
+    "see_results": "Emaitzak ikusi",
+    "previous_eyebrow": "Historia",
+    "previous_title": "Aurreko denboraldiak",
+    "season_heading": "{{season}} denboraldia",
+    "all_seasons": "Denboraldi guztiak",
+    "fewer_seasons": "Denboraldi gutxiago",
+    "others_eyebrow": "Denboraldirik gabe",
+    "others_title": "Beste txapelketak",
+    "empty": "Ez dago txapelketarik liga honetan."
   },
   "specialty": {
     "title": "Espezialitatea"

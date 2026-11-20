@@ -39,7 +39,17 @@
     "season_subtitle": "Toutes les compétitions de cette ligue.",
     "error_load": "Échec du chargement des compétitions",
     "find_player": "Trouver un joueur",
-    "find_player_subtitle": "Titres, partenaires et classements par saison"
+    "find_player_subtitle": "Titres, partenaires et classements par saison",
+    "current_season": "Saison en cours",
+    "see_results": "Voir les résultats",
+    "previous_eyebrow": "Historique",
+    "previous_title": "Saisons précédentes",
+    "season_heading": "Saison {{season}}",
+    "all_seasons": "Toutes les saisons",
+    "fewer_seasons": "Moins de saisons",
+    "others_eyebrow": "Sans saison",
+    "others_title": "Autres compétitions",
+    "empty": "Aucune compétition pour cette ligue."
   },
   "specialty": {
     "title": "Spécialité"

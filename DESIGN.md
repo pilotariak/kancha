@@ -213,7 +213,7 @@ components:
     rounded: "{rounded.round}"
     padding: "18px"
   cardFeatured:
-    backgroundColor: "{colors.primary}"
+    backgroundColor: "{colors.brandFill}"
     textColor: "{colors.surfaceElevated}"
     rounded: "{rounded.hero}"
     padding: "22px"
@@ -446,15 +446,72 @@ Meta:          #7A7A7A, 13px, weight 400
 
 ### Cards — Featured / Hero Card
 
+`FeaturedCard` (`src/components/FeaturedCard.tsx`): the one red card of a screen, for its main
+content. The competitions list features the current season with it: eyebrow "Saison en cours",
+the competition name, footer "Voir les résultats", and the whole card opens the results.
+
 ```
-Background:   #C8102E
+Background:   redFill (#C8102E light, #B5142F dark), never red: white on the dark red (#F5586E)
+              is 3.2:1
 Border-radius: 24px
-Padding:       20–22px
-Title:         #FFFFFF, 26–28px, weight 900
-Eyebrow:       onRedSoft, 12px, weight 800, uppercase
-Sub panel:     #161616 bg, #FFFFFF text — inset dark chip for metadata
-Footer:        white text + ChevronRight icon, space-between layout
+Padding:       22px, 8px between eyebrow and title
+Eyebrow:       onRedSoft, 12px, weight 800, uppercase, +1.5px tracking
+Title:         #FFFFFF, 28px (Hero title), weight 900, line-height 31px. A season in the name
+               never breaks: word joiners (U+2060) hold "2025-2026" on one line
+Sub panel:     #161616 bg, #FFFFFF text — inset dark chip for metadata (optional)
+Footer:        #FFFFFF 15px weight 700 + ChevronRight 18px #FFFFFF, space-between, 12px above
+Pressed:       scale(0.96) via PressableScale
+Placement:     on cream, at least 22px below the header band. The band's 24px bottom corners
+               and the cream gap keep the two red blocks apart in both themes; never let the
+               card touch the band
 ```
+
+Contrast is the header band's: white title and footer 5.88:1 (light) and 6.76:1 (dark), eyebrow
+4.61:1 and 4.73:1.
+
+### Season Grid
+
+The previous seasons on the competitions list, under a "Saisons précédentes" section header.
+The season comes from the competition name (`src/features/competitions/seasons.ts`), as Frontis
+has no season field; a league with no season in any name keeps the plain list of competition
+cards.
+
+`SeasonTile` (`src/components/SeasonTile.tsx`): a half-width tile, two per row, 12px apart. Each
+tile fills a `flex: 1` cell without padding, so an odd last tile keeps its half width next to an
+empty cell. Every tile opens the results of one competition.
+
+```
+Tile:      #FFFDFC (card), 1px solid #E5DED6 (line), 20px radius, 16px padding, content spread
+           top to bottom, 8px gap; min height 96px for a season tile. Tiles of a row share its
+           height
+Eyebrow:   #262626 (text), 12px, weight 800, uppercase, +1.2px tracking, up to 3 lines: the
+           name without its season ("CHAMPIONNAT CCAPB"). Text, not muted: it names the
+           competition, and muted on card is 4.2:1
+Season:    #141414 (ink), 22px, weight 900, tabular-nums, one line ("2025-2026")
+```
+
+- **One competition per season**: one tile per season, eyebrow and season as above.
+- **Several competitions in a season**: a season heading ("Saison 2025-2026": #141414, 13px,
+  weight 800, uppercase, +0.8px tracking) and one tile per competition, with no eyebrow and the
+  name without its season as title (#141414, 16px, weight 800, line-height 20px, up to 3 lines).
+  In the current season, the first competition gets the featured card and the others a
+  competition card right under it.
+- **Six seasons**, then a toggle: "Toutes les saisons" with ChevronDown, "Moins de saisons" with
+  ChevronUp once open. It counts seasons, not tiles. No toggle when nothing is hidden.
+- **Names without a season** in a league that has seasons: competition cards under "Autres
+  compétitions", after the grid.
+
+```
+Toggle:    full width, min height 44px, pill radius, #FFFFFF (white), 1px solid #E5DED6 (line),
+           #141414 (ink) 15px weight 700 label + 18px chevron, 8px gap. Pressed: #E5DED6 (line).
+           aria-expanded carries the state. No red: showing more is not an action
+```
+
+| Pair                               | Light  | Dark (Ikurriña) |
+| ---------------------------------- | ------ | --------------- |
+| Tile season and name (ink) on card | 18.2:1 | 15.5:1          |
+| Tile eyebrow (text) on card        | 14.9:1 | 13.2:1          |
+| Toggle label (ink) on white        | 18.4:1 | 14.0:1          |
 
 ### Cards — Match Card
 
