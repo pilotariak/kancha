@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Check, ChevronRight, Swords, Trophy, Users } from "@/components/icons";
 import { type Palette } from "@/constants/colors";
 import { parseMatchScore, type Side } from "@/features/competitions/matchScore";
+import { useLayoutSize } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import type { Result } from "@/types/competition";
 
@@ -188,7 +189,16 @@ export function TeamRows(
 // ─── Match node ───────────────────────────────────────────────────────────────
 
 function MatchNode(
-  { result, isFinal, colors }: { result: Result; isFinal: boolean; colors: PhaseColors },
+  { result, isFinal, colors, fill }: {
+    result: Result;
+    isFinal: boolean;
+    colors: PhaseColors;
+    /**
+     * Instead of the fixed column width: "width" takes its column's width, "cell" also its
+     * grid cell's height, so the nodes of a row line up.
+     */
+    fill?: "width" | "cell";
+  },
 ) {
   const styles = useThemedStyles(makeStyles);
   const hasScore = parseMatchScore(result.scores) != null;
@@ -197,6 +207,8 @@ function MatchNode(
     <View
       style={[
         styles.matchNode,
+        fill && styles.matchNodeFill,
+        fill === "cell" && styles.matchNodeCell,
         !hasScore && styles.matchNodePending,
         { borderColor: colors.cardBorder, borderWidth: isFinal ? 2 : 1 },
       ]}
@@ -208,31 +220,78 @@ function MatchNode(
 
 // ─── Round column ─────────────────────────────────────────────────────────────
 
-function RoundColumn({ group }: { group: RoundGroup }) {
+function RoundPill({ group }: { group: RoundGroup }) {
   const { t } = useTranslation();
   const styles = useThemedStyles(makeStyles);
   const colors = usePhaseColors()[group.type];
-  const isFinal = group.type === "F";
-  const Icon = group.type === "P" ? Users : isFinal ? Trophy : Swords;
+  const Icon = group.type === "P" ? Users : group.type === "F" ? Trophy : Swords;
 
   return (
-    <View style={styles.column}>
-      <View
-        style={[styles.columnHeader, { backgroundColor: colors.pill, borderColor: colors.border }]}
-      >
-        <Icon color={colors.icon} size={11} />
-        <Text style={[styles.columnHeaderLabel, { color: colors.label }]} numberOfLines={1}>
-          {t(`rounds.${group.type}`)}
-        </Text>
-        <Text style={[styles.columnHeaderCount, { color: colors.count }]}>
-          {group.results.length}
-        </Text>
-      </View>
+    <View
+      style={[styles.columnHeader, { backgroundColor: colors.pill, borderColor: colors.border }]}
+    >
+      <Icon color={colors.icon} size={11} />
+      <Text style={[styles.columnHeaderLabel, { color: colors.label }]} numberOfLines={1}>
+        {t(`rounds.${group.type}`)}
+      </Text>
+      <Text style={[styles.columnHeaderCount, { color: colors.count }]}>
+        {group.results.length}
+      </Text>
+    </View>
+  );
+}
+
+function RoundColumn({ group, fill = false }: { group: RoundGroup; fill?: boolean }) {
+  const styles = useThemedStyles(makeStyles);
+  const colors = usePhaseColors()[group.type];
+  const isFinal = group.type === "F";
+
+  return (
+    <View style={[styles.column, fill && styles.columnFill]}>
+      <RoundPill group={group} />
       <View style={styles.columnBody}>
         {group.results.map((r) => (
-          <MatchNode key={r.id} result={r} isFinal={isFinal} colors={colors} />
+          <MatchNode
+            key={r.id}
+            result={r}
+            isFinal={isFinal}
+            colors={colors}
+            fill={fill ? "width" : undefined}
+          />
         ))}
       </View>
+    </View>
+  );
+}
+
+// ─── Round grid ───────────────────────────────────────────────────────────────
+
+/** A round of group matches as a grid: GRID_COLUMNS nodes per row. */
+function RoundGrid({ group }: { group: RoundGroup }) {
+  const styles = useThemedStyles(makeStyles);
+  const colors = usePhaseColors()[group.type];
+  const rows: Result[][] = [];
+  for (let i = 0; i < group.results.length; i += GRID_COLUMNS) {
+    rows.push(group.results.slice(i, i + GRID_COLUMNS));
+  }
+
+  return (
+    <View style={styles.grid}>
+      <RoundPill group={group} />
+      {rows.map((row) => (
+        <View key={row[0].id} style={styles.gridRow}>
+          {row.map((r) => (
+            <View key={r.id} style={styles.gridCell}>
+              <MatchNode result={r} isFinal={false} colors={colors} fill="cell" />
+            </View>
+          ))}
+          {/* Empty cells keep a short last row's nodes at the same width. */}
+          {Array.from(
+            { length: GRID_COLUMNS - row.length },
+            (_, i) => <View key={`empty-${i}`} style={styles.gridCell} />,
+          )}
+        </View>
+      ))}
     </View>
   );
 }
@@ -251,12 +310,41 @@ function RoundConnector() {
 
 // ─── BracketView ──────────────────────────────────────────────────────────────
 
-export function BracketView({ rounds }: { rounds: RoundGroup[] }) {
+/** Rounds played as groups, not knockout: pools, and phases the parser does not know. */
+const GROUP_ROUNDS: ReadonlySet<PhaseType> = new Set(["P", "other"]);
+
+/**
+ * The rounds side by side, in a row that scrolls sideways. With `layout="fit"` (desktop web),
+ * nothing scrolls sideways: the knockout rounds share the width, and the group rounds follow
+ * as grids.
+ */
+export function BracketView(
+  { rounds, layout = "scroll" }: { rounds: RoundGroup[]; layout?: "scroll" | "fit" },
+) {
   const styles = useThemedStyles(makeStyles);
+  // From 600px on web, where a mouse has no sideways swipe, the scroll bar leads to the
+  // other rounds. A phone, native or web, keeps the swipe alone.
+  const scrollBar = useLayoutSize() !== "phone";
+
+  if (layout === "fit") {
+    const knockout = rounds.filter((group) => !GROUP_ROUNDS.has(group.type));
+    const groups = rounds.filter((group) => GROUP_ROUNDS.has(group.type));
+    return (
+      <View style={styles.fit}>
+        {knockout.length > 0 && (
+          <View style={styles.fitRow}>
+            {knockout.map((group) => <RoundColumn key={group.type} group={group} fill />)}
+          </View>
+        )}
+        {groups.map((group) => <RoundGrid key={group.type} group={group} />)}
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       horizontal
-      showsHorizontalScrollIndicator={false}
+      showsHorizontalScrollIndicator={scrollBar}
       contentContainerStyle={styles.container}
     >
       {rounds.map((group, i) => (
@@ -272,6 +360,10 @@ export function BracketView({ rounds }: { rounds: RoundGroup[] }) {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const COLUMN_WIDTH = 350;
+/** Fit layout: a knockout column is never narrower; more rounds than fit wrap onto a new line. */
+const FIT_MIN_COLUMN_WIDTH = 220;
+const FIT_GAP = 24;
+const GRID_COLUMNS = 3;
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
@@ -285,6 +377,18 @@ const makeStyles = (c: Palette) =>
       width: COLUMN_WIDTH,
       gap: 10,
     },
+    // Fit layout: columns share the row, between the minimum and the scroll layout's width.
+    columnFill: {
+      width: "auto",
+      flexGrow: 1,
+      flexBasis: FIT_MIN_COLUMN_WIDTH,
+      maxWidth: COLUMN_WIDTH,
+    },
+    fit: { gap: FIT_GAP, paddingTop: 4 },
+    fitRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", gap: FIT_GAP },
+    grid: { gap: 10 },
+    gridRow: { flexDirection: "row", gap: 10 },
+    gridCell: { flex: 1 },
     columnHeader: {
       flexDirection: "row",
       alignItems: "center",
@@ -318,6 +422,8 @@ const makeStyles = (c: Palette) =>
       backgroundColor: c.white,
       overflow: "hidden",
     },
+    matchNodeFill: { width: "auto" },
+    matchNodeCell: { flex: 1 },
     matchNodePending: { backgroundColor: c.card },
 
     // Team rows: "card" sizes first, then the "node" and final overrides.

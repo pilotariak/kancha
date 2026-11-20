@@ -21,6 +21,7 @@ import {
   toSeasonBlocks,
 } from "@/features/competitions/seasons";
 import { useCompetitions } from "@/hooks/use-competitions";
+import { useContentColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 import type { Competition } from "@/types/competition";
@@ -37,6 +38,7 @@ export default function CompetitionsListScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const column = useContentColumn();
   const { data: competitions, isPending, isError, error } = useCompetitions();
   const selectedLeagueId = useLeagueStore((s) => s.selectedLeagueId);
   const [expanded, setExpanded] = useState(false);
@@ -191,7 +193,7 @@ export default function CompetitionsListScreen() {
           subtitle={league?.name}
         />
 
-        <View style={styles.body}>
+        <View style={[styles.body, column]}>
           <PressableScale
             style={[styles.card, styles.searchRow]}
             onPress={() => router.push("/(tabs)/competitions/player-search")}

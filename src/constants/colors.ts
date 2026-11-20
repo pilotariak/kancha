@@ -13,6 +13,8 @@ export type Palette = {
   /** Placeholder text in input fields: 4.5:1 or more on white in both themes. */
   placeholder: string;
   line: string;
+  /** Hovered borders on web: cards, chips, fields. */
+  lineStrong: string;
   card: string;
   panel: string;
   green: string;
@@ -42,6 +44,7 @@ export const KanchaColorsLight: Palette = {
   muted: "#7A7A7A",
   placeholder: "#6E6E6E",
   line: "#E5DED6",
+  lineStrong: "#CBBFB2",
   card: "#FFFDFC",
   panel: "#1E1E1E",
   green: "#1F7A5A",
@@ -71,6 +74,7 @@ export const KanchaColorsDark: Palette = {
   muted: "#97A89F",
   placeholder: "#97A89F",
   line: "#25362E",
+  lineStrong: "#3B5246",
   card: "#13201A",
   panel: "#1E2E26",
   green: "#3CC489",

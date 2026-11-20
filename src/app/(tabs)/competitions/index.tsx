@@ -10,6 +10,7 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
+import { useContentColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 
@@ -17,6 +18,7 @@ export default function LeaguePickerScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const column = useContentColumn();
   const setLeague = useLeagueStore((s) => s.setLeague);
 
   function handleSelect(id: string) {
@@ -38,7 +40,7 @@ export default function LeaguePickerScreen() {
           subtitle={t("leagues.subtitle")}
         />
 
-        <View style={styles.body}>
+        <View style={[styles.body, column]}>
           <SectionHeader eyebrow={t("common.choose")} title={t("leagues.your_league")} />
 
           <View style={styles.list}>

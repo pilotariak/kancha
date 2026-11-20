@@ -17,6 +17,7 @@ import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { findPlayers, searchWords } from "@/features/players/name-match";
+import { useContentColumn } from "@/hooks/use-layout";
 import { usePlayerSearch } from "@/hooks/use-players";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
@@ -26,6 +27,7 @@ export default function PlayerSearchScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const column = useContentColumn();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -63,7 +65,7 @@ export default function PlayerSearchScreen() {
           subtitle={t("player_search.subtitle")}
         />
 
-        <View style={styles.body}>
+        <View style={[styles.body, column]}>
           <View style={styles.searchBox}>
             <Search color={colors.muted} size={18} />
             <TextInput

@@ -18,6 +18,7 @@ import {
   type SeasonHistory,
   type SpecialtyBest,
 } from "@/features/players/stats";
+import { useContentColumn } from "@/hooks/use-layout";
 import { usePlayerRankings } from "@/hooks/use-players";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
@@ -179,6 +180,7 @@ export default function PlayerScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const column = useContentColumn();
   const { licence = "" } = useLocalSearchParams<{ licence: string }>();
   // `isPending`, not `isLoading`: the static web export renders without the
   // licence, so the query is disabled there. Both stay pending, and the static
@@ -217,7 +219,7 @@ export default function PlayerScreen() {
           loading={isPending}
         />
 
-        <View style={styles.body}>
+        <View style={[styles.body, column]}>
           {/* States */}
           {isError && (
             <View style={styles.errorBox} accessibilityRole="alert">

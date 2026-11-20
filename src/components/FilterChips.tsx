@@ -1,8 +1,14 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import type { Palette } from "@/constants/colors";
+import {
+  type InteractionState,
+  showsFocusRing,
+  useInteractionStyles,
+} from "@/hooks/use-interaction-styles";
+import { useContentWidth } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 interface FilterChipsProps {
@@ -11,6 +17,8 @@ interface FilterChipsProps {
   onChange: (id: string) => void;
   /** Names the group for screen readers. */
   accessibilityLabel: string;
+  /** Wraps the chips onto several lines, inside the gutter, instead of a scrolling row. */
+  wrap?: boolean;
   testID?: string;
 }
 
@@ -19,7 +27,7 @@ const GUTTER = 20;
 /**
  * One choice among short names, as a row of chips. The row bleeds over the
  * screen gutter and scrolls sideways; a cream fade on the right edge shows
- * that more chips follow.
+ * that more chips follow. With `wrap`, the chips flow onto several lines.
  */
 export function FilterChips(props: FilterChipsProps) {
   // A new set of chips mounts a new row: it resets the scroll state, and on web
@@ -28,23 +36,73 @@ export function FilterChips(props: FilterChipsProps) {
   return <ChipRow key={props.options.map((o) => o.id).join(",")} {...props} />;
 }
 
-function ChipRow({ options, value, onChange, accessibilityLabel, testID }: FilterChipsProps) {
+function ChipRow({ options, value, onChange, accessibilityLabel, wrap, testID }: FilterChipsProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const { width: screenWidth } = useWindowDimensions();
+  const interaction = useInteractionStyles();
+  const viewportWidth = useContentWidth();
   const scrollRef = useRef<ScrollView>(null);
   const [frameWidth, setFrameWidth] = useState(0);
   const [contentWidth, setContentWidth] = useState(0);
   const [offset, setOffset] = useState(0);
   const hasMore = contentWidth - frameWidth - offset > 1;
 
+  const chips = options.map((option) => {
+    const selected = option.id === value;
+    return (
+      <Pressable
+        key={option.id}
+        style={(state: InteractionState) => [
+          styles.chip,
+          selected
+            ? styles.chipSelected
+            : [state.pressed && styles.chipPressed, state.hovered && interaction.hoverBorder],
+          showsFocusRing(state) && interaction.focusRing,
+        ]}
+        onPress={() => onChange(option.id)}
+        onLayout={wrap ? undefined : (e) => {
+          // Bring a selected chip that starts off screen into view.
+          const { x, width } = e.nativeEvent.layout;
+          if (selected && x + width + GUTTER > viewportWidth) {
+            scrollRef.current?.scrollTo({ x: x - GUTTER, animated: false });
+          }
+        }}
+        hitSlop={{ top: 5, bottom: 5 }}
+        accessibilityRole="radio"
+        aria-checked={selected}
+        accessibilityLabel={option.name}
+        testID={testID ? `${testID}-${option.id}` : undefined}
+      >
+        <Text style={[styles.label, selected && styles.labelSelected]} numberOfLines={1}>
+          {option.name}
+        </Text>
+      </Pressable>
+    );
+  });
+
+  if (wrap) {
+    return (
+      <View
+        style={styles.wrapRow}
+        accessibilityRole="radiogroup"
+        accessibilityLabel={accessibilityLabel}
+        testID={testID}
+      >
+        {chips}
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.frame} onLayout={(e) => setFrameWidth(e.nativeEvent.layout.width)}>
+    <View
+      style={[styles.frame, Platform.OS === "web" && styles.frameWeb]}
+      onLayout={(e) => setFrameWidth(e.nativeEvent.layout.width)}
+    >
       <ScrollView
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.row}
+        contentContainerStyle={[styles.row, Platform.OS === "web" && styles.rowWeb]}
         onContentSizeChange={(width) => setContentWidth(width)}
         onScroll={(e) => setOffset(e.nativeEvent.contentOffset.x)}
         scrollEventThrottle={16}
@@ -52,35 +110,7 @@ function ChipRow({ options, value, onChange, accessibilityLabel, testID }: Filte
         accessibilityLabel={accessibilityLabel}
         testID={testID}
       >
-        {options.map((option) => {
-          const selected = option.id === value;
-          return (
-            <Pressable
-              key={option.id}
-              style={({ pressed }) => [
-                styles.chip,
-                selected ? styles.chipSelected : pressed && styles.chipPressed,
-              ]}
-              onPress={() => onChange(option.id)}
-              onLayout={(e) => {
-                // Bring a selected chip that starts off screen into view.
-                const { x, width } = e.nativeEvent.layout;
-                if (selected && x + width + GUTTER > screenWidth) {
-                  scrollRef.current?.scrollTo({ x: x - GUTTER, animated: false });
-                }
-              }}
-              hitSlop={{ top: 5, bottom: 5 }}
-              accessibilityRole="radio"
-              aria-checked={selected}
-              accessibilityLabel={option.name}
-              testID={testID ? `${testID}-${option.id}` : undefined}
-            >
-              <Text style={[styles.label, selected && styles.labelSelected]} numberOfLines={1}>
-                {option.name}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {chips}
       </ScrollView>
       {hasMore
         ? (
@@ -98,10 +128,17 @@ function ChipRow({ options, value, onChange, accessibilityLabel, testID }: Filte
   );
 }
 
+const RING_ROOM = 4;
+
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
     frame: { marginHorizontal: -GUTTER },
+    // The scroll view clips what overflows it: on web, room above and below the chips keeps
+    // the focus ring in view, without moving the row.
+    frameWeb: { marginVertical: -RING_ROOM },
     row: { gap: 8, paddingHorizontal: GUTTER },
+    rowWeb: { paddingVertical: RING_ROOM },
+    wrapRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
     // 34px high, hitSlop adds 10px for the 44px touch target.
     chip: {
       justifyContent: "center",

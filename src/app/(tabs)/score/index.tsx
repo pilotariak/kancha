@@ -17,6 +17,7 @@ import { Trophy, Undo2 } from "@/components/icons";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { INITIAL, reducer, type ScoreAction, type ScoreState } from "@/features/score/scoreMachine";
+import { useContentColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 // ─── Score bar ────────────────────────────────────────────────────────────────
@@ -67,6 +68,7 @@ function SetupScreen({ onStart }: SetupProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const column = useContentColumn();
   const [teamA, setTeamA] = useState("");
   const [teamB, setTeamB] = useState("");
   const [targetRaw, setTargetRaw] = useState("");
@@ -86,7 +88,7 @@ function SetupScreen({ onStart }: SetupProps) {
       >
         <ScreenHeader title={t("score.setup_title")} subtitle={t("score.setup_subtitle")} />
 
-        <View style={styles.setupBody}>
+        <View style={[styles.setupBody, column]}>
           <View style={styles.setupForm}>
             <View style={styles.fieldGroup}>
               <View style={styles.fieldLabelRow}>
@@ -174,6 +176,7 @@ function ScorePanel(
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const column = useContentColumn();
   const isTop = side === "top";
   const bg = isTop ? colors.redFill : colors.panel;
   const winnerBg = colors.green;
@@ -223,25 +226,28 @@ function ScorePanel(
 
   const bar = <ScoreBar score={score} target={target} isWinner={isWinner} isTop={isTop} />;
 
+  const content = isTop
+    ? (
+      <>
+        {teamLabel}
+        {scoreDisplay}
+        {controls}
+        {bar}
+      </>
+    )
+    : (
+      <>
+        {bar}
+        {controls}
+        {scoreDisplay}
+        {teamLabel}
+      </>
+    );
+
+  // From 600px on web, the panel color stays full width and its content keeps to the column.
   return (
     <View style={[styles.panel, { backgroundColor: activeBg }]}>
-      {isTop
-        ? (
-          <>
-            {teamLabel}
-            {scoreDisplay}
-            {controls}
-            {bar}
-          </>
-        )
-        : (
-          <>
-            {bar}
-            {controls}
-            {scoreDisplay}
-            {teamLabel}
-          </>
-        )}
+      {column ? <View style={[styles.panelColumn, column]}>{content}</View> : content}
     </View>
   );
 }
@@ -306,6 +312,7 @@ function WinScreen({ state, onNewGame }: WinProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const column = useContentColumn();
   const scale = useRef(new Animated.Value(0.4)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -329,7 +336,7 @@ function WinScreen({ state, onNewGame }: WinProps) {
 
   return (
     <View style={styles.winFlex}>
-      <Animated.View style={[styles.winContent, { opacity }]}>
+      <Animated.View style={[styles.winContent, column, { opacity }]}>
         <Animated.View style={[styles.winTrophyWrap, { transform: [{ scale }] }]}>
           <Trophy color={colors.amber} size={64} />
         </Animated.View>
@@ -351,7 +358,7 @@ function WinScreen({ state, onNewGame }: WinProps) {
       </Animated.View>
 
       <Pressable
-        style={({ pressed }) => [styles.newGameBtn, pressed && styles.newGameBtnPressed]}
+        style={({ pressed }) => [styles.newGameBtn, column, pressed && styles.newGameBtnPressed]}
         onPress={onNewGame}
         accessibilityRole="button"
         accessibilityLabel={t("score.cta_new_game")}
@@ -449,6 +456,7 @@ const makeStyles = (c: Palette) =>
       paddingVertical: 20,
       justifyContent: "space-between",
     },
+    panelColumn: { flex: 1, justifyContent: "space-between" },
     teamLabelRow: { gap: 4 },
     teamName: {
       color: "#FFFFFF",
