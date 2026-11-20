@@ -49,23 +49,21 @@ export default function CompetitionsListScreen() {
           </View>
 
           <PressableScale
-            style={styles.card}
+            style={[styles.card, styles.searchRow]}
             onPress={() => router.push("/(tabs)/competitions/player-search")}
             accessibilityRole="button"
             accessibilityLabel={t("competitions.find_player")}
             accessibilityHint={t("competitions.find_player_subtitle")}
             testID="find-player-card"
           >
-            <View style={styles.searchRow}>
-              <View style={styles.searchIcon}>
-                <Search color={colors.red} size={18} />
-              </View>
-              <View style={styles.searchBody}>
-                <Text style={styles.cardTitle}>{t("competitions.find_player")}</Text>
-                <Text style={styles.cardMeta}>{t("competitions.find_player_subtitle")}</Text>
-              </View>
-              <ChevronRight color={colors.muted} size={18} />
+            <View style={styles.searchIcon}>
+              <Search color={colors.red} size={18} />
             </View>
+            <View style={styles.searchBody}>
+              <Text style={styles.cardTitle}>{t("competitions.find_player")}</Text>
+              <Text style={styles.cardMeta}>{t("competitions.find_player_subtitle")}</Text>
+            </View>
+            <ChevronRight color={colors.muted} size={18} />
           </PressableScale>
 
           {isPending && (

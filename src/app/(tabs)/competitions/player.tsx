@@ -108,20 +108,18 @@ function PartnerCard({ partner }: { partner: Partner }) {
   const together = t("player.together_count", { count: partner.count });
   return (
     <PressableScale
-      style={styles.card}
+      style={[styles.card, styles.pressableRow]}
       onPress={() => openPlayer(partner.licence)}
       accessibilityRole="button"
       accessibilityLabel={`${label}, ${together}`}
       accessibilityHint={t("player.open_hint")}
       testID={`player-partner-${partner.licence}`}
     >
-      <View style={styles.pressableRow}>
-        <View style={styles.cardBody}>
-          <Text style={styles.cardTitle}>{label}</Text>
-          <Text style={styles.cardMeta}>{together}</Text>
-        </View>
-        <ChevronRight color={colors.muted} size={18} />
+      <View style={styles.cardBody}>
+        <Text style={styles.cardTitle}>{label}</Text>
+        <Text style={styles.cardMeta}>{together}</Text>
       </View>
+      <ChevronRight color={colors.muted} size={18} />
     </PressableScale>
   );
 }
@@ -448,7 +446,6 @@ const makeStyles = (c: Palette) =>
     // Sections and cards
     section: { gap: 12 },
     list: { gap: 10 },
-    // PressableScale styles its outer view: a row there would shrink-wrap the inner Pressable.
     card: {
       borderRadius: 16,
       backgroundColor: c.white,

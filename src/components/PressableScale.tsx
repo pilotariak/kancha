@@ -7,6 +7,8 @@ interface PressableScaleProps extends PressableProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 export function PressableScale({
   children,
   style,
@@ -46,14 +48,13 @@ export function PressableScale({
   );
 
   return (
-    <Animated.View style={[style, { transform: [{ scale }] }]}>
-      <Pressable
-        {...props}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-      >
-        {children}
-      </Pressable>
-    </Animated.View>
+    <AnimatedPressable
+      {...props}
+      style={[style, { transform: [{ scale }] }]}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+    >
+      {children}
+    </AnimatedPressable>
   );
 }
