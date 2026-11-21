@@ -227,7 +227,20 @@
     "licence": "Lizentzia {{licence}}",
     "rank_a11y": "{{rank}}. postua",
     "empty": "Ligak ez du kategoria honetarako sailkapenik argitaratzen.",
-    "error_load": "Ezin izan da sailkapena kargatu."
+    "error_load": "Ezin izan da sailkapena kargatu.",
+    "column_team": "Taldea",
+    "column_record": "Balantzea",
+    "form_win": "I",
+    "form_loss": "G",
+    "form_win_a11y": "irabazi",
+    "form_loss_a11y": "galdu",
+    "form_a11y": "azken emaitzak: {{results}}",
+    "wins_a11y_one": "{{count}} irabazi",
+    "wins_a11y_other": "{{count}} irabazi",
+    "losses_a11y_one": "{{count}} galdu",
+    "losses_a11y_other": "{{count}} galdu",
+    "no_results_a11y": "jokatutako partidarik ez",
+    "players_hint": "Jokalarien estekak erakusten ditu"
   },
   "player": {
     "title": "Jokalaria",

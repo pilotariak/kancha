@@ -227,7 +227,20 @@
     "licence": "Licence {{licence}}",
     "rank_a11y": "Rank {{rank}}",
     "empty": "The league publishes no ranking for this category.",
-    "error_load": "Could not load the ranking."
+    "error_load": "Could not load the ranking.",
+    "column_team": "Team",
+    "column_record": "Record",
+    "form_win": "W",
+    "form_loss": "L",
+    "form_win_a11y": "win",
+    "form_loss_a11y": "loss",
+    "form_a11y": "last results: {{results}}",
+    "wins_a11y_one": "{{count}} win",
+    "wins_a11y_other": "{{count}} wins",
+    "losses_a11y_one": "{{count}} loss",
+    "losses_a11y_other": "{{count}} losses",
+    "no_results_a11y": "no match played",
+    "players_hint": "Shows links to the players"
   },
   "player": {
     "title": "Player",

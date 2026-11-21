@@ -7,6 +7,22 @@ export interface ParsedPhase {
   number: number;
 }
 
+/** The order rounds are played in: the pools first, the final last, unknown phases after it. */
+export const ROUND_ORDER: Record<PhaseType, number> = {
+  P: 0,
+  B: 1,
+  BM: 2,
+  B1T: 3,
+  B2T: 4,
+  B3T: 5,
+  S: 6,
+  H: 7,
+  Q: 8,
+  D: 9,
+  F: 10,
+  other: 11,
+};
+
 export function parsePhase(phase?: string): ParsedPhase {
   if (!phase) return { type: "other", number: 0 };
   // Match B1T/B2T/B3T, then BM (ctpb barrage maintien), then a bare B (ctpb
