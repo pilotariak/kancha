@@ -9,6 +9,7 @@ import { ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { SectionHeader } from "@/components/SectionHeader";
+import { SpecialtyLabel } from "@/components/SpecialtyLabel";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import {
@@ -89,7 +90,7 @@ function SpecialtyCard({ best }: { best: SpecialtyBest }) {
     <View style={[styles.card, styles.cardRow]} testID={`player-specialty-${best.specialty.id}`}>
       <RankBadge rank={best.bestRank} isTitle={best.bestRank === 1} />
       <View style={styles.cardBody}>
-        <Text style={styles.cardTitle}>{best.specialty.name}</Text>
+        <SpecialtyLabel name={best.specialty.name} textStyle={styles.cardTitle} />
         {best.titles > 0 && (
           <View style={styles.pillRow}>
             <StatusPill label={t("player.titles_count", { count: best.titles })} tone="amber" />
@@ -141,7 +142,7 @@ function HistoryCard({ entry }: { entry: HistoryEntry }) {
     >
       <RankBadge rank={entry.rank} isTitle={entry.isTitle} />
       <View style={styles.cardBody}>
-        <Text style={styles.cardTitle}>{entry.specialtyName}</Text>
+        <SpecialtyLabel name={entry.specialtyName} textStyle={styles.cardTitle} />
         <Text style={styles.cardMeta}>{`${entry.categoryName} · ${entry.clubName}`}</Text>
         {partners
           ? <Text style={styles.partners}>{t("player.with", { names: partners })}</Text>

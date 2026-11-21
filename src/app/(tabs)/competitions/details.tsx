@@ -37,6 +37,7 @@ import { RankingView } from "@/components/RankingView";
 import { BAR_HEIGHT, ScreenHeader } from "@/components/ScreenHeader";
 import { type Segment, SegmentedControl } from "@/components/SegmentedControl";
 import { SelectField } from "@/components/SelectField";
+import { SpecialtyLabel } from "@/components/SpecialtyLabel";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
@@ -626,6 +627,15 @@ export default function CompetitionDetailsScreen() {
         options={specialtyOptions}
         value={specialtyId}
         onChange={selectSpecialty}
+        renderOption={(option, { inField, textStyle }) => (
+          // Closed, a name that does not split keeps its one line.
+          <SpecialtyLabel
+            name={option.name}
+            textStyle={textStyle}
+            numberOfLines={inField ? 1 : undefined}
+            testID={inField ? "specialty-select-value" : `specialty-select-value-${option.id}`}
+          />
+        )}
         testID="specialty-select"
       />
     )
