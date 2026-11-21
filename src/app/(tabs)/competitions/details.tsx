@@ -42,7 +42,7 @@ import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import { formatMatchDay, groupByDay, type MatchDay } from "@/features/competitions/matchDays";
-import { matchPhaseLabel, parsePhase } from "@/features/competitions/matchPhase";
+import { matchPhaseLabel, parsePhase, ROUND_ORDER } from "@/features/competitions/matchPhase";
 import { matchProgress } from "@/features/competitions/matchProgress";
 import { parseMatchScore } from "@/features/competitions/matchScore";
 import {
@@ -70,21 +70,6 @@ import type { PhaseType } from "@/components/BracketView";
 import type { Result } from "@/types/competition";
 
 // ─── Grouping ─────────────────────────────────────────────────────────────────
-
-const ROUND_ORDER: Record<PhaseType, number> = {
-  P: 0,
-  B: 1,
-  BM: 2,
-  B1T: 3,
-  B2T: 4,
-  B3T: 5,
-  S: 6,
-  H: 7,
-  Q: 8,
-  D: 9,
-  F: 10,
-  other: 11,
-};
 
 function groupByRound(results: Result[]): RoundGroup[] {
   const map = new Map<PhaseType, Result[]>();
@@ -693,14 +678,7 @@ export default function CompetitionDetailsScreen() {
     if (selection === null && !hasPair) return empty;
     if (!hasPair) return spinner;
     if (viewMode === "ranking") {
-      return (
-        <RankingView
-          competitionId={id}
-          specialtyId={specialtyId}
-          categoryId={categoryId}
-          columns={resultColumns}
-        />
-      );
+      return <RankingView competitionId={id} specialtyId={specialtyId} categoryId={categoryId} />;
     }
     if (isError) return errorBox(error);
     if (loadingResults) return spinner;

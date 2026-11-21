@@ -1,7 +1,9 @@
 import type { Result } from "@/types/competition";
 import { graphqlRequest } from "./client";
 
-const RESULT_SUMMARY_FIELDS = `
+// A lineup player's `number` is the licence, at times followed by a second code
+// ("097866 - 01-641-015"): the ranking matches teams to their matches by it.
+const RESULT_FIELDS = `
   id
   category { id name }
   dateMatch
@@ -11,18 +13,6 @@ const RESULT_SUMMARY_FIELDS = `
   clubB { id name }
   specialty { id name }
   competition { id name }
-  clubALineup {
-    player1 { name }
-    player2 { name }
-  }
-  clubBLineup {
-    player1 { name }
-    player2 { name }
-  }
-`;
-
-const RESULT_DETAIL_FIELDS = `
-  ${RESULT_SUMMARY_FIELDS}
   clubALineup {
     player1 { name number }
     player2 { name number }
@@ -48,7 +38,7 @@ const LIST_RESULTS = `
       phase: $phase
       limit: $limit
     ) {
-      ${RESULT_SUMMARY_FIELDS}
+      ${RESULT_FIELDS}
     }
   }
 `;
@@ -56,7 +46,7 @@ const LIST_RESULTS = `
 const GET_RESULT = `
   query GetResult($id: ID!) {
     result(id: $id) {
-      ${RESULT_DETAIL_FIELDS}
+      ${RESULT_FIELDS}
     }
   }
 `;

@@ -702,6 +702,8 @@ are not a knockout bracket, and their 18 or 20 matches as a column left the late
 | amber | `#FFF3DC`  | `#8A5E00` | Semi-final, attention  |
 
 Shape: `border-radius: 9999px`, `padding: 6px 10px`, `font-size: 12px`, `font-weight: 700`.
+Small (`size="small"`, the phase in a ranking row): `padding: 2px 7px`, `font-size: 11px`,
+`line-height: 14px`, one line.
 
 A past date is not a warning: day cards show no pill for a played day, only the green "Today"
 pill in the header of the day's card.
@@ -1005,6 +1007,66 @@ Grid:      from two columns (web), in the filter column the row moves under the 
 Scrolling: never pinned: outside the filter column, it scrolls away with the results
 ```
 
+### Ranking Table
+
+The ranking view (`RankingView`) is one table, a row per team. The rows come from Frontis
+`rankings`, which has no points and no record; the record and the form come from the results the
+screen already loaded (`useResultsByCompetition`, same query key: no new request), through
+`buildTeamRecords` in `src/features/rankings/ranking.ts`.
+
+```
+Table:        one card: #FFFFFF, 1px #E5DED6 border, 16px radius, rows split by 1px #E5DED6
+              hairlines. Full width on a phone; on web, 712px at most (the text column less its
+              two gutters), left-aligned beside or under the filters
+Head:         "Équipe" over the players, "Bilan" over the form: #7A7A7A 11px weight 700,
+              uppercase, +0.6px tracking, 8px top and bottom. Hidden from screen readers
+Row:          min height 52px, 8px × 10px padding, 8px gaps: the rank cell (22px), two lines
+              4px apart, then, for a pair, a ChevronDown (16px #7A7A7A)
+Rank:         #141414 15px weight 800 tabular-nums, centered. The champion of a final ranking
+              gets the Trophy (18px, amber #C8900A) instead
+Line 1:       the players, #141414 14px weight 700: a pair gives each player a line, a single
+              player's long name may take two. On the right: the record, then the form
+Line 2:       the club name, #7A7A7A 12px weight 600, one line, the first to shrink; the team
+              number ("Équipe 2"), same style, never shrinks. On the right: the phase reached, a
+              small StatusPill (amber "Champion", red for a forfeit, soft for the others)
+Record:       wins-losses ("7-0"), #141414 14px weight 800 tabular-nums. "—", #7A7A7A weight
+              400, when no scored match is the team's. While the results load, or if they fail,
+              the row shows without record and form
+Form:         the last five results, oldest first, right-aligned so the latest ones line up:
+              16px chips, 4px radius, 3px apart, 5px after the record. A win: a green #1F7A5A
+              letter on greenSoft #E6F4EE; a loss: a red #C8102E letter on redSoft #FDE8EC.
+              The letter carries the result without the colour: V/D (fr), W/L (en), V/D (es,
+              victoria/derrota), I/G (eu, irabazi/galdu)
+Text:         the rank, the record and the club name each sit in their own Text: the club name
+              becomes a link (#112) and the digits take a condensed font (#115) on their own
+Press:        a one-player row opens the player (`/competitions/player?licence=…`). A pair's row
+              opens, under it, the PlayerLink pills of its players (36px high, cream, 1px
+              #E5DED6 border, `ranking-player-<licence>`), and its chevron turns up. Pressed and
+              web hover: cream #F7F4EF fill. Keyboard focus: the red ring inside the table
+              (−2px offset)
+Screen reader: each row is one button labelled with a sentence: rank, players, club, team
+              number, phase, wins, losses, then the last results in words ("Rang 1, PUCHEUX
+              Theo, …, Champion, 7 victoires, 0 défaite, derniers résultats : victoire, …"). A
+              pair's row sets `aria-expanded`: accessibilityState is dropped on web
+```
+
+The ranked teams fill about one phone screen: in the 1ère Série example of Championnat CCAPB
+2025-2026, Mur à Gauche / P.G. Creuse Masculin Individuel, a row is 57px (75px when a name takes
+two lines), and nine of the ten rows show under the pinned filters on a 390 × 844 screen. A pair's
+row is 75px. Red marks a loss here, the opposite of the green win, besides its warning role in
+the pills.
+
+**Matching a team to its matches.** By licence only: names carry suffixes ("(D)", "(S)", "(ED)")
+and namesakes play in the same competition (PUCHEUX Theo and PUCHEUX Kevin in Championnat CCAPB
+2025-2026). Frontis gives each lineup player a `number`, the licence, at times followed by a
+second code ("097866 - 01-641-015"): its leading digits are compared with the ranking's
+`players[].licence`. A side belongs to the team with exactly its
+licences, or else to the one team that lists them all, as a team may list a third or fourth
+player; a side that fits several teams, or none, counts for nobody. A match counts once its score
+names a winner (`parseMatchScore`): unscored matches and even sets count for nobody. The form
+orders the matches by date, then by round on the same day (the final after its semi-finals),
+unreadable dates last.
+
 ### Results screen in the grid
 
 On web, from two columns (§5 Columns). On a phone the screen keeps its order: filters,
@@ -1028,7 +1090,7 @@ Filters:   one cell wide, 12px from the results: SelectField, FilterChips (wrap)
            SegmentedControl, ResultsProgress. position: sticky, 68px from the top (the 52px
            collapsed bar and 16px): they stay in view under the bar while the matches scroll.
            The bar alone is pinned
-Results:   the other columns: the match grid or the ranking cards, one card per column
+Results:   the other columns: the match grid, or the ranking table (712px at most)
 ```
 
 With two columns, and always for the bracket, which needs the whole width to fit its rounds,
@@ -1039,7 +1101,7 @@ Filter bar: one wrapping row, 12px gap: SelectField (a cell wide), FilterChips (
             rest of the line, 200px at least), SegmentedControl (a cell wide), pinned under the
             collapsed bar as on a phone. ResultsProgress on its own line under them, with the
             results. When the line is too short, the segmented control drops to a second line
-Results:    the match grid, the ranking cards or the fit bracket, over every column
+Results:    the match grid, the ranking table (712px at most) or the fit bracket
 ```
 
 Switching to the bracket moves the filters from the column to the bar.
@@ -1158,10 +1220,12 @@ The edge stays above the 3:1 that WCAG 1.4.11 asks of a focus indicator, against
 - **Screen padding:** 20 px left/right, consistent across all screens.
 - **Content gap:** 22 px between major stacked sections within a ScrollView.
 - **Single-column layout** on a phone. On web, wider windows add columns of cards (below).
-- **Grid screens** (leagues, competitions, results, ranking, player search, player): their
+- **Grid screens** (leagues, competitions, results, player search, player): their
   lists of cards go through `CardGrid` (`src/components/CardGrid.tsx`), with `columns` from
   `useWebLayout()`. In one column, `CardGrid` is the list as it was. Season tiles are half a
   card: two per column. Nothing caps the width: a wider window gets more columns.
+- **The ranking** is one table, not a grid (§4 Ranking Table): it keeps to the text column
+  less its gutters, `TEXT_MAX_WIDTH − 2 × GUTTER` (712 px), left-aligned in the results column.
 - **Text screens** (About, Score): their content keeps to the text column, `useTextColumn()`
   (`src/hooks/use-layout.ts`): two cards wide, 752 px with its gutters, centered. Add it to the
   view that holds the 20 px gutter, and pass it to `ScreenHeader` (`column`).

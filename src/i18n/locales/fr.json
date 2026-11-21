@@ -227,7 +227,20 @@
     "licence": "Licence {{licence}}",
     "rank_a11y": "Rang {{rank}}",
     "empty": "La ligue ne publie pas de classement pour cette catégorie.",
-    "error_load": "Impossible de charger le classement."
+    "error_load": "Impossible de charger le classement.",
+    "column_team": "Équipe",
+    "column_record": "Bilan",
+    "form_win": "V",
+    "form_loss": "D",
+    "form_win_a11y": "victoire",
+    "form_loss_a11y": "défaite",
+    "form_a11y": "derniers résultats : {{results}}",
+    "wins_a11y_one": "{{count}} victoire",
+    "wins_a11y_other": "{{count}} victoires",
+    "losses_a11y_one": "{{count}} défaite",
+    "losses_a11y_other": "{{count}} défaites",
+    "no_results_a11y": "aucune partie jouée",
+    "players_hint": "Affiche les liens vers les joueurs"
   },
   "player": {
     "title": "Joueur",
