@@ -29,6 +29,8 @@ import {
   LayoutList,
   ListOrdered,
   Network,
+  Share,
+  Share2,
   Swords,
   Trophy,
   Users,
@@ -37,6 +39,7 @@ import { RankingView } from "@/components/RankingView";
 import { BAR_HEIGHT, ScreenHeader } from "@/components/ScreenHeader";
 import { type Segment, SegmentedControl } from "@/components/SegmentedControl";
 import { SelectField } from "@/components/SelectField";
+import { useShareCard } from "@/components/ShareCard";
 import { SpecialtyLabel } from "@/components/SpecialtyLabel";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
@@ -51,9 +54,14 @@ import {
   withSelected,
 } from "@/features/competitions/resultFilters";
 import { GRID_GAP, GUTTER } from "@/features/layout/breakpoints";
+import { canShareResult, resultCardData, teamNames } from "@/features/share/share-card";
 import { useCategories } from "@/hooks/use-categories";
 import { useCompetition, useResultFilters } from "@/hooks/use-competitions";
-import { showsFocusRing, useInteractionStyles } from "@/hooks/use-interaction-styles";
+import {
+  type InteractionState,
+  showsFocusRing,
+  useInteractionStyles,
+} from "@/hooks/use-interaction-styles";
 import { useWebLayout } from "@/hooks/use-layout";
 import { useResultsByCompetition } from "@/hooks/use-matches";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
@@ -134,18 +142,52 @@ function useDayTitle(day: MatchDay): { title: string; count: string } {
   };
 }
 
-/** One match of a day card: its phase in a small label, then both teams. */
-function MatchRow({ result, phaseType }: { result: Result; phaseType: PhaseType }) {
+const ShareIcon = Platform.OS === "android" ? Share2 : Share;
+
+/**
+ * One match of a day card: its phase in a small label, then both teams. A match with a score
+ * has a Share button at the end of its phase line, which shares it as an image.
+ */
+function MatchRow(
+  { result, phaseType, onShare }: {
+    result: Result;
+    phaseType: PhaseType;
+    onShare: (result: Result) => void;
+  },
+) {
   const { t } = useTranslation();
+  const { colors: theme } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const interaction = useInteractionStyles();
   const colors = usePhaseColors()[phaseType];
   const isFinal = phaseType === "F";
+  const [teamA, teamB] = teamNames(result);
 
   return (
     <View style={styles.matchRow} testID={`result-${result.id}`}>
-      <Text style={[styles.matchPhase, isFinal && { color: colors.label }]} numberOfLines={1}>
-        {matchPhaseLabel(result.phase, t)}
-      </Text>
+      <View style={styles.matchHead}>
+        <Text style={[styles.matchPhase, isFinal && { color: colors.label }]} numberOfLines={1}>
+          {matchPhaseLabel(result.phase, t)}
+        </Text>
+        {canShareResult(result)
+          ? (
+            <Pressable
+              onPress={() => onShare(result)}
+              accessibilityRole="button"
+              accessibilityLabel={t("share.result_a11y", { teamA, teamB })}
+              hitSlop={6}
+              style={(state: InteractionState) => [
+                styles.shareButton,
+                (state.pressed || state.hovered) && styles.shareButtonActive,
+                showsFocusRing(state) && interaction.focusRing,
+              ]}
+              testID={`share-result-${result.id}`}
+            >
+              <ShareIcon color={theme.muted} size={16} />
+            </Pressable>
+          )
+          : null}
+      </View>
       <TeamRows result={result} isFinal={isFinal} size="card" />
     </View>
   );
@@ -157,7 +199,7 @@ function MatchRow({ result, phaseType }: { result: Result; phaseType: PhaseType 
  * the grid.
  */
 function DayCard(
-  { day, phaseType, columns, open, onToggle, reduceMotion, cardRef }: {
+  { day, phaseType, columns, open, onToggle, reduceMotion, cardRef, onShare }: {
     day: MatchDay;
     phaseType: PhaseType;
     columns: number;
@@ -166,6 +208,7 @@ function DayCard(
     reduceMotion: boolean;
     /** The card, measured to show the day under the pinned filters. */
     cardRef: Ref<View>;
+    onShare: (result: Result) => void;
   },
 ) {
   const { t } = useTranslation();
@@ -249,7 +292,7 @@ function DayCard(
               <View key={r} style={[styles.dayRow, r > 0 && styles.dayRowLine]}>
                 {row.map((result, c) => (
                   <View key={result.id} style={[styles.dayCell, c > 0 && styles.dayCellLine]}>
-                    <MatchRow result={result} phaseType={phaseType} />
+                    <MatchRow result={result} phaseType={phaseType} onShare={onShare} />
                   </View>
                 ))}
                 {Array.from(
@@ -359,9 +402,14 @@ function PinnedHeader(
 type ViewMode = "list" | "bracket" | "ranking";
 
 export default function CompetitionDetailsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const sharing = useShareCard();
+  const shareResult = (result: Result) => {
+    const card = resultCardData(result, t, i18n.resolvedLanguage ?? "en");
+    if (card) sharing.share(card);
+  };
   const params = useLocalSearchParams<{
     id: string;
     specialtyId?: string;
@@ -707,6 +755,7 @@ export default function CompetitionDetailsScreen() {
                       if (card) dayCards.set(key, card);
                       else dayCards.delete(key);
                     }}
+                    onShare={shareResult}
                   />
                 );
               })}
@@ -797,6 +846,8 @@ export default function CompetitionDetailsScreen() {
             : renderResults()}
         </View>
       </Animated.ScrollView>
+      {/* The card being shared, off screen: beside the scroll view, never one of its children. */}
+      {sharing.card}
     </SafeAreaView>
   );
 }
@@ -972,7 +1023,21 @@ const makeStyles = (c: Palette) =>
 
     // A match in a day card: its phase above the teams.
     matchRow: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6 },
-    matchPhase: { color: c.muted, fontSize: 12, fontWeight: "600", marginBottom: 2 },
+    // Above the team rows, so the Share button's lower edge takes its touches.
+    matchHead: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 2, zIndex: 1 },
+    matchPhase: { flex: 1, color: c.muted, fontSize: 12, fontWeight: "600" },
+    // 32px round, at the end of the phase line, which it does not make taller: the negative
+    // margins take it out of the line's height. hitSlop brings its touch area to 44px.
+    shareButton: {
+      width: 32,
+      height: 32,
+      marginVertical: -9,
+      marginRight: -6,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    shareButtonActive: { backgroundColor: c.cream },
 
     // Current day strip: under the pinned header, cream over the results scrolling beneath.
     dayStrip: {

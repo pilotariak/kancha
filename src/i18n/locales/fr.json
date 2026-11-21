@@ -16,6 +16,18 @@
     "share": "Partager",
     "copy": "Copier le lien"
   },
+  "share": {
+    "cta": "Partager",
+    "result_a11y": "Partager le résultat de {{teamA}} contre {{teamB}} en image",
+    "score_a11y": "Partager le score en image",
+    "dialog_title": "Partager le résultat",
+    "error": "L'image n'a pas pu être partagée.",
+    "results_link": "Résultats sur Kancha",
+    "score_eyebrow": "Partie",
+    "score_target_one": "En {{count}} point",
+    "score_target_other": "En {{count}} points",
+    "score_link": "Comptez les points avec Kancha"
+  },
   "error": {
     "title": "Une erreur est survenue",
     "subtitle": "Une erreur inattendue a interrompu cet écran. Vous pouvez réessayer.",

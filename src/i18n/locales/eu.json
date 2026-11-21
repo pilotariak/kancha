@@ -16,6 +16,18 @@
     "share": "Partekatu",
     "copy": "Kopiatu esteka"
   },
+  "share": {
+    "cta": "Partekatu",
+    "result_a11y": "Partekatu {{teamA}} eta {{teamB}} arteko emaitza irudi gisa",
+    "score_a11y": "Partekatu puntuazioa irudi gisa",
+    "dialog_title": "Partekatu emaitza",
+    "error": "Ezin izan da irudia partekatu.",
+    "results_link": "Emaitzak Kanchan",
+    "score_eyebrow": "Partida",
+    "score_target_one": "{{count}} puntura",
+    "score_target_other": "{{count}} puntura",
+    "score_link": "Eraman puntuazioa Kancharekin"
+  },
   "error": {
     "title": "Zerbaitek huts egin du",
     "subtitle": "Ustekabeko errore batek pantaila hau gelditu du. Berriro saia zaitezke.",

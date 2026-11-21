@@ -6,9 +6,11 @@ import { useTranslation } from "react-i18next";
 import { Alert, Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Trophy, Undo2, X } from "@/components/icons";
+import { Share, Share2, Trophy, Undo2, X } from "@/components/icons";
+import { useShareCard } from "@/components/ShareCard";
 import type { Palette } from "@/constants/colors";
 import { INITIAL, reducer, type ScoreState, type Side } from "@/features/score/scoreMachine";
+import { scoreCardData } from "@/features/share/share-card";
 import { type InteractionState, showsFocusRing } from "@/hooks/use-interaction-styles";
 import { useTextColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -18,6 +20,8 @@ const isWeb = Platform.OS === "web";
 const subscribeNever = () => () => {};
 
 const CLOSE_SIZE = 48;
+
+const ShareIcon = Platform.OS === "android" ? Share2 : Share;
 
 interface MatchSettings {
   teamA: string;
@@ -195,11 +199,12 @@ interface WinProps {
 }
 
 function WinScreen({ state, onUndo, onNewGame }: WinProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const column = useTextColumn();
   const insets = useSafeAreaInsets();
+  const sharing = useShareCard();
   const scale = useRef(new Animated.Value(0.4)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -244,6 +249,20 @@ function WinScreen({ state, onUndo, onNewGame }: WinProps) {
             interaction.pressed && styles.winUndoBtnPressed,
             showsFocusRing(interaction) && styles.focusRing,
           ]}
+          onPress={() => sharing.share(scoreCardData(state, t, i18n.resolvedLanguage ?? "en"))}
+          accessibilityRole="button"
+          accessibilityLabel={t("share.score_a11y")}
+          testID="share-score"
+        >
+          <ShareIcon color="#FFFFFF" size={18} />
+          <Text style={styles.winUndoLabel}>{t("share.cta")}</Text>
+        </Pressable>
+        <Pressable
+          style={(interaction: InteractionState) => [
+            styles.winUndoBtn,
+            interaction.pressed && styles.winUndoBtnPressed,
+            showsFocusRing(interaction) && styles.focusRing,
+          ]}
           onPress={onUndo}
           accessibilityRole="button"
           accessibilityLabel={t("score.undo_point", { team: winnerName })}
@@ -264,6 +283,8 @@ function WinScreen({ state, onUndo, onNewGame }: WinProps) {
           <Text style={styles.newGameLabel}>{t("score.cta_new_game")}</Text>
         </Pressable>
       </View>
+      {/* The card being shared, off screen. */}
+      {sharing.card}
     </View>
   );
 }
