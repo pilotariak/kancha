@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.8.0](https://github.com/pilotariak/kancha/compare/v0.7.0...v0.8.0) (2026-11-21)
+
+
+### 🚀 Features
+
+* **competitions:** feature the current season in the competitions list ([#85](https://github.com/pilotariak/kancha/issues/85)) ([7f8c8f8](https://github.com/pilotariak/kancha/commit/7f8c8f88332144f9255c515de475116857ec82ce)), closes [#76](https://github.com/pilotariak/kancha/issues/76)
+* **details:** choose specialty and category on the results screen ([#84](https://github.com/pilotariak/kancha/issues/84)) ([771d7c7](https://github.com/pilotariak/kancha/commit/771d7c7b79babce0b6f58c1845c97fda7bd7884a)), closes [#74](https://github.com/pilotariak/kancha/issues/74) [#71](https://github.com/pilotariak/kancha/issues/71)
+* **details:** collapse the header and pin the filters while scrolling ([#110](https://github.com/pilotariak/kancha/issues/110)) ([c712dbf](https://github.com/pilotariak/kancha/commit/c712dbfdb947fce4cfbfd6c4a5e9a132f1b9b00d)), closes [#93](https://github.com/pilotariak/kancha/issues/93)
+* **details:** group matches by match day ([#111](https://github.com/pilotariak/kancha/issues/111)) ([641bbec](https://github.com/pilotariak/kancha/commit/641bbeca0978feffc896478ff80ee84af61dc191)), closes [#94](https://github.com/pilotariak/kancha/issues/94)
+* **details:** show match scores set by set and mark the winner ([#82](https://github.com/pilotariak/kancha/issues/82)) ([f0eaf9b](https://github.com/pilotariak/kancha/commit/f0eaf9bbacdeda5bf1ab2b9af64e0b906b5ad73a)), closes [#73](https://github.com/pilotariak/kancha/issues/73)
+* **leagues:** give each league its own tile ([#107](https://github.com/pilotariak/kancha/issues/107)) ([ab2f2c5](https://github.com/pilotariak/kancha/commit/ab2f2c5fee417eeffad6b33ebb292782df1d417c)), closes [#95](https://github.com/pilotariak/kancha/issues/95)
+* **ranking:** show the ranking as a compact table with record and form ([#118](https://github.com/pilotariak/kancha/issues/118)) ([1232833](https://github.com/pilotariak/kancha/commit/1232833aee973b74b8ddf6221d18b7c104243206)), closes [#113](https://github.com/pilotariak/kancha/issues/113)
+* **score:** add a full-screen match mode ([#108](https://github.com/pilotariak/kancha/issues/108)) ([33349bd](https://github.com/pilotariak/kancha/commit/33349bdd07255fab2a92b713cda4bbe64a1ed4ea)), closes [#96](https://github.com/pilotariak/kancha/issues/96)
+* **specialty:** split specialty names and add discipline pictograms ([#117](https://github.com/pilotariak/kancha/issues/117)) ([044f237](https://github.com/pilotariak/kancha/commit/044f237e2edb218e9016b9e3c5b95a3ce3c1b7d5)), closes [#114](https://github.com/pilotariak/kancha/issues/114)
+* **ui:** hide the Créneaux tab until the screen ships ([#78](https://github.com/pilotariak/kancha/issues/78)) ([e6af9ce](https://github.com/pilotariak/kancha/commit/e6af9ce9966454043100572717853b76df909f69)), closes [#77](https://github.com/pilotariak/kancha/issues/77)
+* **ui:** replace the hero gradient with a solid red header band ([#83](https://github.com/pilotariak/kancha/issues/83)) ([1ec796c](https://github.com/pilotariak/kancha/commit/1ec796c23491249bd9f5ff18d2c260b0e9e0d34d)), closes [#75](https://github.com/pilotariak/kancha/issues/75)
+* **ui:** use native tabs, link previews and iOS icon variants ([#109](https://github.com/pilotariak/kancha/issues/109)) ([326a349](https://github.com/pilotariak/kancha/commit/326a3492a43b7f23181b566c46543d2b3b0c2311)), closes [#98](https://github.com/pilotariak/kancha/issues/98)
+* **web:** add a desktop layout with a navigation rail ([#101](https://github.com/pilotariak/kancha/issues/101)) ([6a9fcfc](https://github.com/pilotariak/kancha/commit/6a9fcfc3d5883b2bc018effd626a966474bb1f35))
+
+
+### 🐛 Bug Fixes
+
+* **about:** describe the supported leagues accurately ([#102](https://github.com/pilotariak/kancha/issues/102)) ([f53e646](https://github.com/pilotariak/kancha/commit/f53e64693338314b56d038f44cf1027fc545946a)), closes [#91](https://github.com/pilotariak/kancha/issues/91)
+* **details:** use the singular round name on match cards ([#104](https://github.com/pilotariak/kancha/issues/104)) ([6708431](https://github.com/pilotariak/kancha/commit/6708431e54afe597a02d05f2092a3dc890d05218)), closes [#90](https://github.com/pilotariak/kancha/issues/90)
+* **launch:** match the native splash and launch screen to the red band ([#103](https://github.com/pilotariak/kancha/issues/103)) ([f67129e](https://github.com/pilotariak/kancha/commit/f67129e16191cac39defab0423acebe6375528bc)), closes [#92](https://github.com/pilotariak/kancha/issues/92)
+* **score:** make the new match fields readable in both themes ([#80](https://github.com/pilotariak/kancha/issues/80)) ([d3d5272](https://github.com/pilotariak/kancha/commit/d3d52727f5ae70fc5851ba17883eefef37a10b51)), closes [#70](https://github.com/pilotariak/kancha/issues/70)
+* **slot:** use palette tokens and translations on the slot screens ([#87](https://github.com/pilotariak/kancha/issues/87)) ([7eb5e93](https://github.com/pilotariak/kancha/commit/7eb5e93d70aef147978b46881e9cdbe3fe47acc7)), closes [#72](https://github.com/pilotariak/kancha/issues/72)
+* **ui:** keep the active segment label from being truncated ([#106](https://github.com/pilotariak/kancha/issues/106)) ([e47f95b](https://github.com/pilotariak/kancha/commit/e47f95b7633e21dd462ba5ea7504b0c8fbd75694)), closes [#88](https://github.com/pilotariak/kancha/issues/88)
+* **ui:** keep the row layout of cards built on PressableScale ([#81](https://github.com/pilotariak/kancha/issues/81)) ([eb72462](https://github.com/pilotariak/kancha/commit/eb72462382f9cd94368e16658f069357a15d37bd)), closes [#69](https://github.com/pilotariak/kancha/issues/69)
+* **web:** replace the browser focus outline on text fields ([#105](https://github.com/pilotariak/kancha/issues/105)) ([640fc8a](https://github.com/pilotariak/kancha/commit/640fc8a1399cb7efd10f1d7b82af4d0505d78979)), closes [#89](https://github.com/pilotariak/kancha/issues/89)
+
+
+### 🚨 Maintenance
+
+* **dprint:** format only staged files and skip CHANGELOG.md ([#86](https://github.com/pilotariak/kancha/issues/86)) ([85cf532](https://github.com/pilotariak/kancha/commit/85cf5329b2b7cd3656037760a4bd49376d7aa1c0))
+
 ## [0.7.0](https://github.com/pilotariak/kancha/compare/v0.6.0...v0.7.0) (2026-11-19)
 
 
