@@ -16,6 +16,18 @@
     "share": "Share",
     "copy": "Copy link"
   },
+  "share": {
+    "cta": "Share",
+    "result_a11y": "Share the result of {{teamA}} against {{teamB}} as an image",
+    "score_a11y": "Share the score as an image",
+    "dialog_title": "Share the result",
+    "error": "The image could not be shared.",
+    "results_link": "Results on Kancha",
+    "score_eyebrow": "Match",
+    "score_target_one": "First to {{count}} point",
+    "score_target_other": "First to {{count}} points",
+    "score_link": "Keep score with Kancha"
+  },
   "error": {
     "title": "Something went wrong",
     "subtitle": "An unexpected error stopped this screen. You can try again.",

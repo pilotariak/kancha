@@ -16,6 +16,18 @@
     "share": "Compartir",
     "copy": "Copiar enlace"
   },
+  "share": {
+    "cta": "Compartir",
+    "result_a11y": "Compartir el resultado de {{teamA}} contra {{teamB}} como imagen",
+    "score_a11y": "Compartir el marcador como imagen",
+    "dialog_title": "Compartir el resultado",
+    "error": "No se ha podido compartir la imagen.",
+    "results_link": "Resultados en Kancha",
+    "score_eyebrow": "Partido",
+    "score_target_one": "A {{count}} punto",
+    "score_target_other": "A {{count}} puntos",
+    "score_link": "Lleva el marcador con Kancha"
+  },
   "error": {
     "title": "Algo salió mal",
     "subtitle": "Un error inesperado detuvo esta pantalla. Puedes intentarlo de nuevo.",

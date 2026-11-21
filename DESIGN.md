@@ -622,6 +622,7 @@ Matches:      one row per match, split by full-width 1px #E5DED6 hairlines. Each
               phase in words above the teams ("Poule 4": rounds_match.* label), #7A7A7A 12px
               weight 600 (amber #C8900A in the Final), then the team rows; 14px side padding,
               10px top, 6px bottom. No date on a match: the day header carries it
+Share:        a match with a score ends its phase line with a Share button (§ Share card)
 Team row:     8px top and bottom; 16px winner slot | name + club (flex 1) | one score column
               per set
 Divider:      1px solid #E5DED6 between team rows
@@ -1131,12 +1132,66 @@ Close:       48px #FFFFFF circle centered on the seam, X 22px in panel, shadow
              Android, window.confirm on web
 Focus (web): a 2px #FFFFFF ring, as red disappears on red: inside the half (offset −6px),
              outside the buttons (offset 2px)
-Win:         the green screen: trophy, winner, both scores. "Undo last point" (outlined, 1px
-             rgba(255,255,255,0.4)) above "New match" (redFill), which goes back to the setup
+Win:         the green screen: trophy, winner, both scores. "Share" (Share card) and "Undo last
+             point", both outlined (1px rgba(255,255,255,0.4)), above "New match" (redFill),
+             which goes back to the setup
 Device:      the screen stays on while a game is played, not on the win screen (expo-keep-awake,
              the Wake Lock API on web). Haptics on iOS and Android: an impact per point, a
              selection tick per undo, a success on the win
 ```
+
+### Share card
+
+`ShareCard` (`src/components/ShareCard.tsx`): one match as an image to post, 1080 × 1350 px
+(4:5, a portrait Instagram post), built by `resultCardData` or `scoreCardData`
+(`src/features/share/share-card.ts`). Like a printed card, it does not follow the app theme: it
+always takes the light palette (`KanchaColorsLight`), and its text ignores the system text size.
+Sizes below are image pixels.
+
+```
+Canvas:     cream
+Band:       redFill, 80px side padding, 56px top and bottom, 72px bottom corners. KanchaLogo
+            88px (on-dark) and "Kancha" #FFFFFF 44px weight 900, 24px apart. 36px below: the
+            competition (onRedStrong 30px weight 800, uppercase, +4px tracking, one line), the
+            specialty (#FFFFFF 56px weight 900, two lines), the category (onRedStrong 38px 700)
+Meta:       48px under the band. The round in a pill: ink 30px weight 800, uppercase, +2px,
+            28px × 14px padding, white with a 3px line border; the Final in amberBg with an
+            amber border and a Trophy. Then the long date with its year ("Samedi 28 février
+            2026"), ink 34px weight 700
+Teams:      a white card 32px below: 3px line border (6px red for the Final), 48px radius, 44px
+            side padding. Each team, 28px top and bottom: a 56px winner slot (green Check,
+            stroke 3), the players (ink 44px, two lines) over their club (muted 30px weight 600,
+            two lines), then one column per set: 92px, right-aligned, 110px min width, 28px
+            apart, tabular-nums. Winner 800 with sets 900; loser 600 with muted sets 400; no
+            winner, both 700. A 3px line between the teams
+Link:       64px from the bottom: "Résultats sur Kancha" (muted 30px weight 600), then the
+            results screen's public link (`shareUrl`) without https://, ink 34px weight 700, two
+            lines, breaking after "?" and "&"
+Match mode: eyebrow "Partie", the target as title ("En 40 points"), no category or round,
+            today's date, the final points in one column, and kancha.pilotariak.com/score
+```
+
+Where it is shared from:
+
+```
+Results:  a Share button at the end of a scored match's phase line, in the day cards: a 32px
+          circle, Share icon 16px muted (Share2 on Android), cream when pressed or hovered, the
+          red focus ring. Negative margins keep the line's height; hitSlop brings the touch area
+          to 44px. Labeled "Partager le résultat de <A> contre <B> en image". A match without a
+          score has none
+Win:      "Share", outlined, Share icon 18px #FFFFFF, labeled "Partager le score en image"
+Never disabled: a press while a card is on its way does nothing, and focus stays on the button
+```
+
+iOS and Android render the card off screen (one at a time, on demand), capture it with
+react-native-view-shot and open the system share sheet with the PNG through expo-sharing: stories,
+messages, saving to photos. The link is in the image. Web makes the same PNG with view-shot's web
+module (html2canvas), then calls `navigator.share({ files })` where `navigator.canShare` accepts
+files, else downloads it. Closing the sheet without sharing is not an error.
+
+On web, html2canvas copies the app's stylesheet with the server-rendered rules last, which then
+override the classes created in the browser. The card therefore uses plain style objects, which
+react-native-web writes inline, never `StyleSheet.create`.
 
 ### Error State
 
