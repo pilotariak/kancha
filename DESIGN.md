@@ -861,7 +861,8 @@ Focus:         the browser's default focus ring on the tab link
 specialty on the results screen.
 
 ```
-Field:     #FFFFFF (white), 1px solid #E5DED6 (line), 16px radius, min height 44px, 16px sides
+Field:     #FFFFFF (white), 1px solid #E5DED6 (line), 16px radius, min height 44px, 16px sides,
+           8px above and below
 Value:     #141414 (ink), 15px, weight 700, one line with an ellipsis
 Chevron:   ChevronDown 18px, #7A7A7A (muted), right, 8px gap
 Pressed:   #FFFDFC (card)
@@ -869,10 +870,68 @@ List:      a sheet from the bottom of the screen: #FFFFFF, 24px top corners, scr
            (rgba(103,18,31,0.14)), uppercase muted title (12px, weight 800, +1.5px tracking)
 Rows:      min height 48px, 16px sides, full name #141414 15px weight 600; the current one
            weight 800 with an ink Check (18px, stroke 3). A row or the scrim closes the sheet
+Custom:    `renderOption` draws an option in the field and in the rows instead of the name. It
+           gets the name's text style there, so it can draw a name as is. The option's name stays
+           its screen reader label. The results screen draws each specialty as a SpecialtyLabel
+           (below): two lines at least, so the field grows from 44px to 56px, and
+           more when the discipline wraps (76px for 136 at 320px)
 Web:       hover and focus as cards (lineStrong border, shadow, red ring); a hovered row turns
            cream like a pressed one. From two columns the sheet is the text column (752px) at
            most, centered
 ```
+
+### Specialty Name and Pictograms
+
+Frontis names a specialty "court / discipline": "Mur à Gauche / P.G. Creuse Masculin Individuel".
+`splitSpecialtyName` (`src/features/competitions/specialtyName.ts`) splits it at the first " / "
+into the court, the discipline (Main nue, P.G. Pleine, P.G. Creuse, Xare, Pasaka, Joko Garbi,
+Grand Chistera, Cesta Punta, whatever their spelling) and the rest (gender, format, group). Every
+part keeps Frontis's spelling: they are proper names, never translated. `SpecialtyLabel`
+(`src/components/SpecialtyLabel.tsx`) draws the result in the specialty picker (field and rows)
+and on the player cards:
+
+```
+Court:      #7A7A7A (muted), 12px, weight 700, line height 16, after the court pictogram
+            (16px, muted)
+Discipline: the discipline and the rest as one text, in the place's own style (15px ink in the
+            picker and on the cards), line height 20, after the discipline pictogram (20px,
+            ink). It wraps, never cut, in the closed field too
+Pictograms: a 20px column, 8px from the text, so the court and the discipline start at one edge.
+            A court Kancha does not know keeps its label and leaves the column empty
+Fallback:   a name without " / ", or with an unknown discipline, shows whole, as before: one
+            line in the closed field, wrapping in the rows and on the cards
+```
+
+| Pair                                   | Light  | Dark (Ikurriña) |
+| -------------------------------------- | ------ | --------------- |
+| Court label (muted) on white           | 4.3:1  | 6.1:1           |
+| Discipline pictogram (ink) on white    | 18.4:1 | 14.0:1          |
+| Court pictogram (muted) on white (3:1) | 4.3:1  | 6.1:1           |
+
+The muted court label reaches 4.3:1 on white in light, below the 4.5:1 of the other text pairs:
+the discipline line under it names the specialty at full contrast.
+
+Pictograms (`src/components/pictograms/`), one component per drawing, looked up in `PICTOGRAMS`
+(`index.ts`) by discipline or court key:
+
+```
+Grid:       lucide's: 24 viewBox, 2px stroke, round caps and joins, no fill. Props as a lucide
+            icon (color, size, strokeWidth, absoluteStrokeWidth); screens pass a palette color
+Implements: one per discipline. Main nue: an open hand. Paleta gomme (P.G. Pleine and P.G. Creuse):
+            the paleta and its ball. Xare: the long racket, its net along the hoop. Pasaka: the
+            leather glove and its cuff. Joko garbi: the short chistera on its glove. Grand
+            chistera: the long one. Cesta punta: the deep basket, its tip curled
+Courts:     the walls. Place libre: the fronton, one wall over open ground. Mur à gauche: the
+            front wall and the left wall. Trinquet: the closed court, the tambour slanting off
+            the right wall
+Decorative: hidden from screen readers (aria-hidden on web, accessibilityElementsHidden and
+            importantForAccessibility on iOS and Android); the text beside them names the
+            specialty
+Legible:    at 20px in both themes; the courts at 16px beside their 12px label
+```
+
+These are first drawings. To replace one, from an illustrator's set for instance, change its
+component or point its `PICTOGRAMS` key at another: no screen changes.
 
 ### Filter Chip
 
@@ -953,7 +1012,7 @@ progress, results. The filters there are two rows, pinned under the collapsed ba
 Header) on cream, 14px under the bar and 12px above a 1px line that shows once collapsed:
 
 ```
-Row 1:     SelectField, full width: specialty names differ at their end
+Row 1:     SelectField, full width: the court above the discipline (SpecialtyLabel)
 Row 2:     FilterChips (bleed="start"), then SegmentedControl (iconOnly), 8px apart
 ```
 

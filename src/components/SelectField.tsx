@@ -1,6 +1,15 @@
-import React, { useState } from "react";
+import React, { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  type StyleProp,
+  StyleSheet,
+  Text,
+  type TextStyle,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Check, ChevronDown } from "@/components/icons";
@@ -14,21 +23,38 @@ import {
 import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
-interface SelectFieldProps {
+export interface SelectOption {
+  id: string;
+  /** Shown, and the screen reader label of the option. */
+  name: string;
+}
+
+interface SelectFieldProps<T extends SelectOption> {
   /** What is chosen, e.g. "Specialty": the list title and the screen reader label. */
   label: string;
   hint?: string;
-  options: readonly { id: string; name: string }[];
+  options: readonly T[];
   value?: string;
   onChange: (id: string) => void;
+  /**
+   * Draws an option in the closed field (`inField`) and in the list, in place of its name.
+   * `textStyle` is the style the name has there, so a name drawn as is keeps its look.
+   */
+  renderOption?: (
+    option: T,
+    context: { inField: boolean; textStyle: StyleProp<TextStyle> },
+  ) => ReactNode;
   testID?: string;
 }
 
 /**
  * One choice among long names: a field that shows the current name on one
  * line and opens the full list in a sheet from the bottom of the screen.
+ * `renderOption` draws the options otherwise, on several lines if need be.
  */
-export function SelectField({ label, hint, options, value, onChange, testID }: SelectFieldProps) {
+export function SelectField<T extends SelectOption>(
+  { label, hint, options, value, onChange, renderOption, testID }: SelectFieldProps<T>,
+) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
@@ -53,7 +79,17 @@ export function SelectField({ label, hint, options, value, onChange, testID }: S
         accessibilityHint={hint}
         testID={testID}
       >
-        <Text style={styles.value} numberOfLines={1}>{selected?.name ?? ""}</Text>
+        {renderOption && selected
+          ? (
+            <View style={styles.valueBox}>
+              {renderOption(selected, { inField: true, textStyle: styles.valueText })}
+            </View>
+          )
+          : (
+            <Text style={[styles.valueBox, styles.valueText]} numberOfLines={1}>
+              {selected?.name ?? ""}
+            </Text>
+          )}
         <ChevronDown color={colors.muted} size={18} />
       </Pressable>
 
@@ -93,9 +129,26 @@ export function SelectField({ label, hint, options, value, onChange, testID }: S
                     accessibilityLabel={option.name}
                     testID={testID ? `${testID}-option-${option.id}` : undefined}
                   >
-                    <Text style={[styles.optionLabel, active && styles.optionLabelActive]}>
-                      {option.name}
-                    </Text>
+                    {renderOption
+                      ? (
+                        <View style={styles.optionBox}>
+                          {renderOption(option, {
+                            inField: false,
+                            textStyle: [styles.optionLabel, active && styles.optionLabelActive],
+                          })}
+                        </View>
+                      )
+                      : (
+                        <Text
+                          style={[
+                            styles.optionBox,
+                            styles.optionLabel,
+                            active && styles.optionLabelActive,
+                          ]}
+                        >
+                          {option.name}
+                        </Text>
+                      )}
                     {active ? <Check color={colors.ink} size={18} strokeWidth={3} /> : null}
                   </Pressable>
                 );
@@ -116,13 +169,16 @@ const makeStyles = (c: Palette) =>
       gap: 8,
       minHeight: 44,
       paddingHorizontal: 16,
+      // Room for a value drawn on several lines by renderOption.
+      paddingVertical: 8,
       borderRadius: 16,
       borderWidth: 1,
       borderColor: c.line,
       backgroundColor: c.white,
     },
     fieldPressed: { backgroundColor: c.card },
-    value: { flex: 1, color: c.ink, fontSize: 15, fontWeight: "700" },
+    valueBox: { flex: 1 },
+    valueText: { color: c.ink, fontSize: 15, fontWeight: "700" },
     overlay: { flex: 1, justifyContent: "flex-end", backgroundColor: c.shadow },
     sheet: {
       maxHeight: "75%",
@@ -154,6 +210,7 @@ const makeStyles = (c: Palette) =>
     },
     // Also the hovered row on web.
     optionPressed: { backgroundColor: c.cream },
-    optionLabel: { flex: 1, color: c.ink, fontSize: 15, fontWeight: "600" },
+    optionBox: { flex: 1 },
+    optionLabel: { color: c.ink, fontSize: 15, fontWeight: "600" },
     optionLabelActive: { fontWeight: "800" },
   });
