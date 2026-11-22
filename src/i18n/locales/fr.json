@@ -91,6 +91,17 @@
     "today": "Aujourd'hui",
     "winner": "Vainqueur"
   },
+  "final_summary": {
+    "title": "Vainqueurs",
+    "against": "contre {{team}}",
+    "third_place": "Troisième place",
+    "facts": "{{teams}}, {{matches}}",
+    "and": "et",
+    "team_a11y": "{{players}}, {{club}}",
+    "set_a11y": "{{winners}} à {{runnerUp}}",
+    "final_a11y": "{{round}} : gagnée {{score}} contre {{team}}",
+    "third_place_a11y": "Troisième place : {{teams}}"
+  },
   "rounds": {
     "P": "Poules",
     "B1T": "Barrages 1er tour",

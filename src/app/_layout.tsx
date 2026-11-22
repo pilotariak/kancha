@@ -1,6 +1,7 @@
 import i18n, { hydrationI18n } from "@/i18n";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { FontDisplay, type FontSource, useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -13,6 +14,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorScreen } from "@/components/ErrorScreen";
 import { LaunchScreen } from "@/components/launch-screen";
 import { WebDocumentHead } from "@/components/WebDocumentHead";
+import { ScoreFont } from "@/constants/typography";
 import { useTheme } from "@/hooks/use-theme";
 import { useLeagueStore } from "@/store/league-store";
 
@@ -21,6 +23,22 @@ import { useLeagueStore } from "@/store/league-store";
 export { ErrorScreen as ErrorBoundary };
 
 void SplashScreen.preventAutoHideAsync();
+
+// Native builds embed the scoreboard faces (the expo-font plugin in app.config.js). On web, the
+// static render puts their @font-face rules and preload links in each page's head; nothing waits
+// for them, and the system font shows the digits until they swap in.
+const WEB_FONTS: Record<string, FontSource> = Platform.OS === "web"
+  ? {
+    [ScoreFont.bold]: {
+      uri: require("../../assets/fonts/BarlowCondensed-Bold.ttf"),
+      display: FontDisplay.SWAP,
+    },
+    [ScoreFont.black]: {
+      uri: require("../../assets/fonts/BarlowCondensed-Black.ttf"),
+      display: FontDisplay.SWAP,
+    },
+  }
+  : {};
 
 // Frontis data changes a few times a day: keep it fresh for 5 minutes, so that
 // focusing the browser tab or remounting a screen does not refetch it.
@@ -76,6 +94,7 @@ export default function RootLayout() {
   // language, makes React hydrate each pending route boundary with the old
   // value before it applies the switch.
   const [hydrated, setHydrated] = useState(Platform.OS !== "web");
+  useFonts(WEB_FONTS);
 
   useEffect(() => {
     void SplashScreen.hideAsync();

@@ -24,6 +24,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
 import { FilterChips } from "@/components/FilterChips";
+import { FinalSummaryCard } from "@/components/FinalSummaryCard";
 import {
   ChevronDown,
   LayoutList,
@@ -44,6 +45,7 @@ import { SpecialtyLabel } from "@/components/SpecialtyLabel";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
+import { finalSummary } from "@/features/competitions/finalSummary";
 import { formatMatchDay, groupByDay, type MatchDay } from "@/features/competitions/matchDays";
 import { matchPhaseLabel, parsePhase, ROUND_ORDER } from "@/features/competitions/matchPhase";
 import { matchProgress } from "@/features/competitions/matchProgress";
@@ -641,6 +643,7 @@ export default function CompetitionDetailsScreen() {
       && results && results.length > 0
     ? results
     : null;
+  const summary = useMemo(() => (listed ? finalSummary(listed) : null), [listed]);
 
   // On a phone, the bracket scrolls sideways and bleeds over the gutter to the screen's edges.
   const bracket = grid
@@ -652,6 +655,17 @@ export default function CompetitionDetailsScreen() {
     );
 
   const cell = { width: cellWidth };
+  // Once every match is played and the final is in, its summary card takes the progress row's
+  // place; in the filter bar, a cell wide.
+  const headline = summary
+    ? (
+      <View style={filterBar && cell}>
+        <FinalSummaryCard summary={summary} />
+      </View>
+    )
+    : listed
+    ? <ResultsProgress results={listed} />
+    : null;
   const select = specialtyOptions.length > 0
     ? (
       <SelectField
@@ -730,7 +744,7 @@ export default function CompetitionDetailsScreen() {
     if (!listed) return empty;
     return (
       <>
-        {filterColumn ? null : <ResultsProgress results={listed} />}
+        {filterColumn ? null : headline}
         {viewMode === "bracket"
           ? bracket
           : rounds.map((round, i) => (
@@ -835,7 +849,7 @@ export default function CompetitionDetailsScreen() {
                   {select}
                   {chips}
                   {viewSwitch}
-                  {listed ? <ResultsProgress results={listed} /> : null}
+                  {headline}
                 </View>
                 <View style={styles.resultsBesideFilters}>{renderResults()}</View>
               </>

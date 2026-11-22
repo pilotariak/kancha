@@ -140,13 +140,13 @@ typography:
     lineHeight: 1.2
     letterSpacing: "1.5px"
   scoreLarge:
-    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontFamily: "Barlow Condensed, System, -apple-system, Roboto, sans-serif"
     fontSize: "28px"
     fontWeight: 900
     lineHeight: 1.0
     letterSpacing: "0px"
   score:
-    fontFamily: "System, -apple-system, Roboto, sans-serif"
+    fontFamily: "Barlow Condensed, System, -apple-system, Roboto, sans-serif"
     fontSize: "22px"
     fontWeight: 900
     lineHeight: 1.0
@@ -381,30 +381,39 @@ The dark palette (`meta.darkColors`) takes the three colors of the Basque flag: 
 
 **Font families:**
 
-- **System default** (SF Pro on iOS, Roboto on Android). No custom font is loaded — the system font at high weights provides the sporty, confident tone needed.
-- Numeric data (scores, years) inherits the same family; `tabular-nums` / `font-variant-numeric: tabular-nums` is implied for score alignment.
+- **System default** (SF Pro on iOS, Roboto on Android) for all text but the scoreboard digits. The system font at high weights provides the sporty, confident tone needed.
+- **Barlow Condensed** (SIL Open Font License, `assets/fonts/` with `OFL.txt`) for the scoreboard digits only: set scores and bracket points, rank numbers and records, the match mode score and its target. Like the scoreboards of frontons and trinquets, it reads from far away, and its narrow digits leave the team names more room.
+  - Two faces: **Black** (900) where a system weight of 800 or more was (the winner's sets, ranks, records, the match mode score), **Bold** (700) for the rest (even and lost sets, the match mode target).
+  - Always `tabular-nums`: Barlow's default figures are proportional. A tabular digit is 0.54 em in Black and 0.50 em in Bold, so a score column is two Black digits wide and 9 and 10 take the same place.
+  - In code: `src/constants/typography.ts` (`ScoreFont`, `scoreDigits`, `scoreColumnWidth`). Each face is a family of its own, never set with `fontWeight`: Android would fall back to the system font and web would fake a bolder face.
+  - Native builds embed the fonts (expo-font config plugin, `app.config.js`). Web loads them with `useFonts` in the root layout: the static pages declare and preload them, `font-display: swap`, the system font standing in until they load.
+  - The share card keeps the system font: its web capture (html2canvas) may not see a web font.
+- Other numeric data (years, counts) keeps the system font, with `tabular-nums` where numbers line up.
 
 **Scale and hierarchy:**
 
-| Role              | Size  | Weight | Line height | Letter spacing | Notes                              |
-| ----------------- | ----- | ------ | ----------- | -------------- | ---------------------------------- |
-| Screen title      | 34px  | 900    | 1.1         | 0              | Main hero title per screen         |
-| Hero title (card) | 28px  | 900    | 1.1         | 0              | Featured card / detail hero        |
-| Section title     | 28px  | 800    | 1.15        | −0.8px         | Section header titles              |
-| Card title        | 18px  | 800    | 1.2         | 0              | Competition/specialty cards        |
-| Card subtitle     | 17px  | 800    | 1.2         | 0              | Picker card labels                 |
-| Body              | 15px  | 400    | 1.4         | 0              | General readable text              |
-| Body strong       | 15px  | 700    | 1.4         | 0              | Team names, links, footers         |
-| Meta / secondary  | 14px  | 400    | 1.43        | 0              | Subtitles, hero sub                |
-| Meta strong       | 14px  | 600    | 1.43        | 0              | Hero meta, card level text         |
-| Eyebrow           | 12px  | 800    | 1.2         | +1.4–1.6px     | Section labels, always `uppercase` |
-| Score (large)     | 28px  | 900    | 1.0         | 0              | Final match score                  |
-| Score (match)     | 112px | 900    | 1.0         | 0              | Match mode score, `tabular-nums`   |
-| Score (normal)    | 22px  | 900    | 1.0         | 0              | Match score                        |
-| Score pending     | 20px  | 300    | 1.0         | 0              | "—" placeholder score              |
-| Phase chip        | 12px  | 600    | 1.2         | 0              | Match phase label in footer        |
-| Pill label        | 12px  | 700    | 1.2         | 0              | Status pills                       |
-| Round divider     | 13px  | 800    | 1.2         | +0.8px         | Round section headers, `uppercase` |
+| Role              | Size  | Weight | Line height | Letter spacing | Notes                                                      |
+| ----------------- | ----- | ------ | ----------- | -------------- | ---------------------------------------------------------- |
+| Screen title      | 34px  | 900    | 1.1         | 0              | Main hero title per screen                                 |
+| Hero title (card) | 28px  | 900    | 1.1         | 0              | Featured card / detail hero                                |
+| Section title     | 28px  | 800    | 1.15        | −0.8px         | Section header titles                                      |
+| Card title        | 18px  | 800    | 1.2         | 0              | Competition/specialty cards                                |
+| Card subtitle     | 17px  | 800    | 1.2         | 0              | Picker card labels                                         |
+| Body              | 15px  | 400    | 1.4         | 0              | General readable text                                      |
+| Body strong       | 15px  | 700    | 1.4         | 0              | Team names, links, footers                                 |
+| Meta / secondary  | 14px  | 400    | 1.43        | 0              | Subtitles, hero sub                                        |
+| Meta strong       | 14px  | 600    | 1.43        | 0              | Hero meta, card level text                                 |
+| Eyebrow           | 12px  | 800    | 1.2         | +1.4–1.6px     | Section labels, always `uppercase`                         |
+| Score (large)     | 28px  | 900    | 1.0         | 0              | Final match score, Barlow Condensed Black (Bold when lost) |
+| Score (match)     | 112px | 900    | 1.0         | 0              | Match mode score, Barlow Condensed Black                   |
+| Score target      | 28px  | 700    | —           | 0              | Match mode "/ 40", Barlow Condensed Bold                   |
+| Score (normal)    | 22px  | 900    | 1.0         | 0              | Match score, Barlow Condensed Black (Bold when lost)       |
+| Rank              | 15px  | 900    | 18px        | 0              | Ranking rank number, Barlow Condensed Black                |
+| Record            | 20px  | 900    | 22px        | 0              | Ranking wins-losses, Barlow Condensed Black                |
+| Score pending     | 20px  | 300    | 1.0         | 0              | "—" placeholder score, system font                         |
+| Phase chip        | 12px  | 600    | 1.2         | 0              | Match phase label in footer                                |
+| Pill label        | 12px  | 700    | 1.2         | 0              | Status pills                                               |
+| Round divider     | 13px  | 800    | 1.2         | +0.8px         | Round section headers, `uppercase`                         |
 
 **Principles:**
 
@@ -412,6 +421,7 @@ The dark palette (`meta.darkColors`) takes the three colors of the Basque flag: 
 - Eyebrow text is always `uppercase` with generous letter-spacing (+1.2–1.6 px).
 - All section-level headings use negative tracking (−0.8 px at 28 px) for density.
 - Pending/empty states use weight 300 — intentionally light, to signal absence.
+- Scoreboard digits take their weight from the Barlow Condensed face, never from `fontWeight`.
 
 ---
 
@@ -659,27 +669,30 @@ Team row:     8px top and bottom; 16px winner slot | name + club (flex 1) | one 
               per set. The club name opens the club page (`ClubLink`, § Club page); a side
               without a lineup shows its club as its name, and that name is the link
 Divider:      1px solid #E5DED6 between team rows
-Sets:         one column per set ("07/15 04/15" → 7 4 against 15 15), 22px (28px Final),
-              right-aligned, min width 30px (38px Final), 12px apart, tabular-nums
+Sets:         one column per set ("07/15 04/15" → 7 4 against 15 15), Barlow Condensed (§3)
+              22px (28px Final), right-aligned, two Black digits wide: min width 24px (31px
+              Final), 12px apart, tabular-nums
 Winner:       team that won more sets — green #1F7A5A Check (16px, stroke 3) in the slot,
-              name #141414 weight 800, sets #141414 weight 900
-Loser:        name #141414 weight 600, sets #7A7A7A weight 400
-No winner:    score missing or sets even — no Check, names and sets #141414 weight 700
+              name #141414 weight 800, sets #141414 Black
+Loser:        name #141414 weight 600, sets #7A7A7A Bold
+No winner:    score missing or sets even — no Check, names #141414 weight 700, sets #141414
+              Bold
 Score pending: "—", #7A7A7A, 20px, weight 300
 No red:       a regular day card carries no red. The Final keeps its amber round pill,
               amber phase label and 2px red border.
-Bracket node: same team rows at 14px names, 17px sets (22px Final), min width 24px (30px
+Bracket node: same team rows at 14px names, 17px sets (22px Final), min width 19px (24px
               Final), no header
 Grid:         web, from two columns (§5 Columns): a day card spans the whole results column,
               like the round dividers, and lays its matches out as many to a row as the results
               have columns, each in a `flex: 1` cell split from the next by a 1px #E5DED6
               hairline. A match keeps a phone card's width, the days stay one under the other,
               and a short last row keeps empty cells
-Interaction:  the day header, and the club names (§ Club page). Pressed: cream fill. Web hover: the card takes the card hover
-              (lineStrong border and shadow; the Final keeps its red border). Keyboard focus:
-              the red ring inside the card (−2px offset), as the header is its top row.
-              `aria-expanded` gives the state (accessibilityState is dropped on web); the
-              accessible name is the date, "Aujourd'hui" on the day, and the count
+Interaction:  the day header, and the club names (§ Club page). Header pressed: cream fill.
+              Web hover: the card takes the card hover (lineStrong border and shadow; the Final
+              keeps its red border). Keyboard focus: the red ring inside the card (−2px offset),
+              as the header is its top row. `aria-expanded` gives the state (accessibilityState
+              is dropped on web); the accessible name is the date, "Aujourd'hui" on the day, and
+              the count
 ```
 
 **Current day strip.** Once a day header scrolls under the pinned filters (§ Screen Header,
@@ -1129,11 +1142,66 @@ On the results screen, a row in place of the old Total / Played / Pending strip:
 ```
 Label:     "27 / 27 parties jouées", #262626 (text), 13px, weight 700, tabular-nums
 Bar:       flex 1, 6px, pill radius, #E5DED6 (line) track, #141414 (ink) fill
-Done:      a dark StatusPill ("Terminé") at the end of the row once every match has a score
+Done:      a dark StatusPill ("Terminé") at the end of the row once every match has a score.
+           When the results also hold a final, the Final Summary card takes the row's place
 Grid:      from two columns (web), in the filter column the row moves under the segmented
            control; with the filter bar it stays on its own line under the bar
 Scrolling: never pinned: outside the filter column, it scrolls away with the results
 ```
+
+### Final Summary Card
+
+`FinalSummaryCard` (`src/components/FinalSummaryCard.tsx`) leads a finished competition with
+its result. It replaces the Results Progress row, in the same place, in the list and the bracket
+views, when every match has a score and the results hold one final whose score names a winner. A
+competition in progress keeps the row, as does one with pools only. So does a category whose
+final is played but where a match has no score: lcapb 500/138/1573 has three pool matches with
+no score, and 9 of the 17 categories with a final in Championnat CCAPB 2024-2025 have at least
+one. The data comes from the results the screen already loaded, through `finalSummary` in
+`src/features/competitions/finalSummary.ts`: no new request.
+
+```
+Card:        #FFFFFF, 1px #E5DED6 border, 16px radius, 12px top and bottom, 14px sides. Its
+             parts are split by 1px #E5DED6 hairlines, 12px above and below each
+Head:        the Trophy (18px, amber #C8900A) in a 32px amberBg circle, the title "Vainqueurs"
+             (#141414 15px weight 800, 20px line, a header), then a dark StatusPill "Terminé"
+             at the end. 10px gaps, 10px above the winners
+Winners:     their players as PlayerLink pills (36px high, cream #F7F4EF, 1px #E5DED6 border,
+             18px radius, the name #141414 14px weight 700, a ChevronRight 14px #7A7A7A), 8px
+             apart, wrapping; each opens the player (`/competitions/player?licence=…`). A
+             player whose lineup has no licence is plain text, same type. Under them, the club,
+             #7A7A7A 12px weight 600, 16px lines. A team without lineup shows its club in the
+             players' style. The team number is not shown: results do not carry it
+Final:       a label line, "FINALE" #7A7A7A 11px weight 700 uppercase +0.6px tracking, then
+             " · Samedi 31 octobre 2026" (12px weight 600, as written). Under it, 6px apart, the
+             score, winners first, one "35–20" per set (#141414 20px weight 800, 22px line,
+             tabular-nums), then, 12px to its right, "contre" and the beaten team (#262626 13px
+             weight 600, 18px lines) over its club (#7A7A7A 12px)
+Third place: the losers of the semi-finals: a "TROISIÈME PLACE" label as above, then each team,
+             its players (#262626 13px weight 600) over its club. None without semi-finals
+Facts:       one line, #7A7A7A 12px weight 600, 16px lines, a sentence: the team count, then the
+             pool summary of every match ("6 équipes, 18 parties en 7 journées, du 6 septembre
+             au 31 octobre")
+Grid:        on a phone, where the progress row sits, full width. From three columns, in the
+             filter column under the segmented control: at 1280 × 800 on 500/137/1573 (447px
+             card, one line of chips) it ends 63px above the window's bottom at rest, 121px once
+             the column sticks; on lidfpb 1/4/1 (chips on two lines) 65px and 123px. With the
+             filter bar (two columns, and the bracket) a cell wide, on its own line under the bar
+Text:        the score digits sit in their own Text (`finalScore`), so they can take a
+             condensed font (#115) on their own
+Screen reader: the title is a header, the winners' pills are buttons named by the player with
+             the "opens the player" hint, then the club. The final and third place each read as
+             one sentence, with the score in words and not with the dash: "Finale, Samedi 31
+             octobre 2026 : gagnée 35 à 20 contre BOUDY Anais et COLAQUY Jennifer (E),
+             PELOTARI CHANTECLER BX LAC", "Troisième place : MOREL Perrine et MARTIN Alizee,
+             CANCHA BOIENNE; …". Each sentence is a group with that label, its printed text
+             hidden, so it is not read twice. The facts line reads as printed
+```
+
+**Counting teams.** A team is the set of licences of a side, as the ranking matches them (§4
+Ranking Table): two teams of one club meet in the pools (US BAZAS and CANCHA BOIENNE in 500/137/
+1573), so clubs would undercount. A side without licences counts as its club. On every category
+of lcapb 500 and 502 this gives the ranking's team count.
 
 ### Ranking Table
 
@@ -1158,13 +1226,15 @@ Row:          10px padding, two parts 4px apart. Top: the rank cell (22px), the 
               record over the form, then, for a pair, a ChevronDown (16px #7A7A7A), 8px gaps;
               a one-player row in a table with pairs keeps an empty 16px slot, so the records
               line up. Under it: the club line
-Rank:         #141414 15px weight 800 tabular-nums, centered, on the first player's line. The
-              champion of a final ranking gets the Trophy (18px, amber #C8900A) instead
+Rank:         #141414 Barlow Condensed Black 15px, tabular-nums, centered, on the first
+              player's line. The champion of a final ranking gets the Trophy (18px, amber
+              #C8900A) instead
 Players:      #141414 14px weight 700, 18px lines: one player per line, taking all the width
               left by the record. Never cut: a long name wraps onto a second line
-Record:       wins-losses ("7-0"), #141414 20px weight 800, 22px line, tabular-nums, right-
-              aligned. "—", #7A7A7A weight 400, when no scored match is the team's. While the
-              results load, or if they fail, the row shows without record and form
+Record:       wins-losses ("7-0"), #141414 Barlow Condensed Black 20px, 22px line,
+              tabular-nums, right-aligned. "—", #7A7A7A, when no scored match is the
+              team's. While the results load, or if they fail, the row shows without record
+              and form
 Form:         the last five results under the record, 4px below it, oldest first, right-aligned
               so the latest ones line up: 10px squares, 2px radius, 3px apart. A win is filled
               green #1F7A5A; a loss is empty, outlined 2px red #C8102E. Filled or empty carries
@@ -1172,12 +1242,12 @@ Form:         the last five results under the record, 4px below it, oldest first
               The squares are one image labelled in words ("derniers résultats : victoire,
               victoire, défaite…"), as the row's sentence says it
 Club line:    across the row from the players' left edge, wrapping when long: the club name,
-              #7A7A7A 12px weight 600, 16px lines, a link to the club page (§ Club page); the team number ("Équipe 2"), same style; the
-              phase reached, a small StatusPill (amber "Champion", red for a forfeit, soft for
-              the others, the league's text: "Finale", "1/2 finale", "Poules"). 6px apart, 4px
-              between wrapped lines. Never cut
+              #7A7A7A 12px weight 600, 16px lines, a link to the club page (§ Club page); the
+              team number ("Équipe 2"), same style; the phase reached, a small StatusPill (amber
+              "Champion", red for a forfeit, soft for the others, the league's text: "Finale",
+              "1/2 finale", "Poules"). 6px apart, 4px between wrapped lines. Never cut
 Text:         the rank, the record and the club name each sit in their own Text: the club name
-              is a link (#112) and the digits take a condensed font (#115) on their own
+              is a link (#112) and the digits take Barlow Condensed (§3) on their own
 Press:        a one-player row opens the player (`/competitions/player?licence=…`). A pair's row
               opens, under it, the PlayerLink pills of its players (36px high, cream, 1px
               #E5DED6 border, `ranking-player-<licence>`), and its chevron turns up. Pressed and
@@ -1236,7 +1306,8 @@ From three columns, the list and the ranking give the filters the first grid col
 
 ```
 Filters:   one cell wide, 12px from the results: SelectField, FilterChips (wrap),
-           SegmentedControl, ResultsProgress. position: sticky, 68px from the top (the 52px
+           SegmentedControl, ResultsProgress or, once finished, the Final Summary card.
+           position: sticky, 68px from the top (the 52px
            collapsed bar and 16px): they stay in view under the bar while the matches scroll.
            The bar alone is pinned
 Results:   the other columns: the match grid, or the ranking table (712px at most)
@@ -1386,8 +1457,8 @@ Content:     24px side padding, in the text column on web (useTextColumn). Top h
 Team row:    name #FFFFFF 22px weight 900, one line, then the undo button in the outer corner
 Undo:        48×48, radius 16, rgba(255,255,255,0.16) (pressed 0.30), Undo2 22px #FFFFFF,
              labeled "Undo the last point of <team>". Disabled, 35% opacity, at 0
-Score:       112px weight 900, line height 1.0, tabular-nums, #FFFFFF. "/ target" 28px weight
-             700 onRedSoft. A "+1" pill (rgba(255,255,255,0.16), 20px weight 900) ends the row.
+Score:       Barlow Condensed Black 112px, line height 1.0, tabular-nums, #FFFFFF. "/ target"
+             Barlow Condensed Bold 28px onRedSoft, its baseline on the score's. A "+1" pill (rgba(255,255,255,0.16), 20px weight 900) ends the row.
              Hidden from screen readers: the +1 label carries the score
 Bar:         6px, pill radius, rgba(255,255,255,0.18) track, #FFFFFF fill, score / target
 Close:       48px #FFFFFF circle centered on the seam, X 22px in panel, shadow
@@ -1703,7 +1774,7 @@ The **iOS and Android apps are phone-only** (React Native / Expo, `ios.supportsT
 
 **Match card with score:**
 
-> "A header row: the phase in words on the left (`Poules 1`) and the localized date on the right (`sam. 17 janv.`), both `#7A7A7A` 12px weight-600; on the day of the match a green 'Today' pill replaces the date. Then two team rows, each with `paddingVertical: 8px`: a 16px slot, the team name `#141414` 15px flex-1, and one right-aligned 22px tabular-nums column per set, min width 30px, 12px apart, so `07/15 04/15` reads 7 4 against 15 15. The team that won more sets gets a green `#1F7A5A` check in the slot, name weight-800 and sets `#141414` weight-900; the other team name weight-600 and sets `#7A7A7A` weight-400. No check when the score is missing (show a light `—`) or the sets are even. Rows separated by a 1px `#E5DED6` divider. No red anywhere in a regular match card; the Final keeps its amber phase label and round pill."
+> "A header row: the phase in words on the left (`Poules 1`) and the localized date on the right (`sam. 17 janv.`), both `#7A7A7A` 12px weight-600; on the day of the match a green 'Today' pill replaces the date. Then two team rows, each with `paddingVertical: 8px`: a 16px slot, the team name `#141414` 15px flex-1, and one right-aligned 22px tabular-nums Barlow Condensed column per set, min width 24px, 12px apart, so `07/15 04/15` reads 7 4 against 15 15. The team that won more sets gets a green `#1F7A5A` check in the slot, name weight-800 and sets `#141414` Barlow Condensed Black; the other team name weight-600 and sets `#7A7A7A` Barlow Condensed Bold. No check when the score is missing (show a light `—`) or the sets are even. Rows separated by a 1px `#E5DED6` divider. No red anywhere in a regular match card; the Final keeps its amber phase label and round pill."
 
 **Status pill:**
 
