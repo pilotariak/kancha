@@ -113,6 +113,15 @@ export function toSeasonBlocks(groups: SeasonGroup[]): SeasonBlock[] {
   return blocks;
 }
 
+/**
+ * The name a season tile shows above its years: none when the competition keeps the name of the
+ * featured one (the current season's first), the name otherwise. lcapb tiles then show their
+ * years only, and lidfpb's "Compétition (Ext)" still stands out among its "Compétition" seasons.
+ */
+export function seasonTileName(label: string, current: SeasonGroup): string | undefined {
+  return label === current.competitions[0].label ? undefined : label;
+}
+
 /** Cuts the previous seasons after `limit` seasons, whatever the number of competitions in each. */
 export function splitPreviousSeasons(
   previous: SeasonGroup[],

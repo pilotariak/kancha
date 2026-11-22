@@ -14,7 +14,8 @@
   "link": {
     "open": "Abrir",
     "share": "Compartir",
-    "copy": "Copiar enlace"
+    "copy": "Copiar enlace",
+    "external": "Sitio externo"
   },
   "share": {
     "cta": "Compartir",
@@ -46,7 +47,6 @@
     "open_hint": "Abre las competiciones de la liga"
   },
   "competitions": {
-    "eyebrow": "Panel de competiciones",
     "title": "Competiciones",
     "back": "Ligas",
     "all_eyebrow": "Todas las competiciones",
@@ -55,6 +55,8 @@
     "error_load": "Error al cargar las competiciones",
     "find_player": "Buscar un jugador",
     "find_player_subtitle": "Títulos, compañeros y clasificaciones por temporada",
+    "open_tournaments": "Torneos abiertos",
+    "open_tournaments_subtitle": "Calendario, inscripciones y resultados en Errebot",
     "current_season": "Temporada actual",
     "see_results": "Ver resultados",
     "previous_eyebrow": "Historial",

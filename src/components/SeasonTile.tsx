@@ -63,7 +63,8 @@ const makeStyles = (c: Palette) =>
       borderWidth: 1,
       borderColor: c.line,
     },
-    tileSeason: { minHeight: 96 },
+    // 12px sides too: at 375px, a 16px padding leaves 128px for the 129px of "2025-2026".
+    tileSeason: { padding: 12 },
     // Text, not muted: the eyebrow names the competition, and muted on card is 4.2:1.
     eyebrow: {
       color: c.text,
@@ -72,7 +73,9 @@ const makeStyles = (c: Palette) =>
       letterSpacing: 1.2,
       textTransform: "uppercase",
     },
+    // At the bottom: beside a tile that shows a name, the years of a row stay level.
     season: {
+      marginTop: "auto",
       color: c.ink,
       fontSize: 22,
       fontWeight: "900",
