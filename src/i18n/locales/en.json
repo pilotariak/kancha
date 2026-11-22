@@ -103,6 +103,12 @@
     "F": "Final",
     "other": "Matches"
   },
+  "bracket": {
+    "days_count_one": "{{count}} match day",
+    "days_count_other": "{{count}} match days",
+    "pool_range": "{{matches}} over {{days}}, from {{first}} to {{last}}",
+    "pool_day": "{{matches}} on {{date}}"
+  },
   "rounds_match": {
     "P": "Pool {{number}}",
     "B1T": "1st Round Playoff {{number}}",

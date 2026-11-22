@@ -103,6 +103,12 @@
     "F": "Finala",
     "other": "Partidak"
   },
+  "bracket": {
+    "days_count_one": "{{count}} jardunaldi",
+    "days_count_other": "{{count}} jardunaldi",
+    "pool_range": "{{matches}}, {{days}}: {{first}} – {{last}}",
+    "pool_day": "{{matches}}: {{date}}"
+  },
   "rounds_match": {
     "P": "{{number}}. taldea",
     "B1T": "1. txandako {{number}}. barragea",
