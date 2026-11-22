@@ -463,25 +463,16 @@ Focus (web):   2px solid red outline, 2px offset, keyboard focus only
 
 ### Cards — Icon Card
 
-The first cards of the competitions list, one cell each in the grid and 12px apart on a phone:
-"Trouver un joueur", which opens the player search, then "Tournois ouverts", which opens the
-calendar of open tournaments on Errebot (`OPEN_TOURNAMENTS_URL`, `src/constants/site.ts`).
-Frontis has the league championships and no upcoming match; Errebot lists the open tournaments
-with their registration, pool and final dates. Its legal notice forbids copying its content, so
-Kancha links to it and imports nothing.
+The first card of the competitions list, one cell in the grid: "Trouver un joueur", which opens
+the player search.
 
 ```
 Card:       a competition card (above), in a row: icon tile, text, trailing icon; 12px gap
-Icon tile:  36 × 36px, redSoft, 12px radius, 18px red icon: Search, CalendarDays (tournaments)
+Icon tile:  36 × 36px, redSoft, 12px radius, 18px red Search icon
 Title:      #141414 (ink), 18px, weight 800
-Subtitle:   #7A7A7A (muted), 13px, 2px below the title ("Calendrier, inscriptions et résultats
-            sur Errebot")
-Trailing:   18px muted: ChevronRight for a screen of the app, ExternalLink for an external site
-External:   role link. Opens in the in-app browser on iOS and Android (expo-web-browser). On
-            web, a real link (href, target _blank, rel noopener) that the browser opens in a new
-            tab from a click, Enter or its menu: openBrowserAsync would open a popup window, and
-            RN-web leaves Enter on a role link to the browser. The accessible name ends with
-            "Site externe", as accessibilityHint does not reach web
+Subtitle:   #7A7A7A (muted), 13px, 2px below the title ("Titres, partenaires et classements par
+            saison")
+Trailing:   18px muted ChevronRight
 ```
 
 ### League Tile

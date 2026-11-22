@@ -1,29 +1,13 @@
 import { type Href, router } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CardGrid } from "@/components/CardGrid";
 import { CardLink } from "@/components/CardLink";
 import { FeaturedCard } from "@/components/FeaturedCard";
-import {
-  CalendarDays,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  ExternalLink,
-  Search,
-} from "@/components/icons";
+import { ChevronDown, ChevronRight, ChevronUp, Search } from "@/components/icons";
 import { LeagueIcon } from "@/components/LeagueIcon";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
@@ -31,7 +15,6 @@ import { SeasonTile } from "@/components/SeasonTile";
 import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
-import { OPEN_TOURNAMENTS_URL } from "@/constants/site";
 import {
   formatSeason,
   groupBySeason,
@@ -49,17 +32,6 @@ import type { Competition } from "@/types/competition";
 
 const competitionHref = (id: string): Extract<Href, string> =>
   `/(tabs)/competitions/details?id=${id}`;
-
-// The in-app browser on iOS and Android. On web, a real link that the browser opens in a new tab,
-// from a click, Enter or its menu: openBrowserAsync would open a popup window, and RN-web leaves
-// Enter on a role="link" to the browser, which does nothing without an href.
-const openTournamentsProps = Platform.OS === "web"
-  ? { href: OPEN_TOURNAMENTS_URL, hrefAttrs: { target: "_blank", rel: "noopener" } }
-  : {
-    onPress: () => {
-      WebBrowser.openBrowserAsync(OPEN_TOURNAMENTS_URL).catch(() => undefined);
-    },
-  };
 
 interface Tile {
   competition: Competition;
@@ -238,7 +210,7 @@ export default function CompetitionsListScreen() {
         />
 
         <View style={styles.body}>
-          {/* Cards like the others: one cell wide in the grid. */}
+          {/* A card like the others: one cell wide in the grid. */}
           <CardGrid columns={columns} style={styles.list}>
             <PressableScale
               style={[styles.card, styles.iconCard]}
@@ -256,28 +228,6 @@ export default function CompetitionsListScreen() {
                 <Text style={styles.cardMeta}>{t("competitions.find_player_subtitle")}</Text>
               </View>
               <ChevronRight color={colors.muted} size={18} />
-            </PressableScale>
-
-            {/* An external site: the label says so, as accessibilityHint does not reach web. */}
-            <PressableScale
-              {...openTournamentsProps}
-              style={[styles.card, styles.iconCard]}
-              accessibilityRole="link"
-              accessibilityLabel={[
-                t("competitions.open_tournaments"),
-                t("competitions.open_tournaments_subtitle"),
-                t("link.external"),
-              ].join(", ")}
-              testID="open-tournaments-card"
-            >
-              <View style={styles.iconTile}>
-                <CalendarDays color={colors.red} size={18} />
-              </View>
-              <View style={styles.iconCardBody}>
-                <Text style={styles.cardTitle}>{t("competitions.open_tournaments")}</Text>
-                <Text style={styles.cardMeta}>{t("competitions.open_tournaments_subtitle")}</Text>
-              </View>
-              <ExternalLink color={colors.muted} size={18} />
             </PressableScale>
           </CardGrid>
 
