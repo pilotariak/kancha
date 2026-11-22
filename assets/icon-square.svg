@@ -1,0 +1,18 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Full-bleed square variant of icon.svg, for the web icons (docs/how-to/howto-icons.md).
+       Home screens round the corners themselves, so the cream fills the whole square:
+       no circle, no ring. The K and the ball keep the coordinates of icon.svg. -->
+  <!-- Background: Warm Limestone Cream -->
+  <rect width="1024" height="1024" fill="#F7F4EF"/>
+  <!-- K: vertical stroke -->
+  <line x1="300" y1="196" x2="300" y2="828" stroke="#C8102E" stroke-width="84" stroke-linecap="round"/>
+  <!-- K: upper diagonal -->
+  <line x1="300" y1="512" x2="722" y2="196" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
+  <!-- K: lower diagonal -->
+  <line x1="300" y1="512" x2="722" y2="828" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
+  <!-- Pelota ball -->
+  <circle cx="784" cy="512" r="70" fill="#C8102E"/>
+  <!-- Pelota seam lines -->
+  <path d="M714 512 Q784 442 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M714 512 Q784 582 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
+</svg>

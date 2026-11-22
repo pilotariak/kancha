@@ -18,6 +18,11 @@ const SHARE_IMAGE = `${SITE_URL}/icons/icon-512.png`;
  * the build machine's locale. The page `<title>` comes from `WebDocumentHead`:
  * the static renderer always injects the `Head` title first, so a `<title>`
  * here would be a second, ignored one.
+ *
+ * The `apple-touch-icon` link gives Safari on iOS its home screen icon: without
+ * it, Safari drew a letter on a dark tile despite the manifest icons (#123).
+ * There is no favicon link here: Expo adds it from `web.favicon` in
+ * app.config.js.
  */
 export default function Root({ children }: PropsWithChildren) {
   const { t, i18n } = useTranslation(undefined, { i18n: hydrationI18n });
@@ -52,6 +57,8 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={SHARE_IMAGE} />
         <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <meta name="apple-mobile-web-app-title" content={APP_NAME} />
         <ScrollViewStyleReset />
       </head>
       <body>{children}</body>
