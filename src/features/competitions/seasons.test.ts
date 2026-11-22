@@ -5,6 +5,7 @@ import {
   groupBySeason,
   keepSeasonTogether,
   parseSeason,
+  seasonTileName,
   splitPreviousSeasons,
   toSeasonBlocks,
   VISIBLE_PREVIOUS_SEASONS,
@@ -143,6 +144,50 @@ describe("toSeasonBlocks", () => {
 
   it("returns no block without previous seasons", () => {
     expect(toSeasonBlocks([])).toEqual([]);
+  });
+});
+
+describe("seasonTileName", () => {
+  // Enabled competitions, Frontis 2026-11-22.
+  const tileNames = (names: [string, string][]) => {
+    const grouped = groupBySeason(names.map(([id, name]) => competition(id, name)))!;
+    return grouped.previous.map(({ competitions: [{ label }] }) =>
+      seasonTileName(label, grouped.current)
+    );
+  };
+
+  it("shows the years only when the name is the featured competition's", () => {
+    // lcapb: the season moves inside the name from 2018-2019 down.
+    expect(tileNames([
+      ["500", "Championnat CCAPB 2026-2027"],
+      ["502", "Championnat CCAPB 2025-2026"],
+      ["524", "Championnat 2018-2019 CCAPB"],
+    ])).toEqual([undefined, undefined]);
+  });
+
+  it("keeps the names that differ", () => {
+    // lidfpb: "Compétition 2026-2027" is disabled, so 2025-2026 is the current season.
+    expect(tileNames([
+      ["1", "Compétition 2025-2026"],
+      ["2", "Compétition 2024-2025"],
+      ["6", "Compétition 2021-2022(Ext)"],
+      ["13", "Championnat 2017-2018"],
+    ])).toEqual([undefined, "Compétition (Ext)", "Championnat"]);
+    // lcapb, under "All seasons": its winter championships under the former league name.
+    expect(tileNames([
+      ["500", "Championnat CCAPB 2026-2027"],
+      ["530", "Championnat Hiver 2015-2016 LCAPB"],
+    ])).toEqual(["Championnat Hiver LCAPB"]);
+  });
+
+  it("compares with the featured competition only, in a season with several", () => {
+    // ctpb, were its competitions enabled: "Championnat d'Hiver" sorts before "Tournoi PILOTARIAK".
+    expect(tileNames([
+      ["133", "Tournoi PILOTARIAK 2026/2027"],
+      ["132", "Championnat d'Hiver 2026/2027"],
+      ["141", "Championnat d'Hiver 2024/2025"],
+      ["135", "Tournoi PILOTARIAK 2025/2026"],
+    ])).toEqual(["Tournoi PILOTARIAK", undefined]);
   });
 });
 

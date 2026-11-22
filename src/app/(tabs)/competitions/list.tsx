@@ -1,13 +1,29 @@
 import { type Href, router } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CardGrid } from "@/components/CardGrid";
 import { CardLink } from "@/components/CardLink";
 import { FeaturedCard } from "@/components/FeaturedCard";
-import { ChevronDown, ChevronRight, ChevronUp, Search } from "@/components/icons";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  ExternalLink,
+  Search,
+} from "@/components/icons";
 import { LeagueIcon } from "@/components/LeagueIcon";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
@@ -15,11 +31,13 @@ import { SeasonTile } from "@/components/SeasonTile";
 import { SectionHeader } from "@/components/SectionHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
+import { OPEN_TOURNAMENTS_URL } from "@/constants/site";
 import {
   formatSeason,
   groupBySeason,
   keepSeasonTogether,
   type SeasonGroup,
+  seasonTileName,
   splitPreviousSeasons,
   toSeasonBlocks,
 } from "@/features/competitions/seasons";
@@ -31,6 +49,17 @@ import type { Competition } from "@/types/competition";
 
 const competitionHref = (id: string): Extract<Href, string> =>
   `/(tabs)/competitions/details?id=${id}`;
+
+// The in-app browser on iOS and Android. On web, a real link that the browser opens in a new tab,
+// from a click, Enter or its menu: openBrowserAsync would open a popup window, and RN-web leaves
+// Enter on a role="link" to the browser, which does nothing without an href.
+const openTournamentsProps = Platform.OS === "web"
+  ? { href: OPEN_TOURNAMENTS_URL, hrefAttrs: { target: "_blank", rel: "noopener" } }
+  : {
+    onPress: () => {
+      WebBrowser.openBrowserAsync(OPEN_TOURNAMENTS_URL).catch(() => undefined);
+    },
+  };
 
 interface Tile {
   competition: Competition;
@@ -96,7 +125,7 @@ export default function CompetitionsListScreen() {
     ));
   };
 
-  const renderSeasonGrid = (groups: SeasonGroup[]) =>
+  const renderSeasonGrid = (groups: SeasonGroup[], current: SeasonGroup) =>
     toSeasonBlocks(groups).map((block) =>
       block.kind === "seasons"
         ? (
@@ -104,7 +133,7 @@ export default function CompetitionsListScreen() {
             {renderTiles(
               block.groups.map(({ season, competitions: [{ competition, label }] }) => ({
                 competition,
-                eyebrow: label,
+                eyebrow: seasonTileName(label, current),
                 title: formatSeason(season),
               })),
               "season",
@@ -152,7 +181,7 @@ export default function CompetitionsListScreen() {
               title={t("competitions.previous_title")}
             />
             <View style={styles.list}>
-              {renderSeasonGrid(expanded ? seasons.previous : shown)}
+              {renderSeasonGrid(expanded ? seasons.previous : shown, seasons.current)}
               {hidden.length > 0 && (
                 <Pressable
                   style={({ pressed }) => [
@@ -203,31 +232,52 @@ export default function CompetitionsListScreen() {
       >
         <ScreenHeader
           backLabel={t("competitions.back")}
-          eyebrow={t("competitions.eyebrow")}
           title={t("competitions.title")}
           subtitle={league?.name}
           trailing={league && <LeagueIcon league={league} onBand />}
         />
 
         <View style={styles.body}>
-          {/* A card like the others: one cell wide in the grid. */}
-          <CardGrid columns={columns}>
+          {/* Cards like the others: one cell wide in the grid. */}
+          <CardGrid columns={columns} style={styles.list}>
             <PressableScale
-              style={[styles.card, styles.searchRow]}
+              style={[styles.card, styles.iconCard]}
               onPress={() => router.push("/(tabs)/competitions/player-search")}
               accessibilityRole="button"
               accessibilityLabel={t("competitions.find_player")}
               accessibilityHint={t("competitions.find_player_subtitle")}
               testID="find-player-card"
             >
-              <View style={styles.searchIcon}>
+              <View style={styles.iconTile}>
                 <Search color={colors.red} size={18} />
               </View>
-              <View style={styles.searchBody}>
+              <View style={styles.iconCardBody}>
                 <Text style={styles.cardTitle}>{t("competitions.find_player")}</Text>
                 <Text style={styles.cardMeta}>{t("competitions.find_player_subtitle")}</Text>
               </View>
               <ChevronRight color={colors.muted} size={18} />
+            </PressableScale>
+
+            {/* An external site: the label says so, as accessibilityHint does not reach web. */}
+            <PressableScale
+              {...openTournamentsProps}
+              style={[styles.card, styles.iconCard]}
+              accessibilityRole="link"
+              accessibilityLabel={[
+                t("competitions.open_tournaments"),
+                t("competitions.open_tournaments_subtitle"),
+                t("link.external"),
+              ].join(", ")}
+              testID="open-tournaments-card"
+            >
+              <View style={styles.iconTile}>
+                <CalendarDays color={colors.red} size={18} />
+              </View>
+              <View style={styles.iconCardBody}>
+                <Text style={styles.cardTitle}>{t("competitions.open_tournaments")}</Text>
+                <Text style={styles.cardMeta}>{t("competitions.open_tournaments_subtitle")}</Text>
+              </View>
+              <ExternalLink color={colors.muted} size={18} />
             </PressableScale>
           </CardGrid>
 
@@ -316,8 +366,8 @@ const makeStyles = (c: Palette) =>
     cardTitle: { color: c.ink, fontSize: 18, fontWeight: "800", flex: 1 },
     cardLevel: { color: c.muted, fontSize: 13, fontWeight: "600" },
     cardMeta: { color: c.muted, fontSize: 13 },
-    searchRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-    searchIcon: {
+    iconCard: { flexDirection: "row", alignItems: "center", gap: 12 },
+    iconTile: {
       width: 36,
       height: 36,
       borderRadius: 12,
@@ -325,7 +375,7 @@ const makeStyles = (c: Palette) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    searchBody: { flex: 1, gap: 2 },
+    iconCardBody: { flex: 1, gap: 2 },
     grid: { gap: 12 },
     gridRow: { flexDirection: "row", gap: 12 },
     gridCell: { flex: 1 },

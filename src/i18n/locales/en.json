@@ -14,7 +14,8 @@
   "link": {
     "open": "Open",
     "share": "Share",
-    "copy": "Copy link"
+    "copy": "Copy link",
+    "external": "External site"
   },
   "share": {
     "cta": "Share",
@@ -46,7 +47,6 @@
     "open_hint": "Opens the league's competitions"
   },
   "competitions": {
-    "eyebrow": "Competition desk",
     "title": "Competitions",
     "back": "Leagues",
     "all_eyebrow": "All competitions",
@@ -55,6 +55,8 @@
     "error_load": "Failed to load competitions",
     "find_player": "Find a player",
     "find_player_subtitle": "Titles, partners and rankings by season",
+    "open_tournaments": "Open tournaments",
+    "open_tournaments_subtitle": "Calendar, registration and results on Errebot",
     "current_season": "Current season",
     "see_results": "See results",
     "previous_eyebrow": "History",

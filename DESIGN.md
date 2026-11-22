@@ -451,6 +451,29 @@ Hover (web):   lineStrong border, shadow 0 4px 16px (shadow token)
 Focus (web):   2px solid red outline, 2px offset, keyboard focus only
 ```
 
+### Cards — Icon Card
+
+The first cards of the competitions list, one cell each in the grid and 12px apart on a phone:
+"Trouver un joueur", which opens the player search, then "Tournois ouverts", which opens the
+calendar of open tournaments on Errebot (`OPEN_TOURNAMENTS_URL`, `src/constants/site.ts`).
+Frontis has the league championships and no upcoming match; Errebot lists the open tournaments
+with their registration, pool and final dates. Its legal notice forbids copying its content, so
+Kancha links to it and imports nothing.
+
+```
+Card:       a competition card (above), in a row: icon tile, text, trailing icon; 12px gap
+Icon tile:  36 × 36px, redSoft, 12px radius, 18px red icon: Search, CalendarDays (tournaments)
+Title:      #141414 (ink), 18px, weight 800
+Subtitle:   #7A7A7A (muted), 13px, 2px below the title ("Calendrier, inscriptions et résultats
+            sur Errebot")
+Trailing:   18px muted: ChevronRight for a screen of the app, ExternalLink for an external site
+External:   role link. Opens in the in-app browser on iOS and Android (expo-web-browser). On
+            web, a real link (href, target _blank, rel noopener) that the browser opens in a new
+            tab from a click, Enter or its menu: openBrowserAsync would open a popup window, and
+            RN-web leaves Enter on a role link to the browser. The accessible name ends with
+            "Site externe", as accessibilityHint does not reach web
+```
+
 ### League Tile
 
 `LeagueIcon` (`src/components/LeagueIcon.tsx`): the league's code, in front of its name on the
@@ -563,16 +586,24 @@ empty cells fill a short last row, so every tile keeps the same width. Every til
 results of one competition.
 
 ```
-Tile:      #FFFDFC (card), 1px solid #E5DED6 (line), 20px radius, 16px padding, content spread
-           top to bottom, 8px gap; min height 96px for a season tile. Tiles of a row share its
+Tile:      #FFFDFC (card), 1px solid #E5DED6 (line), 20px radius, 16px padding, 8px gap. A
+           season tile has 12px padding and no min height: with its years only, it is 52px high,
+           about half the 98px it had with a two-line name. At 375px, the 12px sides leave 135px
+           for the 129px of "2025-2026", which 16px cut to "2025-20…". Tiles of a row share its
            height
-Eyebrow:   #262626 (text), 12px, weight 800, uppercase, +1.2px tracking, up to 3 lines: the
-           name without its season ("CHAMPIONNAT CCAPB"). Text, not muted: it names the
-           competition, and muted on card is 4.2:1
-Season:    #141414 (ink), 22px, weight 900, tabular-nums, one line ("2025-2026")
+Eyebrow:   season tile only, and only when the name without its season differs from the
+           featured competition's ("COMPÉTITION (EXT)" among lidfpb's "Compétition" seasons):
+           #262626 (text), 12px, weight 800, uppercase, +1.2px tracking, up to 3 lines, at the
+           top. Text, not muted: it names the competition, and muted on card is 4.2:1
+Season:    #141414 (ink), 22px, weight 900, tabular-nums, one line ("2025-2026"), at the bottom
+           (auto top margin): beside a tile with a name, the years of a row stay level
 ```
 
-- **One competition per season**: one tile per season, eyebrow and season as above.
+- **One competition per season**: one tile per season, with its years. The header band already
+  names the league, and the featured card the competition, so a tile repeats neither: lcapb tiles
+  show their years only. A name that differs from the featured competition's still shows above
+  the years (`seasonTileName`): lidfpb's 2021-2022 "Compétition (Ext)" and 2017-2018
+  "Championnat", lcapb's 2014-2016 "Championnat Hiver LCAPB" under "Toutes les saisons".
 - **Several competitions in a season**: a season heading ("Saison 2025-2026": #141414, 13px,
   weight 800, uppercase, +0.8px tracking) and one tile per competition, with no eyebrow and the
   name without its season as title (#141414, 16px, weight 800, line-height 20px, up to 3 lines).
@@ -769,7 +800,9 @@ Background:   redFill, solid, full width, sized by its content
 Corners:      24px bottom-left and bottom-right (rounded.hero), square top
 Padding:      12px top, 20px sides, 24px bottom; 16px between back link and text
 Back link:    optional, ArrowLeft 20px + label, #FFFFFF 15px weight 600
-Eyebrow:      optional, onRedSoft, 12px, weight 800, uppercase, +1.5px tracking
+Eyebrow:      optional, onRedSoft, 12px, weight 800, uppercase, +1.5px tracking. Once per
+              flow: the Leagues band has "Tableau des compétitions", the Competitions band
+              under it does not repeat it
 Title:        #FFFFFF, 34px, weight 900, line-height 37px, accessibilityRole "header"
 Subtitle:     optional, onRedStrong, 14px, line-height 20px
 Trailing:     optional slot right of the text, 16px gap (the About logo, an action button)
