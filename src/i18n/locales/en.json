@@ -91,6 +91,17 @@
     "today": "Today",
     "winner": "Winner"
   },
+  "final_summary": {
+    "title": "Winners",
+    "against": "against {{team}}",
+    "third_place": "Third place",
+    "facts": "{{teams}}, {{matches}}",
+    "and": "and",
+    "team_a11y": "{{players}}, {{club}}",
+    "set_a11y": "{{winners}} to {{runnerUp}}",
+    "final_a11y": "{{round}}: won {{score}} against {{team}}",
+    "third_place_a11y": "Third place: {{teams}}"
+  },
   "rounds": {
     "P": "Pools",
     "B1T": "1st Round Playoffs",

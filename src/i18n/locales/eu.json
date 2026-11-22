@@ -91,6 +91,17 @@
     "today": "Gaur",
     "winner": "Irabazlea"
   },
+  "final_summary": {
+    "title": "Irabazleak",
+    "against": "{{team}} taldearen aurka",
+    "third_place": "Hirugarren postua",
+    "facts": "{{teams}}, {{matches}}",
+    "and": "eta",
+    "team_a11y": "{{players}}, {{club}}",
+    "set_a11y": "{{winners}} eta {{runnerUp}}",
+    "final_a11y": "{{round}}: {{team}} taldearen aurka irabazia, {{score}}",
+    "third_place_a11y": "Hirugarren postua: {{teams}}"
+  },
   "rounds": {
     "P": "Taldeak",
     "B1T": "Barrageak 1. txanda",

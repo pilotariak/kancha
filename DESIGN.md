@@ -1139,11 +1139,66 @@ On the results screen, a row in place of the old Total / Played / Pending strip:
 ```
 Label:     "27 / 27 parties jouées", #262626 (text), 13px, weight 700, tabular-nums
 Bar:       flex 1, 6px, pill radius, #E5DED6 (line) track, #141414 (ink) fill
-Done:      a dark StatusPill ("Terminé") at the end of the row once every match has a score
+Done:      a dark StatusPill ("Terminé") at the end of the row once every match has a score.
+           When the results also hold a final, the Final Summary card takes the row's place
 Grid:      from two columns (web), in the filter column the row moves under the segmented
            control; with the filter bar it stays on its own line under the bar
 Scrolling: never pinned: outside the filter column, it scrolls away with the results
 ```
+
+### Final Summary Card
+
+`FinalSummaryCard` (`src/components/FinalSummaryCard.tsx`) leads a finished competition with
+its result. It replaces the Results Progress row, in the same place, in the list and the bracket
+views, when every match has a score and the results hold one final whose score names a winner. A
+competition in progress keeps the row, as does one with pools only. So does a category whose
+final is played but where a match has no score: lcapb 500/138/1573 has three pool matches with
+no score, and 9 of the 17 categories with a final in Championnat CCAPB 2024-2025 have at least
+one. The data comes from the results the screen already loaded, through `finalSummary` in
+`src/features/competitions/finalSummary.ts`: no new request.
+
+```
+Card:        #FFFFFF, 1px #E5DED6 border, 16px radius, 12px top and bottom, 14px sides. Its
+             parts are split by 1px #E5DED6 hairlines, 12px above and below each
+Head:        the Trophy (18px, amber #C8900A) in a 32px amberBg circle, the title "Vainqueurs"
+             (#141414 15px weight 800, 20px line, a header), then a dark StatusPill "Terminé"
+             at the end. 10px gaps, 10px above the winners
+Winners:     their players as PlayerLink pills (36px high, cream #F7F4EF, 1px #E5DED6 border,
+             18px radius, the name #141414 14px weight 700, a ChevronRight 14px #7A7A7A), 8px
+             apart, wrapping; each opens the player (`/competitions/player?licence=…`). A
+             player whose lineup has no licence is plain text, same type. Under them, the club,
+             #7A7A7A 12px weight 600, 16px lines. A team without lineup shows its club in the
+             players' style. The team number is not shown: results do not carry it
+Final:       a label line, "FINALE" #7A7A7A 11px weight 700 uppercase +0.6px tracking, then
+             " · Samedi 31 octobre 2026" (12px weight 600, as written). Under it, 6px apart, the
+             score, winners first, one "35–20" per set (#141414 20px weight 800, 22px line,
+             tabular-nums), then, 12px to its right, "contre" and the beaten team (#262626 13px
+             weight 600, 18px lines) over its club (#7A7A7A 12px)
+Third place: the losers of the semi-finals: a "TROISIÈME PLACE" label as above, then each team,
+             its players (#262626 13px weight 600) over its club. None without semi-finals
+Facts:       one line, #7A7A7A 12px weight 600, 16px lines, a sentence: the team count, then the
+             pool summary of every match ("6 équipes, 18 parties en 7 journées, du 6 septembre
+             au 31 octobre")
+Grid:        on a phone, where the progress row sits, full width. From three columns, in the
+             filter column under the segmented control: at 1280 × 800 on 500/137/1573 (447px
+             card, one line of chips) it ends 63px above the window's bottom at rest, 121px once
+             the column sticks; on lidfpb 1/4/1 (chips on two lines) 65px and 123px. With the
+             filter bar (two columns, and the bracket) a cell wide, on its own line under the bar
+Text:        the score digits sit in their own Text (`finalScore`), so they can take a
+             condensed font (#115) on their own
+Screen reader: the title is a header, the winners' pills are buttons named by the player with
+             the "opens the player" hint, then the club. The final and third place each read as
+             one sentence, with the score in words and not with the dash: "Finale, Samedi 31
+             octobre 2026 : gagnée 35 à 20 contre BOUDY Anais et COLAQUY Jennifer (E),
+             PELOTARI CHANTECLER BX LAC", "Troisième place : MOREL Perrine et MARTIN Alizee,
+             CANCHA BOIENNE; …". Each sentence is a group with that label, its printed text
+             hidden, so it is not read twice. The facts line reads as printed
+```
+
+**Counting teams.** A team is the set of licences of a side, as the ranking matches them (§4
+Ranking Table): two teams of one club meet in the pools (US BAZAS and CANCHA BOIENNE in 500/137/
+1573), so clubs would undercount. A side without licences counts as its club. On every category
+of lcapb 500 and 502 this gives the ranking's team count.
 
 ### Ranking Table
 
@@ -1248,7 +1303,8 @@ From three columns, the list and the ranking give the filters the first grid col
 
 ```
 Filters:   one cell wide, 12px from the results: SelectField, FilterChips (wrap),
-           SegmentedControl, ResultsProgress. position: sticky, 68px from the top (the 52px
+           SegmentedControl, ResultsProgress or, once finished, the Final Summary card.
+           position: sticky, 68px from the top (the 52px
            collapsed bar and 16px): they stay in view under the bar while the matches scroll.
            The bar alone is pinned
 Results:   the other columns: the match grid, or the ranking table (712px at most)

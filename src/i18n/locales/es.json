@@ -91,6 +91,17 @@
     "today": "Hoy",
     "winner": "Ganador"
   },
+  "final_summary": {
+    "title": "Ganadores",
+    "against": "contra {{team}}",
+    "third_place": "Tercer puesto",
+    "facts": "{{teams}}, {{matches}}",
+    "and": "y",
+    "team_a11y": "{{players}}, {{club}}",
+    "set_a11y": "{{winners}} a {{runnerUp}}",
+    "final_a11y": "{{round}}: ganada {{score}} contra {{team}}",
+    "third_place_a11y": "Tercer puesto: {{teams}}"
+  },
   "rounds": {
     "P": "Grupos",
     "B1T": "Repechaje 1ª ronda",
