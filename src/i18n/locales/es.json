@@ -103,6 +103,12 @@
     "F": "Final",
     "other": "Partidos"
   },
+  "bracket": {
+    "days_count_one": "{{count}} jornada",
+    "days_count_other": "{{count}} jornadas",
+    "pool_range": "{{matches}} en {{days}}, del {{first}} al {{last}}",
+    "pool_day": "{{matches}} el {{date}}"
+  },
   "rounds_match": {
     "P": "Grupo {{number}}",
     "B1T": "Repechaje 1ª ronda {{number}}",

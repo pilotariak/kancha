@@ -673,8 +673,36 @@ filters away. The strip follows the scroll offset and the measured top of each d
 (`measureLayout` against the results body, on every resize of that body), so it behaves the same
 on iOS, Android and web.
 
-On a phone, the bracket (`BracketView`) is a row of round columns one card wide (350px),
-connected by a chevron, that scrolls sideways and bleeds over the gutter.
+On a phone, the bracket (`BracketView`) shows the knockout rounds first, in a row that scrolls
+sideways and bleeds over the gutters, and folds the pools under it.
+
+```
+Knockout:   every round but the pools (barrages, 16ths to the final), in the order they are
+            played, as columns connected by a 32px chevron. A column leaves 40px of the next one
+            on the first screen: screen width − 20px gutter − 32px chevron − 40px, one card
+            (350px) at most, 220px at least (298px on a 390px phone). A lone round is one card
+            between the gutters. The nodes take their column's width
+Snap:       the row snaps to a column (column + chevron); the end of the scroll shows the last
+            round whole
+Fade:       a 32px cream fade on the right edge, from transparent (cream at alpha 0, as gray
+            shows through "transparent" on web) to cream, while more of the row is to the right
+Dots:       with two rounds or more, one 6px dot per round under the row, centered, 6px apart:
+            lineStrong, the round nearest the left edge 18px wide in ink. They follow the scroll,
+            and the end of the scroll marks the last round. Hidden from screen readers: the
+            round pills name the columns
+Pools:      20px under the dots, inside the gutters: for each group round (pools, and phases the
+            parser does not know), its round pill, then one summary line, collapsed
+Summary:    "15 parties en 5 journées, du 6 septembre au 4 octobre" ("3 parties le 6 septembre"
+            on one day, the match count alone with no date); white card, 1px #E5DED6 border, 14px
+            radius, 44px high at least, 14px side padding; text #141414 14px weight 700, then a
+            ChevronDown 18px muted, turned over when open. The days are the days with a readable
+            date; a match without one counts as a match
+Open:       the summary opens the pool's nodes as a column, 10px apart, at the width between the
+            gutters. Pressed: cream fill. Web hover: the card hover. Keyboard focus: the red
+            ring. `aria-expanded` gives the state
+Pools only: a competition without knockout rounds keeps the row of round columns one card wide,
+            with every match in view
+```
 
 From two columns (web, `columns` prop), the bracket takes the fit layout: nothing scrolls
 sideways.
@@ -689,8 +717,9 @@ Pools:     below, 24px under the knockout row: the round pill, then the nodes in
            parser does not know ("Parties") go there too
 ```
 
-The knockout rounds come first: they are what a reader looks for, and they are short. Pools
-are not a knockout bracket, and their 18 or 20 matches as a column left the later rounds empty.
+The knockout rounds come first, at every width: they are what a reader looks for, and they are
+short. Pools are not a knockout bracket, and their 15 to 25 matches as a column, nearly 2,000px
+tall on a phone, left the later rounds empty and off screen.
 
 ### Status Pills
 

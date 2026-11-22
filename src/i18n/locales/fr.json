@@ -103,6 +103,12 @@
     "F": "Finale",
     "other": "Parties"
   },
+  "bracket": {
+    "days_count_one": "{{count}} journée",
+    "days_count_other": "{{count}} journées",
+    "pool_range": "{{matches}} en {{days}}, du {{first}} au {{last}}",
+    "pool_day": "{{matches}} le {{date}}"
+  },
   "rounds_match": {
     "P": "Poule {{number}}",
     "B1T": "Barrage 1er tour {{number}}",

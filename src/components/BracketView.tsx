@@ -1,12 +1,28 @@
-import React, { useMemo } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CardGrid } from "@/components/CardGrid";
-import { Check, ChevronRight, Swords, Trophy, Users } from "@/components/icons";
+import { Check, ChevronDown, ChevronRight, Swords, Trophy, Users } from "@/components/icons";
 import { type Palette } from "@/constants/colors";
+import {
+  activePage,
+  CONNECTOR_WIDTH,
+  knockoutColumnWidth,
+  knockoutRowWidth,
+  poolSummaryLabel,
+  splitRounds,
+  summarizePool,
+} from "@/features/competitions/bracket";
 import { parseMatchScore, type Side } from "@/features/competitions/matchScore";
-import { CARD_WIDTH } from "@/features/layout/breakpoints";
+import { CARD_WIDTH, GUTTER } from "@/features/layout/breakpoints";
+import {
+  type InteractionState,
+  showsFocusRing,
+  useInteractionStyles,
+} from "@/hooks/use-interaction-styles";
+import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import type { Result } from "@/types/competition";
 
@@ -242,13 +258,19 @@ function RoundPill({ group }: { group: RoundGroup }) {
   );
 }
 
-function RoundColumn({ group, fill = false }: { group: RoundGroup; fill?: boolean }) {
+/**
+ * One round: its pill, then its nodes one card wide. `fill` shares a row's width (fit layout);
+ * `width` sets the column's own (the phone knockout row). Either way the nodes take its width.
+ */
+function RoundColumn(
+  { group, fill = false, width }: { group: RoundGroup; fill?: boolean; width?: number },
+) {
   const styles = useThemedStyles(makeStyles);
   const colors = usePhaseColors()[group.type];
   const isFinal = group.type === "F";
 
   return (
-    <View style={[styles.column, fill && styles.columnFill]}>
+    <View style={[styles.column, fill && styles.columnFill, width != null && { width }]}>
       <RoundPill group={group} />
       <View style={styles.columnBody}>
         {group.results.map((r) => (
@@ -257,7 +279,7 @@ function RoundColumn({ group, fill = false }: { group: RoundGroup; fill?: boolea
             result={r}
             isFinal={isFinal}
             colors={colors}
-            fill={fill ? "width" : undefined}
+            fill={fill || width != null ? "width" : undefined}
           />
         ))}
       </View>
@@ -296,22 +318,164 @@ function RoundConnector() {
   );
 }
 
-// ─── BracketView ──────────────────────────────────────────────────────────────
+// ─── Knockout row (phone) ─────────────────────────────────────────────────────
 
-/** Rounds played as groups, not knockout: pools, and phases the parser does not know. */
-const GROUP_ROUNDS: ReadonlySet<PhaseType> = new Set(["P", "other"]);
+/** One dot per round, the round nearest the left edge drawn long. */
+function PageDots({ count, active }: { count: number; active: number }) {
+  const styles = useThemedStyles(makeStyles);
+  return (
+    // The round pills name the columns: the dots only show where the row is.
+    <View
+      style={styles.dots}
+      aria-hidden
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      testID="bracket-page-dots"
+    >
+      {Array.from({ length: count }, (_, i) => (
+        <View
+          key={i}
+          style={[styles.dot, i === active && styles.dotActive]}
+          testID={i === active ? "bracket-page-dot-active" : undefined}
+        />
+      ))}
+    </View>
+  );
+}
 
 /**
- * The rounds side by side, in a row that scrolls sideways (one column, the phone layout). With
- * more `columns` (web), nothing scrolls sideways: the knockout rounds share the width, and the
- * group rounds follow as grids of that many nodes per row.
+ * The knockout rounds side by side, in a row that bleeds over the gutters and scrolls sideways,
+ * snapping to a column. The columns leave room for the edge of the next one, under a cream fade;
+ * dots under the row follow the scroll.
+ */
+function KnockoutRow({ rounds }: { rounds: RoundGroup[] }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  // The bracket takes the content width on a phone: a first render at the right width, then the
+  // measured frame.
+  const { contentWidth } = useWebLayout();
+  const [frameWidth, setFrameWidth] = useState(contentWidth);
+  const [offset, setOffset] = useState(0);
+
+  const columnWidth = knockoutColumnWidth(frameWidth, rounds.length);
+  const pageWidth = columnWidth + CONNECTOR_WIDTH;
+  const maxOffset = Math.max(0, knockoutRowWidth(columnWidth, rounds.length) - frameWidth);
+  const page = activePage(offset, pageWidth, rounds.length, maxOffset);
+  const hasMore = maxOffset - offset > 1;
+
+  // The scroll re-renders the dots and the fade, not the columns.
+  const columns = useMemo(
+    () =>
+      rounds.map((group, i) => (
+        <React.Fragment key={group.type}>
+          <RoundColumn group={group} width={columnWidth} />
+          {i < rounds.length - 1 && <RoundConnector />}
+        </React.Fragment>
+      )),
+    [rounds, columnWidth],
+  );
+
+  return (
+    <View>
+      <View onLayout={(e) => setFrameWidth(e.nativeEvent.layout.width)}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={pageWidth}
+          decelerationRate="fast"
+          onScroll={(e) => setOffset(e.nativeEvent.contentOffset.x)}
+          scrollEventThrottle={16}
+          contentContainerStyle={[styles.container, rounds.length > 1 && styles.containerDots]}
+          testID="bracket-knockout"
+        >
+          {columns}
+        </ScrollView>
+        {hasMore
+          ? (
+            <LinearGradient
+              pointerEvents="none"
+              // An 8-digit hex keeps the cream hue: "transparent" fades through gray on web.
+              colors={[`${colors.cream}00`, colors.cream]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.fade}
+            />
+          )
+          : null}
+      </View>
+      {rounds.length > 1 && <PageDots count={rounds.length} active={page} />}
+    </View>
+  );
+}
+
+// ─── Pools (phone) ────────────────────────────────────────────────────────────
+
+/**
+ * A group round under the knockout row: its pill, then one line that sums up its matches and
+ * opens them as a column of nodes.
+ */
+function PoolRound({ group }: { group: RoundGroup }) {
+  const { t, i18n } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  const interaction = useInteractionStyles();
+  const phaseColors = usePhaseColors()[group.type];
+  const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  // The language the strings resolved to, so a "de" device gets an English date too.
+  const summary = poolSummaryLabel(
+    summarizePool(group.results),
+    t,
+    i18n.resolvedLanguage ?? "en",
+  );
+
+  return (
+    <View style={styles.pool}>
+      <RoundPill group={group} />
+      <Pressable
+        onPress={() => setOpen((value) => !value)}
+        onHoverIn={() => setHovered(true)}
+        onHoverOut={() => setHovered(false)}
+        accessibilityRole="button"
+        aria-expanded={open}
+        style={(state: InteractionState) => [
+          styles.poolSummary,
+          state.pressed && styles.poolSummaryPressed,
+          hovered && interaction.hover,
+          showsFocusRing(state) && interaction.focusRing,
+        ]}
+        testID={`bracket-pool-toggle-${group.type}`}
+      >
+        <Text style={styles.poolSummaryText}>{summary}</Text>
+        <View style={open && styles.chevronOpen}>
+          <ChevronDown color={colors.muted} size={18} />
+        </View>
+      </Pressable>
+      {open && (
+        <View style={styles.columnBody}>
+          {group.results.map((r) => (
+            <MatchNode key={r.id} result={r} isFinal={false} colors={phaseColors} fill="width" />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ─── BracketView ──────────────────────────────────────────────────────────────
+
+/**
+ * The knockout rounds first, then the group rounds. On a phone (one column), the knockout rounds
+ * sit side by side in a row that scrolls sideways, and each group round folds into one summary
+ * line under it; with group rounds only, they keep their sideways row of columns. With more
+ * `columns` (web), nothing scrolls sideways: the knockout rounds share the width, and the group
+ * rounds follow as grids of that many nodes per row.
  */
 export function BracketView({ rounds, columns = 1 }: { rounds: RoundGroup[]; columns?: number }) {
   const styles = useThemedStyles(makeStyles);
+  const { knockout, groups } = useMemo(() => splitRounds(rounds), [rounds]);
 
   if (columns > 1) {
-    const knockout = rounds.filter((group) => !GROUP_ROUNDS.has(group.type));
-    const groups = rounds.filter((group) => GROUP_ROUNDS.has(group.type));
     return (
       <View style={styles.fit}>
         {knockout.length > 0 && (
@@ -320,6 +484,15 @@ export function BracketView({ rounds, columns = 1 }: { rounds: RoundGroup[]; col
           </View>
         )}
         {groups.map((group) => <RoundGrid key={group.type} group={group} columns={columns} />)}
+      </View>
+    );
+  }
+
+  if (knockout.length > 0) {
+    return (
+      <View style={styles.phone}>
+        <KnockoutRow rounds={knockout} />
+        {groups.map((group) => <PoolRound key={group.type} group={group} />)}
       </View>
     );
   }
@@ -354,11 +527,34 @@ const FIT_GAP = 24;
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
     container: {
-      paddingHorizontal: 20,
+      paddingHorizontal: GUTTER,
       paddingTop: 4,
       paddingBottom: 16,
       alignItems: "flex-start",
     },
+    // Phone, with knockout rounds: the row and its dots, then the pools.
+    phone: { gap: 20 },
+    containerDots: { paddingBottom: 12 },
+    fade: { position: "absolute", top: 0, right: 0, bottom: 0, width: 32 },
+    dots: { flexDirection: "row", justifyContent: "center", gap: 6 },
+    dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.lineStrong },
+    dotActive: { width: 18, backgroundColor: c.ink },
+    pool: { paddingHorizontal: GUTTER, gap: 10 },
+    poolSummary: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      minHeight: 44,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.line,
+      backgroundColor: c.white,
+    },
+    poolSummaryPressed: { backgroundColor: c.cream },
+    poolSummaryText: { flex: 1, color: c.ink, fontSize: 14, fontWeight: "700", lineHeight: 20 },
+    chevronOpen: { transform: [{ rotate: "180deg" }] },
     column: {
       width: COLUMN_WIDTH,
       gap: 10,
@@ -396,7 +592,7 @@ const makeStyles = (c: Palette) =>
     },
     columnBody: { gap: 10 },
     connector: {
-      width: 32,
+      width: CONNECTOR_WIDTH,
       paddingTop: 50,
       alignItems: "center",
     },
