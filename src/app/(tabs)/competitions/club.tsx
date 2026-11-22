@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CardGrid } from "@/components/CardGrid";
 import { CardLink } from "@/components/CardLink";
+import { FollowButton } from "@/components/FollowButton";
 import { ChevronDown, ChevronRight, ChevronUp, RotateCcw, Trophy } from "@/components/icons";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { SectionHeader } from "@/components/SectionHeader";
@@ -347,6 +348,15 @@ export default function ClubScreen() {
           eyebrow={t("club.eyebrow")}
           title={club?.name ?? t("club.title")}
           loading={clubPending}
+          action={club
+            ? (
+              <FollowButton
+                favourite={{ kind: "club", id: club.id, name: club.name }}
+                name={club.name}
+                testID="club-follow"
+              />
+            )
+            : null}
         />
 
         <View style={styles.body}>

@@ -6,13 +6,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CardGrid } from "@/components/CardGrid";
 import { CardLink } from "@/components/CardLink";
+import { clubHref } from "@/components/ClubLink";
 import { FeaturedCard } from "@/components/FeaturedCard";
-import { ChevronDown, ChevronRight, ChevronUp, Search } from "@/components/icons";
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Search,
+  Shield,
+  Trophy,
+  User,
+} from "@/components/icons";
 import { LeagueIcon } from "@/components/LeagueIcon";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { SeasonTile } from "@/components/SeasonTile";
 import { SectionHeader } from "@/components/SectionHeader";
+import { SpecialtyLabel } from "@/components/SpecialtyLabel";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import {
@@ -27,11 +37,129 @@ import {
 import { useCompetitions } from "@/hooks/use-competitions";
 import { useWebLayout } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
+import {
+  type FollowedCategory,
+  hasFavourites,
+  selectLeagueFavourites,
+  useFavouritesStore,
+} from "@/store/favourites-store";
 import { useLeagueStore } from "@/store/league-store";
 import type { Competition } from "@/types/competition";
 
 const competitionHref = (id: string): Extract<Href, string> =>
   `/(tabs)/competitions/details?id=${id}`;
+
+const playerHref = (licence: string): Extract<Href, string> =>
+  `/(tabs)/competitions/player?licence=${encodeURIComponent(licence)}`;
+
+const categoryHref = (c: FollowedCategory): Extract<Href, string> =>
+  `/(tabs)/competitions/details?id=${c.competitionId}&specialtyId=${c.specialtyId}&categoryId=${c.categoryId}`;
+
+interface FollowedCardProps {
+  href: Extract<Href, string>;
+  icon: typeof Shield;
+  /** The kind, above the title: "Club", "Joueur", "Catégorie". */
+  kind: string;
+  title: string;
+  /** The specialty name, shown with its pictograms in place of a plain title. */
+  specialty?: boolean;
+  /** The lines under the title, joined by " · " on screen and by commas for screen readers. */
+  meta?: string[];
+  hint: string;
+  testID: string;
+}
+
+function FollowedCard(
+  { href, icon: Icon, kind, title, specialty, meta, hint, testID }: FollowedCardProps,
+) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  return (
+    <CardLink
+      style={[styles.card, styles.iconCard]}
+      href={href}
+      accessibilityRole="button"
+      accessibilityLabel={[kind, title, ...(meta ?? [])].join(", ")}
+      accessibilityHint={hint}
+      testID={testID}
+    >
+      <View style={styles.iconTile}>
+        <Icon color={colors.red} size={18} />
+      </View>
+      <View style={styles.followedBody}>
+        <Text style={styles.followedKind}>{kind}</Text>
+        {specialty
+          ? <SpecialtyLabel name={title} textStyle={styles.followedTitle} />
+          : <Text style={styles.followedTitle}>{title}</Text>}
+        {meta
+          ? <Text style={styles.cardMeta}>{meta.map(keepSeasonTogether).join(" · ")}</Text>
+          : null}
+      </View>
+      <ChevronRight color={colors.muted} size={18} />
+    </CardLink>
+  );
+}
+
+/**
+ * "Suivis": a shortcut to each club, player and category followed in the league, from the
+ * names saved with them, so it shows offline. None when the league has no favourite.
+ */
+function FollowedSection({ leagueId, columns }: { leagueId: string | null; columns: number }) {
+  const { t } = useTranslation();
+  const styles = useThemedStyles(makeStyles);
+  const favourites = useFavouritesStore(selectLeagueFavourites(leagueId));
+  if (!hasFavourites(favourites)) return null;
+
+  return (
+    <View style={styles.section} testID="followed-section">
+      <SectionHeader eyebrow={t("follow.section_eyebrow")} title={t("follow.section_title")} />
+      <CardGrid columns={columns} style={styles.list}>
+        {favourites.clubs.map((club) => (
+          <FollowedCard
+            key={`club-${club.id}`}
+            href={clubHref(club.id)}
+            icon={Shield}
+            kind={t("club.eyebrow")}
+            title={club.name}
+            hint={t("club.open_hint")}
+            testID={`followed-club-${club.id}`}
+          />
+        ))}
+        {favourites.players.map((player) => {
+          const licence = t("ranking.licence", { licence: player.licence });
+          return (
+            <FollowedCard
+              key={`player-${player.licence}`}
+              href={playerHref(player.licence)}
+              icon={User}
+              kind={t("player.eyebrow")}
+              title={player.name ?? licence}
+              meta={player.name ? [licence] : undefined}
+              hint={t("player.open_hint")}
+              testID={`followed-player-${player.licence}`}
+            />
+          );
+        })}
+        {favourites.categories.map((category) => {
+          const key = `${category.competitionId}-${category.specialtyId}-${category.categoryId}`;
+          return (
+            <FollowedCard
+              key={`category-${key}`}
+              href={categoryHref(category)}
+              icon={Trophy}
+              kind={t("category.title")}
+              title={category.specialtyName}
+              specialty
+              meta={[category.categoryName, category.competitionName]}
+              hint={t("follow.category_hint")}
+              testID={`followed-category-${key}`}
+            />
+          );
+        })}
+      </CardGrid>
+    </View>
+  );
+}
 
 interface Tile {
   competition: Competition;
@@ -210,6 +338,8 @@ export default function CompetitionsListScreen() {
         />
 
         <View style={styles.body}>
+          <FollowedSection leagueId={selectedLeagueId} columns={columns} />
+
           {/* A card like the others: one cell wide in the grid. */}
           <CardGrid columns={columns} style={styles.list}>
             <PressableScale
@@ -326,6 +456,16 @@ const makeStyles = (c: Palette) =>
       justifyContent: "center",
     },
     iconCardBody: { flex: 1, gap: 2 },
+    section: { gap: 12 },
+    followedBody: { flex: 1, gap: 4 },
+    followedKind: {
+      color: c.muted,
+      fontSize: 11,
+      fontWeight: "800",
+      letterSpacing: 0.8,
+      textTransform: "uppercase",
+    },
+    followedTitle: { color: c.ink, fontSize: 16, fontWeight: "800", lineHeight: 21 },
     grid: { gap: 12 },
     gridRow: { flexDirection: "row", gap: 12 },
     gridCell: { flex: 1 },

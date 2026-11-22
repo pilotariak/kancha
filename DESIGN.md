@@ -463,8 +463,9 @@ Focus (web):   2px solid red outline, 2px offset, keyboard focus only
 
 ### Cards — Icon Card
 
-The first card of the competitions list, one cell in the grid: "Trouver un joueur", which opens
-the player search.
+The first card of the competitions list, one cell in the grid, under the Suivis section when the
+league has favourites (§ Follow — Suivis section): "Trouver un joueur", which opens the player
+search.
 
 ```
 Card:       a competition card (above), in a row: icon tile, text, trailing icon; 12px gap
@@ -812,6 +813,10 @@ Eyebrow:      optional, onRedSoft, 12px, weight 800, uppercase, +1.5px tracking.
 Title:        #FFFFFF, 34px, weight 900, line-height 37px, accessibilityRole "header"
 Subtitle:     optional, onRedStrong, 14px, line-height 20px
 Trailing:     optional slot right of the text, 16px gap (the About logo, an action button)
+Action:       optional, at the right end of the back link's row, centered on it, 16px gap (the
+              follow button). It stays out of the band's bottom 52px, which the collapsed bar
+              overlaps on the results screen: a control there would lose its presses to the bar,
+              invisible at rest, even where the title is one line
 Loading:      white spinner in place of the title and subtitle
 Compact:      `compact` prop, for a screen with filters under the band (results): title 28px
               (Hero title), line-height 31px; 16px bottom padding, 12px between back link and text
@@ -1325,7 +1330,8 @@ club in a competition; the summaries are pure functions in `src/features/clubs/c
 
 ```
 Header:       the red band (§ Screen Header): back link, eyebrow "Club", the club's name as
-              Frontis spells it ("AMIS DE LA PEL.BASQUE-LE HAILLAN"); a spinner while it loads
+              Frontis spells it ("AMIS DE LA PEL.BASQUE-LE HAILLAN"); a spinner while it loads.
+              The follow button (§ Follow — button) in the back link's row once the name loads
 Season:       a SelectField ("Saison"), the seasons of the competitions list (`groupBySeason`),
               the current season first and chosen by default. The choice goes to the URL
               (`&season=2025-2026`), so a reload or a shared link keeps it. Competitions without
@@ -1391,6 +1397,85 @@ entries; four titles: Mur à Gauche / P.G. Creuse Masculin Individuel in 1ère a
 Mur à Gauche / P.G. Pleine Masculin in 2ème Série (three finals between its own teams), and
 Trinquet / P.G. Creuse Masculin in 3ème Série. The Trinquet / P.G. Creuse Masculin 2ème Série
 final, lost to CA Béglais, is none. The club has results in 13 seasons, 2014-2015 to 2026-2027.
+
+### Follow — button
+
+`FollowButton` (`src/components/FollowButton.tsx`): "Suivre" / "Suivi", in the header band's
+action slot (the back link's row, on the right) of the club page, the player page and the
+results screen. It follows a club, a
+player, or the competition, specialty and category on screen, in the selected league. One
+component, so a redesigned screen (the player page, #120) keeps it by placing it in its header.
+
+```
+Shape:         pill, 44px high and wide at least (minHeight, minWidth: the touch target, as web
+               ignores hitSlop), 14px sides, rounded.full, 6px between the star and the label
+Off:           "Suivre": 1.5px onRedSoft border, no fill; 18px Star outline and the label in
+               onRedStrong, 15px weight 700
+On:            "Suivi": onRedStrong fill and border; the Star filled and the label in redFill
+Hover, press:  redDark fill when off; onRedSoft fill and border when on
+Focus (web):   2px onRedStrong outline, 2px offset, keyboard focus only: the red ring would not
+               show on the band
+Hidden:        until the league and the saved favourites load, so it never shows a wrong state,
+               and until the names it saves are known: the club, the player's rankings (none
+               for a licence without rankings), the competition, specialty and category
+Results:       on the band only: the collapsed bar has no action slot. The label names the
+               specialty and category, as the band's title is the competition
+Screen reader: a button named after what it follows and its state, the visible word first:
+               "Suivre AMIS DE LA PEL.BASQUE-LE HAILLAN", "Suivi : PUCHEUX Theo", "Suivre Mur à
+               Gauche / P.G. Creuse Masculin Individuel, 1ère Série". The state also goes to
+               accessibilityState (selected) on iOS and Android, and to aria-pressed on web,
+               where accessibilityState never reaches the DOM
+Press:         a Pressable: it takes the touch on iOS and Android, and its click does not bubble
+               on web, so a card or row around it does not open too
+```
+
+| Pair (on redFill)                                      | Light (`#C8102E`) | Dark (`#B5142F`) |
+| ------------------------------------------------------ | ----------------- | ---------------- |
+| Label, star (onRedStrong) on the band                  | 4.95:1            | 5.68:1           |
+| Border (onRedSoft) on the band                         | 4.61:1            | 4.73:1           |
+| Label (onRedStrong) on the hover fill (redDark)        | 7.27:1            | 9.97:1           |
+| Followed pill (onRedStrong) on the band                | 4.95:1            | 5.68:1           |
+| Label, star (redFill) on the followed pill             | 4.95:1            | 5.68:1           |
+| Label (redFill) on the followed hover fill (onRedSoft) | 4.61:1            | 4.73:1           |
+
+**Store.** `useFavouritesStore` (`src/store/favourites-store.ts`), saved on the device as
+`kancha-favourites` (zustand persist, AsyncStorage), with no account. `byLeague` holds, by league
+id, `clubs` (id, name), `players` (licence, name or null) and `categories` (competitionId,
+specialtyId, categoryId and their three names), each in the order followed; ids repeat across
+leagues, so a favourite belongs to one league. The names are saved with the ids, so the Suivis
+section shows offline and sends no request. A league whose last favourite goes is dropped. The
+add, remove and toggle helpers and the `selectLeagueFavourites` and `selectIsFollowed`
+selectors are plain functions with unit tests; the notifications (#137) send this list to
+Frontis.
+
+### Follow — Suivis section
+
+At the top of the Competitions screen, above "Trouver un joueur": a shortcut to each favourite of
+the selected league. None when the league has no favourite, or before the saved ones load.
+
+```
+Header:        SectionHeader "Favoris" / "Suivis", 12px above the cards
+Cards:         the icon card (§ Cards — Icon Card) in the card grid, one cell wide: the clubs,
+               then the players, then the categories, each in the order followed. Icon tile:
+               Shield (club), User (player), Trophy (category)
+Kind:          above the title, #7A7A7A (muted) 11px weight 800 uppercase, +0.8px tracking:
+               "Club", "Joueur", "Catégorie"; 4px between the lines
+Title:         #141414 (ink) 16px weight 800, line-height 21px: the club's name, the player's
+               name ("Licence 066629" without one), or the category's specialty as a
+               SpecialtyLabel, with its pictograms
+Meta:          #7A7A7A 13px: "Licence 066629" under a player's name; "1ère Série · Championnat
+               CCAPB 2025-2026" for a category; none for a club
+Opens:         the club page (`/competitions/club?id=…`), the player page (`?licence=…`), or the
+               results screen on the pair (`/competitions/details?id=…&specialtyId=…&categoryId=…`),
+               through CardLink (§ Link previews)
+Screen reader: a button labelled with the kind, the title and the meta ("Club, AMIS DE LA
+               PEL.BASQUE-LE HAILLAN"), with the hint of its target ("Ouvre la page du club")
+```
+
+Measured on lcapb: club 4063 (AMIS DE LA PEL.BASQUE-LE HAILLAN), player 066629 (PUCHEUX Theo)
+and Mur à Gauche / P.G. Creuse Masculin Individuel, 1ère Série, in Championnat CCAPB 2025-2026
+(competition 502, specialty 136, category 1573), followed from their screens, show in Suivis
+and open them; they stay after a reload, and the section hides on lidfpb.
 
 ### Score — Setup
 

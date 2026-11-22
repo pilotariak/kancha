@@ -25,6 +25,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
 import { FilterChips } from "@/components/FilterChips";
 import { FinalSummaryCard } from "@/components/FinalSummaryCard";
+import { FollowButton } from "@/components/FollowButton";
 import {
   ChevronDown,
   LayoutList,
@@ -478,6 +479,26 @@ export default function CompetitionDetailsScreen() {
   } = useResultsByCompetition(id, specialtyId, categoryId);
 
   const hasPair = !!specialtyId && !!categoryId;
+  // The pair on screen, with the names the followed list shows offline.
+  const specialtyName = specialties?.find((s) => s.id === specialtyId)?.name;
+  const categoryName = categories?.find((c) => c.id === categoryId)?.name;
+  const follow = competition && specialtyId && specialtyName && categoryId && categoryName
+    ? (
+      <FollowButton
+        favourite={{
+          kind: "category",
+          competitionId: competition.id,
+          competitionName: competition.name,
+          specialtyId,
+          specialtyName,
+          categoryId,
+          categoryName,
+        }}
+        name={`${specialtyName}, ${categoryName}`}
+        testID="category-follow"
+      />
+    )
+    : null;
   const rounds = useMemo(() => (results ? groupByRound(results) : []), [results]);
   // The list view splits each round by match day; the bracket keeps the rounds.
   const roundDays = useMemo(() => groupByDay(rounds.map((round) => round.results)), [rounds]);
@@ -801,6 +822,7 @@ export default function CompetitionDetailsScreen() {
             eyebrow={league?.name}
             title={competition?.name ?? t("common.competition_fallback")}
             loading={loadingComp}
+            action={follow}
             compact
           />
         </View>
