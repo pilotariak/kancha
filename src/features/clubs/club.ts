@@ -140,8 +140,11 @@ export function clubEntries(matches: readonly ClubMatch[]): ClubEntry[] {
 
 // ─── Results by date ──────────────────────────────────────────────────────────
 
+/** A match the date order reads: a club's, or a player's. */
+type DatedMatch = { result: Pick<Result, "dateMatch" | "phase"> };
+
 /** The latest date first, unreadable dates last; on one day, the later round first. */
-function newestFirst(a: ClubMatch, b: ClubMatch): number {
+function newestFirst(a: DatedMatch, b: DatedMatch): number {
   const da = a.result.dateMatch ? parsePlainDate(a.result.dateMatch) : null;
   const db = b.result.dateMatch ? parsePlainDate(b.result.dateMatch) : null;
   if (da && db) {
@@ -156,7 +159,7 @@ function newestFirst(a: ClubMatch, b: ClubMatch): number {
 }
 
 /** Every match of the season, the latest first, matches to come included. */
-export function matchesByDate(matches: readonly ClubMatch[]): ClubMatch[] {
+export function matchesByDate<T extends DatedMatch>(matches: readonly T[]): T[] {
   return [...matches].sort(newestFirst);
 }
 
