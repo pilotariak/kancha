@@ -29,7 +29,15 @@ module.exports = {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#F7F4EF",
+        // Themed icons (Android 13 and up): the white K of icon.svg on a transparent
+        // background, inside the 66 dp safe zone (assets/icon-monochrome.svg). The launcher
+        // tints it; icon-tinted.png is opaque and cannot serve here.
+        monochromeImage: "./assets/images/icon-monochrome.png",
       },
+      // Off, which writes android:enableOnBackInvokedCallback="false": React Native's
+      // ReactActivity keeps an OnBackPressedCallback enabled at all times, so the system plays
+      // no back preview, and react-native-screens 4.16 has no predictive back for its stack.
+      predictiveBackGestureEnabled: false,
       package: "io.pilotariak.kancha",
     },
     web: {

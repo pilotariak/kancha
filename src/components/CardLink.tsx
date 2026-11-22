@@ -15,7 +15,8 @@ type CardLinkProps = Omit<ComponentProps<typeof PressableScale>, "onPress"> & {
 /**
  * A `PressableScale` card that opens `href`. On iOS, a long press also shows a preview of the
  * screen and a menu: Open, Share, Copy link, with the public web address (`shareUrl`). Android
- * and web keep the plain card: a press pushes `href`, and web keeps its hover and focus.
+ * and web keep the plain card: a press pushes `href`. Android shows `PressableScale`'s ripple
+ * (pass `android_ripple` to change its color), and web keeps its hover and focus.
  */
 export function CardLink({ href, style, ...props }: CardLinkProps) {
   const { t } = useTranslation();

@@ -15,7 +15,9 @@ import { useTheme } from "@/hooks/use-theme";
  * route the tabs go back to.
  *
  * iOS sets only the selected tint: a background, blur or label color would replace the system
- * glass. Android takes the colors of the former JS tab bar, with the redSoft pill of the web rail.
+ * glass. Android takes the colors of the former JS tab bar, with the redSoft pill of the web rail
+ * and the cards' ripple: without `rippleColor`, react-native-screens reads `itemRippleColor`
+ * from the Material 3 theme, which does not define it, and the press shows no ripple.
  */
 export default function TabLayout() {
   const { t } = useTranslation();
@@ -27,6 +29,7 @@ export default function TabLayout() {
       iconColor: colors.tabIconInactive,
       labelStyle: { color: colors.tabIconInactive, fontSize: 12, fontWeight: "700" },
       indicatorColor: colors.redSoft,
+      rippleColor: colors.ripple,
     } as const
     : undefined;
 

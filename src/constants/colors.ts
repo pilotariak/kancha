@@ -25,6 +25,10 @@ export type Palette = {
   /** Translucent white for secondary text on redFill: 4.5:1 or more in both themes. */
   onRedStrong: string;
   onRedSoft: string;
+  /** Android press ripple: red at 10 % on cards, rows and tabs. */
+  ripple: string;
+  /** Android press ripple on a redFill card: white at 10 %, as red would not show. */
+  rippleOnRed: string;
   /** Tab bar surfaces. */
   tabBar: string;
   tabBarBorder: string;
@@ -54,6 +58,8 @@ export const KanchaColorsLight: Palette = {
   amberBg: "#FFF8E7",
   onRedStrong: "rgba(255,255,255,0.90)",
   onRedSoft: "rgba(255,255,255,0.86)",
+  ripple: "rgba(200,16,46,0.10)",
+  rippleOnRed: "rgba(255,255,255,0.10)",
   tabBar: "#FFFFFF",
   tabBarBorder: "#E9E0D6",
   tabIconInactive: "#B8B1AA",
@@ -84,6 +90,8 @@ export const KanchaColorsDark: Palette = {
   amberBg: "#2A240F",
   onRedStrong: "rgba(255,255,255,0.90)",
   onRedSoft: "rgba(255,255,255,0.80)",
+  ripple: "rgba(245,88,110,0.10)",
+  rippleOnRed: "rgba(255,255,255,0.10)",
   tabBar: "#0F1A15",
   tabBarBorder: "#1F2D27",
   tabIconInactive: "#5E7268",
