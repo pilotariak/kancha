@@ -1,12 +1,35 @@
+import { createInstance, type TFunction } from "i18next";
+
+import en from "@/i18n/locales/en.json";
+import es from "@/i18n/locales/es.json";
+import eu from "@/i18n/locales/eu.json";
+import fr from "@/i18n/locales/fr.json";
 import type { ClubLineup, TeamRanking } from "@/types/competition";
 
 import {
   buildRanking,
   buildTeamRecords,
+  formLabel,
+  type FormResult,
   isForfeit,
   lineupLicence,
+  phaseLabel,
+  type RankingRow,
   type RecordMatch,
+  rowLabel,
 } from "./ranking";
+
+const LOCALES = { en, es, eu, fr } as const;
+
+async function translator(lng: keyof typeof LOCALES): Promise<TFunction> {
+  const i18n = createInstance();
+  await i18n.init({
+    lng,
+    resources: { [lng]: { translation: LOCALES[lng] } },
+    interpolation: { escapeValue: false },
+  });
+  return i18n.getFixedT(lng);
+}
 
 /** Build a ranking line; `id` doubles as the club id so each team stays distinct. */
 function team(id: string, overrides: Partial<TeamRanking> = {}): TeamRanking {
@@ -293,5 +316,91 @@ describe("buildTeamRecords", () => {
     ]);
     // D 2 is won before the final is lost on the same day; the undated matches come after.
     expect(records.get("t1")?.form).toEqual(["W", "L", "L", "W"]);
+  });
+});
+
+// Rows below come from Frontis: lcapb competition 502, specialty 138, category 1573.
+describe("ranking labels", () => {
+  let tFr: TFunction;
+  let tEn: TFunction;
+
+  beforeAll(async () => {
+    tFr = await translator("fr");
+    tEn = await translator("en");
+  });
+
+  const champion: RankingRow = {
+    id: "95",
+    rank: 1,
+    clubName: "CA BEGLAIS",
+    teamNumber: 1,
+    phase: "Champion",
+    isChampion: true,
+    isForfeit: false,
+    players: [
+      { licence: "059063", name: "NICOL Guillaume" },
+      { licence: "058964", name: "GONZALEZ Antoine" },
+    ],
+  };
+  const quarter: RankingRow = {
+    id: "102",
+    rank: 8,
+    clubName: "CA BEGLAIS",
+    teamNumber: 3,
+    phase: "1/4 de finale",
+    isChampion: false,
+    isForfeit: false,
+    players: [
+      { licence: "063917", name: "GUITTON Cyril" },
+      { licence: "096009", name: null },
+    ],
+  };
+
+  it("names the champion in the app's language and keeps the league's other phases", () => {
+    expect(phaseLabel(champion, tEn)).toBe("Champion");
+    expect(phaseLabel(quarter, tEn)).toBe("1/4 de finale");
+  });
+
+  it("says the form in words, oldest first", () => {
+    expect(formLabel(["W", "W", "L"], tFr)).toBe(
+      "derniers résultats : victoire, victoire, défaite",
+    );
+    expect(formLabel(["L", "W"], tEn)).toBe("last results: loss, win");
+  });
+
+  it("has the form words in every language", async () => {
+    for (const lng of Object.keys(LOCALES) as (keyof typeof LOCALES)[]) {
+      const t = await translator(lng);
+      const label = formLabel(["W", "L"], t);
+      expect(label).not.toMatch(/ranking\./);
+      expect(label).toContain(t("ranking.form_win_a11y"));
+      expect(label).toContain(t("ranking.form_loss_a11y"));
+    }
+  });
+
+  it("reads a row as one sentence: rank, players, club, team, phase, record and form", () => {
+    const record = { wins: 7, losses: 0, form: ["W", "W", "W", "W", "W"] as FormResult[] };
+    expect(rowLabel(champion, record, tFr)).toBe(
+      "Rang 1, NICOL Guillaume, GONZALEZ Antoine, CA BEGLAIS, Équipe 1, Champion, "
+        + "7 victoires, 0 défaite, derniers résultats : victoire, victoire, victoire, victoire, "
+        + "victoire",
+    );
+  });
+
+  it("names a player listed by licence alone", () => {
+    expect(rowLabel(quarter, { wins: 1, losses: 1, form: ["W", "L"] }, tEn)).toBe(
+      "Rank 8, GUITTON Cyril, Licence 096009, CA BEGLAIS, Team 3, 1/4 de finale, "
+        + "1 win, 1 loss, last results: win, loss",
+    );
+  });
+
+  it("says when a team has no scored match, and stops at the phase while results load", () => {
+    expect(rowLabel(quarter, { wins: 0, losses: 0, form: [] }, tEn)).toBe(
+      "Rank 8, GUITTON Cyril, Licence 096009, CA BEGLAIS, Team 3, 1/4 de finale, "
+        + "no match played",
+    );
+    expect(rowLabel(quarter, undefined, tEn)).toBe(
+      "Rank 8, GUITTON Cyril, Licence 096009, CA BEGLAIS, Team 3, 1/4 de finale",
+    );
   });
 });

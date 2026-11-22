@@ -1,19 +1,21 @@
 import { router } from "expo-router";
-import type { TFunction } from "i18next";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ChevronDown, ChevronRight, RotateCcw, Trophy } from "@/components/icons";
-import { SectionHeader } from "@/components/SectionHeader";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { GUTTER, TEXT_MAX_WIDTH } from "@/features/layout/breakpoints";
 import {
   buildRanking,
   buildTeamRecords,
+  formLabel,
   type FormResult,
+  phaseLabel,
+  playerName,
   type RankingRow,
+  rowLabel,
   type TeamRecord,
 } from "@/features/rankings/ranking";
 import {
@@ -28,10 +30,6 @@ import type { RankedPlayer } from "@/types/competition";
 
 /** On web, the table keeps to the text column, inside the screen's gutters. */
 const TABLE_MAX_WIDTH = TEXT_MAX_WIDTH - 2 * GUTTER;
-
-function playerName(player: RankedPlayer, t: TFunction): string {
-  return player.name ?? t("ranking.licence", { licence: player.licence });
-}
 
 function openPlayer(licence: string) {
   router.push({ pathname: "/(tabs)/competitions/player", params: { licence } });
@@ -61,62 +59,45 @@ function PlayerLink({ player }: { player: RankedPlayer }) {
   );
 }
 
-// ─── Form chips ───────────────────────────────────────────────────────────────
+// ─── Form ─────────────────────────────────────────────────────────────────────
 
-function FormChips({ form }: { form: FormResult[] }) {
+/** The last results as squares: a win filled green, a loss outlined red, so not by colour alone. */
+function FormSquares({ form }: { form: FormResult[] }) {
   const { t } = useTranslation();
   const styles = useThemedStyles(makeStyles);
 
   return (
-    <View style={styles.form}>
-      {form.map((result, i) => {
-        const win = result === "W";
-        return (
-          <View key={i} style={[styles.chip, win ? styles.chipWin : styles.chipLoss]}>
-            <Text style={[styles.chipLetter, win ? styles.chipLetterWin : styles.chipLetterLoss]}>
-              {t(win ? "ranking.form_win" : "ranking.form_loss")}
-            </Text>
-          </View>
-        );
-      })}
+    <View style={styles.form} role="img" accessibilityLabel={formLabel(form, t)}>
+      {form.map((result, i) => (
+        <View
+          key={i}
+          style={[styles.square, result === "W" ? styles.squareWin : styles.squareLoss]}
+        />
+      ))}
     </View>
   );
 }
 
 // ─── Ranking row ──────────────────────────────────────────────────────────────
 
-/** What a screen reader says for a row, in one sentence. */
-function rowSentence(row: RankingRow, record: TeamRecord | undefined, t: TFunction): string {
-  const parts = [
-    t("ranking.rank_a11y", { rank: row.rank }),
-    ...row.players.map((p) => playerName(p, t)),
-    row.clubName,
-    t("ranking.team", { number: row.teamNumber }),
-    row.isChampion ? t("ranking.champion") : row.phase,
-  ];
-  if (record && record.wins + record.losses === 0) {
-    parts.push(t("ranking.no_results_a11y"));
-  } else if (record) {
-    const form = record.form.map((r) =>
-      t(r === "W" ? "ranking.form_win_a11y" : "ranking.form_loss_a11y")
-    );
-    parts.push(
-      t("ranking.wins_a11y", { count: record.wins }),
-      t("ranking.losses_a11y", { count: record.losses }),
-      t("ranking.form_a11y", { results: form.join(", ") }),
-    );
-  }
-  return parts.join(", ");
-}
-
 /**
- * One team, in two lines beside its rank: the players, then the record and form; the club and
- * team number, then the phase. `record` is undefined while the results load: the row leaves the
- * record and form out. A one-player team opens the player; a pair opens links to its players.
+ * One team: its rank, its players one per line, and on the right the record over the form; under
+ * them, across the row, the club, the team number and the phase. Nothing is cut: long names and
+ * club names wrap. `record` is undefined while the results load: the row leaves the record and
+ * form out. A one-player team opens the player; a pair opens links to its players. `chevronSlot`
+ * keeps a one-player row's record in line with the pairs' when the table has both.
  */
-function RankingTableRow(
-  { row, record, first }: { row: RankingRow; record: TeamRecord | undefined; first: boolean },
-) {
+function RankingTableRow({
+  row,
+  record,
+  first,
+  chevronSlot,
+}: {
+  row: RankingRow;
+  record: TeamRecord | undefined;
+  first: boolean;
+  chevronSlot: boolean;
+}) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
@@ -129,55 +110,50 @@ function RankingTableRow(
 
   const summary = (
     <>
-      <View style={styles.rankCell}>
-        {row.isChampion
-          ? <Trophy color={colors.amber} size={18} />
-          : <Text style={styles.rankNumber}>{row.rank}</Text>}
-      </View>
-      <View style={styles.teamCell}>
-        <View style={styles.line}>
-          <View style={styles.names}>
-            {row.players.map((p) => (
-              // A pair gives each player a line; a long single name may take two.
-              <Text key={p.licence} style={styles.playerName} numberOfLines={several ? 1 : 2}>
-                {playerName(p, t)}
-              </Text>
-            ))}
-          </View>
-          {record
-            ? (
-              <View style={styles.recordLine}>
-                <Text style={[styles.record, played === 0 && styles.recordNone]}>
-                  {played === 0 ? "—" : `${record.wins}-${record.losses}`}
-                </Text>
-                {record.form.length > 0 ? <FormChips form={record.form} /> : null}
-              </View>
-            )
-            : null}
-        </View>
-        <View style={[styles.line, styles.lineCenter]}>
-          <View style={styles.clubLine}>
-            <Text style={styles.clubName} numberOfLines={1}>{row.clubName}</Text>
-            <Text style={styles.teamNumber} numberOfLines={1}>
-              {t("ranking.team", { number: row.teamNumber })}
-            </Text>
-          </View>
+      <View style={styles.top}>
+        <View style={styles.rankCell}>
           {row.isChampion
-            ? <StatusPill label={t("ranking.champion")} tone="amber" size="small" />
-            : <StatusPill label={row.phase} tone={row.isForfeit ? "red" : "soft"} size="small" />}
+            ? <Trophy color={colors.amber} size={18} />
+            : <Text style={styles.rankNumber}>{row.rank}</Text>}
         </View>
+        <View style={styles.names}>
+          {row.players.map((p) => (
+            <Text key={p.licence} style={styles.playerName}>{playerName(p, t)}</Text>
+          ))}
+        </View>
+        {record
+          ? (
+            <View style={styles.recordCell}>
+              <Text style={[styles.record, played === 0 && styles.recordNone]}>
+                {played === 0 ? "—" : `${record.wins}-${record.losses}`}
+              </Text>
+              {record.form.length > 0 ? <FormSquares form={record.form} /> : null}
+            </View>
+          )
+          : null}
+        {several
+          ? (
+            <View style={[styles.chevron, open && styles.chevronOpen]}>
+              <ChevronDown color={colors.muted} size={16} />
+            </View>
+          )
+          : chevronSlot
+          ? <View style={styles.chevron} />
+          : null}
       </View>
-      {several
-        ? (
-          <View style={open && styles.chevronOpen}>
-            <ChevronDown color={colors.muted} size={16} />
-          </View>
-        )
-        : null}
+      <View style={styles.meta}>
+        <Text style={styles.clubName}>{row.clubName}</Text>
+        <Text style={styles.teamNumber}>{t("ranking.team", { number: row.teamNumber })}</Text>
+        <StatusPill
+          label={phaseLabel(row, t)}
+          tone={row.isChampion ? "amber" : row.isForfeit ? "red" : "soft"}
+          size="small"
+        />
+      </View>
     </>
   );
 
-  const label = rowSentence(row, record, t);
+  const label = rowLabel(row, record, t);
 
   return (
     <View style={[!first && styles.rowLine]} testID={`ranking-row-${row.id}`}>
@@ -250,27 +226,26 @@ export function RankingView({ competitionId, specialtyId, categoryId }: RankingV
     () => (results && rows.length > 0 ? buildTeamRecords(rows, results) : null),
     [results, rows],
   );
+  const pairs = rows.some((row) => row.players.length > 1);
 
   return (
     <View style={styles.container} testID="ranking-view">
-      <View style={styles.sectionBlock}>
-        <SectionHeader
-          eyebrow={t("ranking.eyebrow")}
-          title={t("ranking.title")}
-          subtitle={rows.length > 0 ? t("ranking.teams_count", { count: rows.length }) : undefined}
-        />
-        {ranking?.status === "final" && (
-          <View style={styles.statusRow}>
-            <StatusPill label={t("ranking.final")} tone="dark" />
+      {/* The view toggle names the view: one line says how many teams and how final. */}
+      {rows.length > 0 && (
+        <View style={styles.summary}>
+          <View style={styles.summaryLine} testID="ranking-summary">
+            <Text style={styles.teamsCount}>
+              {t("ranking.teams_count", { count: rows.length })}
+            </Text>
+            {ranking?.status === "final"
+              ? <StatusPill label={t("ranking.final")} tone="dark" />
+              : <StatusPill label={t("ranking.provisional")} tone="soft" />}
           </View>
-        )}
-        {ranking?.status === "provisional" && (
-          <View style={styles.statusRow}>
-            <StatusPill label={t("ranking.provisional")} tone="soft" />
-            <Text style={styles.statusNote}>{t("ranking.provisional_note")}</Text>
-          </View>
-        )}
-      </View>
+          {ranking?.status === "provisional"
+            ? <Text style={styles.statusNote}>{t("ranking.provisional_note")}</Text>
+            : null}
+        </View>
+      )}
 
       {isLoading && (
         <View style={styles.centered}>
@@ -313,18 +288,18 @@ export function RankingView({ competitionId, specialtyId, categoryId }: RankingV
       {rows.length > 0 && (
         <View style={styles.table} testID="ranking-table">
           {/* Each row reads as a sentence: the column titles are for the eye only. */}
-          <View
-            style={[
-              styles.tableHead,
-              rows.some((row) => row.players.length > 1) && styles.tableHeadChevron,
-            ]}
-            aria-hidden
-          >
+          <View style={[styles.tableHead, pairs && styles.tableHeadChevron]} aria-hidden>
             <Text style={[styles.headLabel, styles.headTeam]}>{t("ranking.column_team")}</Text>
             <Text style={styles.headLabel}>{t("ranking.column_record")}</Text>
           </View>
           {rows.map((row, i) => (
-            <RankingTableRow key={row.id} row={row} record={records?.get(row.id)} first={i === 0} />
+            <RankingTableRow
+              key={row.id}
+              row={row}
+              record={records?.get(row.id)}
+              first={i === 0}
+              chevronSlot={pairs}
+            />
           ))}
         </View>
       )}
@@ -336,11 +311,24 @@ export function RankingView({ competitionId, specialtyId, categoryId }: RankingV
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    container: { gap: 20 },
+    container: { gap: 12 },
 
-    // Section header + ranking status
-    sectionBlock: { gap: 12 },
-    statusRow: { alignItems: "flex-start", gap: 8 },
+    // Team count + ranking status, ending over the table's right edge.
+    summary: { width: "100%", maxWidth: TABLE_MAX_WIDTH, gap: 6 },
+    summaryLine: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 10,
+      minHeight: 26,
+    },
+    teamsCount: {
+      color: c.text,
+      fontSize: 13,
+      fontWeight: "700",
+      fontVariant: ["tabular-nums"],
+    },
     statusNote: { color: c.muted, fontSize: 13, fontWeight: "600", lineHeight: 18 },
 
     // States
@@ -414,67 +402,47 @@ const makeStyles = (c: Palette) =>
     },
     headTeam: { flex: 1 },
     rowLine: { borderTopWidth: 1, borderTopColor: c.line },
-    row: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      minHeight: 52,
-      paddingVertical: 8,
-      paddingHorizontal: 10,
-    },
+    row: { gap: 4, paddingVertical: 10, paddingHorizontal: 10 },
     rowPressed: { backgroundColor: c.cream },
     // The ring stays inside the table, whose corners clip it.
     rowFocus: { outlineOffset: -2 },
-    rankCell: { width: 22, alignItems: "center" },
+    top: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+    rankCell: { width: 22, minHeight: 18, alignItems: "center", justifyContent: "center" },
     rankNumber: {
       color: c.ink,
       fontSize: 15,
       fontWeight: "800",
+      lineHeight: 18,
       fontVariant: ["tabular-nums"],
     },
-    teamCell: { flex: 1, minWidth: 0, gap: 4 },
-    line: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
-    lineCenter: { alignItems: "center" },
     names: { flex: 1, minWidth: 0 },
     playerName: { color: c.ink, fontSize: 14, fontWeight: "700", lineHeight: 18 },
-    clubLine: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "baseline", gap: 6 },
-    clubName: {
-      color: c.muted,
-      fontSize: 12,
-      fontWeight: "600",
-      lineHeight: 16,
-      flexShrink: 1,
-    },
-    teamNumber: {
-      color: c.muted,
-      fontSize: 12,
-      fontWeight: "600",
-      lineHeight: 16,
-      flexShrink: 0,
-    },
-    recordLine: { flexDirection: "row", alignItems: "center", gap: 5, height: 18 },
+    recordCell: { alignItems: "flex-end", gap: 4 },
     record: {
       color: c.ink,
-      fontSize: 14,
+      fontSize: 20,
       fontWeight: "800",
-      lineHeight: 18,
+      lineHeight: 22,
       fontVariant: ["tabular-nums"],
     },
     recordNone: { color: c.muted, fontWeight: "400" },
     form: { flexDirection: "row", gap: 3 },
-    chip: {
-      width: 16,
-      height: 16,
-      borderRadius: 4,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    chipWin: { backgroundColor: c.greenSoft },
-    chipLoss: { backgroundColor: c.redSoft },
-    chipLetter: { fontSize: 10, fontWeight: "800", lineHeight: 12 },
-    chipLetterWin: { color: c.green },
-    chipLetterLoss: { color: c.red },
+    square: { width: 10, height: 10, borderRadius: 2 },
+    squareWin: { backgroundColor: c.green },
+    squareLoss: { borderWidth: 2, borderColor: c.red },
+    chevron: { width: 16, alignSelf: "center" },
     chevronOpen: { transform: [{ rotate: "180deg" }] },
+    // Under the players and the record, from the players' left edge: wraps rather than cuts.
+    meta: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "center",
+      columnGap: 6,
+      rowGap: 4,
+      paddingLeft: 30,
+    },
+    clubName: { color: c.muted, fontSize: 12, fontWeight: "600", lineHeight: 16 },
+    teamNumber: { color: c.muted, fontSize: 12, fontWeight: "600", lineHeight: 16 },
 
     // A pair's players, under its row once opened.
     players: {

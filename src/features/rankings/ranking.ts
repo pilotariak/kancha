@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+
 import { comparePlainDates, parsePlainDate } from "@/features/competitions/matchDate";
 import { parsePhase, ROUND_ORDER } from "@/features/competitions/matchPhase";
 import { parseMatchScore, type Side } from "@/features/competitions/matchScore";
@@ -160,4 +162,49 @@ export function buildTeamRecords(
       },
     ]),
   );
+}
+
+// ─── Labels ───────────────────────────────────────────────────────────────────
+
+/** A player's name, or their licence when the league site lists it alone. */
+export function playerName(player: RankedPlayer, t: TFunction): string {
+  return player.name ?? t("ranking.licence", { licence: player.licence });
+}
+
+/** The phase a team reached: "Champion" in the app's language, else the league's own text. */
+export function phaseLabel(row: Pick<RankingRow, "isChampion" | "phase">, t: TFunction): string {
+  return row.isChampion ? t("ranking.champion") : row.phase;
+}
+
+/** The form in words, as a screen reader says it: "last results: win, win, loss". */
+export function formLabel(form: readonly FormResult[], t: TFunction): string {
+  const results = form.map((r) =>
+    t(r === "W" ? "ranking.form_win_a11y" : "ranking.form_loss_a11y")
+  );
+  return t("ranking.form_a11y", { results: results.join(", ") });
+}
+
+/**
+ * What a screen reader says for a ranking row, in one sentence: rank, players, club, team number,
+ * phase, then wins, losses and form. `record` is undefined while the results load: the sentence
+ * stops at the phase.
+ */
+export function rowLabel(row: RankingRow, record: TeamRecord | undefined, t: TFunction): string {
+  const parts = [
+    t("ranking.rank_a11y", { rank: row.rank }),
+    ...row.players.map((p) => playerName(p, t)),
+    row.clubName,
+    t("ranking.team", { number: row.teamNumber }),
+    phaseLabel(row, t),
+  ];
+  if (record && record.wins + record.losses === 0) {
+    parts.push(t("ranking.no_results_a11y"));
+  } else if (record) {
+    parts.push(
+      t("ranking.wins_a11y", { count: record.wins }),
+      t("ranking.losses_a11y", { count: record.losses }),
+      formLabel(record.form, t),
+    );
+  }
+  return parts.join(", ");
 }

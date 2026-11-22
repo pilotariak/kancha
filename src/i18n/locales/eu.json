@@ -103,6 +103,12 @@
     "F": "Finala",
     "other": "Partidak"
   },
+  "bracket": {
+    "days_count_one": "{{count}} jardunaldi",
+    "days_count_other": "{{count}} jardunaldi",
+    "pool_range": "{{matches}}, {{days}}: {{first}} – {{last}}",
+    "pool_day": "{{matches}}: {{date}}"
+  },
   "rounds_match": {
     "P": "{{number}}. taldea",
     "B1T": "1. txandako {{number}}. barragea",
@@ -227,8 +233,6 @@
     "cta_create": "Sortu ordutegia"
   },
   "ranking": {
-    "eyebrow": "Sailkapena",
-    "title": "Txapelketaren sailkapena",
     "teams_count_one": "{{count}} talde",
     "teams_count_other": "{{count}} talde",
     "final": "Behin betiko sailkapena",
@@ -242,8 +246,6 @@
     "error_load": "Ezin izan da sailkapena kargatu.",
     "column_team": "Taldea",
     "column_record": "Balantzea",
-    "form_win": "I",
-    "form_loss": "G",
     "form_win_a11y": "irabazi",
     "form_loss_a11y": "galdu",
     "form_a11y": "azken emaitzak: {{results}}",
