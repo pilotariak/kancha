@@ -541,7 +541,8 @@ the shadow to follow.
 ### Link previews (iOS)
 
 `CardLink` (`src/components/CardLink.tsx`) is the `PressableScale` of a card that opens a screen:
-the competition cards, the featured card, the season tiles and the player rows. A press opens the
+the competition cards, the featured card, the season tiles, the player rows and the club page
+entries. A press opens the
 screen on every platform. On iOS, a long press also shows the screen in a system preview, with a
 menu: Open, Share, Copy link. Share and Copy link give the screen's public web address
 (`SITE_URL`, `src/constants/site.ts`), which opens the web app: the app has no universal links.
@@ -655,7 +656,8 @@ Matches:      one row per match, split by full-width 1px #E5DED6 hairlines. Each
               10px top, 6px bottom. No date on a match: the day header carries it
 Share:        a match with a score ends its phase line with a Share button (§ Share card)
 Team row:     8px top and bottom; 16px winner slot | name + club (flex 1) | one score column
-              per set
+              per set. The club name opens the club page (`ClubLink`, § Club page); a side
+              without a lineup shows its club as its name, and that name is the link
 Divider:      1px solid #E5DED6 between team rows
 Sets:         one column per set ("07/15 04/15" → 7 4 against 15 15), 22px (28px Final),
               right-aligned, min width 30px (38px Final), 12px apart, tabular-nums
@@ -673,7 +675,7 @@ Grid:         web, from two columns (§5 Columns): a day card spans the whole re
               have columns, each in a `flex: 1` cell split from the next by a 1px #E5DED6
               hairline. A match keeps a phone card's width, the days stay one under the other,
               and a short last row keeps empty cells
-Interaction:  the day header only. Pressed: cream fill. Web hover: the card takes the card hover
+Interaction:  the day header, and the club names (§ Club page). Pressed: cream fill. Web hover: the card takes the card hover
               (lineStrong border and shadow; the Final keeps its red border). Keyboard focus:
               the red ring inside the card (−2px offset), as the header is its top row.
               `aria-expanded` gives the state (accessibilityState is dropped on web); the
@@ -1170,12 +1172,12 @@ Form:         the last five results under the record, 4px below it, oldest first
               The squares are one image labelled in words ("derniers résultats : victoire,
               victoire, défaite…"), as the row's sentence says it
 Club line:    across the row from the players' left edge, wrapping when long: the club name,
-              #7A7A7A 12px weight 600, 16px lines; the team number ("Équipe 2"), same style; the
+              #7A7A7A 12px weight 600, 16px lines, a link to the club page (§ Club page); the team number ("Équipe 2"), same style; the
               phase reached, a small StatusPill (amber "Champion", red for a forfeit, soft for
               the others, the league's text: "Finale", "1/2 finale", "Poules"). 6px apart, 4px
               between wrapped lines. Never cut
 Text:         the rank, the record and the club name each sit in their own Text: the club name
-              becomes a link (#112) and the digits take a condensed font (#115) on their own
+              is a link (#112) and the digits take a condensed font (#115) on their own
 Press:        a one-player row opens the player (`/competitions/player?licence=…`). A pair's row
               opens, under it, the PlayerLink pills of its players (36px high, cream, 1px
               #E5DED6 border, `ranking-player-<licence>`), and its chevron turns up. Pressed and
@@ -1252,6 +1254,81 @@ Results:    the match grid, the ranking table (712px at most) or the fit bracket
 ```
 
 Switching to the bracket moves the filters from the column to the bar.
+
+### Club page
+
+`/competitions/club?id=<clubId>` (`src/app/(tabs)/competitions/club.tsx`): how one club does in a
+season, from its results alone. Frontis `results(clubId, competitionId)` returns every match of a
+club in a competition; the summaries are pure functions in `src/features/clubs/club.ts`.
+
+```
+Header:       the red band (§ Screen Header): back link, eyebrow "Club", the club's name as
+              Frontis spells it ("AMIS DE LA PEL.BASQUE-LE HAILLAN"); a spinner while it loads
+Season:       a SelectField ("Saison"), the seasons of the competitions list (`groupBySeason`),
+              the current season first and chosen by default. The choice goes to the URL
+              (`&season=2025-2026`), so a reload or a shared link keeps it. Competitions without
+              a season in their name are left out. 712px at most on web
+Summary:      one card, three cells split by 1px #E5DED6 rules, as the player totals: Jouées,
+              Gagnées, Perdues (#141414 26px weight 900 tabular-nums over #7A7A7A 11px weight
+              700 uppercase). Played counts the matches with a score (`parseMatchScore`); a
+              match between two teams of the club is played, neither won nor lost, and a note
+              under the card says how many (#7A7A7A 13px weight 600), so the three add up
+Entries:      "Engagements / Par spécialité": one card per competition, specialty and category,
+              in the card grid. SpecialtyLabel, then "1ère Série · 23 parties" (#7A7A7A 12px
+              weight 600, after the competition's name without its season when the season has
+              several: "Championnat Jeunes CCAPB"), then a small
+              StatusPill: amber "Champion" when the club won the final, soft with the furthest
+              round otherwise (rounds.*: "Quarts de finale", "Barrages 2e tour"). A ChevronRight
+              ends the card, which opens the results screen on the pair
+              (`/competitions/details?id=…&specialtyId=…&categoryId=…`, CardLink). A result
+              without a category gets no link
+Results:      "Résultats / Derniers résultats": the five latest matches with a score, the latest
+              first (by date, the later round first on one day), in one card with 1px hairlines,
+              712px at most on web. A row: the opponent (#141414 15px weight 700) and the sets
+              from the club's side ("35-22", #141414 15px weight 800 tabular-nums), the
+              SpecialtyLabel (13px #262626), then a small StatusPill (green Victoire, red
+              Défaite, soft Interne or Égalité) before "Demi-finale 1 · 3ème Série · sam. 9 mai"
+              (#7A7A7A 12px weight 600). A match between two teams of the club reads "Entre deux
+              équipes du club", its sets from the winner's side
+See all:      under the card, the pill toggle of the season grid: "Voir les 108 parties" lists
+              every match of the season, the latest first, matches to come with "—" and their
+              date or "Date à venir"; "Voir les dernières seulement" folds it back.
+              `aria-expanded` gives the state. None when the season has no more matches
+Titles:       "Palmarès / Titres": the finals the club won, in the order of the entries. Cards
+              with the 2px amber border of a won ranking: a 40px amberBg tile with the amber
+              Trophy, SpecialtyLabel, "1ère Série · 15-1 15-5", then "Finale gagnée contre …" or
+              "Finale entre deux équipes du club". A final between two teams of the club is one
+              title; a lost, unscored or level final is none
+States:       a spinner while the competitions or the results load; the error box (§ Error
+              State) with Réessayer; "Aucune partie pour ce club en 2026-2027." (§ Empty State)
+Screen reader: each result row and title card is one element labelled with a sentence
+              ("Défaite, contre CA BEGLAIS, 24-35, Place Libre / P.G. Pleine Masculin,
+              Demi-finale 1, 3ème Série, sam. 9 mai"); an entry is a button with its hint
+```
+
+**Loading.** One request per competition of the season, `limit: 500`, and a next page with
+`offset` while a page comes back full (`matchesApi.listAll`). The query key is
+`["results", { clubId, competitionId }]` (`clubResultsQuery` in `src/hooks/use-matches.ts`), and
+`useClubResults` takes a list of club and competition pairs, so a player's matches (#119) reuse
+it: a match found under two clubs counts once. The competitions list keeps the enabled
+competitions only: on lcapb that is one Championnat per season, as Jeunes and Corpo are disabled.
+
+**Club links.** `ClubLink` (`src/components/ClubLink.tsx`) turns a club name into a link wherever
+it sits: the team rows of the match cards and bracket nodes, the club line of the ranking rows.
+The name keeps its style; hover and press underline it, and keyboard focus draws the red ring
+around the name (the link's own browser outline is off). On web it is a real `<a>` to
+`/competitions/club?id=…`, without the `(tabs)` group: a click or Enter opens the page in the
+app, and the browser can open it in a new tab. The link takes the press: the ranking row around
+it does not open its player or its pair. On web the link stays in the accessibility tree, inside
+the row's button. On iOS and Android the row is one accessibility element, so VoiceOver and
+TalkBack reach a club from the match cards, not from a ranking row.
+
+Measured on Amis de la P.B. Le Haillan (lcapb, club 4063), 2025-2026 (Championnat CCAPB,
+competition 502): 108 matches, 108 played, 63 won, 31 lost, 14 between two of its teams; 11
+entries; four titles: Mur à Gauche / P.G. Creuse Masculin Individuel in 1ère and 2ème Série and
+Mur à Gauche / P.G. Pleine Masculin in 2ème Série (three finals between its own teams), and
+Trinquet / P.G. Creuse Masculin in 3ème Série. The Trinquet / P.G. Creuse Masculin 2ème Série
+final, lost to CA Béglais, is none. The club has results in 13 seasons, 2014-2015 to 2026-2027.
 
 ### Score — Setup
 

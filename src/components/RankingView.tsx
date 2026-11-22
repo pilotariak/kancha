@@ -3,6 +3,7 @@ import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { ClubLink } from "@/components/ClubLink";
 import { ChevronDown, ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
@@ -142,7 +143,7 @@ function RankingTableRow({
           : null}
       </View>
       <View style={styles.meta}>
-        <Text style={styles.clubName}>{row.clubName}</Text>
+        <ClubLink club={{ id: row.clubId, name: row.clubName }} textStyle={styles.clubName} />
         <Text style={styles.teamNumber}>{t("ranking.team", { number: row.teamNumber })}</Text>
         <StatusPill
           label={phaseLabel(row, t)}
