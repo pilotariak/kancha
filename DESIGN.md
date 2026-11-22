@@ -981,10 +981,12 @@ Overflow:  a 40px fade from transparent cream to cream on the right edge while c
 Web:       hover gives an unselected chip a lineStrong border; keyboard focus the red ring. The
            row gains 4px above and below inside the scroll view (and loses it outside), so the
            ring is not clipped
-Wrap:      `wrap` prop, from two columns (web): the chips flow onto several lines inside the
-           gutter, with no scrolling, no bleed and no fade
+Wrap:      `wrap` prop: the chips flow onto several lines inside the gutter, with no scrolling,
+           no bleed and no fade. The results screen always wraps them, on a phone too, so no
+           category hides off screen
 Bleed:     `bleed="start"`: the row bleeds over the left gutter only and ends where the control
-           after it starts, the fade at that end (the view switch on the results screen, phone)
+           after it starts, the fade at that end. No screen uses it since the results screen
+           wraps its chips
 ```
 
 ### Segmented Control
@@ -994,17 +996,23 @@ content, such as Liste / Tableau / Classement.
 
 ```
 Track:     #E5DED6 (line), pill radius, 3px padding, 2px between segments, 44px tall
-Segment:   flex 1, min height 38px, 14px icon + 13px label, centered, pill radius
+Segment:   min height 38px, 8px sides, 14px icon + 13px label, centered, pill radius
+Widths:    equal (flex 1) when each segment is 104px wide or more (a 322px track for three):
+           the longest label, "Clasificación" (es, 83px), fits with 5px to spare. Narrower, as
+           on a 320 or 360px phone, each segment starts from its label's width and they share
+           the rest, so "Classement" (fr) and "Clasificación" keep every letter. Until the track
+           is measured, segments take their labels' widths (`segmentFit` in
+           `src/features/layout/segments.ts`)
 Inactive:  no fill, #262626 (text), weight 700
 Active:    #FFFFFF (white) segment, 1px #CBBFB2 (lineStrong) ring and a 0 1px 4px shadow
            (shadow), #141414 (ink) icon and label, weight 700
 Icons:     shown only when each segment is 124px wide or more (a 382px track for three),
            read from the track's width, not the window's: narrower, the longest label
            ("Clasificación", es) no longer fits beside its icon. On the results screen, labels
-           only at 768 and 1280px wide; icons at 1024 and 1440px
+           only on a phone and at 768 and 1280px wide; icons at 1024 and 1440px
 Icon only: `iconOnly` prop: 44px segments, an 18px icon and no label (142px for three); the
-           label stays each segment's accessible name. The results screen uses it on a phone,
-           beside the category chips
+           label stays each segment's accessible name. No screen uses it since the results
+           screen gave the view switch its own row on a phone
 No red:    picking a view is not an action
 Web:       hover tints an inactive segment lineStrong; keyboard focus draws the red ring
 ```
@@ -1114,13 +1122,20 @@ unreadable dates last.
 ### Results screen in the grid
 
 On web, from two columns (§5 Columns). On a phone the screen keeps its order: filters,
-progress, results. The filters there are two rows, pinned under the collapsed bar (§4 Screen
-Header) on cream, 14px under the bar and 12px above a 1px line that shows once collapsed:
+progress, results. The filters there are three rows, 10px apart, pinned under the collapsed bar
+(§4 Screen Header) on cream, 14px under the bar and 12px above a 1px line that shows once
+collapsed:
 
 ```
 Row 1:     SelectField, full width: the court above the discipline (SpecialtyLabel)
-Row 2:     FilterChips (bleed="start"), then SegmentedControl (iconOnly), 8px apart
+Row 2:     FilterChips (wrap), full width: every category in view, on a second line when they
+           do not fit (three séries at 320px)
+Row 3:     SegmentedControl, full width, with its labels (Liste, Tableau, Classement)
 ```
+
+A view switch beside the chips, icons only, left them 185px of a 375px screen: the third série
+sat entirely past the edge (0 of 103px at 375 and 390px), behind a cut second chip and the edge
+fade. Each further line of chips adds 42px to the pinned block.
 
 The pinned block (`PinnedHeader` in `details.tsx`) is the ScrollView's second child, pinned by
 `stickyHeaderIndices` on iOS and Android and by `position: sticky` on web (react-native-web

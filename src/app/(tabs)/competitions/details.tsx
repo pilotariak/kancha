@@ -680,8 +680,8 @@ export default function CompetitionDetailsScreen() {
         options={categoryOptions}
         value={categoryId}
         onChange={(next) => router.setParams({ categoryId: next })}
-        wrap={grid}
-        bleed="start"
+        // Every category in view: the chips never scroll.
+        wrap
         testID="category-chips"
       />
     )
@@ -691,23 +691,20 @@ export default function CompetitionDetailsScreen() {
       segments={segments}
       value={viewMode}
       onChange={setViewMode}
-      iconOnly={!grid}
       testID="view-mode"
     />
   );
 
-  // The filters pinned under the bar: two rows on a phone (the select, then the chips and an
-  // icon-only view switch), the filter bar in the grid. The filter column is not pinned: it is
+  // The filters pinned under the bar: on a phone, three rows (the select, the chips, then the
+  // labelled view switch); in the grid, the filter bar. The filter column is not pinned: it is
   // sticky beside the results, under the bar.
   let pinnedFilters: ReactNode = null;
   if (!grid) {
     pinnedFilters = (
       <View style={styles.filters}>
         {select}
-        <View style={styles.chipsRow}>
-          <View style={styles.chipsRowChips}>{chips}</View>
-          {viewSwitch}
-        </View>
+        {chips}
+        {viewSwitch}
       </View>
     );
   } else if (filterBar) {
@@ -881,9 +878,6 @@ const makeStyles = (c: Palette) =>
       height: 1,
       backgroundColor: c.line,
     },
-    // Phone: the chips scroll beside the view switch, bleeding over the left gutter only.
-    chipsRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-    chipsRowChips: { flex: 1, minWidth: 0 },
 
     // Three grid columns or more: the filters take the first one, one cell wide, and stay in
     // view, under the collapsed bar, while the matches scroll.
