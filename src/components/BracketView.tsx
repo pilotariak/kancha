@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CardGrid } from "@/components/CardGrid";
+import { ClubLink } from "@/components/ClubLink";
 import { Check, ChevronDown, ChevronRight, Swords, Trophy, Users } from "@/components/icons";
 import { type Palette } from "@/constants/colors";
 import { scoreColumnWidth, scoreDigits } from "@/constants/typography";
@@ -108,17 +109,26 @@ export type TeamRowsSize = "card" | "node";
 interface TeamRowProps {
   name: string;
   club: string | null;
+  /** The side's club: its name links to the club page, whether it is `club` or `name`. */
+  clubId: string;
   points: number[] | null;
   outcome: "won" | "lost" | "even";
   isFinal: boolean;
   size: TeamRowsSize;
 }
 
-function TeamRow({ name, club, points, outcome, isFinal, size }: TeamRowProps) {
+function TeamRow({ name, club, clubId, points, outcome, isFinal, size }: TeamRowProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const node = size === "node";
+  const nameStyle = [
+    styles.teamName,
+    node && styles.teamNameNode,
+    isFinal && (node ? styles.teamNameNodeFinal : styles.teamNameFinal),
+    outcome === "won" && styles.teamNameWon,
+    outcome === "lost" && styles.teamNameLost,
+  ];
 
   return (
     <View style={[styles.teamRow, node && styles.teamRowNode]}>
@@ -130,18 +140,19 @@ function TeamRow({ name, club, points, outcome, isFinal, size }: TeamRowProps) {
         )}
       </View>
       <View style={styles.teamInfo}>
-        <Text
-          style={[
-            styles.teamName,
-            node && styles.teamNameNode,
-            isFinal && (node ? styles.teamNameNodeFinal : styles.teamNameFinal),
-            outcome === "won" && styles.teamNameWon,
-            outcome === "lost" && styles.teamNameLost,
-          ]}
-        >
-          {name}
-        </Text>
-        {club ? <Text style={[styles.teamClub, node && styles.teamClubNode]}>{club}</Text> : null}
+        {/* Without a lineup, the side's name is its club's. */}
+        {club
+          ? <Text style={nameStyle}>{name}</Text>
+          : <ClubLink club={{ id: clubId, name }} textStyle={nameStyle} style={styles.clubLink} />}
+        {club
+          ? (
+            <ClubLink
+              club={{ id: clubId, name: club }}
+              textStyle={[styles.teamClub, node && styles.teamClubNode]}
+              style={styles.clubLink}
+            />
+          )
+          : null}
       </View>
       {points
         ? (
@@ -186,6 +197,7 @@ export function TeamRows(
       <TeamRow
         name={lineupA || result.clubA.name}
         club={lineupA ? result.clubA.name : null}
+        clubId={result.clubA.id}
         points={score ? score.sets.map((s) => s.a) : null}
         outcome={outcome("A")}
         isFinal={isFinal}
@@ -195,6 +207,7 @@ export function TeamRows(
       <TeamRow
         name={lineupB || result.clubB.name}
         club={lineupB ? result.clubB.name : null}
+        clubId={result.clubB.id}
         points={score ? score.sets.map((s) => s.b) : null}
         outcome={outcome("B")}
         isFinal={isFinal}
@@ -617,6 +630,8 @@ const makeStyles = (c: Palette) =>
     teamRowNode: { paddingHorizontal: 14, paddingVertical: 10 },
     winnerSlot: { width: 16, alignItems: "center" },
     teamInfo: { flex: 1, gap: 2 },
+    // The club link spans the name only, not the rest of the column.
+    clubLink: { alignSelf: "flex-start" },
     teamName: { color: c.ink, fontSize: 15, fontWeight: "700" },
     teamNameNode: { fontSize: 14, lineHeight: 20 },
     teamNameFinal: { fontSize: 16 },

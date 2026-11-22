@@ -59,6 +59,7 @@ describe("buildRanking", () => {
       {
         id: "1",
         rank: 1,
+        clubId: "1",
         clubName: "Club 1",
         teamNumber: 2,
         phase: "Champion",
@@ -332,6 +333,7 @@ describe("ranking labels", () => {
   const champion: RankingRow = {
     id: "95",
     rank: 1,
+    clubId: "4062",
     clubName: "CA BEGLAIS",
     teamNumber: 1,
     phase: "Champion",
@@ -345,6 +347,7 @@ describe("ranking labels", () => {
   const quarter: RankingRow = {
     id: "102",
     rank: 8,
+    clubId: "4062",
     clubName: "CA BEGLAIS",
     teamNumber: 3,
     phase: "1/4 de finale",

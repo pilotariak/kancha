@@ -10,6 +10,7 @@ export type RankingStatus = "empty" | "provisional" | "final";
 export interface RankingRow {
   id: string;
   rank: number;
+  clubId: string;
   clubName: string;
   teamNumber: number;
   /** Raw league-site text, shown as is. */
@@ -44,6 +45,7 @@ export function buildRanking(rankings: TeamRanking[]): RankingView {
     .map((r) => ({
       id: r.id,
       rank: r.rank,
+      clubId: r.club.id,
       clubName: r.club.name,
       teamNumber: r.teamNumber,
       phase: r.phase,
