@@ -342,6 +342,15 @@
     "error_load": "No se pudieron cargar los partidos de este club.",
     "open_hint": "Abre la página del club"
   },
+  "follow": {
+    "follow": "Seguir",
+    "following": "Siguiendo",
+    "follow_a11y": "Seguir: {{name}}",
+    "following_a11y": "Siguiendo: {{name}}",
+    "section_eyebrow": "Favoritos",
+    "section_title": "Seguidos",
+    "category_hint": "Abre los resultados de esta categoría"
+  },
   "head": {
     "page_title": "{{screen}} · Kancha",
     "description": "Las competiciones de pelota vasca de un vistazo: resultados, cuadros y clasificaciones de campeonato de cada liga.",

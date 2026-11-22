@@ -342,6 +342,15 @@
     "error_load": "Could not load this club's matches.",
     "open_hint": "Opens the club page"
   },
+  "follow": {
+    "follow": "Follow",
+    "following": "Following",
+    "follow_a11y": "Follow {{name}}",
+    "following_a11y": "Following: {{name}}",
+    "section_eyebrow": "Favourites",
+    "section_title": "Following",
+    "category_hint": "Opens the results of this category"
+  },
   "head": {
     "page_title": "{{screen}} · Kancha",
     "description": "Basque pelota competitions at a glance: results, brackets and championship rankings for each league.",

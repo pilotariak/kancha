@@ -342,6 +342,15 @@
     "error_load": "Impossible de charger les parties de ce club.",
     "open_hint": "Ouvre la page du club"
   },
+  "follow": {
+    "follow": "Suivre",
+    "following": "Suivi",
+    "follow_a11y": "Suivre {{name}}",
+    "following_a11y": "Suivi : {{name}}",
+    "section_eyebrow": "Favoris",
+    "section_title": "Suivis",
+    "category_hint": "Ouvre les résultats de cette catégorie"
+  },
   "head": {
     "page_title": "{{screen}} · Kancha",
     "description": "Les compétitions de pelote basque en un coup d'œil : résultats, tableaux et classements de championnat pour chaque ligue.",

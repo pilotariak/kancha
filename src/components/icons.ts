@@ -24,6 +24,7 @@ export { default as Search } from "lucide-react-native/dist/cjs/icons/search";
 export { default as Share } from "lucide-react-native/dist/cjs/icons/share";
 export { default as Share2 } from "lucide-react-native/dist/cjs/icons/share-2";
 export { default as Shield } from "lucide-react-native/dist/cjs/icons/shield";
+export { default as Star } from "lucide-react-native/dist/cjs/icons/star";
 export { default as Sun } from "lucide-react-native/dist/cjs/icons/sun";
 export { default as SunMoon } from "lucide-react-native/dist/cjs/icons/sun-moon";
 export { default as Swords } from "lucide-react-native/dist/cjs/icons/swords";

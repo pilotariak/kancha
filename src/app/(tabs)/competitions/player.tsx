@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CardGrid } from "@/components/CardGrid";
+import { FollowButton } from "@/components/FollowButton";
 import { ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
@@ -220,6 +221,15 @@ export default function PlayerScreen() {
           title={name ?? t("ranking.licence", { licence })}
           subtitle={heroMeta}
           loading={isPending}
+          action={stats && stats.totals.rankings > 0
+            ? (
+              <FollowButton
+                favourite={{ kind: "player", licence, name }}
+                name={name ?? t("ranking.licence", { licence })}
+                testID="player-follow"
+              />
+            )
+            : null}
         />
 
         <View style={styles.body}>

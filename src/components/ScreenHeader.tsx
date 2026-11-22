@@ -31,11 +31,16 @@ interface ScreenHeaderProps {
   loading?: boolean;
   /** Rendered to the right of the text, e.g. a logo or an action button. */
   trailing?: ReactNode;
+  /**
+   * Rendered at the right end of the back link's row: the follow button. Out of the band's bottom
+   * `BAR_HEIGHT`, which a pinned collapsed bar overlaps (results screen), so it stays reachable.
+   */
+  action?: ReactNode;
   /** A 28px title and tighter padding, for screens with filters under the band. */
   compact?: boolean;
   /**
    * The 52px bar a compact band collapses to while the screen scrolls: the back arrow and the
-   * title on one line. Eyebrow, subtitle, trailing and column do not apply.
+   * title on one line. Eyebrow, subtitle, trailing, action and column do not apply.
    */
   collapsed?: boolean;
   /** Out of reach of touch, keyboard and screen readers: a collapsed bar not yet shown. */
@@ -67,6 +72,7 @@ export function ScreenHeader({
   onBack,
   loading = false,
   trailing,
+  action,
   compact = false,
   collapsed = false,
   inert = false,
@@ -106,31 +112,40 @@ export function ScreenHeader({
     );
   }
 
+  const back = backLabel
+    ? (
+      <Pressable
+        style={(state: InteractionState) => [
+          styles.back,
+          showsFocusRing(state) && styles.backFocusRing,
+        ]}
+        onPress={onBack ?? (() => router.back())}
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel={backLabel}
+      >
+        {(state: InteractionState) => (
+          <>
+            <ArrowLeft color="#FFFFFF" size={20} />
+            <Text style={[styles.backLabel, state.hovered && styles.backLabelHovered]}>
+              {backLabel}
+            </Text>
+          </>
+        )}
+      </Pressable>
+    )
+    : null;
+
   const content = (
     <>
-      {backLabel
+      {action
         ? (
-          <Pressable
-            style={(state: InteractionState) => [
-              styles.back,
-              showsFocusRing(state) && styles.backFocusRing,
-            ]}
-            onPress={onBack ?? (() => router.back())}
-            hitSlop={12}
-            accessibilityRole="button"
-            accessibilityLabel={backLabel}
-          >
-            {(state: InteractionState) => (
-              <>
-                <ArrowLeft color="#FFFFFF" size={20} />
-                <Text style={[styles.backLabel, state.hovered && styles.backLabelHovered]}>
-                  {backLabel}
-                </Text>
-              </>
-            )}
-          </Pressable>
+          <View style={styles.topRow}>
+            <View style={styles.topRowStart}>{back}</View>
+            {action}
+          </View>
         )
-        : null}
+        : back}
       <View style={styles.row}>
         <View style={styles.text}>
           {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
@@ -200,6 +215,9 @@ const makeStyles = (c: Palette) =>
     },
     backLabel: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
     backLabelHovered: { textDecorationLine: "underline" },
+    // With an action: the back link on the left, the action on the right, centered on each other.
+    topRow: { flexDirection: "row", alignItems: "center", gap: 16 },
+    topRowStart: { flex: 1 },
     row: { flexDirection: "row", alignItems: "center", gap: 16 },
     text: { flex: 1, gap: 6 },
     eyebrow: {
