@@ -1039,34 +1039,45 @@ Scrolling: never pinned: outside the filter column, it scrolls away with the res
 
 ### Ranking Table
 
-The ranking view (`RankingView`) is one table, a row per team. The rows come from Frontis
-`rankings`, which has no points and no record; the record and the form come from the results the
-screen already loaded (`useResultsByCompetition`, same query key: no new request), through
-`buildTeamRecords` in `src/features/rankings/ranking.ts`.
+The ranking view (`RankingView`) is one line of summary over one table, a row per team. The rows
+come from Frontis `rankings`, which has no points and no record; the record and the form come
+from the results the screen already loaded (`useResultsByCompetition`, same query key: no new
+request), through `buildTeamRecords` in `src/features/rankings/ranking.ts`. The row's screen
+reader sentence comes from `rowLabel` in the same file.
 
 ```
+Summary:      one line, no section header (the view toggle already names the view): the team
+              count ("11 équipes"), #262626 (text) 13px weight 700 tabular-nums, then at the end
+              the ranking status, a StatusPill: dark "Classement définitif", or soft
+              "Provisoire" with its note under the line (#7A7A7A 13px weight 600). As wide as
+              the table, 12px above it; none while the ranking loads, fails or is empty
 Table:        one card: #FFFFFF, 1px #E5DED6 border, 16px radius, rows split by 1px #E5DED6
               hairlines. Full width on a phone; on web, 712px at most (the text column less its
               two gutters), left-aligned beside or under the filters
-Head:         "Équipe" over the players, "Bilan" over the form: #7A7A7A 11px weight 700,
+Head:         "Équipe" over the players, "Bilan" over the record: #7A7A7A 11px weight 700,
               uppercase, +0.6px tracking, 8px top and bottom. Hidden from screen readers
-Row:          min height 52px, 8px × 10px padding, 8px gaps: the rank cell (22px), two lines
-              4px apart, then, for a pair, a ChevronDown (16px #7A7A7A)
-Rank:         #141414 15px weight 800 tabular-nums, centered. The champion of a final ranking
-              gets the Trophy (18px, amber #C8900A) instead
-Line 1:       the players, #141414 14px weight 700: a pair gives each player a line, a single
-              player's long name may take two. On the right: the record, then the form
-Line 2:       the club name, #7A7A7A 12px weight 600, one line, the first to shrink; the team
-              number ("Équipe 2"), same style, never shrinks. On the right: the phase reached, a
-              small StatusPill (amber "Champion", red for a forfeit, soft for the others)
-Record:       wins-losses ("7-0"), #141414 14px weight 800 tabular-nums. "—", #7A7A7A weight
-              400, when no scored match is the team's. While the results load, or if they fail,
-              the row shows without record and form
-Form:         the last five results, oldest first, right-aligned so the latest ones line up:
-              16px chips, 4px radius, 3px apart, 5px after the record. A win: a green #1F7A5A
-              letter on greenSoft #E6F4EE; a loss: a red #C8102E letter on redSoft #FDE8EC.
-              The letter carries the result without the colour: V/D (fr), W/L (en), V/D (es,
-              victoria/derrota), I/G (eu, irabazi/galdu)
+Row:          10px padding, two parts 4px apart. Top: the rank cell (22px), the players, the
+              record over the form, then, for a pair, a ChevronDown (16px #7A7A7A), 8px gaps;
+              a one-player row in a table with pairs keeps an empty 16px slot, so the records
+              line up. Under it: the club line
+Rank:         #141414 15px weight 800 tabular-nums, centered, on the first player's line. The
+              champion of a final ranking gets the Trophy (18px, amber #C8900A) instead
+Players:      #141414 14px weight 700, 18px lines: one player per line, taking all the width
+              left by the record. Never cut: a long name wraps onto a second line
+Record:       wins-losses ("7-0"), #141414 20px weight 800, 22px line, tabular-nums, right-
+              aligned. "—", #7A7A7A weight 400, when no scored match is the team's. While the
+              results load, or if they fail, the row shows without record and form
+Form:         the last five results under the record, 4px below it, oldest first, right-aligned
+              so the latest ones line up: 10px squares, 2px radius, 3px apart. A win is filled
+              green #1F7A5A; a loss is empty, outlined 2px red #C8102E. Filled or empty carries
+              the result without the colour, in a fifth of the width the lettered chips took.
+              The squares are one image labelled in words ("derniers résultats : victoire,
+              victoire, défaite…"), as the row's sentence says it
+Club line:    across the row from the players' left edge, wrapping when long: the club name,
+              #7A7A7A 12px weight 600, 16px lines; the team number ("Équipe 2"), same style; the
+              phase reached, a small StatusPill (amber "Champion", red for a forfeit, soft for
+              the others, the league's text: "Finale", "1/2 finale", "Poules"). 6px apart, 4px
+              between wrapped lines. Never cut
 Text:         the rank, the record and the club name each sit in their own Text: the club name
               becomes a link (#112) and the digits take a condensed font (#115) on their own
 Press:        a one-player row opens the player (`/competitions/player?licence=…`). A pair's row
@@ -1075,16 +1086,19 @@ Press:        a one-player row opens the player (`/competitions/player?licence=�
               web hover: cream #F7F4EF fill. Keyboard focus: the red ring inside the table
               (−2px offset)
 Screen reader: each row is one button labelled with a sentence: rank, players, club, team
-              number, phase, wins, losses, then the last results in words ("Rang 1, PUCHEUX
-              Theo, …, Champion, 7 victoires, 0 défaite, derniers résultats : victoire, …"). A
-              pair's row sets `aria-expanded`: accessibilityState is dropped on web
+              number, phase, wins, losses, then the last results in words ("Rang 1, NICOL
+              Guillaume, GONZALEZ Antoine, CA BEGLAIS, Équipe 1, Champion, 7 victoires, 0
+              défaite, derniers résultats : victoire, …"). A pair's row sets `aria-expanded`:
+              accessibilityState is dropped on web
 ```
 
-The ranked teams fill about one phone screen: in the 1ère Série example of Championnat CCAPB
-2025-2026, Mur à Gauche / P.G. Creuse Masculin Individuel, a row is 57px (75px when a name takes
-two lines), and nine of the ten rows show under the pinned filters on a 390 × 844 screen. A pair's
-row is 75px. Red marks a loss here, the opposite of the green win, besides its warning role in
-the pills.
+Measured on the web export with Mur à Gauche P.G. Pleine Masculin, 1ère Série of LCAPB 2025-2026
+(11 pairs): no text is cut at 320, 375 or 390px, where 0.8.0 cut 7 player names and 7 club names
+at 375px (3 and 4 of the 6 pairs of Pleine Feminine, 1ère Série 2026-2027, also none now). A
+pair's row is 79px, 99px when its club line wraps onto a second line (6 of 11 rows at 375px, 5 at
+390px); at 320px names wrap too, up to 117px. On web at 1280px every row is 79px. The summary
+line is 27px: the table starts 129px higher than under the 0.8.0 section header. Red marks a loss here, the
+opposite of the green win, besides its warning role in the pills.
 
 **Matching a team to its matches.** By licence only: names carry suffixes ("(D)", "(S)", "(ED)")
 and namesakes play in the same competition (PUCHEUX Theo and PUCHEUX Kevin in Championnat CCAPB

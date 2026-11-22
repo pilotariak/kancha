@@ -233,8 +233,6 @@
     "cta_create": "Crear el horario"
   },
   "ranking": {
-    "eyebrow": "Clasificación",
-    "title": "Clasificación del campeonato",
     "teams_count_one": "{{count}} equipo",
     "teams_count_other": "{{count}} equipos",
     "final": "Clasificación definitiva",
@@ -248,8 +246,6 @@
     "error_load": "No se pudo cargar la clasificación.",
     "column_team": "Equipo",
     "column_record": "Balance",
-    "form_win": "V",
-    "form_loss": "D",
     "form_win_a11y": "victoria",
     "form_loss_a11y": "derrota",
     "form_a11y": "últimos resultados: {{results}}",
