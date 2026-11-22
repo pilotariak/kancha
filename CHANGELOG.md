@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.9.0](https://github.com/pilotariak/kancha/compare/v0.8.0...v0.9.0) (2026-11-22)
+
+
+### 🚀 Features
+
+* **about:** group the About screen and drop the language flags ([#145](https://github.com/pilotariak/kancha/issues/145)) ([23d763f](https://github.com/pilotariak/kancha/commit/23d763fdb4f95092e834a30260f9d5c53c142386)), closes [#128](https://github.com/pilotariak/kancha/issues/128) [#131](https://github.com/pilotariak/kancha/issues/131)
+* **android:** add Material 3 ripples and a themed icon ([#153](https://github.com/pilotariak/kancha/issues/153)) ([d669bb6](https://github.com/pilotariak/kancha/commit/d669bb63a1e4547c957e56afb62087f720fc90b2)), closes [#99](https://github.com/pilotariak/kancha/issues/99)
+* **club:** add a club page with its season, results and titles ([#149](https://github.com/pilotariak/kancha/issues/149)) ([269d543](https://github.com/pilotariak/kancha/commit/269d5438a24ae68a4046d4fba404ce795dc5f671)), closes [#112](https://github.com/pilotariak/kancha/issues/112)
+* **competitions:** trim season tiles and link open tournaments ([#144](https://github.com/pilotariak/kancha/issues/144)) ([46fa8a5](https://github.com/pilotariak/kancha/commit/46fa8a59db6832944ed6d113e0e7e4486f49810e)), closes [#130](https://github.com/pilotariak/kancha/issues/130) [#136](https://github.com/pilotariak/kancha/issues/136)
+* **details:** lead a finished competition with its winners ([#147](https://github.com/pilotariak/kancha/issues/147)) ([e4d0560](https://github.com/pilotariak/kancha/commit/e4d056011e1781281043e99e6e3e28b0067f48f5)), closes [#129](https://github.com/pilotariak/kancha/issues/129)
+* **follow:** follow clubs, players and categories ([#152](https://github.com/pilotariak/kancha/issues/152)) ([d05e9e5](https://github.com/pilotariak/kancha/commit/d05e9e5b577d1916b70e30ca7a48231ed45e6bc8)), closes [#134](https://github.com/pilotariak/kancha/issues/134)
+* **score:** start a game with target presets and recent teams ([#143](https://github.com/pilotariak/kancha/issues/143)) ([e9b1c41](https://github.com/pilotariak/kancha/commit/e9b1c414c7f66be516091d0d9a0b886f1566000f)), closes [#132](https://github.com/pilotariak/kancha/issues/132)
+* **share:** share a match result as an image ([#121](https://github.com/pilotariak/kancha/issues/121)) ([5302015](https://github.com/pilotariak/kancha/commit/5302015c6bcfa4a555754e0b6a9dbc1fe562412c)), closes [#116](https://github.com/pilotariak/kancha/issues/116)
+* **ui:** use a condensed scoreboard font for scores ([#146](https://github.com/pilotariak/kancha/issues/146)) ([6415a6e](https://github.com/pilotariak/kancha/commit/6415a6ed46a8d32ae2aca8280affae93ca59675b)), closes [#115](https://github.com/pilotariak/kancha/issues/115)
+
+
+### 🐛 Bug Fixes
+
+* **bracket:** show the knockout rounds first on phones ([#142](https://github.com/pilotariak/kancha/issues/142)) ([2c29199](https://github.com/pilotariak/kancha/commit/2c291994767fd969c47521d265fad629ff55ddbc)), closes [#127](https://github.com/pilotariak/kancha/issues/127)
+* **competitions:** remove the Errebot link ([#150](https://github.com/pilotariak/kancha/issues/150)) ([5fef8b7](https://github.com/pilotariak/kancha/commit/5fef8b746954bef6db7439b570b427a9095356f6)), closes [#148](https://github.com/pilotariak/kancha/issues/148)
+* **details:** give the série chips their own row so no série is hidden ([#140](https://github.com/pilotariak/kancha/issues/140)) ([ae736c6](https://github.com/pilotariak/kancha/commit/ae736c6636fa1072251b674ace4c2a97c0bd3779)), closes [#125](https://github.com/pilotariak/kancha/issues/125)
+* **ranking:** keep full names in the compact ranking on phones ([#141](https://github.com/pilotariak/kancha/issues/141)) ([8ba6a2c](https://github.com/pilotariak/kancha/commit/8ba6a2c903979d6bb40e975218005cde4314cac5)), closes [#126](https://github.com/pilotariak/kancha/issues/126)
+* **web:** give the home screen and the browser tab the Kancha icon ([#124](https://github.com/pilotariak/kancha/issues/124)) ([5f3fc4f](https://github.com/pilotariak/kancha/commit/5f3fc4fb54d10ff7e0434edc83e1c1dba0bdc3f3)), closes [#123](https://github.com/pilotariak/kancha/issues/123)
+
 ## [0.8.0](https://github.com/pilotariak/kancha/compare/v0.7.0...v0.8.0) (2026-11-21)
 
 
