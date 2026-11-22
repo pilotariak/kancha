@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Share, Share2, Trophy, Undo2, X } from "@/components/icons";
 import { useShareCard } from "@/components/ShareCard";
 import type { Palette } from "@/constants/colors";
+import { scoreDigits } from "@/constants/typography";
 import { INITIAL, reducer, type ScoreState, type Side } from "@/features/score/scoreMachine";
 import { scoreCardData } from "@/features/share/share-card";
 import { type InteractionState, showsFocusRing } from "@/hooks/use-interaction-styles";
@@ -465,18 +466,17 @@ const makeStyles = (c: Palette) =>
       pointerEvents: "none",
     },
     scoreNumber: {
+      ...scoreDigits.black,
       color: "#FFFFFF",
       fontSize: 112,
-      fontWeight: "900",
       lineHeight: 112,
-      fontVariant: ["tabular-nums"],
     },
     scoreTarget: {
+      ...scoreDigits.bold,
       color: c.onRedSoft,
       fontSize: 28,
-      fontWeight: "700",
-      marginBottom: 14,
-      fontVariant: ["tabular-nums"],
+      // Puts its baseline on the score's, in the 112px line.
+      marginBottom: 6,
     },
     addHint: {
       marginLeft: "auto",

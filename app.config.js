@@ -44,7 +44,17 @@ module.exports = {
           root: "src/app",
         },
       ],
-      "expo-font",
+      [
+        // The scoreboard digits (src/constants/typography.ts): native builds embed them, so they
+        // are there at launch. Web loads them with useFonts in src/app/_layout.tsx.
+        "expo-font",
+        {
+          fonts: [
+            "./assets/fonts/BarlowCondensed-Bold.ttf",
+            "./assets/fonts/BarlowCondensed-Black.ttf",
+          ],
+        },
+      ],
       "expo-web-browser",
       [
         // The native splash is the launch screen's redFill (DESIGN.md), light
