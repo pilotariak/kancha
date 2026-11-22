@@ -227,8 +227,6 @@
     "cta_create": "Create the slot"
   },
   "ranking": {
-    "eyebrow": "Ranking",
-    "title": "Championship ranking",
     "teams_count_one": "{{count}} team",
     "teams_count_other": "{{count}} teams",
     "final": "Final ranking",
@@ -242,8 +240,6 @@
     "error_load": "Could not load the ranking.",
     "column_team": "Team",
     "column_record": "Record",
-    "form_win": "W",
-    "form_loss": "L",
     "form_win_a11y": "win",
     "form_loss_a11y": "loss",
     "form_a11y": "last results: {{results}}",

@@ -227,8 +227,6 @@
     "cta_create": "Créer le slot"
   },
   "ranking": {
-    "eyebrow": "Classement",
-    "title": "Classement du championnat",
     "teams_count_one": "{{count}} équipe",
     "teams_count_other": "{{count}} équipes",
     "final": "Classement définitif",
@@ -242,8 +240,6 @@
     "error_load": "Impossible de charger le classement.",
     "column_team": "Équipe",
     "column_record": "Bilan",
-    "form_win": "V",
-    "form_loss": "D",
     "form_win_a11y": "victoire",
     "form_loss_a11y": "défaite",
     "form_a11y": "derniers résultats : {{results}}",
