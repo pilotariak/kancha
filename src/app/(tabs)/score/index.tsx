@@ -12,13 +12,24 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { FilterChips } from "@/components/FilterChips";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
+import {
+  defaultTargetChoice,
+  recentTeamsFor,
+  TARGET_PRESETS,
+  type TargetChoice,
+  targetOf,
+} from "@/features/score/setup";
 import { useFieldFocus } from "@/hooks/use-interaction-styles";
 import { useTextColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
+import { useScoreSetupStore } from "@/store/score-setup-store";
+
+const OTHER = "other";
 
 // ─── Setup screen ─────────────────────────────────────────────────────────────
 
@@ -31,83 +42,156 @@ function SetupScreen({ onStart }: SetupProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const column = useTextColumn();
+  const { bottom } = useSafeAreaInsets();
   const teamAFocus = useFieldFocus();
   const teamBFocus = useFieldFocus();
   const targetFocus = useFieldFocus();
+  const recentTeams = useScoreSetupStore((s) => s.recentTeams);
+  const lastTarget = useScoreSetupStore((s) => s.lastTarget);
   const [teamA, setTeamA] = useState("");
   const [teamB, setTeamB] = useState("");
-  const [targetRaw, setTargetRaw] = useState("");
+  // Null until the user picks: the form follows the last target, which loads from storage
+  // after the first render.
+  const [picked, setPicked] = useState<TargetChoice | null>(null);
 
-  const target = parseInt(targetRaw, 10);
-  const canStart = teamA.trim().length > 0 && teamB.trim().length > 0 && target > 0;
+  const choice = picked ?? defaultTargetChoice(lastTarget);
+  const target = targetOf(choice);
+  const canStart = teamA.trim().length > 0 && teamB.trim().length > 0 && target !== null;
+
+  function start() {
+    if (canStart && target !== null) onStart(teamA.trim(), teamB.trim(), target);
+  }
+
+  const presetOptions = [
+    ...TARGET_PRESETS.map((value) => ({ id: String(value), name: String(value) })),
+    { id: OTHER, name: t("score.target_other") },
+  ];
+  const presetValue = choice?.kind === "preset" ? String(choice.value) : choice ? OTHER : undefined;
+
+  function pickTarget(id: string) {
+    if (id !== OTHER) setPicked({ kind: "preset", value: Number(id) });
+    else if (choice?.kind !== "other") setPicked({ kind: "other", text: "" });
+  }
+
+  const teams = [
+    {
+      label: t("score.label_team_a"),
+      value: teamA,
+      setValue: setTeamA,
+      other: teamB,
+      focus: teamAFocus,
+      dotStyle: styles.teamDotA,
+      testID: "team-a",
+    },
+    {
+      label: t("score.label_team_b"),
+      value: teamB,
+      setValue: setTeamB,
+      other: teamA,
+      focus: teamBFocus,
+      dotStyle: styles.teamDotB,
+      testID: "team-b",
+    },
+  ];
 
   return (
+    // The keyboard covers the tab bar: the offset takes back the bar's inset, which the footer
+    // already pads, so Start sits right on the keyboard.
     <KeyboardAvoidingView
-      style={styles.setupFlex}
+      style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={-bottom}
     >
-      <ScrollView
-        contentContainerStyle={styles.setupContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <ScreenHeader
-          column={column}
-          title={t("score.setup_title")}
-          subtitle={t("score.setup_subtitle")}
-        />
+      {/* The top edge sits behind the light status bar: red like the header band. */}
+      <SafeAreaView style={styles.top} edges={["top"]}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <ScreenHeader
+            column={column}
+            title={t("score.setup_title")}
+            subtitle={t("score.setup_subtitle")}
+          />
 
-        <View style={[styles.setupBody, column]}>
-          <View style={styles.setupForm}>
-            <View style={styles.fieldGroup}>
-              <View style={styles.fieldLabelRow}>
-                <View style={[styles.teamDot, styles.teamDotA]} />
-                <Text style={styles.fieldLabel}>{t("score.label_team_a")}</Text>
-              </View>
-              <TextInput
-                {...teamAFocus.focusProps}
-                style={[styles.input, teamAFocus.inputStyle, teamAFocus.focusStyle]}
-                value={teamA}
-                onChangeText={setTeamA}
-                placeholder={t("score.placeholder_team")}
-                placeholderTextColor={colors.placeholder}
-                returnKeyType="next"
-                autoCapitalize="words"
-              />
-            </View>
-
-            <View style={styles.fieldGroup}>
-              <View style={styles.fieldLabelRow}>
-                <View style={[styles.teamDot, styles.teamDotB]} />
-                <Text style={styles.fieldLabel}>{t("score.label_team_b")}</Text>
-              </View>
-              <TextInput
-                {...teamBFocus.focusProps}
-                style={[styles.input, teamBFocus.inputStyle, teamBFocus.focusStyle]}
-                value={teamB}
-                onChangeText={setTeamB}
-                placeholder={t("score.placeholder_team")}
-                placeholderTextColor={colors.placeholder}
-                returnKeyType="next"
-                autoCapitalize="words"
-              />
-            </View>
+          <View style={[styles.form, column]}>
+            {teams.map((team) => {
+              const recent = recentTeamsFor(recentTeams, team.other).map((name) => ({
+                id: name,
+                name,
+              }));
+              return (
+                <View key={team.testID} style={styles.fieldGroup}>
+                  <View style={styles.fieldLabelRow}>
+                    <View style={[styles.teamDot, team.dotStyle]} />
+                    <Text style={styles.fieldLabel}>{team.label}</Text>
+                  </View>
+                  <TextInput
+                    {...team.focus.focusProps}
+                    style={[styles.input, team.focus.inputStyle, team.focus.focusStyle]}
+                    value={team.value}
+                    onChangeText={team.setValue}
+                    placeholder={t("score.placeholder_team")}
+                    placeholderTextColor={colors.placeholder}
+                    returnKeyType="next"
+                    autoCapitalize="words"
+                    accessibilityLabel={team.label}
+                    testID={team.testID}
+                  />
+                  {recent.length > 0
+                    ? (
+                      <FilterChips
+                        options={recent}
+                        value={team.value.trim()}
+                        onChange={team.setValue}
+                        accessibilityLabel={t("score.recent_teams", { team: team.label })}
+                        wrap={column !== undefined}
+                        testID={`${team.testID}-recent`}
+                      />
+                    )
+                    : null}
+                </View>
+              );
+            })}
 
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>{t("score.label_target")}</Text>
-              <TextInput
-                {...targetFocus.focusProps}
-                style={[styles.input, targetFocus.inputStyle, targetFocus.focusStyle]}
-                value={targetRaw}
-                onChangeText={setTargetRaw}
-                placeholder={t("score.placeholder_target")}
-                placeholderTextColor={colors.placeholder}
-                keyboardType="number-pad"
-                returnKeyType="done"
+              <FilterChips
+                options={presetOptions}
+                value={presetValue}
+                onChange={pickTarget}
+                accessibilityLabel={t("score.label_target")}
+                wrap
+                testID="target"
               />
+              {choice?.kind === "other"
+                ? (
+                  <TextInput
+                    {...targetFocus.focusProps}
+                    style={[styles.input, targetFocus.inputStyle, targetFocus.focusStyle]}
+                    value={choice.text}
+                    onChangeText={(text) => setPicked({ kind: "other", text })}
+                    placeholder={t("score.placeholder_target")}
+                    placeholderTextColor={colors.placeholder}
+                    keyboardType="number-pad"
+                    returnKeyType="done"
+                    // Opened by a press on "other", not when the last target opens it.
+                    autoFocus={picked !== null}
+                    accessibilityLabel={t("score.label_target")}
+                    testID="target-input"
+                  />
+                )
+                : null}
             </View>
           </View>
+        </ScrollView>
+      </SafeAreaView>
 
+      {/* Out of the scroll view, Start stays above the keyboard and the tab bar. */}
+      <View style={[styles.footer, { paddingBottom: bottom }]}>
+        <View style={[styles.footerContent, column]}>
           <Pressable
             style={(
               { pressed },
@@ -116,15 +200,20 @@ function SetupScreen({ onStart }: SetupProps) {
               !canStart && styles.startBtnDisabled,
               pressed && canStart && styles.startBtnPressed,
             ]}
-            onPress={() => canStart && onStart(teamA.trim(), teamB.trim(), target)}
+            onPress={start}
             disabled={!canStart}
             accessibilityRole="button"
-            accessibilityLabel={t("score.cta_start")}
+            accessibilityLabel={target === null
+              ? t("score.cta_start")
+              : t("score.cta_start_target_a11y", { count: target })}
+            testID="start"
           >
-            <Text style={styles.startBtnLabel}>{t("score.cta_start")}</Text>
+            <Text style={styles.startBtnLabel} numberOfLines={1}>
+              {target === null ? t("score.cta_start") : t("score.cta_start_target", { target })}
+            </Text>
           </Pressable>
         </View>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -135,17 +224,17 @@ function SetupScreen({ onStart }: SetupProps) {
 // it, so its keyboard would stay up.
 const startMatch = (teamA: string, teamB: string, target: number) => {
   Keyboard.dismiss();
+  useScoreSetupStore.getState().remember(teamA, teamB, target);
   router.push({ pathname: "/match", params: { teamA, teamB, target: String(target) } });
 };
 
+// The root provider sits outside the native tab bar, so its bottom inset is the home indicator
+// alone. This one is inside the tab: its bottom inset covers the tab bar too.
 export default function ScoreScreen() {
-  const styles = useThemedStyles(makeStyles);
-
-  // The top edge sits behind the light status bar: red like the header band.
   return (
-    <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
+    <SafeAreaProvider>
       <SetupScreen onStart={startMatch} />
-    </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -153,13 +242,11 @@ export default function ScoreScreen() {
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: c.redFill },
-
-    // Setup
-    setupFlex: { flex: 1, backgroundColor: c.cream },
-    setupContent: { paddingBottom: 24 },
-    setupBody: { paddingHorizontal: 20, paddingTop: 28, gap: 28 },
-    setupForm: { gap: 18 },
+    root: { flex: 1, backgroundColor: c.cream },
+    top: { flex: 1, backgroundColor: c.redFill },
+    scroll: { flex: 1, backgroundColor: c.cream },
+    scrollContent: { paddingBottom: 24 },
+    form: { paddingHorizontal: 20, paddingTop: 28, gap: 18 },
     fieldGroup: { gap: 8 },
     fieldLabelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     fieldLabel: {
@@ -183,10 +270,17 @@ const makeStyles = (c: Palette) =>
       fontWeight: "700",
       color: c.ink,
     },
+    footer: {
+      backgroundColor: c.cream,
+      borderTopWidth: 1,
+      borderTopColor: c.line,
+    },
+    footerContent: { paddingHorizontal: 20, paddingVertical: 12 },
     startBtn: {
       borderRadius: 16,
       backgroundColor: c.redFill,
       paddingVertical: 18,
+      paddingHorizontal: 16,
       alignItems: "center",
     },
     startBtnDisabled: { opacity: 0.35 },
