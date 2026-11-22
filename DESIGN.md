@@ -329,7 +329,7 @@ components:
 - **Ink** (`#141414`): Headings, card titles, primary body text on light backgrounds.
 - **Text** (`#262626`): Body text, slightly softer than Ink.
 - **Muted** (`#7A7A7A`): Secondary text, eyebrow labels, metadata.
-- **Placeholder** (`#6E6E6E`): Placeholder text in input fields. Darker than Muted so it reaches 4.5:1 on White (5.1:1); `#97A89F` in the dark theme (6.1:1 on the dark White).
+- **Placeholder** (`#6E6E6E`): Placeholder text in input fields, and the gray text of the grouped list (§4 Grouped List). Darker than Muted so it reaches 4.5:1 on White (5.1:1) and on Cream (4.65:1); `#97A89F` in the dark theme (6.1:1 on the dark White).
 
 ### Semantic
 
@@ -798,6 +798,61 @@ Title:    #141414, 28px, weight 800, −0.8px tracking
 Subtitle: #7A7A7A, 14px, weight 400, line-height 20px
 Gap:      4px between stack items
 ```
+
+### Grouped List
+
+`ListGroup` (`src/components/ListGroup.tsx`): rows grouped in one card under a heading, with a
+line between rows, like an iOS inset grouped list. The About screen has two groups: Préférences
+(Apparence, then Langue), then Application (Version, Site web, Copyright). The supported leagues
+section follows, 32px below.
+
+```
+Heading:     placeholder (#6E6E6E), 12px, weight 800, uppercase, +1.4px tracking,
+             accessibilityRole "header", 8px above the card
+Card:        #FFFFFF (white), 1px solid #E5DED6 (line), 20px radius. It clips its rows
+             (overflow hidden), so a pressed or selected fill follows its corners
+Separator:   1px line between rows, inset 20px from the left (ROW_INSET), to the right edge
+Row:         20px sides, 16px above and below, label left and value right, 12px apart
+Label:       placeholder, 14px, weight 600; a picker's label follows a 16px muted icon, 8px gap
+Value:       #141414 (ink), 15px, weight 700. The website is a link: red, with ExternalLink 14px
+Pressed:     cream fill, also on web hover. No hover border or shadow: the row has no edge
+Focus (web): the 2px red ring, drawn 2px inside the row (outlineOffset −2), as the card clips
+             a ring drawn outside it. Keyboard focus only
+```
+
+**Picker row** (Apparence, Langue): the row opens its options below it, in the same card, and
+its chevron turns up. Choosing an option closes them.
+
+```
+Row:         a button named after its label and value ("Langue, Français"), with aria-expanded
+Options:     a radiogroup named after the row; each option a radio with aria-checked (not
+             accessibilityState, which react-native-web drops)
+Option:      14px above and below, 44px from the left (OPTION_INSET), under the row's label; a
+             line inset 44px above each. #141414 15px, weight 600
+Selected:    redSoft fill, red text weight 800, 8px red dot on the right
+```
+
+**Languages**: each language under its own name, never a flag, as a flag names a country and not
+a language: English, Français, Español, Euskara. Its name in the interface language follows as
+secondary text, in placeholder after a middle dot: "Euskara · Basque". The interface language
+itself, which is the selected option, shows its name once. The own name is the language's key in
+its own locale file (`t("language.eu", { lng: "eu" })`), so no name is written in code. Screen
+readers read the visible names with a comma in place of the dot ("Euskara, Basque"), which starts
+with the visible text. `languageNames` and `resolveLanguage` (`src/features/language/languages.ts`)
+build the names and map the device language to a supported one ("fr-FR" is Français, an
+unsupported language is English).
+
+Muted falls short of 4.5:1 in light on both surfaces, so the gray text uses placeholder:
+
+| Pair                                         | Light  | Dark (Ikurriña) |
+| -------------------------------------------- | ------ | --------------- |
+| Heading (placeholder) on cream               | 4.65:1 | 7.50:1          |
+| Label, secondary name (placeholder) on white | 5.10:1 | 6.08:1          |
+| Label on a pressed or hovered row (cream)    | 4.65:1 | 7.50:1          |
+| Link (red) on white                          | 5.88:1 | 4.70:1          |
+| Selected option (red) on redSoft             | 5.02:1 | 5.11:1          |
+| Muted on white (rejected for labels)         | 4.29:1 | 6.08:1          |
+| Muted on cream (rejected for headings)       | 3.91:1 | 7.50:1          |
 
 ### Navigation / Tab Bar
 

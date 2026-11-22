@@ -16,9 +16,16 @@ import {
   SunMoon,
 } from "@/components/icons";
 import { LeagueIcon } from "@/components/LeagueIcon";
+import { ListGroup, ListSeparator, ROW_INSET } from "@/components/ListGroup";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
+import { languageNames, LANGUAGES, resolveLanguage } from "@/features/language/languages";
+import {
+  type InteractionState,
+  showsFocusRing,
+  useInteractionStyles,
+} from "@/hooks/use-interaction-styles";
 import { useTextColumn } from "@/hooks/use-layout";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 import { type SupportedLanguage, useLanguageStore } from "@/store/language-store";
@@ -28,35 +35,130 @@ const WEBSITE_URL = "https://pilotariak.com";
 const APP_VERSION = Constants.expoConfig?.version ?? "—";
 const COPYRIGHT_YEAR = new Date().getFullYear();
 
-const LANGUAGES: { code: SupportedLanguage; flag: string }[] = [
-  { code: "en", flag: "🇬🇧" },
-  { code: "fr", flag: "🇫🇷" },
-  { code: "es", flag: "🇪🇸" },
-  { code: "eu", flag: "🏔️" },
-];
+type Icon = React.ComponentType<{ size?: number; color?: string }>;
 
-type ThemeIcon = React.ComponentType<{ size?: number; color?: string }>;
-
-const THEMES: { mode: ThemeMode; Icon: ThemeIcon }[] = [
+const THEMES: { mode: ThemeMode; Icon: Icon }[] = [
   { mode: "system", Icon: Monitor },
   { mode: "light", Icon: Sun },
   { mode: "dark", Icon: Moon },
 ];
 
+// A picker's options line up with its label: the row inset, the 16px icon and its 8px gap.
+const OPTION_INSET = ROW_INSET + 16 + 8;
+
 const supportedLeagues = LEAGUES.filter((l) => l.supported);
+
+/** Row fill on press and hover. The card clips its rows, so the focus ring goes inside. */
+function useRowStyle() {
+  const styles = useThemedStyles(makeStyles);
+  const interaction = useInteractionStyles();
+  return (state: InteractionState) => [
+    (state.pressed || state.hovered) && styles.rowPressed,
+    showsFocusRing(state) && [interaction.focusRing, styles.focusRingInside],
+  ];
+}
+
+interface PickerProps<T extends string> {
+  Icon: Icon;
+  label: string;
+  /** The selected option's name, at the end of the row. */
+  value: string;
+  options: readonly T[];
+  selected: T;
+  onSelect: (option: T) => void;
+  /** An option's screen reader label. */
+  optionLabel: (option: T) => string;
+  renderOption: (option: T, isSelected: boolean) => React.ReactNode;
+  testID: string;
+  optionTestID: (option: T) => string;
+}
+
+/** A row that opens its options below it, in the same card. */
+function Picker<T extends string>({
+  Icon,
+  label,
+  value,
+  options,
+  selected,
+  onSelect,
+  optionLabel,
+  renderOption,
+  testID,
+  optionTestID,
+}: PickerProps<T>) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  const rowStyle = useRowStyle();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <View testID={testID}>
+      <Pressable
+        style={(state: InteractionState) => [styles.row, ...rowStyle(state)]}
+        onPress={() => setOpen((v) => !v)}
+        accessibilityRole="button"
+        accessibilityLabel={`${label}, ${value}`}
+        aria-expanded={open}
+      >
+        <View style={styles.rowLeft}>
+          <Icon color={colors.muted} size={16} />
+          <Text style={styles.rowLabel}>{label}</Text>
+        </View>
+        <View style={styles.rowRight}>
+          <Text style={styles.rowValue}>{value}</Text>
+          {open
+            ? <ChevronUp color={colors.muted} size={16} />
+            : <ChevronDown color={colors.muted} size={16} />}
+        </View>
+      </Pressable>
+
+      {open && (
+        <View accessibilityRole="radiogroup" accessibilityLabel={label}>
+          {options.map((option) => {
+            const isSelected = option === selected;
+            return (
+              <React.Fragment key={option}>
+                <ListSeparator inset={OPTION_INSET} />
+                <Pressable
+                  style={(state: InteractionState) => [
+                    styles.option,
+                    isSelected && styles.optionSelected,
+                    ...rowStyle(state),
+                  ]}
+                  onPress={() => {
+                    onSelect(option);
+                    setOpen(false);
+                  }}
+                  testID={optionTestID(option)}
+                  accessibilityRole="radio"
+                  aria-checked={isSelected}
+                  accessibilityLabel={optionLabel(option)}
+                >
+                  {renderOption(option, isSelected)}
+                  {isSelected && <View style={styles.selectedDot} />}
+                </Pressable>
+              </React.Fragment>
+            );
+          })}
+        </View>
+      )}
+    </View>
+  );
+}
 
 export default function AboutScreen() {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const rowStyle = useRowStyle();
   const column = useTextColumn();
   const { language, setLanguage } = useLanguageStore();
   const { mode: themeMode, setMode: setThemeMode } = useThemeStore();
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [themeOpen, setThemeOpen] = useState(false);
 
-  const currentLang = (language ?? i18n.language ?? "en") as SupportedLanguage;
-  const currentEntry = LANGUAGES.find((l) => l.code === currentLang) ?? LANGUAGES[0];
+  const currentLang = resolveLanguage(language ?? i18n.language);
+  // A language's own name comes from its own locale file, the other from the interface's.
+  const namesOf = (code: SupportedLanguage) =>
+    languageNames(t(`language.${code}`, { lng: code }), t(`language.${code}`));
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -82,149 +184,78 @@ export default function AboutScreen() {
         />
 
         <View style={[styles.body, column]}>
-          <View style={styles.cards}>
-            <View style={styles.card} testID="about-version">
-              <Text style={styles.cardLabel}>{t("about.version")}</Text>
-              <Text style={styles.cardValue}>{APP_VERSION}</Text>
-            </View>
+          <ListGroup title={t("about.preferences")} testID="about-preferences">
+            <Picker
+              Icon={SunMoon}
+              label={t("theme.label")}
+              value={t(`theme.${themeMode}`)}
+              options={THEMES.map((theme) => theme.mode)}
+              selected={themeMode}
+              onSelect={setThemeMode}
+              optionLabel={(mode) => t(`theme.${mode}`)}
+              renderOption={(mode, isSelected) => {
+                const ThemeIcon = THEMES.find((theme) => theme.mode === mode)?.Icon ?? Monitor;
+                return (
+                  <>
+                    <ThemeIcon color={isSelected ? colors.red : colors.muted} size={18} />
+                    <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+                      {t(`theme.${mode}`)}
+                    </Text>
+                  </>
+                );
+              }}
+              testID="about-theme"
+              optionTestID={(mode) => `theme-option-${mode}`}
+            />
+            <Picker
+              Icon={Globe}
+              label={t("language.label")}
+              value={namesOf(currentLang).name}
+              options={LANGUAGES}
+              selected={currentLang}
+              onSelect={setLanguage}
+              optionLabel={(code) => namesOf(code).label}
+              renderOption={(code, isSelected) => {
+                const names = namesOf(code);
+                return (
+                  <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+                    {names.name}
+                    {names.localized
+                      ? <Text style={styles.optionSecondary}>{" · "}{names.localized}</Text>
+                      : null}
+                  </Text>
+                );
+              }}
+              testID="about-language"
+              optionTestID={(code) => `language-option-${code}`}
+            />
+          </ListGroup>
 
-            <View style={styles.card} testID="about-copyright">
-              <Text style={styles.cardLabel}>{t("about.copyright")}</Text>
-              <Text style={styles.cardValue}>© {COPYRIGHT_YEAR} Pilotariak</Text>
+          <ListGroup title={t("about.application")} testID="about-application">
+            <View style={styles.row} testID="about-version">
+              <Text style={styles.rowLabel}>{t("about.version")}</Text>
+              <Text style={styles.rowValue}>{APP_VERSION}</Text>
             </View>
 
             <Pressable
-              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+              style={(state: InteractionState) => [styles.row, ...rowStyle(state)]}
               onPress={() => void Linking.openURL(WEBSITE_URL)}
               testID="about-website"
               accessibilityRole="button"
-              accessibilityLabel={t("about.website")}
+              accessibilityLabel={`${t("about.website")}, pilotariak.com`}
             >
-              <Text style={styles.cardLabel}>{t("about.website")}</Text>
-              <View style={styles.linkRow}>
+              <Text style={styles.rowLabel}>{t("about.website")}</Text>
+              <View style={styles.rowRight}>
                 <Text style={styles.linkText}>pilotariak.com</Text>
                 <ExternalLink color={colors.red} size={14} />
               </View>
             </Pressable>
 
-            {/* Language picker */}
-            <View testID="about-language">
-              <Pressable
-                style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-                onPress={() => setPickerOpen((v) => !v)}
-                accessibilityRole="button"
-                accessibilityLabel={t("language.label")}
-              >
-                <View style={styles.languageLeft}>
-                  <Globe color={colors.muted} size={16} />
-                  <Text style={styles.cardLabel}>{t("language.label")}</Text>
-                </View>
-                <View style={styles.linkRow}>
-                  <Text style={styles.cardValue}>
-                    {currentEntry?.flag} {t(`language.${currentLang}`)}
-                  </Text>
-                  {pickerOpen
-                    ? <ChevronUp color={colors.muted} size={16} />
-                    : <ChevronDown color={colors.muted} size={16} />}
-                </View>
-              </Pressable>
-
-              {pickerOpen && (
-                <View style={styles.languageList}>
-                  {LANGUAGES.map((lang) => {
-                    const isSelected = lang.code === currentLang;
-                    return (
-                      <Pressable
-                        key={lang.code}
-                        style={({ pressed }) => [
-                          styles.languageOption,
-                          isSelected && styles.languageOptionSelected,
-                          pressed && styles.cardPressed,
-                        ]}
-                        onPress={() => {
-                          setLanguage(lang.code);
-                          setPickerOpen(false);
-                        }}
-                        testID={`language-option-${lang.code}`}
-                        accessibilityRole="button"
-                        accessibilityLabel={t(`language.${lang.code}`)}
-                        accessibilityState={{ selected: isSelected }}
-                      >
-                        <Text style={styles.languageFlag}>{lang.flag}</Text>
-                        <Text
-                          style={[
-                            styles.languageOptionText,
-                            isSelected && styles.languageOptionTextSelected,
-                          ]}
-                        >
-                          {t(`language.${lang.code}`)}
-                        </Text>
-                        {isSelected && <View style={styles.languageSelectedDot} />}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
+            <View style={styles.row} testID="about-copyright">
+              <Text style={styles.rowLabel}>{t("about.copyright")}</Text>
+              <Text style={styles.rowValue}>© {COPYRIGHT_YEAR} Pilotariak</Text>
             </View>
-
-            {/* Theme picker */}
-            <View testID="about-theme">
-              <Pressable
-                style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-                onPress={() => setThemeOpen((v) => !v)}
-                accessibilityRole="button"
-                accessibilityLabel={t("theme.label")}
-              >
-                <View style={styles.languageLeft}>
-                  <SunMoon color={colors.muted} size={16} />
-                  <Text style={styles.cardLabel}>{t("theme.label")}</Text>
-                </View>
-                <View style={styles.linkRow}>
-                  <Text style={styles.cardValue}>{t(`theme.${themeMode}`)}</Text>
-                  {themeOpen
-                    ? <ChevronUp color={colors.muted} size={16} />
-                    : <ChevronDown color={colors.muted} size={16} />}
-                </View>
-              </Pressable>
-
-              {themeOpen && (
-                <View style={styles.languageList}>
-                  {THEMES.map(({ mode, Icon }) => {
-                    const isSelected = mode === themeMode;
-                    return (
-                      <Pressable
-                        key={mode}
-                        style={({ pressed }) => [
-                          styles.languageOption,
-                          isSelected && styles.languageOptionSelected,
-                          pressed && styles.cardPressed,
-                        ]}
-                        onPress={() => {
-                          setThemeMode(mode);
-                          setThemeOpen(false);
-                        }}
-                        testID={`theme-option-${mode}`}
-                        accessibilityRole="button"
-                        accessibilityLabel={t(`theme.${mode}`)}
-                        accessibilityState={{ selected: isSelected }}
-                      >
-                        <Icon color={isSelected ? colors.red : colors.muted} size={18} />
-                        <Text
-                          style={[
-                            styles.languageOptionText,
-                            isSelected && styles.languageOptionTextSelected,
-                          ]}
-                        >
-                          {t(`theme.${mode}`)}
-                        </Text>
-                        {isSelected && <View style={styles.languageSelectedDot} />}
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
-            </View>
-          </View>
+          </ListGroup>
 
           <View style={styles.leaguesSection}>
             <Text style={styles.sectionEyebrow}>{t("about.leagues_eyebrow")}</Text>
@@ -272,82 +303,75 @@ const makeStyles = (c: Palette) =>
       elevation: 8,
     },
     logo: { width: 52, height: 52 },
-    cards: {
-      gap: 10,
-    },
-    card: {
-      borderRadius: 20,
-      backgroundColor: c.white,
-      borderWidth: 1,
-      borderColor: c.line,
-      paddingHorizontal: 20,
+    row: {
+      paddingHorizontal: ROW_INSET,
       paddingVertical: 16,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
+      gap: 12,
     },
-    cardPressed: {
+    rowPressed: {
       backgroundColor: c.cream,
     },
-    cardLabel: {
-      color: c.muted,
-      fontSize: 14,
-      fontWeight: "600",
+    focusRingInside: {
+      outlineOffset: -2,
     },
-    cardValue: {
-      color: c.ink,
-      fontSize: 15,
-      fontWeight: "700",
+    rowLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
     },
-    linkRow: {
+    rowRight: {
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
+      flexShrink: 1,
+    },
+    // placeholder, not muted: muted on white is 4.3:1 in the light theme.
+    rowLabel: {
+      color: c.placeholder,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    rowValue: {
+      color: c.ink,
+      fontSize: 15,
+      fontWeight: "700",
+      flexShrink: 1,
+      textAlign: "right",
     },
     linkText: {
       color: c.red,
       fontSize: 15,
       fontWeight: "700",
     },
-    languageLeft: {
+    option: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 8,
-    },
-    languageList: {
-      marginTop: 4,
-      borderRadius: 20,
-      backgroundColor: c.white,
-      borderWidth: 1,
-      borderColor: c.line,
-      overflow: "hidden",
-    },
-    languageOption: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 20,
+      paddingLeft: OPTION_INSET,
+      paddingRight: ROW_INSET,
       paddingVertical: 14,
       gap: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: c.line,
     },
-    languageOptionSelected: {
+    optionSelected: {
       backgroundColor: c.redSoft,
     },
-    languageFlag: {
-      fontSize: 20,
-    },
-    languageOptionText: {
+    optionText: {
       flex: 1,
       color: c.ink,
       fontSize: 15,
       fontWeight: "600",
     },
-    languageOptionTextSelected: {
+    optionTextSelected: {
       color: c.red,
       fontWeight: "800",
     },
-    languageSelectedDot: {
+    optionSecondary: {
+      color: c.placeholder,
+      fontWeight: "600",
+    },
+    selectedDot: {
       width: 8,
       height: 8,
       borderRadius: 4,
