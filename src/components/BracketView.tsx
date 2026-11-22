@@ -6,6 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CardGrid } from "@/components/CardGrid";
 import { Check, ChevronDown, ChevronRight, Swords, Trophy, Users } from "@/components/icons";
 import { type Palette } from "@/constants/colors";
+import { scoreColumnWidth, scoreDigits } from "@/constants/typography";
 import {
   activePage,
   CONNECTOR_WIDTH,
@@ -624,21 +625,20 @@ const makeStyles = (c: Palette) =>
     teamNameLost: { fontWeight: "600" },
     teamClub: { color: c.muted, fontSize: 12, fontWeight: "600" },
     teamClubNode: { fontSize: 11 },
-    // A fixed column per set, right-aligned, keeps 7 above 15 in both rows.
+    // A fixed column per set, two Black digits wide, right-aligned: 7 above 15 in both rows.
     sets: { flexDirection: "row", gap: 12 },
     set: {
+      ...scoreDigits.bold,
       color: c.ink,
       fontSize: 22,
-      fontWeight: "700",
-      minWidth: 30,
+      minWidth: scoreColumnWidth(22),
       textAlign: "right",
-      fontVariant: ["tabular-nums"],
     },
-    setNode: { fontSize: 17, minWidth: 24 },
-    setFinal: { fontSize: 28, minWidth: 38 },
-    setNodeFinal: { fontSize: 22, minWidth: 30 },
-    setWon: { fontWeight: "900" },
-    setLost: { color: c.muted, fontWeight: "400" },
+    setNode: { fontSize: 17, minWidth: scoreColumnWidth(17) },
+    setFinal: { fontSize: 28, minWidth: scoreColumnWidth(28) },
+    setNodeFinal: { fontSize: 22, minWidth: scoreColumnWidth(22) },
+    setWon: scoreDigits.black,
+    setLost: { color: c.muted },
     scorePending: {
       color: c.muted,
       fontSize: 20,

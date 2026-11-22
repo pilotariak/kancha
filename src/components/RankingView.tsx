@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 import { ChevronDown, ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
+import { scoreDigits } from "@/constants/typography";
 import { GUTTER, TEXT_MAX_WIDTH } from "@/features/layout/breakpoints";
 import {
   buildRanking,
@@ -408,24 +409,12 @@ const makeStyles = (c: Palette) =>
     rowFocus: { outlineOffset: -2 },
     top: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
     rankCell: { width: 22, minHeight: 18, alignItems: "center", justifyContent: "center" },
-    rankNumber: {
-      color: c.ink,
-      fontSize: 15,
-      fontWeight: "800",
-      lineHeight: 18,
-      fontVariant: ["tabular-nums"],
-    },
+    rankNumber: { ...scoreDigits.black, color: c.ink, fontSize: 15, lineHeight: 18 },
     names: { flex: 1, minWidth: 0 },
     playerName: { color: c.ink, fontSize: 14, fontWeight: "700", lineHeight: 18 },
     recordCell: { alignItems: "flex-end", gap: 4 },
-    record: {
-      color: c.ink,
-      fontSize: 20,
-      fontWeight: "800",
-      lineHeight: 22,
-      fontVariant: ["tabular-nums"],
-    },
-    recordNone: { color: c.muted, fontWeight: "400" },
+    record: { ...scoreDigits.black, color: c.ink, fontSize: 20, lineHeight: 22 },
+    recordNone: { color: c.muted },
     form: { flexDirection: "row", gap: 3 },
     square: { width: 10, height: 10, borderRadius: 2 },
     squareWin: { backgroundColor: c.green },
