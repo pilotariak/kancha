@@ -1,0 +1,26 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monochrome layer of the Android adaptive icon (android.adaptiveIcon.monochromeImage), for
+       themed icons on Android 13 and up: the mark of icon.svg in white on a transparent
+       background, which the launcher tints. The layer is 108 dp square, and only a centred
+       66 dp circle is never clipped: a radius of 1024 × 33 / 108 = 312.9 here. Unscaled, the
+       end caps of the K's vertical stroke reach 380.5 + 42 = 422.5 from the centre, so the mark
+       is scaled by 0.72 about the centre: 304.2, inside the safe zone. The pelota seams are cut
+       out of the ball, as a single color cannot draw them. -->
+  <defs>
+    <mask id="seams">
+      <rect width="1024" height="1024" fill="#FFFFFF"/>
+      <path d="M714 512 Q784 442 854 512" fill="none" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+      <path d="M714 512 Q784 582 854 512" fill="none" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+    </mask>
+  </defs>
+  <g transform="translate(512 512) scale(0.72) translate(-512 -512)">
+    <!-- K: vertical stroke -->
+    <line x1="300" y1="196" x2="300" y2="828" stroke="#FFFFFF" stroke-width="84" stroke-linecap="round"/>
+    <!-- K: upper diagonal -->
+    <line x1="300" y1="512" x2="722" y2="196" stroke="#FFFFFF" stroke-width="78" stroke-linecap="round"/>
+    <!-- K: lower diagonal -->
+    <line x1="300" y1="512" x2="722" y2="828" stroke="#FFFFFF" stroke-width="78" stroke-linecap="round"/>
+    <!-- Pelota ball, seams cut out -->
+    <circle cx="784" cy="512" r="70" fill="#FFFFFF" mask="url(#seams)"/>
+  </g>
+</svg>

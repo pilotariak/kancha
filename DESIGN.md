@@ -17,6 +17,8 @@ meta:
     shadow: "rgba(103, 18, 31, 0.14)"
     on-red-strong: "rgba(255,255,255,0.90)"
     on-red-soft: "rgba(255,255,255,0.86)"
+    ripple: "rgba(200,16,46,0.10)"
+    ripple-on-red: "rgba(255,255,255,0.10)"
   # darkColors — full "Ikurriña" dark palette: very dark forest-green surfaces,
   # Basque red and white text, the three colors of the Basque flag. The
   # design.md standard is single-scheme, so the dark variant lives here (every
@@ -44,6 +46,8 @@ meta:
     amberBg: "#2A240F"
     onRedStrong: "rgba(255,255,255,0.90)"
     onRedSoft: "rgba(255,255,255,0.80)"
+    ripple: "rgba(245,88,110,0.10)"
+    rippleOnRed: "rgba(255,255,255,0.10)"
     tabBar: "#0F1A15"
     tabBarBorder: "#1F2D27"
     tabIconInactive: "#5E7268"
@@ -336,6 +340,8 @@ components:
 - **Green** (`#1F7A5A`): Success states, "today" date pills, confirmed status.
 - **Green Soft** (`#E6F4EE`): Success pill background.
 - **Shadow** (`rgba(103, 18, 31, 0.14)`): Elevation shadow — red-tinted for brand warmth.
+- **Ripple** (`rgba(200,16,46,0.10)`, the dark Red at 10 % in dark): the Android press ripple of cards, rows and tabs.
+- **Ripple on Red** (`rgba(255,255,255,0.10)`): the ripple of a redFill card, where Red would not show.
 
 ### Dark Surfaces (panels, hero overlays)
 
@@ -371,6 +377,7 @@ The dark palette (`meta.darkColors`) takes the three colors of the Basque flag: 
 | `--green`       | `#1F7A5A`              | Success, live/today indicator  |
 | `--green-soft`  | `#E6F4EE`              | Success pill background        |
 | `--shadow`      | `rgba(103,18,31,0.14)` | Elevated and hovered cards     |
+| `--ripple`      | `rgba(200,16,46,0.10)` | Android press ripple           |
 | `--panel`       | `#1E1E1E`              | Dark inset on red backgrounds  |
 | `--amber`       | `#C8900A`              | Finale/final round highlight   |
 | `--amber-bg`    | `#FFF8E7`              | Finale pill background         |
@@ -457,6 +464,7 @@ Padding:       18px
 Shadow:        none at rest (border provides separation)
 Title:         #141414, 17–18px, weight 800
 Meta:          #7A7A7A, 13px, weight 400
+Pressed:       scale(0.96) on iOS and web; on Android, a ripple clipped to the radius (below)
 Hover (web):   lineStrong border, shadow 0 4px 16px (shadow token)
 Focus (web):   2px solid red outline, 2px offset, keyboard focus only
 ```
@@ -512,7 +520,7 @@ light. WCAG 1.4.3 exempts an inactive component.
 
 ### Interaction states (web)
 
-Hover and keyboard focus exist on web only; iOS and Android render as before. The styles live in
+Hover and keyboard focus exist on web only; iOS and Android have neither. The styles live in
 `src/hooks/use-interaction-styles.ts` and read the `hovered` and `focused` states that
 react-native-web passes to `Pressable`. Text fields take their focus style from `useFieldFocus`
 in the same file.
@@ -539,6 +547,24 @@ and focus through `onHoverIn`/`onHoverOut` and `onFocus`/`onBlur` instead. It dr
 only when it carries the card's `style`: a bare wrapper around a styled child has no radius for
 the shadow to follow.
 
+Press feedback, on every platform (`PressableScale`):
+
+```
+iOS and web:        scale(0.96), spring
+Android, cards:     a ripple in the ripple token (red at 10 %) over the card, clipped to its
+                    radius, and no scale. The featured card passes rippleOnRed (white at 10 %)
+                    through `android_ripple`: red would not show on redFill
+Android, wrappers:  scale(0.96), as on iOS: a bare wrapper around a styled child (chips, CTA
+                    buttons) has no radius for the ripple to follow, and the child's fill would
+                    hide a ripple drawn behind it
+Android, tabs:      the ripple token (Navigation / Tab Bar)
+```
+
+React Native masks a bounded ripple with a rectangle, which would spill past a 20px corner. The
+card draws it in the foreground (`foreground: true`) with `overflow: "hidden"`: React Native then
+clips the foreground to the card's own rounded border, so the ripple follows any radius without
+reading it.
+
 ### Link previews (iOS)
 
 `CardLink` (`src/components/CardLink.tsx`) is the `PressableScale` of a card that opens a screen:
@@ -547,7 +573,17 @@ entries. A press opens the
 screen on every platform. On iOS, a long press also shows the screen in a system preview, with a
 menu: Open, Share, Copy link. Share and Copy link give the screen's public web address
 (`SITE_URL`, `src/constants/site.ts`), which opens the web app: the app has no universal links.
-Android and web keep the plain card, with its hover and focus states on web.
+Android and web keep the plain card: the ripple on Android, the hover and focus states on web.
+
+### App icon (Android)
+
+```
+Adaptive icon:  foregroundImage on a #F7F4EF (cream) background
+Themed icon:    monochromeImage, Android 13 and up: the white K and pelota of icon.svg on a
+                transparent background, which the launcher tints. The seams are cut out of the
+                ball. Scaled by 0.72 about the centre to stay inside the 66 dp safe zone of the
+                108 dp layer (assets/icon-monochrome.svg, docs/how-to/howto-icons.md)
+```
 
 ### Cards — Featured / Hero Card
 
@@ -565,7 +601,7 @@ Title:         #FFFFFF, 28px (Hero title), weight 900, line-height 31px. A seaso
                never breaks: word joiners (U+2060) hold "2025-2026" on one line
 Sub panel:     #161616 bg, #FFFFFF text — inset dark chip for metadata (optional)
 Footer:        #FFFFFF 15px weight 700 + ChevronRight 18px #FFFFFF, space-between, 12px above
-Pressed:       scale(0.96) via PressableScale
+Pressed:       scale(0.96) via PressableScale on iOS and web; a rippleOnRed ripple on Android
 Hover (web):   the shadow only (no border); focus ring as the other cards
 Placement:     on cream, at least 22px below the header band. The band's 24px bottom corners
                and the cream gap keep the two red blocks apart in both themes; never let the
@@ -946,14 +982,22 @@ Android: the Material 3 bottom navigation, in the colors of the former JS bar.
 
 ```
 Background:    tabBar
-Active:        red icon and label on a redSoft pill (indicatorColor)
+Active:        red icon and label on a redSoft pill (indicatorColor). react-native-screens
+               draws the bar in a Material 3 theme with the active indicator on, so the pill
+               needs only its color
 Inactive tint: tabIconInactive
+Ripple:        the ripple token (rippleColor). Without it, react-native-screens reads
+               itemRippleColor from the Material 3 theme, which does not define it: no ripple
 Label:         12px, weight 700
 Icons:         Material Design Icons rendered to images by VectorIcon: trophy-outline,
                sword-cross, information-outline (`src/components/android-tab-icon.android.tsx`).
-               Native tabs take an image or a drawable, not the Lucide SVG components;
-               drawables come with #99
+               Native tabs take an image or a drawable, not the Lucide SVG components. A
+               drawable is an Android resource, which this managed project could only add
+               through a config plugin; the images need none
 ```
+
+Every color comes from the active palette, so the bar follows the app's theme in light and dark,
+not only the system's.
 
 Web: the bottom bar until two columns fit beside the rail (`RAIL_MIN_WIDTH`, 880px, §5).
 

@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { CardLink } from "@/components/CardLink";
 import { ChevronRight } from "@/components/icons";
 import type { Palette } from "@/constants/colors";
-import { useThemedStyles } from "@/hooks/use-theme";
+import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
 interface FeaturedCardProps {
   eyebrow: string;
@@ -23,11 +23,14 @@ interface FeaturedCardProps {
  */
 export function FeaturedCard({ eyebrow, title, footer, href, testID }: FeaturedCardProps) {
   const styles = useThemedStyles(makeStyles);
+  const { colors } = useTheme();
 
   return (
     <CardLink
       style={styles.card}
       href={href}
+      // The red ripple of the other cards would not show on redFill.
+      android_ripple={{ color: colors.rippleOnRed }}
       accessibilityRole="button"
       accessibilityLabel={`${eyebrow}, ${title}`}
       accessibilityHint={footer}
