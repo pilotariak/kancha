@@ -129,6 +129,8 @@
     "version": "Bertsioa",
     "copyright": "Copyright",
     "website": "Webgunea",
+    "preferences": "Hobespenak",
+    "application": "Aplikazioa",
     "leagues_title": "Ligak eta batzordeak",
     "leagues_eyebrow": "Onartutako batzordeak",
     "leagues_description_one": "Kancha gaur egun batzorde batekin konektatuta dago, eta garapenak aurrera egin ahala integrazio gehiago planifikatuta daude.",

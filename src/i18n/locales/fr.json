@@ -129,6 +129,8 @@
     "version": "Version",
     "copyright": "Copyright",
     "website": "Site web",
+    "preferences": "Préférences",
+    "application": "Application",
     "leagues_title": "Ligues & comités",
     "leagues_eyebrow": "Comités soutenus",
     "leagues_description_one": "Kancha est actuellement connecté à un comité, avec d'autres intégrations prévues au fil du développement.",
