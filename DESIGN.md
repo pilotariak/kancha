@@ -1165,6 +1165,46 @@ Results:    the match grid, the ranking table (712px at most) or the fit bracket
 
 Switching to the bracket moves the filters from the column to the bar.
 
+### Score — Setup
+
+The Score tab (`src/app/(tabs)/score/index.tsx`) is the new match form. When a match starts, it
+saves the last six team names and the target on the device only (`useScoreSetupStore`,
+AsyncStorage key `kancha-score-setup`). The rules live in `src/features/score/setup.ts`.
+
+```
+Teams:     two text fields (Inputs — Text Field), each with its team marker. Under each, the
+           recent teams as Filter Chips, most recent first, minus the team in the other field
+           (whatever its case). A press fills the field; the chip matching the field is
+           selected. A scrolling row on a phone, wrapped from two columns (web). None before the
+           first match
+Target:    Filter Chips, wrapped: 30, 35, 40, "Autre". "Autre" opens a number field under the
+           chips, focused when pressed, which takes any positive number. The form opens on the
+           last target: its chip, or "Autre" holding it. Nothing selected before the first match
+Start:     a bar under the scroll view, never scrolled: cream, 1px line top border, 12px × 20px
+           padding, in the text column on web. The button: redFill, 16px radius, 18px top and
+           bottom, label #FFFFFF 17px weight 900 on one line, "Commencer · en 35" once a target
+           is set, "Commencer" before. 35% opacity, disabled, until both teams and a target are
+           set. Screen readers hear "Commencer la partie en 35 points"
+Insets:    the screen has its own SafeAreaProvider. A SafeAreaView takes the insets of the
+           nearest provider, and the root one sits outside the native tab bar: its bottom inset
+           is the home indicator alone. Inside the tab, the bottom inset covers the tab bar
+           (iOS) and is 0 above the Material bar (Android). The bar pads its bottom by it
+Keyboard:  the KeyboardAvoidingView is the screen's root, at the top of the window, as it
+           measures its overlap with the keyboard from its own frame. The keyboard covers the
+           tab bar, so keyboardVerticalOffset takes back the bottom inset: the button sits on
+           the keyboard
+```
+
+Presets: 35 and 40 are the targets of every scored match in the 2026-2027 CCAPB championship
+(Frontis, competition 500 in lcapb: 149 to 35 and 158 to 40, the five finals to 35). 30 is there
+for shorter games.
+
+| Pair                               | Light  | Dark (Ikurriña) |
+| ---------------------------------- | ------ | --------------- |
+| Chip label (text) on white         | 15.1:1 | 11.9:1          |
+| Selected chip label (cream) on ink | 16.8:1 | 17.3:1          |
+| Start label (#FFFFFF) on redFill   | 5.88:1 | 6.76:1          |
+
 ### Score — Match mode
 
 The Score tab holds the setup. Start opens the match: the route `/match`
@@ -1453,7 +1493,9 @@ The **iOS and Android apps are phone-only** (React Native / Expo, `ios.supportsT
 
 **Safe areas:**
 
-- Always `edges={["top"]}` on `SafeAreaView` — bottom is handled by the tab bar container.
+- Always `edges={["top"]}` on `SafeAreaView` — bottom is handled by the tab bar container. The
+  Score tab is the exception: its pinned Start bar pads by the bottom inset of a provider of its
+  own, inside the tab (§4 Score — Setup).
 - Bottom content padding: 120 px (`paddingBottom: 120`) to clear the floating tab bar.
 
 **Text scaling:**
