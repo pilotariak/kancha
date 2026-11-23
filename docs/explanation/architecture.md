@@ -2,20 +2,21 @@
 
 ## Platform overview
 
-Kancha is the mobile client in the Pilotariak platform — a Basque pelota competition management system. It sits at the edge of a federated GraphQL architecture:
+Kancha is the mobile client in the Pilotariak platform — a Basque pelota competition management system. It reads competition data from a federated GraphQL architecture, and slot data from a separate service:
 
 ```
 Kancha (React Native / Expo)
-  │  GraphQL over HTTPS
-  ▼
-Frontis (GraphQL Gateway, :4000)  — hive-gateway federation
-  ├─── specialties (:4004)        — Specialty entities
-  ├─── clubs (:4001)              — Club entities
-  ├─── competitions (:4002)       — Competition entities
-  └─── results (:4005)            — Result, Player entities
+  │
+  ├── GraphQL over HTTPS ──▶ Frontis (GraphQL Gateway, :4000)  — hive-gateway federation
+  │                            ├─── specialties (:4004)        — Specialty entities
+  │                            ├─── clubs (:4001)              — Club entities
+  │                            ├─── competitions (:4002)       — Competition entities
+  │                            └─── results (:4005)            — Result, Player entities
+  │
+  └── JSON over HTTPS ─────▶ pik                               — slots: Cloudflare Worker and D1
 ```
 
-Kancha never talks directly to subgraphs. All data goes through Frontis.
+Competition data goes through Frontis only: Kancha never talks directly to subgraphs. Slot data (the Créneaux tab) is private to each group of players and comes from [pik](https://github.com/pilotariak/pik), which Frontis neither stores nor serves. The two services do not talk to each other. See [ADR-0001](../adr/0001-call-a-dedicated-slots-service.md).
 
 ## Why Expo
 
