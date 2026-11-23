@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react-native";
 import React, { useState } from "react";
-import { type LayoutChangeEvent, Pressable, StyleSheet, Text, View } from "react-native";
+import { type LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { Palette } from "@/constants/colors";
 import { SEGMENT_GAP, segmentFit, TRACK_PADDING } from "@/features/layout/segments";
@@ -16,6 +16,21 @@ export interface Segment<T extends string> {
   label: string;
   icon?: LucideIcon;
 }
+
+/**
+ * react-native-web presses a Pressable on Enter, and on Space for the button role only: a tab
+ * takes Space too, as WAI-ARIA tabs do. Web only, as native keyboards go through the same press.
+ */
+const selectOnSpace = (select: () => void) =>
+  Platform.OS === "web"
+    ? {
+      onKeyDown: (event: { key: string; preventDefault: () => void }) => {
+        if (event.key !== " ") return;
+        event.preventDefault();
+        select();
+      },
+    }
+    : {};
 
 interface SegmentedControlProps<T extends string> {
   segments: readonly Segment<T>[];
@@ -71,6 +86,7 @@ export function SegmentedControl<T extends string>(
               showsFocusRing(state) && interaction.focusRing,
             ]}
             onPress={() => onChange(option)}
+            {...selectOnSpace(() => onChange(option))}
             accessibilityRole="tab"
             accessibilityLabel={label}
             aria-selected={active}

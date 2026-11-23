@@ -389,7 +389,7 @@ The dark palette (`meta.darkColors`) takes the three colors of the Basque flag: 
 **Font families:**
 
 - **System default** (SF Pro on iOS, Roboto on Android) for all text but the scoreboard digits. The system font at high weights provides the sporty, confident tone needed.
-- **Barlow Condensed** (SIL Open Font License, `assets/fonts/` with `OFL.txt`) for the scoreboard digits only: set scores and bracket points, rank numbers and records, the match mode score and its target. Like the scoreboards of frontons and trinquets, it reads from far away, and its narrow digits leave the team names more room.
+- **Barlow Condensed** (SIL Open Font License, `assets/fonts/` with `OFL.txt`) for the scoreboard digits only: set scores and bracket points, rank numbers and records, the four figures of the player page (§4 Player page), the match mode score and its target. Like the scoreboards of frontons and trinquets, it reads from far away, and its narrow digits leave the team names more room.
   - Two faces: **Black** (900) where a system weight of 800 or more was (the winner's sets, ranks, records, the match mode score), **Bold** (700) for the rest (even and lost sets, the match mode target).
   - Always `tabular-nums`: Barlow's default figures are proportional. A tabular digit is 0.54 em in Black and 0.50 em in Bold, so a score column is two Black digits wide and 9 and 10 take the same place.
   - In code: `src/constants/typography.ts` (`ScoreFont`, `scoreDigits`, `scoreColumnWidth`). Each face is a family of its own, never set with `fontWeight`: Android would fall back to the system font and web would fake a bolder face.
@@ -1158,6 +1158,9 @@ Icon only: `iconOnly` prop: 44px segments, an 18px icon and no label (142px for 
            screen gave the view switch its own row on a phone
 No red:    picking a view is not an action
 Web:       hover tints an inactive segment lineStrong; keyboard focus draws the red ring
+Keys:      a tablist of tabs with aria-selected; Tab reaches each segment, Enter and Space
+           select it. react-native-web presses a Pressable on Space for the button role only,
+           so the control handles Space itself on web (`selectOnSpace`)
 ```
 
 | Pair                                  | Light  | Dark (Ikurriña) |
@@ -1280,7 +1283,9 @@ Form:         the last five results under the record, 4px below it, oldest first
               green #1F7A5A; a loss is empty, outlined 2px red #C8102E. Filled or empty carries
               the result without the colour, in a fifth of the width the lettered chips took.
               The squares are one image labelled in words ("derniers résultats : victoire,
-              victoire, défaite…"), as the row's sentence says it
+              victoire, défaite…"), as the row's sentence says it. `FormSquares`
+              (`src/components/FormSquares.tsx`), shared with the player page, which draws
+              them at 18px
 Club line:    across the row from the players' left edge, wrapping when long: the club name,
               #7A7A7A 12px weight 600, 16px lines, a link to the club page (§ Club page); the
               team number ("Équipe 2"), same style; the phase reached, a small StatusPill (amber
@@ -1441,6 +1446,131 @@ entries; four titles: Mur à Gauche / P.G. Creuse Masculin Individuel in 1ère a
 Mur à Gauche / P.G. Pleine Masculin in 2ème Série (three finals between its own teams), and
 Trinquet / P.G. Creuse Masculin in 3ème Série. The Trinquet / P.G. Creuse Masculin 2ème Série
 final, lost to CA Béglais, is none. The club has results in 13 seasons, 2014-2015 to 2026-2027.
+
+### Player page
+
+`/competitions/player?licence=<licence>` (`src/app/(tabs)/competitions/player.tsx`): who a player
+is and how they play, from two sources. Frontis `playerRankings(licence)` loads first and fills
+the header and Honours; the matches (`usePlayerMatches`, #119) follow. The screen logic is pure
+functions in `src/features/players/` (`profile.ts`, `matches.ts`, `stats.ts`), which take the
+matches whatever their source, so Frontis player statistics (frontis#109) can replace the loading.
+
+```
+Header:       the compact red band (§ Screen Header): back link, eyebrow "Joueur", the name as
+              the rankings spell it, then "Licence 066629 · AMIS DE LA PEL.BASQUE-LE HAILLAN":
+              the club of the most recent ranking, the current one. The initials (first and last
+              word, suffixes such as "(E)" left out) in a 56px redDark circle with a 1.5px
+              onRedSoft ring, #FFFFFF 20px weight 800, hidden from screen readers. The follow
+              button (§ Follow — button) in the back link's row. The club is plain text: the
+              link's red focus ring would not show on the band
+Figures:      one card, two rows of two cells split by 1px #E5DED6 rules: Titres, Bilan
+              ("29-7"), Taux de victoire ("81 %"), Saisons. Values in Barlow Condensed Black 30px
+              (§3), #141414, over #7A7A7A 11px weight 700 uppercase labels. Titles and seasons
+              come from the rankings; the record and win rate show "—" in muted until the
+              matches load. Four in a row would give each label 78px at 390px, where
+              "DENBORALDIAK" (eu) takes 100px and "TAUX DE VICTOIRE" (fr) 118px
+Tabs:         a SegmentedControl: Aperçu, Parties, Palmarès. The tab goes to the URL
+              (`&tab=matches`, `&tab=honours`), so a reload or a shared link opens it; a missing
+              or unknown tab is the overview (`parsePlayerTab`). Rendered once the rankings
+              load, so the static HTML and the first client render match. The panel under it
+              has role tabpanel, named after its tab
+```
+
+**Overview.** On a phone, in this order:
+
+```
+Form:         "Forme / Derniers résultats": the last 10 results with a winner, oldest first, as
+              the ranking's squares (`FormSquares`, 18px here, 10px in a ranking row), then
+              "Série en cours : 7 victoires" (#262626 13px weight 600). A level match is played
+              but in neither
+Latest season: "Dernière saison / 2025-2026": one row per ranking of the most recent season,
+              in one card with hairlines. SpecialtyLabel and the record on the right (Barlow
+              Condensed Black 20px); "1ère Série · <club>" (#7A7A7A 12px, the club a ClubLink);
+              then the phase pill (amber "Champion", red forfeit, soft league text, soft
+              "Provisoire" too) and "7 parties · manches 14-1"
+Specialties:  "Par spécialité / Spécialités": one table, a row per specialty the player was
+              ranked or played in, the most played first. Head "Spécialité" over "Bilan" (11px
+              uppercase, hidden from screen readers). A row: SpecialtyLabel, the record, then
+              the best final ranking as a pill (amber "Champion", or "2 titres"; soft with the
+              league's phase otherwise) and "19 parties"
+Partners:     "Partenaires / A joué avec": the players who played on their side, the most
+              matches first: a row per partner, the name over "24 parties", the record and a
+              ChevronRight; it opens the partner. Ranking teammates with no match together go
+              on one muted line under the card: "Dans la même équipe, sans partie ensemble :
+              NAVARRINE Olivier, FIGEROU Benedict, GARCIA Antoine."
+Opponents:    "Adversaires / Les plus affrontés": the five most met, then the latest met. The
+              name over "4 parties · dernière : sam. 28 févr. (2025-2026), Victoire 15-8 15-3",
+              the record from the player's side, a ChevronRight; it opens the opponent. The
+              score and the season are joined with word joiners, so they never wrap inside
+```
+
+**Matches.** Season chips (FilterChips, wrapped): "Toutes", then each season with a match, the
+latest first; the choice goes to the URL (`&season=<competition id>`). Each season is a header
+card, its season (#141414 16px weight 800, a header) over "17 parties", its record and a
+ChevronDown. It is a button with `aria-expanded`. With "Toutes" the latest season opens and the
+past ones show their record only; a chip opens its season alone. Under an open season, a group
+per specialty and category, the latest played first: SpecialtyLabel over "1ère Série · 10
+parties", the group's record on the right, then its matches, the latest first, in one card with
+hairlines. A row: the opponents (#141414 15px weight 700) and the sets from the player's side
+(Barlow Condensed Black 18px, "—" in muted for a match to come); the opponents' club (ClubLink)
+and "· Avec JANY Alexandre"; then the outcome pill (green Victoire, red Défaite, soft Égalité)
+and "Finale 1 · sam. 28 févr." Each row is one element labelled with a sentence.
+
+**Honours.**
+
+```
+Titles:       "Palmarès / Titres": each final ranking won, the latest first, as the club page's
+              title card (2px amber border, the Trophy tile): SpecialtyLabel, "1ère Série ·
+              2025-2026", then, once the matches load, "Finale gagnée contre DUFFOUR-NONNON Lucas
+              (D)", the sets (Barlow Condensed Black 18px) and the date. The final is the won
+              match of phase F in the title's competition, specialty and category; a title whose
+              final is not found keeps its card without it. "Aucun titre pour l'instant." when
+              none
+Rankings:     "Historique / Saison par saison": one table, a cream head row per season (its
+              competition's name, 11px uppercase), then a row per ranking: the rank (Barlow
+              Condensed Black 18px) or the amber Trophy for a title, SpecialtyLabel, "1ère Série ·
+              <club>" with a ClubLink, the phase and "Provisoire" pills. A season of one ranking
+              is no card of its own
+Clubs:        "Clubs / Par saison": one card, a row per season: the season (#7A7A7A 13px weight
+              700, tabular-nums, 84px) and its clubs, each a ClubLink (#141414 14px weight 700)
+```
+
+**Wide web** (§5 Columns, two columns and up): the player in the first grid cell (`cellWidth`),
+the tabs beside it, 12px apart, 712px at most. The cell holds the figures, the form, the latest
+season and the specialties; the overview tab then holds the partners and the opponents only, so
+nothing shows twice. At 1280 × 900 the cell is 363px and the tabs 712px; at 1000px, 410px each.
+No card stretches across the window: every list is one table in its column.
+
+**Loading and errors.** The band shows a spinner until the rankings load; then the figures, the
+tabs, the latest season and the specialties (records "—") show, and Honours whole, its titles
+without their finals. Until the matches load, one spinner stands in the form's place, or in the
+matches tab's panel; if they fail, one error box with Réessayer stands there instead (React
+Query retries three times first), and the header and Honours stay. The wide layout shows it once:
+in the cell, or in the matches tab when that tab is open. A rankings error shows the error box
+alone; a licence without rankings shows "Aucun classement trouvé pour cette licence."
+
+**Counting.** By licence only, as the ranking table (§ Ranking Table). Every record counts the
+matches with a score; a level match is played, neither won nor lost, and out of the form and the
+streak. A lineup player without a licence shows in the match but is in no record, no partner and
+no opponent list. Names show as Frontis sends them, suffix included ("SEINDERAIN Gerard (E)").
+
+**Keyboard and screen readers.** The segments are tabs in a tablist with `aria-selected`
+(react-native-web drops accessibilityState). Tab reaches them; Enter and Space select one:
+react-native-web presses a non-button on Enter only, so `SegmentedControl` handles Space itself
+on web. Each figure is one element ("Bilan: 29 victoires, 7 défaites"; "Bilan: Chargement" while
+the matches load); the form squares read as one image.
+
+Measured on PUCHEUX Theo (lcapb, licence 066629), from Frontis on 23 November 2026: header AMIS DE
+LA PEL.BASQUE-LE HAILLAN, 2 titles, 29-7, 81 %, 4 seasons; sets 55-14; streak 7 wins; two titles,
+15-1 15-5 against DUFFOUR-NONNON Lucas (D) (Mur à Gauche / P.G. Creuse Masculin Individuel, 1ère
+Série, 2025-2026, a final between two teams of Le Haillan) and 15-3 15-6 against FEVRIER Mathieu
+and SEINDERAIN Gerard (E) (Trinquet / P.G. Creuse Masculin, 2ème Série, 2023-2024); partners JANY
+Alexandre (24, 18-6) and SENDER Timothe (5, 4-1), NAVARRINE Olivier, FIGEROU Benedict and GARCIA
+Antoine on the teammates line. The web export, replayed from those responses, shows the same at
+390 × 844 and 1280 × 900, light and dark, without a console error; in French, Basque and Spanish
+no text is cut at 390 or 320px. Chrome's accessibility tree names each tab with its selected
+state, the panel, each figure, specialty row and match row with its sentence, the season toggles
+with their expanded state and the chips with their checked state; the match rows are no Tab stop.
 
 ### Follow — button
 
@@ -1729,7 +1859,9 @@ The edge stays above the 3:1 that WCAG 1.4.11 asks of a focus indicator, against
 - **Screen padding:** 20 px left/right, consistent across all screens.
 - **Content gap:** 22 px between major stacked sections within a ScrollView.
 - **Single-column layout** on a phone. On web, wider windows add columns of cards (below).
-- **Grid screens** (leagues, competitions, results, player search, player): their
+- **The player page** gives the player a grid cell and the tabs the rest, 712 px at most
+  (§4 Player page): its lists are tables, not card grids.
+- **Grid screens** (leagues, competitions, results, player search): their
   lists of cards go through `CardGrid` (`src/components/CardGrid.tsx`), with `columns` from
   `useWebLayout()`. In one column, `CardGrid` is the list as it was. Season tiles are half a
   card: two per column. Nothing caps the width: a wider window gets more columns.
