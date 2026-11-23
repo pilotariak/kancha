@@ -1,6 +1,6 @@
 ---
 adr: 0004
-status: 🤔 Proposed
+status: ✅ Accepted
 deciders: nlamirault
 consulted:
 informed:
@@ -8,7 +8,7 @@ date: 2026-11-23
 spdx-license: Apache-2.0
 ---
 
-# ADR-0004: Serve the slots API under the Kancha web origin
+# ADR-0004: Call pik on its own origin from the web build
 
 ## Context
 
@@ -29,7 +29,9 @@ sends every path to `index.html`. `public/_headers` sets no Content-Security-Pol
 which origins the page can call.
 
 pik ([`pilotariak/pik`](https://github.com/pilotariak/pik)) is a Cloudflare Worker with its own D1 database
-([ADR-0001](0001-call-a-dedicated-slots-service.md)).
+([ADR-0001](0001-call-a-dedicated-slots-service.md)), at `https://pik.pilotariak.com`. The native app calls it at
+`EXPO_PUBLIC_PIK_URL`. In development, pik runs at `http://localhost:8787` and the web build at `http://localhost:8081`,
+served by the Expo dev server (Metro), which forwards no path to another server.
 
 ## Considered Options
 
@@ -58,11 +60,14 @@ pik ([`pilotariak/pik`](https://github.com/pilotariak/pik)) is a Cloudflare Work
 
 - ✅ The token is out of reach of page scripts.
 - ✅ No change to the Kancha web deployment.
+- ✅ One base URL for every build: the web build calls pik at `EXPO_PUBLIC_PIK_URL`, like the native app.
+- ✅ The web build reaches a local pik in development, with no forward to set up in the Expo dev server.
 
 **Cons:**
 
 - ❌ Credentialed CORS on every call, and cookie behaviour that depends on how Safari judges the API's address.
 - ❌ The web and native builds authenticate differently, and the web one is the harder to test.
+- ❌ pik keeps a list of the origins allowed to call it with the cookie, one per environment.
 
 ### 3. Same origin through a Pages Function
 
@@ -81,46 +86,59 @@ pik ([`pilotariak/pik`](https://github.com/pilotariak/pik)) is a Cloudflare Work
 - ❌ The `/* /index.html 200` rule in `public/_redirects` must not catch `/api/*`. That has to be checked on a preview
   deployment.
 - ❌ Pages does not apply `public/_headers` to responses from Functions, so pik sets its own security headers.
+- ❌ The Expo dev server does not forward `/api`, so the web build has no slots in development without a proxy of its
+  own.
 
 ## Decision
 
-We propose _option 3_, provided that a test on Safari for iOS confirms that the cookie survives more than seven days
-without a visit. If it does not, we fall back to option 1 and the recovery paths of ADR-0002.
+We choose _option 2_. This ADR first proposed option 3: it was dropped so that the web build calls pik like the native
+app, in development as in production.
 
 The rules:
 
-- pik sets the token in a cookie with `HttpOnly`, `Secure`, `SameSite=Lax` and `Path=/api`.
-- pik accepts the token either from that cookie or from an `Authorization: Bearer` header. It checks the `Origin`
-  header on every write that comes with the cookie.
-- The Pages Function forwards the method, path, query, body and the cookie and authorization headers, and nothing else.
+- Every build calls pik at `EXPO_PUBLIC_PIK_URL` followed by `/api/v1`: `https://pik.pilotariak.com` in production,
+  `http://localhost:8787` in development.
+- pik sets the token in a cookie with `HttpOnly`, `Secure`, `SameSite=Lax` and `Path=/api`. `kancha.pilotariak.com` and
+  `pik.pilotariak.com` belong to the same site, and so do two ports of `localhost`, so a `SameSite=Lax` cookie goes with
+  the web build's calls.
+- The web build calls pik with `credentials: "include"`. The native app sends the token in an `Authorization: Bearer`
+  header and calls with `credentials: "omit"`, so that its cookie jar never keeps pik's cookie.
+- pik answers CORS for a list of allowed origins only, set per environment: `https://kancha.pilotariak.com` in
+  production, `http://localhost:8081` in development. It echoes the request's origin, never `*`, allows credentials,
+  answers the preflight, and sets these headers on every response, errors included. The same list drives the check of
+  the `Origin` header on every write that comes with the cookie.
 
-Still open: whether the native app also calls `https://kancha.pilotariak.com/api`, which gives one base URL for every
-build, or calls pik directly, which saves a hop.
+Still to check: that Safari for iOS keeps pik's cookie more than seven days without a visit. If it does not, we fall
+back to option 1 and the recovery paths of ADR-0002.
 
 ## Consequences
 
 ### Positive
 
-- ✅ Web players on Safari should keep their token between sessions, so the personal link of ADR-0002 stays a fallback.
-- ✅ pik needs no CORS configuration for the website.
+- ✅ One base URL for every build, and the web build can be tried against a local pik with `bunx expo start --web`.
+- ✅ The Kancha web deployment stays a static export: no Function and no binding to a second Worker.
+- ✅ The token stays out of reach of page scripts.
 
 ### Negative
 
-- ❌ The Kancha web deployment gains a Function and a binding to a second Worker, which a deployment can now break.
+- ❌ pik must answer CORS correctly. A missing header on an error response hides pik's problem from the page, which then
+  shows a network error.
+- ❌ Web players on Safari may still lose their token after seven days, until the check above is done.
 - ❌ Players who answer from a messaging app's built-in browser still lose their token when they switch to Safari.
 
 ### Neutral
 
-- ↔️ Preview deployments of the website need their own service binding, to a pik environment that is not production.
-- ↔️ Once a Wrangler configuration file defines the Pages bindings, it is their source of truth: the same fields can no
-  longer be edited in the dashboard.
+- ↔️ Preview deployments of the website have their own origins: they need a pik environment that is not production
+  and that allows them.
+- ↔️ If `public/_headers` gains a Content-Security-Policy, its `connect-src` must allow pik's origin.
 
 ## References
 
 - [ADR-0001: Call a dedicated slots service next to Frontis](0001-call-a-dedicated-slots-service.md)
 - [ADR-0002: Identify slot players without accounts](0002-identify-slot-players-without-accounts.md)
 - [pik: the slots service](https://github.com/pilotariak/pik)
+- [pik#18: answer CORS for the Kancha web origins](https://github.com/pilotariak/pik/issues/18)
+- [#156: forward /api to pik from the Kancha website (option 3, not planned)](https://github.com/pilotariak/kancha/issues/156)
 - [WebKit: Full Third-Party Cookie Blocking and More (7-day cap on script-writable storage)](https://webkit.org/blog/10218/full-third-party-cookie-blocking-and-more/)
-- [Cloudflare Pages Functions: routing](https://developers.cloudflare.com/pages/functions/routing/)
-- [Cloudflare Pages Functions: service bindings](https://developers.cloudflare.com/pages/functions/bindings/#service-bindings)
-- [Cloudflare Pages Functions: Wrangler configuration](https://developers.cloudflare.com/pages/functions/wrangler-configuration/)
+- [MDN: CORS requests with credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#requests_with_credentials)
+- [MDN: SameSite cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value)

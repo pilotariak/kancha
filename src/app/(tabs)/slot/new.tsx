@@ -1,133 +1,253 @@
 import { router, Stack } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CalendarClock, Check, ChevronRight, MapPin, Plus, UserCheck, X } from "@/components/icons";
+import { CalendarClock, Check, ChevronRight, MapPin, Minus, Plus, Users } from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
-import { StatusPill } from "@/components/StatusPill";
+import { selectOnSpace } from "@/components/SegmentedControl";
 import type { Palette } from "@/constants/colors";
+import {
+  type CivilDate,
+  defaultSeason,
+  ISO_WEEKDAYS,
+  type IsoWeekday,
+  localToday,
+  parseDateInput,
+  toIsoDate,
+  weekdayName,
+} from "@/features/slots/dates";
+import { slotErrorMessage } from "@/features/slots/errors";
+import { capitalize, dateNames, formatDay, formatLongDate } from "@/features/slots/format";
+import {
+  COURTS,
+  defaultDraft,
+  type DraftError,
+  firstInvalidStep,
+  firstSession,
+  firstSessionChoices,
+  INTERVALS,
+  LIMITS,
+  parseTimeInput,
+  type SlotDraft,
+  SPECIALTIES,
+  stepErrors,
+  toCreateSlot,
+  withMinPlayers,
+  withPlaces,
+  WIZARD_STEPS,
+} from "@/features/slots/wizard";
 import { useFieldFocus } from "@/hooks/use-interaction-styles";
+import { useCreateSlot } from "@/hooks/use-slots";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
 
-type PlayerStatus = "ok" | "ko" | "disponible";
+// ── Form parts ────────────────────────────────────────────────────────────────
 
-interface SlotPlayer {
-  id: string;
-  name: string;
-  status: PlayerStatus;
-  selected: boolean;
+function Field(
+  { label, hint, error, children }: {
+    label: string;
+    hint?: string;
+    error?: string;
+    children: ReactNode;
+  },
+) {
+  const styles = useThemedStyles(makeStyles);
+  return (
+    <View style={styles.field}>
+      <Text style={styles.label}>{label}</Text>
+      {children}
+      {error
+        ? <Text style={styles.fieldError} accessibilityRole="alert">{error}</Text>
+        : hint
+        ? <Text style={styles.hint}>{hint}</Text>
+        : null}
+    </View>
+  );
 }
 
-const STEPS = ["period", "frequency", "players", "statuses", "selection", "summary"] as const;
+/** One choice among a few: a row of chips, read as radio buttons. */
+function Choices<T extends string | number>(
+  { label, options, value, onChange, render, describe }: {
+    label: string;
+    options: readonly T[];
+    value: T;
+    onChange: (value: T) => void;
+    render: (value: T) => string;
+    /** The accessible name when the chip shows an abbreviation. */
+    describe?: (value: T) => string;
+  },
+) {
+  const styles = useThemedStyles(makeStyles);
+  return (
+    <View style={styles.chipsWrap} role="radiogroup" aria-label={label}>
+      {options.map((option) => {
+        const selected = option === value;
+        return (
+          <PressableScale
+            key={String(option)}
+            onPress={() => onChange(option)}
+            {...selectOnSpace(() => onChange(option))}
+            role="radio"
+            aria-checked={selected}
+            accessibilityLabel={describe ? describe(option) : render(option)}
+          >
+            <View style={[styles.chip, selected ? styles.chipActive : null]}>
+              <Text style={[styles.chipText, selected ? styles.chipTextActive : null]}>
+                {render(option)}
+              </Text>
+            </View>
+          </PressableScale>
+        );
+      })}
+    </View>
+  );
+}
 
-// Monday first; 0 = Sunday, as in Date.getDay().
-const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0] as const;
+/**
+ * A number with − and + buttons. A button at its bound stays focusable, marked disabled, and
+ * does nothing: disabling a focused Pressable would drop the keyboard focus on web.
+ */
+function Stepper(
+  { label, value, min, max, onChange, display }: {
+    label: string;
+    value: number;
+    min: number;
+    max: number;
+    onChange: (value: number) => void;
+    display?: string;
+  },
+) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  const atMin = value <= min;
+  const atMax = value >= max;
+  return (
+    <View style={styles.stepper}>
+      <PressableScale
+        onPress={() => !atMin && onChange(value - 1)}
+        accessibilityRole="button"
+        accessibilityLabel={t("new_slot.decrease", { label })}
+        aria-disabled={atMin}
+      >
+        <View style={[styles.stepperButton, atMin ? styles.stepperButtonOff : null]}>
+          <Minus color={atMin ? colors.muted : colors.ink} size={18} />
+        </View>
+      </PressableScale>
+      <Text
+        style={styles.stepperValue}
+        aria-live="polite"
+        accessibilityLabel={`${label}: ${display ?? value}`}
+      >
+        {display ?? value}
+      </Text>
+      <PressableScale
+        onPress={() => !atMax && onChange(value + 1)}
+        accessibilityRole="button"
+        accessibilityLabel={t("new_slot.increase", { label })}
+        aria-disabled={atMax}
+      >
+        <View style={[styles.stepperButton, atMax ? styles.stepperButtonOff : null]}>
+          <Plus color={atMax ? colors.muted : colors.ink} size={18} />
+        </View>
+      </PressableScale>
+    </View>
+  );
+}
 
-// 7 January 2024 is a Sunday, so `weekday` (0 = Sunday) falls on the 7 + weekday.
-const weekdayDate = (weekday: number) => new Date(2024, 0, 7 + weekday);
-
-// Intl gives lowercase weekday names in French, Spanish and Basque.
-const capitalize = (text: string, locale: string) =>
-  text.charAt(0).toLocaleUpperCase(locale) + text.slice(1);
-
-const STATUSES: PlayerStatus[] = ["ok", "ko", "disponible"];
-
-const STATUS_TONES: Record<PlayerStatus, "green" | "red" | "amber"> = {
-  ok: "green",
-  ko: "red",
-  disponible: "amber",
-};
-
-// Mock defaults: the wizard shows them in the active language until the user edits a field.
-const DEFAULT_SEASON = "2025–2026";
-const DEFAULT_START = new Date(2025, 8, 1);
-const DEFAULT_END = new Date(2026, 7, 1);
+// ── Main component ────────────────────────────────────────────────────────────
 
 export default function NewSlotScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "en";
-  const formats = useMemo(
-    () => ({
-      monthYear: new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }),
-      weekday: new Intl.DateTimeFormat(locale, { weekday: "long" }),
-      weekdayShort: new Intl.DateTimeFormat(locale, { weekday: "short" }),
-    }),
-    [locale],
-  );
-  const [currentStep, setCurrentStep] = useState(0);
-  const seasonFocus = useFieldFocus();
+  const names = useMemo(() => dateNames(t), [t]);
+
+  const nameFocus = useFieldFocus();
+  const venueFocus = useFieldFocus();
   const startFocus = useFieldFocus();
   const endFocus = useFieldFocus();
   const timeFromFocus = useFieldFocus();
   const timeToFocus = useFieldFocus();
-  const venueFocus = useFieldFocus();
+  const deadlineFocus = useFieldFocus();
+  const organizerFocus = useFieldFocus();
 
-  // Step 0 — Période. Null until edited, so the default follows the language.
-  const [seasonName, setSeasonName] = useState<string | null>(null);
-  const [startDate, setStartDate] = useState<string | null>(null);
-  const [endDate, setEndDate] = useState<string | null>(null);
-  const defaultStart = formats.monthYear.format(DEFAULT_START);
-  const defaultEnd = formats.monthYear.format(DEFAULT_END);
-  const season = seasonName ?? t("slot.season", { season: DEFAULT_SEASON });
-  const start = startDate ?? defaultStart;
-  const end = endDate ?? defaultEnd;
+  // The defaults depend on today's date: set after the mount, so the static web HTML, rendered
+  // at build time, hydrates with the same tree.
+  const [today, setToday] = useState<CivilDate | null>(null);
+  const [draft, setDraft] = useState<SlotDraft | null>(null);
+  useEffect(() => {
+    const now = localToday();
+    setToday(now);
+    setDraft(defaultDraft(defaultSeason(now)));
+  }, []);
 
-  // Step 1 — Fréquence
-  const [weekday, setWeekday] = useState(4);
-  const weekdayLabel = capitalize(formats.weekday.format(weekdayDate(weekday)), locale);
-  const [timeFrom, setTimeFrom] = useState("18:00");
-  const [timeTo, setTimeTo] = useState("20:00");
-  const [venue, setVenue] = useState("Fronton municipal, Biarritz");
+  const [stepIndex, setStepIndex] = useState(0);
+  const step = WIZARD_STEPS[stepIndex];
+  // A step shows its errors once Continue was pressed on it.
+  const [attempted, setAttempted] = useState(false);
+  const createSlot = useCreateSlot();
 
-  // Step 2 — Joueurs
-  const [players, setPlayers] = useState<SlotPlayer[]>([]);
-  const [newPlayerName, setNewPlayerName] = useState("");
-  const playerInputRef = useRef<TextInput>(null);
-  const playerFocus = useFieldFocus(playerInputRef);
+  const errors = useMemo(
+    () => (draft && today && attempted ? stepErrors(draft, step, today) : {}),
+    [draft, today, attempted, step],
+  );
+  const errorText = (error?: DraftError) =>
+    error ? t(`new_slot.errors.${error.code}`, { min: error.min, max: error.max }) : undefined;
 
-  const addPlayer = () => {
-    const name = newPlayerName.trim();
-    if (!name) return;
-    setPlayers((prev) => [
-      ...prev,
-      { id: String(Date.now()), name, status: "ok", selected: false },
-    ]);
-    setNewPlayerName("");
-    playerInputRef.current?.focus();
+  const update = (changes: Partial<SlotDraft>) => setDraft((d) => (d ? { ...d, ...changes } : d));
+
+  const goTo = (index: number) => {
+    setAttempted(false);
+    setStepIndex(index);
+  };
+  const goBack = () => goTo(Math.max(stepIndex - 1, 0));
+  const isLastStep = stepIndex === WIZARD_STEPS.length - 1;
+
+  const onContinue = () => {
+    if (!draft || !today) return;
+    if (Object.keys(stepErrors(draft, step, today)).length > 0) {
+      setAttempted(true);
+      return;
+    }
+    goTo(stepIndex + 1);
   };
 
-  const removePlayer = (id: string) => {
-    setPlayers((prev) => prev.filter((p) => p.id !== id));
+  const onCreate = () => {
+    if (!draft || !today || createSlot.isPending) return;
+    const body = toCreateSlot(draft, today);
+    if (!body) {
+      // The date changed since a step was checked: go back to the field to fix.
+      const invalid = firstInvalidStep(draft, today);
+      if (invalid) {
+        setStepIndex(WIZARD_STEPS.indexOf(invalid));
+        setAttempted(true);
+      }
+      return;
+    }
+    createSlot.mutate(body, { onSuccess: () => router.replace("/(tabs)/slot") });
   };
 
-  const setStatus = (id: string, status: PlayerStatus) => {
-    setPlayers((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
+  const weekdayLabel = (weekday: IsoWeekday) =>
+    capitalize(weekdayName(weekday, names.weekdays), locale);
+  const longDate = (date: CivilDate) => capitalize(formatLongDate(t, names, date), locale);
+  const dateHint = (text: string) => {
+    const date = parseDateInput(text);
+    return date ? longDate(date) : undefined;
   };
+  const deadlineDays = (days: number) =>
+    days === 0
+      ? t("new_slot.deadline_same_day")
+      : days === 1
+      ? t("new_slot.deadline_day_before")
+      : t("new_slot.deadline_days_before", { count: days });
 
-  const toggleSelected = (id: string) => {
-    setPlayers((prev) => prev.map((p) => (p.id === id ? { ...p, selected: !p.selected } : p)));
-  };
-
-  const goNext = () => setCurrentStep((s) => (s < STEPS.length - 1 ? s + 1 : s));
-
-  const goBack = () => setCurrentStep((s) => (s > 0 ? s - 1 : s));
-
-  const isLastStep = currentStep === STEPS.length - 1;
-
-  const nextLabel = useMemo(() => {
-    if (isLastStep) return t("new_slot.cta_create");
-    if (currentStep === 2 && players.length === 0) return t("new_slot.cta_skip");
-    return t("new_slot.cta_continue");
-  }, [currentStep, isLastStep, players.length, t]);
-
-  const handleConfirm = () => {
-    router.replace("/(tabs)/slot");
-  };
+  const anchor = draft && today ? firstSession(draft, today) : null;
+  const choices = draft && today ? firstSessionChoices(draft, today) : [];
+  const createError = createSlot.isError ? slotErrorMessage(createSlot.error) : null;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -140,7 +260,7 @@ export default function NewSlotScreen() {
         testID="new-slot-screen"
       >
         <ScreenHeader
-          backLabel={currentStep > 0 ? t("common.back") : undefined}
+          backLabel={stepIndex > 0 ? t("common.back") : undefined}
           onBack={goBack}
           title={t("slot.new")}
           subtitle={t("new_slot.subtitle")}
@@ -149,33 +269,27 @@ export default function NewSlotScreen() {
         <View style={styles.body}>
           {/* ── Step indicator ── */}
           <View style={styles.stepsRow}>
-            {STEPS.map((step, index) => (
-              <View key={step} style={styles.stepItem}>
+            {WIZARD_STEPS.map((name, index) => (
+              <View key={name} style={styles.stepItem}>
                 <View
                   style={[
                     styles.stepCircle,
-                    index === currentStep ? styles.stepCircleActive : null,
-                    index < currentStep ? styles.stepCircleDone : null,
+                    index === stepIndex ? styles.stepCircleActive : null,
+                    index < stepIndex ? styles.stepCircleDone : null,
                   ]}
                 >
-                  {index < currentStep ? <Check color={colors.red} size={14} /> : (
+                  {index < stepIndex ? <Check color={colors.red} size={14} /> : (
                     <Text
-                      style={[
-                        styles.stepText,
-                        index === currentStep ? styles.stepTextActive : null,
-                      ]}
+                      style={[styles.stepText, index === stepIndex ? styles.stepTextActive : null]}
                     >
                       {index + 1}
                     </Text>
                   )}
                 </View>
                 <Text
-                  style={[
-                    styles.stepLabel,
-                    index === currentStep ? styles.stepLabelActive : null,
-                  ]}
+                  style={[styles.stepLabel, index === stepIndex ? styles.stepLabelActive : null]}
                 >
-                  {t(`new_slot.step_${step}`)}
+                  {t(`new_slot.step_${name}`)}
                 </Text>
               </View>
             ))}
@@ -183,379 +297,427 @@ export default function NewSlotScreen() {
 
           {/* ── Form card ── */}
           <View style={styles.formCard}>
-            {/* STEP 0 — Période */}
-            {currentStep === 0 && (
-              <>
-                <Text style={styles.stepHeading}>{t("new_slot.period_heading")}</Text>
-
-                <Text style={styles.label}>{t("new_slot.label_season")}</Text>
-                <TextInput
-                  {...seasonFocus.focusProps}
-                  value={season}
-                  onChangeText={setSeasonName}
-                  style={[styles.input, seasonFocus.inputStyle, seasonFocus.focusStyle]}
-                  testID="input-season-name"
-                />
-
-                <Text style={styles.label}>{t("new_slot.label_start")}</Text>
-                <TextInput
-                  {...startFocus.focusProps}
-                  value={start}
-                  onChangeText={setStartDate}
-                  style={[styles.input, startFocus.inputStyle, startFocus.focusStyle]}
-                  placeholder={t("new_slot.placeholder_example", { value: defaultStart })}
-                  placeholderTextColor={colors.placeholder}
-                  testID="input-start-date"
-                />
-
-                <Text style={styles.label}>{t("new_slot.label_end")}</Text>
-                <TextInput
-                  {...endFocus.focusProps}
-                  value={end}
-                  onChangeText={setEndDate}
-                  style={[styles.input, endFocus.inputStyle, endFocus.focusStyle]}
-                  placeholder={t("new_slot.placeholder_example", { value: defaultEnd })}
-                  placeholderTextColor={colors.placeholder}
-                  testID="input-end-date"
-                />
-
-                <View style={styles.previewBox}>
-                  <CalendarClock color={colors.red} size={16} />
-                  <Text style={styles.previewText}>
-                    {season || "—"} · {start || "?"} → {end || "?"}
-                  </Text>
+            {!draft || !today
+              ? (
+                <View style={styles.centered}>
+                  <ActivityIndicator color={colors.red} accessibilityLabel={t("common.loading")} />
                 </View>
-              </>
-            )}
+              )
+              : (
+                <>
+                  {/* STEP 1 — Créneau */}
+                  {step === "slot" && (
+                    <>
+                      <Text style={styles.stepHeading}>{t("new_slot.slot_heading")}</Text>
 
-            {/* STEP 1 — Fréquence */}
-            {currentStep === 1 && (
-              <>
-                <Text style={styles.stepHeading}>{t("new_slot.frequency_heading")}</Text>
-
-                <Text style={styles.label}>{t("new_slot.label_weekday")}</Text>
-                <View style={styles.chipsWrap}>
-                  {WEEKDAYS.map((day) => (
-                    <PressableScale
-                      key={day}
-                      onPress={() => setWeekday(day)}
-                      accessibilityRole="button"
-                      accessibilityLabel={formats.weekday.format(weekdayDate(day))}
-                    >
-                      <View
-                        style={[
-                          styles.chip,
-                          day === weekday ? styles.chipActive : null,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.chipText,
-                            day === weekday ? styles.chipTextActive : null,
-                          ]}
-                        >
-                          {capitalize(formats.weekdayShort.format(weekdayDate(day)), locale)}
-                        </Text>
-                      </View>
-                    </PressableScale>
-                  ))}
-                </View>
-
-                <Text style={styles.label}>{t("new_slot.label_time")}</Text>
-                <View style={styles.timeRow}>
-                  <TextInput
-                    {...timeFromFocus.focusProps}
-                    value={timeFrom}
-                    onChangeText={setTimeFrom}
-                    style={[
-                      styles.input,
-                      styles.inputHalf,
-                      timeFromFocus.inputStyle,
-                      timeFromFocus.focusStyle,
-                    ]}
-                    placeholder="18:00"
-                    placeholderTextColor={colors.placeholder}
-                    testID="input-time-from"
-                  />
-                  <Text style={styles.timeSep}>→</Text>
-                  <TextInput
-                    {...timeToFocus.focusProps}
-                    value={timeTo}
-                    onChangeText={setTimeTo}
-                    style={[
-                      styles.input,
-                      styles.inputHalf,
-                      timeToFocus.inputStyle,
-                      timeToFocus.focusStyle,
-                    ]}
-                    placeholder="20:00"
-                    placeholderTextColor={colors.placeholder}
-                    testID="input-time-to"
-                  />
-                </View>
-
-                <Text style={styles.label}>{t("new_slot.label_venue")}</Text>
-                <View style={[styles.inputWithIcon, venueFocus.focusStyle]}>
-                  <MapPin color={colors.muted} size={16} />
-                  <TextInput
-                    {...venueFocus.focusProps}
-                    value={venue}
-                    onChangeText={setVenue}
-                    style={[styles.inputFlexible, venueFocus.inputStyle]}
-                    placeholder={t("new_slot.placeholder_venue")}
-                    placeholderTextColor={colors.placeholder}
-                    testID="input-venue"
-                  />
-                </View>
-
-                <View style={styles.previewBox}>
-                  <CalendarClock color={colors.red} size={16} />
-                  <Text style={styles.previewText}>
-                    {`${weekdayLabel} · ${timeFrom || "?"} – ${timeTo || "?"}`}
-                  </Text>
-                </View>
-              </>
-            )}
-
-            {/* STEP 2 — Joueurs */}
-            {currentStep === 2 && (
-              <>
-                <Text style={styles.stepHeading}>
-                  {t("new_slot.players_heading", { total: players.length })}
-                </Text>
-
-                <View style={[styles.inputWithIcon, playerFocus.focusStyle]}>
-                  <TextInput
-                    {...playerFocus.focusProps}
-                    ref={playerInputRef}
-                    value={newPlayerName}
-                    onChangeText={setNewPlayerName}
-                    style={[styles.inputFlexible, playerFocus.inputStyle]}
-                    placeholder={t("new_slot.placeholder_player")}
-                    placeholderTextColor={colors.placeholder}
-                    onSubmitEditing={addPlayer}
-                    returnKeyType="done"
-                    testID="input-player-name"
-                  />
-                  <PressableScale
-                    onPress={addPlayer}
-                    accessibilityRole="button"
-                    accessibilityLabel={t("new_slot.add_player")}
-                  >
-                    <View style={styles.addBtn}>
-                      <Plus color={colors.onRedStrong} size={16} />
-                    </View>
-                  </PressableScale>
-                </View>
-
-                {players.length === 0 && (
-                  <Text style={styles.emptyHint}>{t("new_slot.players_hint")}</Text>
-                )}
-
-                {players.map((p) => (
-                  <View key={p.id} style={styles.playerRow}>
-                    <View style={styles.playerInitial}>
-                      <Text style={styles.playerInitialText}>{p.name.charAt(0)}</Text>
-                    </View>
-                    <Text style={styles.playerName} numberOfLines={1}>
-                      {p.name}
-                    </Text>
-                    <PressableScale
-                      onPress={() => removePlayer(p.id)}
-                      accessibilityRole="button"
-                      accessibilityLabel={t("new_slot.remove_player", { name: p.name })}
-                    >
-                      <View style={styles.removeBtn}>
-                        <X color={colors.muted} size={14} />
-                      </View>
-                    </PressableScale>
-                  </View>
-                ))}
-              </>
-            )}
-
-            {/* STEP 3 — Statuts */}
-            {currentStep === 3 && (
-              <>
-                <Text style={styles.stepHeading}>{t("new_slot.statuses_heading")}</Text>
-                <Text style={styles.stepHint}>{t("new_slot.statuses_hint")}</Text>
-
-                {players.length === 0 && (
-                  <Text style={styles.emptyHint}>{t("new_slot.no_players")}</Text>
-                )}
-
-                {players.map((p) => (
-                  <View key={p.id} style={styles.statusRow}>
-                    <View style={styles.playerInitial}>
-                      <Text style={styles.playerInitialText}>{p.name.charAt(0)}</Text>
-                    </View>
-                    <Text style={styles.playerName} numberOfLines={1}>
-                      {p.name}
-                    </Text>
-                    <View style={styles.statusChips}>
-                      {STATUSES.map((status) => (
-                        <PressableScale
-                          key={status}
-                          onPress={() => setStatus(p.id, status)}
-                          accessibilityRole="button"
-                          accessibilityLabel={t(`slot.status.${status}`)}
-                          accessibilityState={{ selected: p.status === status }}
-                        >
-                          <View
-                            style={[
-                              styles.statusChip,
-                              p.status === status
-                                ? styles.statusChipActive
-                                : null,
-                            ]}
-                          >
-                            <Text
-                              style={[
-                                styles.statusChipText,
-                                p.status === status
-                                  ? styles.statusChipTextActive
-                                  : null,
-                              ]}
-                            >
-                              {t(`slot.status.${status}`)}
-                            </Text>
-                          </View>
-                        </PressableScale>
-                      ))}
-                    </View>
-                  </View>
-                ))}
-              </>
-            )}
-
-            {/* STEP 4 — Sélection */}
-            {currentStep === 4 && (
-              <>
-                <Text style={styles.stepHeading}>
-                  {t("new_slot.selection_heading", {
-                    total: players.filter((p) => p.selected).length,
-                  })}
-                </Text>
-                <Text style={styles.stepHint}>{t("new_slot.selection_hint")}</Text>
-
-                {players.length === 0 && (
-                  <Text style={styles.emptyHint}>{t("new_slot.no_players")}</Text>
-                )}
-
-                {players.map((p) => (
-                  <PressableScale
-                    key={p.id}
-                    onPress={() => toggleSelected(p.id)}
-                    accessibilityRole="button"
-                    accessibilityLabel={p.name}
-                    accessibilityState={{ selected: p.selected }}
-                  >
-                    <View
-                      style={[
-                        styles.selectionRow,
-                        p.selected ? styles.selectionRowActive : null,
-                      ]}
-                    >
-                      <View
-                        style={[
-                          styles.playerInitial,
-                          p.selected ? styles.playerInitialSelected : null,
-                        ]}
-                      >
-                        {p.selected
-                          ? <UserCheck color={colors.cream} size={16} />
-                          : <Text style={styles.playerInitialText}>{p.name.charAt(0)}</Text>}
-                      </View>
-                      <Text
-                        style={[
-                          styles.playerName,
-                          p.selected ? styles.playerNameSelected : null,
-                        ]}
-                        numberOfLines={1}
-                      >
-                        {p.name}
-                      </Text>
-                      <StatusPill
-                        label={t(`slot.status.${p.status}`)}
-                        tone={STATUS_TONES[p.status]}
-                      />
-                    </View>
-                  </PressableScale>
-                ))}
-              </>
-            )}
-
-            {/* STEP 5 — Résumé */}
-            {currentStep === 5 && (
-              <>
-                <Text style={styles.stepHeading}>{t("new_slot.summary_heading")}</Text>
-
-                <View style={styles.summarySection}>
-                  <Text style={styles.summaryLabel}>{t("new_slot.summary_season")}</Text>
-                  <Text style={styles.summaryValue}>{season || "—"}</Text>
-                  <Text style={styles.summaryMeta}>
-                    {`${start || "?"} → ${end || "?"}`}
-                  </Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.summarySection}>
-                  <Text style={styles.summaryLabel}>{t("new_slot.summary_slot")}</Text>
-                  <Text style={styles.summaryValue}>
-                    {`${weekdayLabel} · ${timeFrom}–${timeTo}`}
-                  </Text>
-                  <View style={styles.summaryRow}>
-                    <MapPin color={colors.muted} size={13} />
-                    <Text style={styles.summaryMeta}>{venue || "—"}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.summarySection}>
-                  <Text style={styles.summaryLabel}>
-                    {t("new_slot.summary_players", { total: players.length })}
-                  </Text>
-                  <View style={styles.summaryPlayers}>
-                    {players.map((p) => (
-                      <View key={p.id} style={styles.summaryPlayer}>
-                        <Text style={styles.summaryPlayerName} numberOfLines={1}>
-                          {p.name}
-                        </Text>
-                        <StatusPill
-                          label={t(`slot.status.${p.status}`)}
-                          tone={STATUS_TONES[p.status]}
+                      <Field label={t("new_slot.label_name")} error={errorText(errors.name)}>
+                        <TextInput
+                          {...nameFocus.focusProps}
+                          value={draft.name}
+                          onChangeText={(name) => update({ name })}
+                          style={[styles.input, nameFocus.inputStyle, nameFocus.focusStyle]}
+                          placeholder={t("new_slot.placeholder_name")}
+                          placeholderTextColor={colors.placeholder}
+                          maxLength={LIMITS.name * 2}
+                          testID="input-slot-name"
                         />
-                        {p.selected && <UserCheck color={colors.green} size={14} />}
-                      </View>
-                    ))}
-                    {players.length === 0 && (
-                      <Text style={styles.emptyHint}>{t("new_slot.summary_no_players")}</Text>
-                    )}
-                  </View>
-                </View>
-              </>
-            )}
+                      </Field>
 
-            {/* ── CTA ── */}
-            <PressableScale
-              onPress={isLastStep ? handleConfirm : goNext}
-              testID="new-slot-continue"
-              accessibilityRole="button"
-              accessibilityLabel={nextLabel}
-            >
-              <View style={styles.ctaButton}>
-                <Text style={styles.ctaText}>{nextLabel}</Text>
-                {isLastStep
-                  ? <Check color={colors.ink} size={18} />
-                  : <ChevronRight color={colors.ink} size={18} />}
-              </View>
-            </PressableScale>
+                      <Field label={t("new_slot.label_venue")} error={errorText(errors.venue)}>
+                        <View style={[styles.inputWithIcon, venueFocus.focusStyle]}>
+                          <MapPin color={colors.muted} size={16} />
+                          <TextInput
+                            {...venueFocus.focusProps}
+                            value={draft.venue}
+                            onChangeText={(venue) => update({ venue })}
+                            style={[styles.inputFlexible, venueFocus.inputStyle]}
+                            placeholder={t("new_slot.placeholder_venue")}
+                            placeholderTextColor={colors.placeholder}
+                            maxLength={LIMITS.venue * 2}
+                            testID="input-venue"
+                          />
+                        </View>
+                      </Field>
+
+                      <Field label={t("new_slot.label_specialty")}>
+                        <Choices
+                          label={t("new_slot.label_specialty")}
+                          options={SPECIALTIES}
+                          value={draft.specialty}
+                          onChange={(specialty) => update({ specialty })}
+                          render={(value) => t(`slot.specialty.${value}`)}
+                        />
+                      </Field>
+
+                      <Field label={t("new_slot.label_court")}>
+                        <Choices
+                          label={t("new_slot.label_court")}
+                          options={COURTS}
+                          value={draft.court}
+                          onChange={(court) => update({ court })}
+                          render={(value) => t(`slot.court.${value}`)}
+                        />
+                      </Field>
+                    </>
+                  )}
+
+                  {/* STEP 2 — Fréquence */}
+                  {step === "frequency" && (
+                    <>
+                      <Text style={styles.stepHeading}>{t("new_slot.frequency_heading")}</Text>
+
+                      <Text style={styles.sectionLabel}>{t("new_slot.label_season")}</Text>
+                      <Field
+                        label={t("new_slot.label_start")}
+                        hint={dateHint(draft.seasonStart)}
+                        error={errorText(errors.seasonStart)}
+                      >
+                        <TextInput
+                          {...startFocus.focusProps}
+                          value={draft.seasonStart}
+                          onChangeText={(seasonStart) => update({ seasonStart })}
+                          style={[styles.input, startFocus.inputStyle, startFocus.focusStyle]}
+                          placeholder={t("new_slot.placeholder_example", { value: "01/09/2026" })}
+                          placeholderTextColor={colors.placeholder}
+                          keyboardType="numbers-and-punctuation"
+                          testID="input-season-start"
+                        />
+                      </Field>
+                      <Field
+                        label={t("new_slot.label_end")}
+                        hint={dateHint(draft.seasonEnd)}
+                        error={errorText(errors.seasonEnd)}
+                      >
+                        <TextInput
+                          {...endFocus.focusProps}
+                          value={draft.seasonEnd}
+                          onChangeText={(seasonEnd) => update({ seasonEnd })}
+                          style={[styles.input, endFocus.inputStyle, endFocus.focusStyle]}
+                          placeholder={t("new_slot.placeholder_example", { value: "30/06/2027" })}
+                          placeholderTextColor={colors.placeholder}
+                          keyboardType="numbers-and-punctuation"
+                          testID="input-season-end"
+                        />
+                      </Field>
+
+                      <Field label={t("new_slot.label_weekday")}>
+                        <Choices
+                          label={t("new_slot.label_weekday")}
+                          options={ISO_WEEKDAYS}
+                          value={draft.weekday}
+                          onChange={(weekday) => update({ weekday })}
+                          render={(day) =>
+                            capitalize(weekdayName(day, names.weekdaysShort), locale)}
+                          describe={weekdayLabel}
+                        />
+                      </Field>
+
+                      <Field label={t("new_slot.label_interval")}>
+                        <Choices
+                          label={t("new_slot.label_interval")}
+                          options={INTERVALS}
+                          value={draft.intervalWeeks}
+                          onChange={(intervalWeeks) => update({ intervalWeeks })}
+                          render={(weeks) =>
+                            weeks === 2
+                              ? t("slot.interval.fortnightly")
+                              : t("slot.interval.weekly")}
+                        />
+                      </Field>
+
+                      <Field
+                        label={t("new_slot.label_first_session")}
+                        error={errorText(errors.anchorDate)}
+                      >
+                        {choices.length > 1 && anchor
+                          ? (
+                            <Choices
+                              label={t("new_slot.label_first_session")}
+                              options={choices.map(toIsoDate)}
+                              value={toIsoDate(anchor)}
+                              onChange={(anchorDate) => update({ anchorDate })}
+                              render={(iso) => {
+                                const date = choices.find((d) => toIsoDate(d) === iso);
+                                return date ? capitalize(formatDay(t, names, date), locale) : iso;
+                              }}
+                            />
+                          )
+                          : (
+                            <Text style={styles.valueText}>
+                              {anchor ? longDate(anchor) : "—"}
+                            </Text>
+                          )}
+                      </Field>
+
+                      <Field
+                        label={t("new_slot.label_time")}
+                        error={errorText(errors.timeFrom ?? errors.timeTo)}
+                      >
+                        <View style={styles.timeRow}>
+                          <TextInput
+                            {...timeFromFocus.focusProps}
+                            value={draft.timeFrom}
+                            onChangeText={(timeFrom) => update({ timeFrom })}
+                            style={[
+                              styles.input,
+                              styles.inputHalf,
+                              timeFromFocus.inputStyle,
+                              timeFromFocus.focusStyle,
+                            ]}
+                            placeholder="18:00"
+                            placeholderTextColor={colors.placeholder}
+                            keyboardType="numbers-and-punctuation"
+                            testID="input-time-from"
+                          />
+                          <Text style={styles.timeSep}>→</Text>
+                          <TextInput
+                            {...timeToFocus.focusProps}
+                            value={draft.timeTo}
+                            onChangeText={(timeTo) => update({ timeTo })}
+                            style={[
+                              styles.input,
+                              styles.inputHalf,
+                              timeToFocus.inputStyle,
+                              timeToFocus.focusStyle,
+                            ]}
+                            placeholder="20:00"
+                            placeholderTextColor={colors.placeholder}
+                            keyboardType="numbers-and-punctuation"
+                            testID="input-time-to"
+                          />
+                        </View>
+                      </Field>
+
+                      <View style={styles.previewBox}>
+                        <CalendarClock color={colors.red} size={16} />
+                        <Text style={styles.previewText}>{t("new_slot.fixed_hint")}</Text>
+                      </View>
+                    </>
+                  )}
+
+                  {/* STEP 3 — Joueurs */}
+                  {step === "players" && (
+                    <>
+                      <Text style={styles.stepHeading}>{t("new_slot.players_heading")}</Text>
+
+                      <Field
+                        label={t("new_slot.label_min_players")}
+                        hint={t("new_slot.min_players_hint")}
+                        error={errorText(errors.minPlayers)}
+                      >
+                        <Stepper
+                          label={t("new_slot.label_min_players")}
+                          value={draft.minPlayers}
+                          min={1}
+                          max={LIMITS.players}
+                          onChange={(value) => setDraft(withMinPlayers(draft, value))}
+                        />
+                      </Field>
+
+                      <Field
+                        label={t("new_slot.label_places")}
+                        error={errorText(errors.places)}
+                      >
+                        <Stepper
+                          label={t("new_slot.label_places")}
+                          value={draft.places}
+                          min={draft.minPlayers}
+                          max={LIMITS.players}
+                          onChange={(value) => setDraft(withPlaces(draft, value))}
+                        />
+                      </Field>
+
+                      <Field
+                        label={t("new_slot.label_deadline")}
+                        hint={t("new_slot.deadline_at", {
+                          day: deadlineDays(draft.deadlineDaysBefore),
+                          time: parseTimeInput(draft.deadlineTime) ?? draft.deadlineTime,
+                        })}
+                        error={errorText(errors.deadlineDaysBefore ?? errors.deadlineTime)}
+                      >
+                        <Stepper
+                          label={t("new_slot.label_deadline")}
+                          value={draft.deadlineDaysBefore}
+                          min={0}
+                          max={LIMITS.deadlineDaysBefore}
+                          onChange={(deadlineDaysBefore) => update({ deadlineDaysBefore })}
+                          display={deadlineDays(draft.deadlineDaysBefore)}
+                        />
+                        <TextInput
+                          {...deadlineFocus.focusProps}
+                          value={draft.deadlineTime}
+                          onChangeText={(deadlineTime) => update({ deadlineTime })}
+                          style={[styles.input, deadlineFocus.inputStyle, deadlineFocus.focusStyle]}
+                          placeholder="20:00"
+                          placeholderTextColor={colors.placeholder}
+                          accessibilityLabel={`${t("new_slot.label_deadline")}, ${
+                            t("new_slot.label_time")
+                          }`}
+                          keyboardType="numbers-and-punctuation"
+                          testID="input-deadline-time"
+                        />
+                      </Field>
+
+                      <Field
+                        label={t("new_slot.label_organizer")}
+                        hint={t("new_slot.organizer_hint")}
+                        error={errorText(errors.organizerName)}
+                      >
+                        <TextInput
+                          {...organizerFocus.focusProps}
+                          value={draft.organizerName}
+                          onChangeText={(organizerName) => update({ organizerName })}
+                          style={[
+                            styles.input,
+                            organizerFocus.inputStyle,
+                            organizerFocus.focusStyle,
+                          ]}
+                          placeholder={t("new_slot.placeholder_organizer")}
+                          placeholderTextColor={colors.placeholder}
+                          autoComplete="given-name"
+                          maxLength={LIMITS.organizerName * 2}
+                          testID="input-organizer-name"
+                        />
+                      </Field>
+                    </>
+                  )}
+
+                  {/* STEP 4 — Résumé */}
+                  {step === "summary" && (
+                    <Summary
+                      draft={draft}
+                      anchor={anchor}
+                      longDate={longDate}
+                      weekdayLabel={weekdayLabel}
+                      deadlineDays={deadlineDays}
+                    />
+                  )}
+
+                  {createError && isLastStep && (
+                    <View style={styles.errorBox} accessibilityRole="alert">
+                      <Text style={styles.errorTitle}>{t("new_slot.create_error")}</Text>
+                      <Text style={styles.errorDetail}>
+                        {t(createError.key, createError.params)}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* ── CTA ── */}
+                  <PressableScale
+                    onPress={isLastStep ? onCreate : onContinue}
+                    testID="new-slot-continue"
+                    accessibilityRole="button"
+                    accessibilityLabel={isLastStep
+                      ? t(createSlot.isPending ? "new_slot.cta_creating" : "new_slot.cta_create")
+                      : t("new_slot.cta_continue")}
+                    aria-busy={createSlot.isPending}
+                  >
+                    <View style={styles.ctaButton}>
+                      <Text style={styles.ctaText}>
+                        {isLastStep
+                          ? t(
+                            createSlot.isPending ? "new_slot.cta_creating" : "new_slot.cta_create",
+                          )
+                          : t("new_slot.cta_continue")}
+                      </Text>
+                      {createSlot.isPending
+                        ? <ActivityIndicator color={colors.ink} size="small" />
+                        : isLastStep
+                        ? <Check color={colors.ink} size={18} />
+                        : <ChevronRight color={colors.ink} size={18} />}
+                    </View>
+                  </PressableScale>
+                </>
+              )}
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function Summary(
+  { draft, anchor, longDate, weekdayLabel, deadlineDays }: {
+    draft: SlotDraft;
+    anchor: CivilDate | null;
+    longDate: (date: CivilDate) => string;
+    weekdayLabel: (weekday: IsoWeekday) => string;
+    deadlineDays: (days: number) => string;
+  },
+) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  const start = parseDateInput(draft.seasonStart);
+  const end = parseDateInput(draft.seasonEnd);
+  const season = start && end
+    ? (start.year === end.year ? `${start.year}` : `${start.year}–${end.year}`)
+    : "—";
+  const timeFrom = parseTimeInput(draft.timeFrom) ?? draft.timeFrom;
+  const timeTo = parseTimeInput(draft.timeTo);
+  const interval = draft.intervalWeeks === 2
+    ? t("slot.interval.fortnightly")
+    : t("slot.interval.weekly");
+
+  return (
+    <>
+      <Text style={styles.stepHeading}>{t("new_slot.summary_heading")}</Text>
+
+      <View style={styles.summarySection}>
+        <Text style={styles.summaryLabel}>{t("new_slot.summary_slot")}</Text>
+        <Text style={styles.summaryValue}>{draft.name.trim()}</Text>
+        <Text style={styles.summaryMeta}>
+          {`${t(`slot.specialty.${draft.specialty}`)} · ${t(`slot.court.${draft.court}`)}`}
+        </Text>
+        <View style={styles.summaryRow}>
+          <MapPin color={colors.muted} size={13} />
+          <Text style={styles.summaryMeta}>{draft.venue.trim()}</Text>
+        </View>
+      </View>
+
+      <View style={styles.divider} />
+
+      <View style={styles.summarySection}>
+        <Text style={styles.summaryLabel}>{t("new_slot.summary_season")}</Text>
+        <Text style={styles.summaryValue}>{t("slot.season", { season })}</Text>
+        <Text style={styles.summaryMeta}>
+          {`${start ? longDate(start) : "?"} → ${end ? longDate(end) : "?"}`}
+        </Text>
+        <Text style={styles.summaryMeta}>
+          {`${weekdayLabel(draft.weekday)} · ${
+            timeTo ? `${timeFrom}–${timeTo}` : timeFrom
+          } · ${interval}`}
+        </Text>
+        {anchor && (
+          <Text style={styles.summaryMeta}>
+            {t("new_slot.summary_first_session", { date: longDate(anchor) })}
+          </Text>
+        )}
+      </View>
+
+      <View style={styles.divider} />
+
+      <View style={styles.summarySection}>
+        <Text style={styles.summaryLabel}>{t("new_slot.summary_players")}</Text>
+        <View style={styles.summaryRow}>
+          <Users color={colors.muted} size={13} />
+          <Text style={styles.summaryValueSmall}>
+            {t("new_slot.summary_players_value", { min: draft.minPlayers, places: draft.places })}
+          </Text>
+        </View>
+        <Text style={styles.summaryMeta}>
+          {t("new_slot.summary_deadline", {
+            when: t("new_slot.deadline_at", {
+              day: deadlineDays(draft.deadlineDaysBefore),
+              time: parseTimeInput(draft.deadlineTime) ?? draft.deadlineTime,
+            }),
+          })}
+        </Text>
+        <Text style={styles.summaryMeta}>
+          {t("new_slot.summary_organizer", { name: draft.organizerName.trim() })}
+        </Text>
+      </View>
+    </>
   );
 }
 
@@ -565,6 +727,7 @@ const makeStyles = (c: Palette) =>
     scroll: { backgroundColor: c.cream },
     content: { paddingBottom: 120 },
     body: { paddingHorizontal: 20, paddingTop: 22, gap: 22 },
+    centered: { paddingVertical: 32, alignItems: "center" },
 
     stepsRow: { flexDirection: "row", justifyContent: "space-between", gap: 4 },
     stepItem: { flex: 1, alignItems: "center", gap: 6 },
@@ -603,13 +766,9 @@ const makeStyles = (c: Palette) =>
       fontSize: 20,
       fontWeight: "900",
     },
-    stepHint: {
-      color: c.muted,
-      fontSize: 13,
-      lineHeight: 18,
-      marginTop: -6,
-    },
+    sectionLabel: { color: c.ink, fontSize: 16, fontWeight: "800" },
 
+    field: { gap: 8 },
     label: {
       color: c.muted,
       fontSize: 12,
@@ -617,6 +776,9 @@ const makeStyles = (c: Palette) =>
       textTransform: "uppercase",
       letterSpacing: 1.3,
     },
+    hint: { color: c.muted, fontSize: 13, fontWeight: "600", lineHeight: 18 },
+    fieldError: { color: c.red, fontSize: 13, fontWeight: "700", lineHeight: 18 },
+    valueText: { color: c.ink, fontSize: 16, fontWeight: "700" },
     input: {
       borderRadius: 14,
       borderWidth: 1,
@@ -628,7 +790,9 @@ const makeStyles = (c: Palette) =>
       color: c.ink,
       fontWeight: "600",
     },
-    inputHalf: { flex: 1 },
+    // minWidth 0: on web the <input> keeps its intrinsic width as a flex child, and the two
+    // times overflowed the card on a phone.
+    inputHalf: { flex: 1, minWidth: 0 },
     inputWithIcon: {
       borderRadius: 14,
       borderWidth: 1,
@@ -641,6 +805,7 @@ const makeStyles = (c: Palette) =>
     },
     inputFlexible: {
       flex: 1,
+      minWidth: 0,
       paddingVertical: 14,
       fontSize: 16,
       color: c.ink,
@@ -662,88 +827,29 @@ const makeStyles = (c: Palette) =>
     chipText: { color: c.ink, fontSize: 14, fontWeight: "700" },
     chipTextActive: { color: c.red },
 
-    addBtn: {
-      width: 36,
-      height: 36,
-      borderRadius: 12,
-      backgroundColor: c.redFill,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    emptyHint: {
-      color: c.muted,
-      fontSize: 13,
-      fontStyle: "italic",
-      textAlign: "center",
-      paddingVertical: 8,
-    },
-
-    playerRow: {
+    stepper: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 10,
-      backgroundColor: c.cream,
+      gap: 12,
+    },
+    stepperButton: {
+      width: 44,
+      height: 44,
       borderRadius: 14,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-    },
-    playerInitial: {
-      width: 34,
-      height: 34,
-      borderRadius: 17,
-      backgroundColor: c.redSoft,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    playerInitialText: { color: c.red, fontSize: 14, fontWeight: "900" },
-    playerInitialSelected: { backgroundColor: c.green },
-    playerName: { flex: 1, color: c.ink, fontSize: 15, fontWeight: "700" },
-    playerNameSelected: { color: c.green },
-    removeBtn: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: c.line,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-
-    statusRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      backgroundColor: c.cream,
-      borderRadius: 14,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-    },
-    statusChips: { flexDirection: "row", gap: 6 },
-    statusChip: {
-      borderRadius: 10,
       borderWidth: 1,
       borderColor: c.line,
       backgroundColor: c.white,
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-    },
-    statusChipActive: { backgroundColor: c.ink, borderColor: c.ink },
-    statusChipText: { color: c.muted, fontSize: 12, fontWeight: "700" },
-    statusChipTextActive: { color: c.white },
-
-    selectionRow: {
-      flexDirection: "row",
       alignItems: "center",
-      gap: 10,
-      backgroundColor: c.cream,
-      borderRadius: 14,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      borderWidth: 1,
-      borderColor: "transparent",
+      justifyContent: "center",
     },
-    selectionRowActive: {
-      backgroundColor: c.greenSoft,
-      borderColor: c.greenSoft,
+    stepperButtonOff: { backgroundColor: c.cream },
+    stepperValue: {
+      flex: 1,
+      color: c.ink,
+      fontSize: 17,
+      fontWeight: "800",
+      textAlign: "center",
+      fontVariant: ["tabular-nums"],
     },
 
     previewBox: {
@@ -756,6 +862,17 @@ const makeStyles = (c: Palette) =>
     },
     previewText: { color: c.ink, fontSize: 14, fontWeight: "700", flex: 1 },
 
+    errorBox: {
+      borderRadius: 16,
+      backgroundColor: c.redSoft,
+      padding: 16,
+      gap: 6,
+      borderWidth: 1,
+      borderColor: "rgba(200,16,46,0.2)",
+    },
+    errorTitle: { color: c.red, fontSize: 14, fontWeight: "700" },
+    errorDetail: { color: c.muted, fontSize: 13, fontWeight: "600" },
+
     divider: { height: 1, backgroundColor: c.line },
 
     summarySection: { gap: 6 },
@@ -767,24 +884,9 @@ const makeStyles = (c: Palette) =>
       letterSpacing: 1.2,
     },
     summaryValue: { color: c.ink, fontSize: 17, fontWeight: "900" },
-    summaryMeta: { color: c.muted, fontSize: 13 },
+    summaryValueSmall: { color: c.ink, fontSize: 15, fontWeight: "800" },
+    summaryMeta: { color: c.muted, fontSize: 13, fontWeight: "600" },
     summaryRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-    summaryPlayers: { gap: 8 },
-    summaryPlayer: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      backgroundColor: c.cream,
-      borderRadius: 12,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-    },
-    summaryPlayerName: {
-      flex: 1,
-      color: c.ink,
-      fontSize: 14,
-      fontWeight: "700",
-    },
 
     ctaButton: {
       borderRadius: 16,

@@ -15,6 +15,7 @@ export { default as Info } from "lucide-react-native/dist/cjs/icons/info";
 export { default as LayoutList } from "lucide-react-native/dist/cjs/icons/layout-list";
 export { default as ListOrdered } from "lucide-react-native/dist/cjs/icons/list-ordered";
 export { default as MapPin } from "lucide-react-native/dist/cjs/icons/map-pin";
+export { default as Minus } from "lucide-react-native/dist/cjs/icons/minus";
 export { default as Monitor } from "lucide-react-native/dist/cjs/icons/monitor";
 export { default as Moon } from "lucide-react-native/dist/cjs/icons/moon";
 export { default as Network } from "lucide-react-native/dist/cjs/icons/network";

@@ -19,9 +19,9 @@ export interface Segment<T extends string> {
 
 /**
  * react-native-web presses a Pressable on Enter, and on Space for the button role only: a tab
- * takes Space too, as WAI-ARIA tabs do. Web only, as native keyboards go through the same press.
+ * or a radio takes Space too, as WAI-ARIA tabs and radios do. Web only, as native keyboards go through the same press.
  */
-const selectOnSpace = (select: () => void) =>
+export const selectOnSpace = (select: () => void) =>
   Platform.OS === "web"
     ? {
       onKeyDown: (event: { key: string; preventDefault: () => void }) => {
