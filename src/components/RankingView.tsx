@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ClubLink } from "@/components/ClubLink";
+import { FormSquares } from "@/components/FormSquares";
 import { ChevronDown, ChevronRight, RotateCcw, Trophy } from "@/components/icons";
 import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
@@ -12,8 +13,6 @@ import { GUTTER, TEXT_MAX_WIDTH } from "@/features/layout/breakpoints";
 import {
   buildRanking,
   buildTeamRecords,
-  formLabel,
-  type FormResult,
   phaseLabel,
   playerName,
   type RankingRow,
@@ -58,25 +57,6 @@ function PlayerLink({ player }: { player: RankedPlayer }) {
       <Text style={styles.playerLinkLabel}>{label}</Text>
       <ChevronRight color={colors.muted} size={14} />
     </Pressable>
-  );
-}
-
-// ─── Form ─────────────────────────────────────────────────────────────────────
-
-/** The last results as squares: a win filled green, a loss outlined red, so not by colour alone. */
-function FormSquares({ form }: { form: FormResult[] }) {
-  const { t } = useTranslation();
-  const styles = useThemedStyles(makeStyles);
-
-  return (
-    <View style={styles.form} role="img" accessibilityLabel={formLabel(form, t)}>
-      {form.map((result, i) => (
-        <View
-          key={i}
-          style={[styles.square, result === "W" ? styles.squareWin : styles.squareLoss]}
-        />
-      ))}
-    </View>
   );
 }
 
@@ -416,10 +396,6 @@ const makeStyles = (c: Palette) =>
     recordCell: { alignItems: "flex-end", gap: 4 },
     record: { ...scoreDigits.black, color: c.ink, fontSize: 20, lineHeight: 22 },
     recordNone: { color: c.muted },
-    form: { flexDirection: "row", gap: 3 },
-    square: { width: 10, height: 10, borderRadius: 2 },
-    squareWin: { backgroundColor: c.green },
-    squareLoss: { borderWidth: 2, borderColor: c.red },
     chevron: { width: 16, alignSelf: "center" },
     chevronOpen: { transform: [{ rotate: "180deg" }] },
     // Under the players and the record, from the players' left edge: wraps rather than cuts.

@@ -72,24 +72,24 @@ describe("buildPlayerStats", () => {
     expect(totals.rankings).toBe(4);
   });
 
-  it("gives the best final rank per specialty with its titles, best first", () => {
+  it("gives the best final rank per specialty with its phase and titles, best first", () => {
     const trinquet = { id: "1", name: "Trinquet / Main nue" };
     const placeLibre = { id: "2", name: "Place libre / Grand chistera" };
     const mur = { id: "3", name: "Mur à gauche / Pala corta" };
     const fronton = { id: "4", name: "Fronton / Xare" };
     const { specialties } = buildPlayerStats(ME, [
-      ranking("1", { specialty: trinquet, rank: 3 }),
-      ranking("2", { specialty: mur, rank: 2 }),
-      ranking("3", { specialty: placeLibre, rank: 2 }),
+      ranking("1", { specialty: trinquet, rank: 3, phase: "1/2 finale" }),
+      ranking("2", { specialty: mur, rank: 2, phase: "Finale" }),
+      ranking("3", { specialty: placeLibre, rank: 2, phase: "Finale" }),
       ranking("4", { specialty: placeLibre, rank: 1, competition: SEASON_2025 }),
       ranking("5", { specialty: placeLibre, rank: 1, competition: SEASON_2024 }),
       ranking("6", { specialty: trinquet, rank: 1, final: false, competition: SEASON_2024 }),
       ranking("7", { specialty: fronton, rank: 1, final: false }),
     ]);
     expect(specialties).toEqual([
-      { specialty: placeLibre, bestRank: 1, titles: 2 },
-      { specialty: mur, bestRank: 2, titles: 0 },
-      { specialty: trinquet, bestRank: 3, titles: 0 },
+      { specialty: placeLibre, bestRank: 1, phase: "Champion", titles: 2 },
+      { specialty: mur, bestRank: 2, phase: "Finale", titles: 0 },
+      { specialty: trinquet, bestRank: 3, phase: "1/2 finale", titles: 0 },
     ]);
   });
 
@@ -206,7 +206,7 @@ describe("buildPlayerStats", () => {
         id: "1",
         specialtyName: "Trinquet / Main nue",
         categoryName: "2ème Série",
-        clubName: "Club Ane",
+        club: { id: "1", name: "Club Ane" },
         rank: 1,
         phase: "Finale",
         final: false,
@@ -218,7 +218,7 @@ describe("buildPlayerStats", () => {
         id: "2",
         specialtyName: "Trinquet / Main nue",
         categoryName: "1ère Série",
-        clubName: "Club Ane",
+        club: { id: "1", name: "Club Ane" },
         rank: 5,
         phase: "FORFAIT",
         final: true,

@@ -20,6 +20,8 @@ export interface PlayerTotals {
 export interface SpecialtyBest {
   specialty: Specialty;
   bestRank: number;
+  /** The phase of the most recent ranking at the best rank: raw league-site text. */
+  phase: string;
   titles: number;
 }
 
@@ -35,7 +37,7 @@ export interface HistoryEntry {
   id: string;
   specialtyName: string;
   categoryName: string;
-  clubName: string;
+  club: Club;
   rank: number;
   /** Raw league-site text, shown as is. */
   phase: string;
@@ -100,12 +102,16 @@ export function buildPlayerStats(licence: string, rankings: PlayerRanking[]): Pl
     if (r.final) {
       const best = specialties.get(r.specialty.id);
       if (best) {
-        best.bestRank = Math.min(best.bestRank, r.rank);
+        if (r.rank < best.bestRank) {
+          best.bestRank = r.rank;
+          best.phase = r.phase;
+        }
         if (isTitle) best.titles++;
       } else {
         specialties.set(r.specialty.id, {
           specialty: r.specialty,
           bestRank: r.rank,
+          phase: r.phase,
           titles: isTitle ? 1 : 0,
         });
       }
@@ -130,7 +136,7 @@ export function buildPlayerStats(licence: string, rankings: PlayerRanking[]): Pl
       id: r.id,
       specialtyName: r.specialty.name,
       categoryName: r.category.name,
-      clubName: r.club.name,
+      club: r.club,
       rank: r.rank,
       phase: r.phase,
       final: r.final,
