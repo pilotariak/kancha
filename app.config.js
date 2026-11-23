@@ -65,6 +65,13 @@ module.exports = {
       ],
       "expo-web-browser",
       [
+        // The pik player token (src/api/pik-token.ts). No Face ID prompt, so no usage string; the
+        // Android backup rules keep the token out of Auto Backup, as a restored copy cannot be
+        // decrypted on another device.
+        "expo-secure-store",
+        { faceIDPermission: false },
+      ],
+      [
         // The native splash is the launch screen's redFill (DESIGN.md), light
         // and dark, so start-up shows no cream flash before the red launch screen.
         "expo-splash-screen",

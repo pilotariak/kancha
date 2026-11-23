@@ -140,8 +140,8 @@ We propose _option 3_, with these rules:
   restores the token without an organizer. It is optional, not a step of the flow. The token sits in the URL fragment,
   which the browser does not send to the server or its logs. The link works like a password: it is never posted in the
   group chat.
-- **Storage.** The app keeps the token in secure storage on native. On the web, it is an `HttpOnly` cookie if
-  [ADR-0004](0004-serve-the-slots-api-under-the-kancha-web-origin.md) is accepted, browser storage otherwise.
+- **Storage.** The app keeps the token in secure storage on native. On the web, it is an `HttpOnly` cookie set by pik
+  ([ADR-0004](0004-call-pik-on-its-own-origin-from-the-web-build.md)), or browser storage if Safari does not keep it.
 - **The organizer stays in charge of the list.** An organizer can close the list, release a name, rotate the invite
   code and answer for a member who never joined.
 - **Rate limits.** pik rate-limits slot creation, name claims and the use of recovery links.
@@ -172,7 +172,7 @@ We propose _option 3_, with these rules:
 ## References
 
 - [ADR-0001: Call a dedicated slots service next to Frontis](0001-call-a-dedicated-slots-service.md)
-- [ADR-0004: Serve the slots API under the Kancha web origin](0004-serve-the-slots-api-under-the-kancha-web-origin.md)
+- [ADR-0004: Call pik on its own origin from the web build](0004-call-pik-on-its-own-origin-from-the-web-build.md)
 - [pik: the slots service](https://github.com/pilotariak/pik)
 - [WebKit: Full Third-Party Cookie Blocking and More (7-day cap on script-writable storage)](https://webkit.org/blog/10218/full-third-party-cookie-blocking-and-more/)
 - [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)

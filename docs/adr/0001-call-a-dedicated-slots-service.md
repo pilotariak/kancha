@@ -68,8 +68,8 @@ Worker and a D1 database in their own repository.
 **Cons:**
 
 - ❌ A second base URL to configure per environment, and a second source of network errors.
-- ❌ If the web build calls pik on its own origin, pik must allow `https://kancha.pilotariak.com` through CORS.
-  [ADR-0004](0004-serve-the-slots-api-under-the-kancha-web-origin.md) proposes to avoid this.
+- ❌ The web build calls pik on its own origin, so pik must allow `https://kancha.pilotariak.com` through CORS
+  ([ADR-0004](0004-call-pik-on-its-own-origin-from-the-web-build.md)).
 
 ### 4. An external tool
 
@@ -105,8 +105,8 @@ Kancha keeps reading competition data from Frontis only.
   does not recompute them, so the date logic lives in one place.
 - ↔️ Drawing the pairs for a session stays a pure function in Kancha, tested like `features/score`. pik only stores
   the result.
-- ↔️ Where the web build reaches pik, on its own origin or under `kancha.pilotariak.com/api`, is decided in
-  [ADR-0004](0004-serve-the-slots-api-under-the-kancha-web-origin.md).
+- ↔️ The web build reaches pik on its own origin, like the native app: see
+  [ADR-0004](0004-call-pik-on-its-own-origin-from-the-web-build.md).
 
 ## References
 
@@ -114,5 +114,5 @@ Kancha keeps reading competition data from Frontis only.
 - [pik: the slots service](https://github.com/pilotariak/pik)
 - [ADR-0002: Identify slot players without accounts](0002-identify-slot-players-without-accounts.md)
 - [ADR-0003: Use share messages instead of push notifications for slots](0003-use-share-messages-instead-of-push-notifications.md)
-- [ADR-0004: Serve the slots API under the Kancha web origin](0004-serve-the-slots-api-under-the-kancha-web-origin.md)
+- [ADR-0004: Call pik on its own origin from the web build](0004-call-pik-on-its-own-origin-from-the-web-build.md)
 - [#77: hide the Créneaux tab until the screen ships](https://github.com/pilotariak/kancha/issues/77)

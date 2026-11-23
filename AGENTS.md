@@ -29,6 +29,33 @@ kancha/
 
 Data comes from **Frontis** (GraphQL gateway at `https://frontis-gateway.pilotariak.com/graphql`).
 
+Slot data (the Créneaux tab) comes from **[pik](https://github.com/pilotariak/pik)**, a REST API under
+`/api/v1`, apart from Frontis (ADR-0001 in #154):
+
+- `src/api/pik-client.ts` is the client, `src/api/pik.ts` wires it, `src/hooks/use-slots.ts` holds the
+  TanStack Query hooks, and `src/features/slots/` the pure logic (wizard rules, dates, problem messages).
+- `EXPO_PUBLIC_PIK_URL` is pik's origin, without `/api/v1` (the client appends it):
+  `https://pik.pilotariak.com` in production, `http://localhost:8787` in development. The native app
+  and the web build both call it. On the web the call is cross-origin with `credentials: "include"`:
+  pik must answer CORS for the Kancha origin (`http://localhost:8081` in development), and accept it
+  for cookie writes (pilotariak/pik#18, ADR-0004). Until then, the web build gets a network error.
+- The native app keeps the player token in `expo-secure-store` and sends it as `Authorization: Bearer`;
+  the web build relies on pik's `HttpOnly` cookie. Never log a token, an `Idempotency-Key` or slot data.
+- Errors are `application/problem+json`: `src/features/slots/errors.ts` maps each `type` to a message in
+  `slot.errors`. The list of types comes from pik's `src/api/problem.rs`: `openapi.json` names them by
+  their Rust variant instead of the URI pik sends.
+- `src/api/pik-openapi.ts` is generated from pik's OpenAPI contract, at the pik commit pinned in the
+  `pik:types` script of `package.json` (pik has no release yet). Never edit it by hand:
+
+```bash
+bun run pik:types                                      # from the pinned pik commit on GitHub
+PIK_OPENAPI=<path or URL of openapi.json> bun run pik:types   # from another contract
+```
+
+To try the slots against a local pik, run it from its clone (`make migrate-local`, then `make dev`) and
+point `EXPO_PUBLIC_PIK_URL` at `http://localhost:8787` (`http://10.0.2.2:8787` from the Android
+emulator). Never create test slots on `https://pik.pilotariak.com`: it holds real players' data.
+
 ## Dev Setup
 
 Requirements: [Bun](https://bun.sh) ≥ 1.1, [Expo CLI](https://docs.expo.dev/get-started/installation/)
@@ -85,7 +112,9 @@ make cf-deploy-web                      # deploy to Cloudflare Pages (project: k
 
 - **TypeScript** throughout; strict mode enabled
 - **Expo Router** file-based routing — add screens by creating files in `src/app/`
-- **i18n**: translation keys in `src/locales/`; always use `useTranslation()` for user-facing strings
+- **i18n**: translation keys in `src/i18n/locales/` (en, fr, es, eu); always use `useTranslation()` for
+  user-facing strings. Chrome's Intl has no Basque names: the slot screens name weekdays and months from
+  `slot.date`, not `Intl.DateTimeFormat`
 - **Data fetching**: use TanStack Query hooks — don't call GraphQL directly from components
 - Formatting: `dprint` (config in `dprint.json`)
 - Design system documented in `DESIGN.md`

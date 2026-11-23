@@ -8,7 +8,8 @@
     "base": {
       "bun": "1.3.10",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://frontis-gateway.nicolas-lamirault.workers.dev"
+        "EXPO_PUBLIC_API_URL": "https://frontis-gateway.nicolas-lamirault.workers.dev",
+        "EXPO_PUBLIC_PIK_URL": "http://localhost:8787"
       }
     },
     "development": {
@@ -35,7 +36,8 @@
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://frontis-gateway.pilotariak.com"
+        "EXPO_PUBLIC_API_URL": "https://frontis-gateway.pilotariak.com",
+        "EXPO_PUBLIC_PIK_URL": "https://pik.pilotariak.com"
       }
     }
   },
