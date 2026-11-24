@@ -79,6 +79,8 @@
     "matches_count_one": "{{count}} partie",
     "matches_count_other": "{{count}} parties",
     "date_to_come": "Date à venir",
+    "pool": "Poule {{number}}",
+    "pool_phase": "Phase {{number}}",
     "view_list": "Liste",
     "view_bracket": "Tableau",
     "view_ranking": "Classement",
@@ -121,7 +123,7 @@
     "pool_day": "{{matches}} le {{date}}"
   },
   "rounds_match": {
-    "P": "Poule {{number}}",
+    "P": "Phase de poules",
     "B1T": "Barrage 1er tour {{number}}",
     "B2T": "Barrage 2e tour {{number}}",
     "B3T": "Barrage 3e tour {{number}}",

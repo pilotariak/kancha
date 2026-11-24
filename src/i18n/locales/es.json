@@ -79,6 +79,8 @@
     "matches_count_one": "{{count}} partido",
     "matches_count_other": "{{count}} partidos",
     "date_to_come": "Fecha por confirmar",
+    "pool": "Grupo {{number}}",
+    "pool_phase": "Fase {{number}}",
     "view_list": "Lista",
     "view_bracket": "Cuadro",
     "view_ranking": "Clasificación",
@@ -121,7 +123,7 @@
     "pool_day": "{{matches}} el {{date}}"
   },
   "rounds_match": {
-    "P": "Grupo {{number}}",
+    "P": "Fase de grupos",
     "B1T": "Repechaje 1ª ronda {{number}}",
     "B2T": "Repechaje 2ª ronda {{number}}",
     "B3T": "Repechaje 3ª ronda {{number}}",

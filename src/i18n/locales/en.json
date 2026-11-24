@@ -79,6 +79,8 @@
     "matches_count_one": "{{count}} match",
     "matches_count_other": "{{count}} matches",
     "date_to_come": "Date to come",
+    "pool": "Pool {{number}}",
+    "pool_phase": "Phase {{number}}",
     "view_list": "List",
     "view_bracket": "Bracket",
     "view_ranking": "Ranking",
@@ -121,7 +123,7 @@
     "pool_day": "{{matches}} on {{date}}"
   },
   "rounds_match": {
-    "P": "Pool {{number}}",
+    "P": "Pool stage",
     "B1T": "1st Round Playoff {{number}}",
     "B2T": "2nd Round Playoff {{number}}",
     "B3T": "3rd Round Playoff {{number}}",

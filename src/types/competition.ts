@@ -49,6 +49,16 @@ export interface Result {
   clubB: Club;
   scores?: string;
   phase?: string;
+  /**
+   * The pool of a pool match, the N of the league site's "Poules N" section. Null on the other
+   * rounds, and on the rows Frontis stored before it read the pool.
+   */
+  pool?: number | null;
+  /**
+   * The N of the league site's "Poule phase N" heading when it names several pool phases, whose
+   * match numbers start again at "P 1". Null when it names a single one.
+   */
+  poolPhase?: number | null;
   clubALineup?: ClubLineup;
   clubBLineup?: ClubLineup;
 }

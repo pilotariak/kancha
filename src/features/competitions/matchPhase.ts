@@ -34,9 +34,11 @@ export function parsePhase(phase?: string): ParsedPhase {
 }
 
 /**
- * The label of a match card: "P 3" reads "Poule 3". `rounds_match.*` names one match, in the
- * singular, and places the number itself, since Basque puts it first ("3. taldea"); the plural
- * `rounds.*` titles the round divider. A phase the parser does not know is shown as Frontis sent it.
+ * The label of a match card: "Q 3" reads "Quart de finale 3". `rounds_match.*` names one match,
+ * in the singular, and places the number itself, since Basque puts it first; the plural
+ * `rounds.*` titles the round divider. A pool match reads "Phase de poules", without its number:
+ * "P 10" is the tenth match of the pool round, not a pool, and Frontis does not say which pool
+ * it belongs to (see `groupByPool`). A phase the parser does not know is shown as Frontis sent it.
  */
 export function matchPhaseLabel(phase: string | undefined, t: TFunction): string {
   const { type, number } = parsePhase(phase);

@@ -79,6 +79,8 @@
     "matches_count_one": "{{count}} partida",
     "matches_count_other": "{{count}} partida",
     "date_to_come": "Data zehazteke",
+    "pool": "{{number}}. taldea",
+    "pool_phase": "{{number}}. fasea",
     "view_list": "Zerrenda",
     "view_bracket": "Taula",
     "view_ranking": "Sailkapena",
@@ -121,7 +123,7 @@
     "pool_day": "{{matches}}: {{date}}"
   },
   "rounds_match": {
-    "P": "{{number}}. taldea",
+    "P": "Talde fasea",
     "B1T": "1. txandako {{number}}. barragea",
     "B2T": "2. txandako {{number}}. barragea",
     "B3T": "3. txandako {{number}}. barragea",

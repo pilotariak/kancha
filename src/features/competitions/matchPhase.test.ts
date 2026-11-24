@@ -9,8 +9,8 @@ import { matchPhaseLabel, parsePhase } from "./matchPhase";
 
 const LOCALES = { en, es, eu, fr } as const;
 
-// Every round the parser knows; "other" shows the phase as Frontis sent it.
-const ROUND_TYPES = ["P", "B", "BM", "B1T", "B2T", "B3T", "S", "H", "Q", "D", "F"] as const;
+// Every round the parser knows but the pools; "other" shows the phase as Frontis sent it.
+const ROUND_TYPES = ["B", "BM", "B1T", "B2T", "B3T", "S", "H", "Q", "D", "F"] as const;
 
 async function translator(lng: keyof typeof LOCALES): Promise<TFunction> {
   const i18n = createInstance();
@@ -46,9 +46,10 @@ describe("matchPhaseLabel", () => {
     tEn = await translator("en");
   });
 
-  it("names a pool match in the singular", () => {
-    expect(matchPhaseLabel("P 1", tFr)).toBe("Poule 1");
-    expect(matchPhaseLabel("P 1", tEn)).toBe("Pool 1");
+  it("names a pool match by its round, without the number", () => {
+    // "P 10" is the tenth match of the pool round, not pool 10.
+    expect(matchPhaseLabel("P 10", tFr)).toBe("Phase de poules");
+    expect(matchPhaseLabel("P 10", tEn)).toBe("Pool stage");
   });
 
   it("names a knockout match in the singular", () => {
@@ -77,5 +78,10 @@ describe("matchPhaseLabel", () => {
 describe.each(Object.entries(LOCALES))("%s locale", (_, messages) => {
   it.each(ROUND_TYPES)("gives round %s a match label that carries the number", (type) => {
     expect(messages.rounds_match[type]).toContain("{{number}}");
+  });
+
+  it("gives a pool match a label without the match number, and a pool its number", () => {
+    expect(messages.rounds_match.P).not.toContain("{{number}}");
+    expect(messages.details.pool).toContain("{{number}}");
   });
 });

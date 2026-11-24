@@ -8,6 +8,8 @@ const RESULT_FIELDS = `
   category { id name }
   dateMatch
   phase
+  pool
+  poolPhase
   scores
   clubA { id name }
   clubB { id name }
