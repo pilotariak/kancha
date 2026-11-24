@@ -75,6 +75,49 @@ export function isoWeekday(date: CivilDate): IsoWeekday {
   return (day === 0 ? 7 : day) as IsoWeekday;
 }
 
+/** A date and time on a Paris clock. */
+export interface ParisTime {
+  date: CivilDate;
+  hour: number;
+  minute: number;
+}
+
+const HOUR_MS = 60 * 60 * 1000;
+
+/** The last Sunday of a month, at 01:00 UTC: when Paris changes its clocks (EU rule). */
+function clockChange(year: number, month: number): number {
+  const last = { year, month, day: new Date(Date.UTC(year, month, 0)).getUTCDate() };
+  const sunday = addDays(last, -(isoWeekday(last) % 7));
+  return utc(sunday) + HOUR_MS;
+}
+
+/**
+ * An instant pik sends in UTC ("2026-11-25T19:00:00Z", a deadline), on the Paris clock, where the
+ * slots meet and pik computes their deadlines: UTC+2 from the last Sunday of March to the last
+ * Sunday of October, at 01:00 UTC, UTC+1 the rest of the year. Never the device's time zone, nor
+ * Intl's, whose time zones Kancha does not rely on. Null for a string that is not an instant.
+ */
+export function parisTime(instant: string): ParisTime | null {
+  // RFC 3339 with an offset or "Z"; a date alone, which Date.parse reads as UTC too, is no instant.
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/i.test(instant)) {
+    return null;
+  }
+  const ms = Date.parse(instant);
+  if (!Number.isFinite(ms)) return null;
+  const year = new Date(ms).getUTCFullYear();
+  const summer = ms >= clockChange(year, 3) && ms < clockChange(year, 10);
+  const local = new Date(ms + (summer ? 2 : 1) * HOUR_MS);
+  return {
+    date: {
+      year: local.getUTCFullYear(),
+      month: local.getUTCMonth() + 1,
+      day: local.getUTCDate(),
+    },
+    hour: local.getUTCHours(),
+    minute: local.getUTCMinutes(),
+  };
+}
+
 /** The device's date today. pik counts in Europe/Paris; the wizard only uses it for defaults. */
 export function localToday(now: Date = new Date()): CivilDate {
   return { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };

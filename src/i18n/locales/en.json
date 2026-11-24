@@ -298,7 +298,8 @@
       ],
       "day": "{{weekday}} {{day}} {{month}}",
       "long": "{{weekday}} {{day}} {{month}} {{year}}",
-      "month_year": "{{month}} {{year}}"
+      "month_year": "{{month}} {{year}}",
+      "day_time": "{{day}} {{time}}"
     },
     "errors": {
       "unauthorized": "This device is not a player of the slot yet.",
@@ -364,11 +365,7 @@
         "required": "Type your name.",
         "too_long": "{{max}} characters at most.",
         "in_list": "{{name}} is in the list: it is now picked above."
-      },
-      "joined_title": "Welcome, {{name}}",
-      "already_title": "You are already in, {{name}}",
-      "joined_text": "This device answers as {{name}} in {{slot}}.",
-      "done": "Done"
+      }
     },
     "personal_link": {
       "title": "Your personal link",
@@ -410,9 +407,7 @@
       "invalid_text": "Open the whole link, as the organizer sent it.",
       "error": "The recovery link could not be used.",
       "gone_title": "This link was used or has expired",
-      "gone_text": "A recovery link works once, within 24 hours. Ask an organizer for a new one.",
-      "done_title": "Your name is back",
-      "done_text": "This device answers again under your name, with your answers."
+      "gone_text": "A recovery link works once, within 24 hours. Ask an organizer for a new one."
     },
     "members_screen": {
       "eyebrow": "Players",
@@ -455,6 +450,73 @@
       "recovery_message": "{{slot}}: your link to get your name back on Kancha (once, within 24 hours)",
       "recovery_share": "Send privately",
       "action_error": "The change could not be saved."
+    },
+    "time": {
+      "clock": "{{hh}}:{{mm}}",
+      "message": "{{hh}}:{{mm}}",
+      "message_minutes": "{{hh}}:{{mm}}"
+    },
+    "open_session": "Open the session",
+    "session_screen": {
+      "eyebrow": "Session",
+      "load_error": "The session could not be loaded.",
+      "invalid": "This session link is incomplete. Open the session from the {{tab}} tab.",
+      "deadline_until": "Answers until {{deadline}}",
+      "deadline_closed": "Answers closed on {{deadline}}",
+      "gauge_label": "OK: {{ok}}, Backup: {{dispo}}, minimum {{min}}, {{places}} places",
+      "min_marker": "min {{count}}",
+      "places_marker_one": "{{count}} place",
+      "places_marker_other": "{{count}} places",
+      "sentence": {
+        "separator": ", ",
+        "free_places_one": "{{count}} free place",
+        "free_places_other": "{{count}} free places",
+        "full": "full",
+        "waiting_one": "{{count}} waiting",
+        "waiting_other": "{{count}} waiting",
+        "dispo_can_complete_one": "{{count}} backup can fill in",
+        "dispo_can_complete_other": "{{count}} backups can fill in",
+        "ok_short_one": "{{count}} OK short",
+        "ok_short_other": "{{count}} OK short",
+        "ok_at_deadline": "{{ok}} OK at the deadline, {{min}} needed",
+        "cancelled": "an organizer cancelled this date"
+      },
+      "answer_hint": "Backup: you come if players are missing. Only OK answers count toward the minimum.",
+      "ko_only": "The deadline has passed: you can still drop out.",
+      "cancelled_notice": "This date is cancelled: answers are closed.",
+      "answer_error": "Your answer was not saved.",
+      "answer_for_error": "The answer for {{name}} was not saved.",
+      "answers_title": "Answers",
+      "no_answer": "No answer",
+      "nobody": "Nobody",
+      "answer_for": "Answer for {{name}}",
+      "answer_for_hint": "Some players have not picked their name yet: you can answer for them.",
+      "share_title": "In the group chat",
+      "remind": "Send a reminder",
+      "remind_hint": "Shares the OK count, the deadline and the invite link in the group chat.",
+      "notify": "Let the group know",
+      "notify_hint": "Shares in the group chat whether the session is on.",
+      "copied": "Message copied",
+      "organizer_title": "Organizer",
+      "cancel": "Cancel this date",
+      "cancel_hint": "The date stays in the list, struck through, and players can no longer answer.",
+      "cancel_confirm": "Confirm: cancel the date",
+      "cancel_keep": "Keep the date",
+      "restore": "Restore this date"
+    },
+    "session_message": {
+      "title": "{{slot}} · {{day}}",
+      "ok_needed": "{{ok}} OK, {{min}} needed",
+      "ok_free_one": "{{ok}} OK, {{count}} place left",
+      "ok_free_other": "{{ok}} OK, {{count}} places left",
+      "ok_full": "{{ok}} OK, full",
+      "answer_before": "Answer before {{deadline}}:",
+      "on_free_one": "On: {{ok}} OK, {{count}} free place",
+      "on_free_other": "On: {{ok}} OK, {{count}} free places",
+      "on_full": "On: {{ok}} OK, full",
+      "cancelled_short": "Cancelled: {{ok}} OK at the deadline",
+      "cancelled": "Cancelled",
+      "next": "Next session: {{day}}"
     }
   },
   "new_slot": {

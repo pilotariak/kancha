@@ -459,3 +459,65 @@ describe("organizer actions", () => {
     });
   });
 });
+
+describe("one session and its answers", () => {
+  it("reads a session by its Paris date, with the device's token", async () => {
+    const { api, call } = client([reply(200, { date: "2026-11-26", answers: [] })], {
+      tokens: memoryTokens("t1"),
+    });
+    await expect(api.session("s_1", "2026-11-26")).resolves.toMatchObject({ date: "2026-11-26" });
+    expect(call(0).url).toBe(`${BASE}/slots/s_1/sessions/2026-11-26`);
+    expect(call(0).init.method).toBe("GET");
+    expect(call(0).headers.Authorization).toBe("Bearer t1");
+  });
+
+  it("answers for the device's member without naming it", async () => {
+    const result = { member_id: "m_1", status: "ok", session: { state: "on" } };
+    const { api, call } = client([reply(200, result)], { tokens: memoryTokens("t1") });
+    await expect(api.answerSession("s_1", "2026-11-26", "ok")).resolves.toEqual(result);
+    expect(call(0).url).toBe(`${BASE}/slots/s_1/sessions/2026-11-26/answer`);
+    expect(call(0).init.method).toBe("PUT");
+    expect(JSON.parse(call(0).init.body as string)).toEqual({ status: "ok" });
+    expect(call(0).headers.Authorization).toBe("Bearer t1");
+    // pik takes no If-Match on answers: the last write wins.
+    expect(call(0).headers["If-Match"]).toBeUndefined();
+  });
+
+  it("answers for another member (organizer) with their id", async () => {
+    const { api, call } = client([reply(200, {})]);
+    await api.answerSession("s_1", "2026-11-26", "dispo", "m_7");
+    expect(JSON.parse(call(0).init.body as string)).toEqual({ status: "dispo", member_id: "m_7" });
+    expect(call(0).init.credentials).toBe("include");
+  });
+
+  it("throws the deadline and the cancellation as pik's problems", async () => {
+    const { api } = client([problem("deadline-passed", 409), problem("session-cancelled", 409)]);
+    await expect(api.answerSession("s_1", "2026-11-26", "ok")).rejects.toMatchObject({
+      failure: "deadline-passed",
+      status: 409,
+    });
+    await expect(api.answerSession("s_1", "2026-11-26", "ko")).rejects.toMatchObject({
+      failure: "session-cancelled",
+    });
+  });
+
+  it("cancels a date, and undoes it", async () => {
+    const { api, call } = client([
+      reply(200, { state: "cancelled" }),
+      reply(200, { state: "missing" }),
+    ]);
+    await expect(api.updateSession("s_1", "2026-11-26", { cancelled: true })).resolves
+      .toEqual({ state: "cancelled" });
+    await api.updateSession("s_1", "2026-11-26", { cancelled: false });
+    expect(call(0).url).toBe(`${BASE}/slots/s_1/sessions/2026-11-26`);
+    expect(call(0).init.method).toBe("PATCH");
+    expect(JSON.parse(call(0).init.body as string)).toEqual({ cancelled: true });
+    expect(JSON.parse(call(1).init.body as string)).toEqual({ cancelled: false });
+  });
+
+  it("throws organizer-only for a player who cancels", async () => {
+    const { api } = client([problem("organizer-only", 403)]);
+    await expect(api.updateSession("s_1", "2026-11-26", { cancelled: true })).rejects
+      .toMatchObject({ failure: "organizer-only", status: 403 });
+  });
+});

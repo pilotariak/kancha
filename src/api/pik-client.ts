@@ -17,7 +17,12 @@ export type SlotCard = Schemas["SlotCard"];
 export type SessionList = Schemas["SessionList"];
 export type SessionSummary = Schemas["SessionSummary"];
 export type SessionState = Schemas["SessionState"];
+export type SessionDetail = Schemas["SessionDetail"];
+export type SessionChanges = Schemas["SessionChanges"];
 export type AnswerStatus = Schemas["AnswerStatus"];
+export type AnswerView = Schemas["AnswerView"];
+export type NoAnswerView = Schemas["NoAnswerView"];
+export type AnswerResult = Schemas["AnswerResult"];
 export type SlotCourt = Schemas["Court"];
 export type JoinPreview = Schemas["JoinPreview"];
 export type FreeName = Schemas["FreeName"];
@@ -207,6 +212,8 @@ export function createPikClient({ fetch, baseUrl, tokens, timeoutMs = 15_000 }: 
   const slotPath = (slotId: string) => `/slots/${encodeURIComponent(slotId)}`;
   const memberPath = (slotId: string, memberId: string) =>
     `${slotPath(slotId)}/members/${encodeURIComponent(memberId)}`;
+  const sessionPath = (slotId: string, date: string) =>
+    `${slotPath(slotId)}/sessions/${encodeURIComponent(date)}`;
 
   return {
     /**
@@ -402,6 +409,36 @@ export function createPikClient({ fetch, baseUrl, tokens, timeoutMs = 15_000 }: 
     async setListClosed(slotId: string, closed: boolean) {
       return request<Schemas["ListState"]>("PUT", `${slotPath(slotId)}/list`, {
         body: { closed },
+        token: await stored(),
+      });
+    },
+
+    // ── One session and its answers ───────────────────────────────────────────
+
+    /**
+     * One session, `date` as "YYYY-MM-DD" in Europe/Paris: its state and counts, the answers by
+     * status and the members who did not answer. pik computes the state on every read.
+     */
+    async session(slotId: string, date: string) {
+      return request<SessionDetail>("GET", sessionPath(slotId, date), { token: await stored() });
+    },
+
+    /**
+     * Answers for a session: the device's member, or another one (`memberId`, organizer). The
+     * last write wins, so a retry is harmless. After the deadline pik takes only `ko`; a
+     * cancelled session takes none. Returns the session as pik computes it after the answer.
+     */
+    async answerSession(slotId: string, date: string, status: AnswerStatus, memberId?: string) {
+      return request<AnswerResult>("PUT", `${sessionPath(slotId, date)}/answer`, {
+        body: memberId ? { status, member_id: memberId } : { status },
+        token: await stored(),
+      });
+    },
+
+    /** Cancels a date or undoes it, among other changes to one session (organizer). */
+    async updateSession(slotId: string, date: string, changes: SessionChanges) {
+      return request<SessionSummary>("PATCH", sessionPath(slotId, date), {
+        body: changes,
         token: await stored(),
       });
     },

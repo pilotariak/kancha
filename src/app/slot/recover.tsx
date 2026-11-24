@@ -1,14 +1,12 @@
 import { router } from "expo-router";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform } from "react-native";
 
 import { isPikFailure } from "@/api/pik";
 import { LifeBuoy } from "@/components/icons";
 import {
   Centered,
   Paragraph,
-  PersonalLinkCard,
   SlotButton,
   SlotCardBox,
   SlotErrorBox,
@@ -27,19 +25,19 @@ import { useTheme } from "@/hooks/use-theme";
  *
  * The link is redeemed on a press, never on load: opened in a messaging app's own browser, whose
  * storage is apart from the usual browser's, it would be spent there. On the web pik sets its
- * cookie in the response when this browser has no player yet.
+ * cookie in the response when this browser has no player yet. Then the Créneaux list shows the
+ * member's slots, on every platform.
  */
 export default function RecoveryLinkScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const secret = useLinkSecret("recover");
   const redeem = useRedeemRecovery();
-  const web = Platform.OS === "web";
 
-  // The web build shows the player's slots; the Créneaux tab is still hidden on iOS and Android.
+  // The member is back on this device: show their slots.
   useEffect(() => {
-    if (web && redeem.isSuccess) router.replace("/(tabs)/slot");
-  }, [web, redeem.isSuccess]);
+    if (redeem.isSuccess) router.replace("/(tabs)/slot");
+  }, [redeem.isSuccess]);
 
   const gone = isPikFailure(redeem.error, "recovery-link-gone")
     || isPikFailure(redeem.error, "not-found");
@@ -53,27 +51,7 @@ export default function RecoveryLinkScreen() {
         </SlotNotice>
       );
     }
-    if (redeem.isSuccess) {
-      if (web) return <Centered label={t("common.loading")} />;
-      return (
-        <>
-          <SlotNotice
-            tone="success"
-            title={t("slot.recover_screen.done_title")}
-            testID="recovery-done"
-          >
-            {t("slot.recover_screen.done_text")}
-          </SlotNotice>
-          <PersonalLinkCard testID="recovery-personal-link" />
-          <SlotButton
-            label={t("slot.join_flow.done")}
-            tone="primary"
-            onPress={() => router.replace("/")}
-            testID="recovery-finish"
-          />
-        </>
-      );
-    }
+    if (redeem.isSuccess) return <Centered label={t("common.loading")} />;
     if (gone) {
       return (
         <SlotNotice title={t("slot.recover_screen.gone_title")} testID="recovery-gone">

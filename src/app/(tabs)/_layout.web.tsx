@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Info, Swords, Trophy } from "@/components/icons";
+import { CalendarClock, Info, Swords, Trophy } from "@/components/icons";
 import { KanchaLogo } from "@/components/KanchaLogo";
 import { RAIL_WIDTH } from "@/features/layout/breakpoints";
 import { useWebLayout } from "@/hooks/use-layout";
@@ -81,7 +81,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Trophy color={color} size={size} />,
         }}
       />
-      <Tabs.Screen name="slot" options={{ href: null }} />
+      <Tabs.Screen
+        name="slot"
+        options={{
+          title: t("tabs.slot"),
+          tabBarIcon: ({ color, size }) => <CalendarClock color={color} size={size} />,
+        }}
+      />
       <Tabs.Screen
         name="score"
         options={{

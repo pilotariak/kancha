@@ -20,6 +20,7 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 import type { Palette } from "@/constants/colors";
 import { slotErrorMessage } from "@/features/slots/errors";
 import { personalUrl } from "@/features/slots/links";
+import { messageText } from "@/features/slots/messages";
 import { useTextColumn } from "@/hooks/use-layout";
 import { useDeviceToken } from "@/hooks/use-slots";
 import { useTheme, useThemedStyles } from "@/hooks/use-theme";
@@ -214,10 +215,36 @@ export function SlotNotice(
   );
 }
 
+export type ShareOutcome = "shared" | "copied" | "failed";
+
 /**
- * Share and Copy for a link. iOS shares a URL; Android and the web share it as text, as
- * `Share.share({ url })` is iOS only. On the web, a browser without the share sheet copies it.
- * `onShared` tells the screen, which may show that the link was copied.
+ * Opens the system share sheet with a message and its link. iOS shares the URL next to the text;
+ * Android and the web share one text, the link on its last line, as `Share.share({ url })` is
+ * iOS only. On the web, a browser without the share sheet copies `copy` instead (the whole text
+ * by default). Closing the share sheet is not an error.
+ */
+export async function shareMessage(
+  { message, url, copy }: { message?: string; url?: string; copy?: string },
+): Promise<ShareOutcome> {
+  const text = messageText({ text: message ?? "", url });
+  try {
+    if (Platform.OS === "ios") {
+      await Share.share(url ? (message ? { message, url } : { url }) : { message: text });
+    } else if (Platform.OS === "web" && typeof navigator.share !== "function") {
+      await Clipboard.setStringAsync(copy ?? text);
+      return "copied";
+    } else {
+      await Share.share({ message: text });
+    }
+    return "shared";
+  } catch {
+    return "failed";
+  }
+}
+
+/**
+ * Share and Copy for a link, through `shareMessage`. On the web, a browser without the share
+ * sheet copies the link.
  */
 export function LinkActions(
   { url, shareLabel, copyLabel, testID, message, secret }: {
@@ -247,14 +274,7 @@ export function LinkActions(
   };
 
   const share = async () => {
-    const text = message ? `${message}\n${url}` : url;
-    try {
-      if (Platform.OS === "ios") await Share.share(message ? { message, url } : { url });
-      else if (Platform.OS === "web" && typeof navigator.share !== "function") await copy();
-      else await Share.share({ message: text });
-    } catch {
-      // Closing the share sheet is not an error.
-    }
+    if ((await shareMessage({ message, url, copy: url })) === "copied") setCopied(true);
   };
 
   return (

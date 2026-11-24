@@ -298,7 +298,8 @@
       ],
       "day": "{{weekday}} {{day}} {{month}}",
       "long": "{{weekday}} {{day}} {{month}} {{year}}",
-      "month_year": "{{month}} {{year}}"
+      "month_year": "{{month}} {{year}}",
+      "day_time": "{{day}} {{time}}"
     },
     "errors": {
       "unauthorized": "Cet appareil n'est pas encore joueur du créneau.",
@@ -364,11 +365,7 @@
         "required": "Tapez votre nom.",
         "too_long": "{{max}} caractères au plus.",
         "in_list": "{{name}} est dans la liste : ce nom est maintenant choisi ci-dessus."
-      },
-      "joined_title": "Bienvenue, {{name}}",
-      "already_title": "Vous y êtes déjà, {{name}}",
-      "joined_text": "Cet appareil répond en tant que {{name}} dans {{slot}}.",
-      "done": "Terminé"
+      }
     },
     "personal_link": {
       "title": "Votre lien personnel",
@@ -410,9 +407,7 @@
       "invalid_text": "Ouvrez le lien en entier, tel que l'organisateur l'a envoyé.",
       "error": "Le lien de récupération n'a pas pu servir.",
       "gone_title": "Ce lien a déjà servi ou a expiré",
-      "gone_text": "Un lien de récupération ne sert qu'une fois, dans les 24 heures. Demandez-en un nouveau à un organisateur.",
-      "done_title": "Votre nom est de retour",
-      "done_text": "Cet appareil répond de nouveau sous votre nom, avec vos réponses."
+      "gone_text": "Un lien de récupération ne sert qu'une fois, dans les 24 heures. Demandez-en un nouveau à un organisateur."
     },
     "members_screen": {
       "eyebrow": "Joueurs",
@@ -455,6 +450,73 @@
       "recovery_message": "{{slot}} : ton lien pour retrouver ton nom sur Kancha (une fois, dans les 24 heures)",
       "recovery_share": "Envoyer en privé",
       "action_error": "La modification n'a pas pu être enregistrée."
+    },
+    "time": {
+      "clock": "{{hh}}:{{mm}}",
+      "message": "{{hour}}h",
+      "message_minutes": "{{hour}}h{{mm}}"
+    },
+    "open_session": "Ouvrir la séance",
+    "session_screen": {
+      "eyebrow": "Séance",
+      "load_error": "La séance n'a pas pu être chargée.",
+      "invalid": "Ce lien de séance est incomplet. Ouvrez la séance depuis l'onglet {{tab}}.",
+      "deadline_until": "Réponses jusqu'à {{deadline}}",
+      "deadline_closed": "Réponses closes depuis {{deadline}}",
+      "gauge_label": "OK : {{ok}}, Dispo : {{dispo}}, minimum {{min}}, {{places}} places",
+      "min_marker": "min {{count}}",
+      "places_marker_one": "{{count}} place",
+      "places_marker_other": "{{count}} places",
+      "sentence": {
+        "separator": ", ",
+        "free_places_one": "{{count}} place libre",
+        "free_places_other": "{{count}} places libres",
+        "full": "complet",
+        "waiting_one": "{{count}} en attente",
+        "waiting_other": "{{count}} en attente",
+        "dispo_can_complete_one": "{{count}} dispo peut compléter",
+        "dispo_can_complete_other": "{{count}} dispo peuvent compléter",
+        "ok_short_one": "il manque {{count}} OK",
+        "ok_short_other": "il manque {{count}} OK",
+        "ok_at_deadline": "{{ok}} OK à la date limite, il en fallait {{min}}",
+        "cancelled": "un organisateur a annulé cette date"
+      },
+      "answer_hint": "Dispo : vous venez s'il manque du monde. Seuls les OK comptent pour le minimum.",
+      "ko_only": "La date limite est passée : vous pouvez encore vous désister.",
+      "cancelled_notice": "Cette date est annulée : les réponses sont fermées.",
+      "answer_error": "Votre réponse n'a pas été enregistrée.",
+      "answer_for_error": "La réponse pour {{name}} n'a pas été enregistrée.",
+      "answers_title": "Réponses",
+      "no_answer": "Sans réponse",
+      "nobody": "Personne",
+      "answer_for": "Répondre pour {{name}}",
+      "answer_for_hint": "Certains joueurs n'ont pas encore choisi leur nom : vous pouvez répondre pour eux.",
+      "share_title": "Dans le groupe",
+      "remind": "Relancer",
+      "remind_hint": "Partage dans le groupe le nombre de OK, la date limite et le lien d'invitation.",
+      "notify": "Prévenir",
+      "notify_hint": "Partage dans le groupe si la séance a lieu.",
+      "copied": "Message copié",
+      "organizer_title": "Organisation",
+      "cancel": "Annuler cette date",
+      "cancel_hint": "La date reste dans la liste, barrée, et les joueurs ne peuvent plus répondre.",
+      "cancel_confirm": "Confirmer : annuler la date",
+      "cancel_keep": "Garder la date",
+      "restore": "Rétablir cette date"
+    },
+    "session_message": {
+      "title": "{{slot}} · {{day}}",
+      "ok_needed": "{{ok}} OK, il en faut {{min}}",
+      "ok_free_one": "{{ok}} OK, encore {{count}} place",
+      "ok_free_other": "{{ok}} OK, encore {{count}} places",
+      "ok_full": "{{ok}} OK, complet",
+      "answer_before": "Réponds avant {{deadline}} :",
+      "on_free_one": "Assurée : {{ok}} OK, {{count}} place libre",
+      "on_free_other": "Assurée : {{ok}} OK, {{count}} places libres",
+      "on_full": "Assurée : {{ok}} OK, complet",
+      "cancelled_short": "Annulée : {{ok}} OK à la date limite",
+      "cancelled": "Annulée",
+      "next": "Prochaine séance : {{day}}"
     }
   },
   "new_slot": {

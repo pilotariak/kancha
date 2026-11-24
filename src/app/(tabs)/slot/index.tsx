@@ -49,6 +49,10 @@ const NO_SLOTS: SlotCard[] = [];
 
 const timeRange = (from: string, to?: string | null) => (to ? `${from}–${to}` : from);
 
+/** The session screen of one date of a slot. */
+const openSession = (slotId: string, date: string) =>
+  router.push({ pathname: "/(tabs)/slot/session", params: { id: slotId, date } });
+
 // ── States ────────────────────────────────────────────────────────────────────
 
 function ErrorBox(
@@ -139,28 +143,38 @@ function SlotCardView({ slot, names }: { slot: SlotCard; names: DateNames }) {
 
       {next && nextDate && answer
         ? (
-          <>
-            <View style={styles.nextRow}>
-              <View style={styles.nextText}>
-                <Text style={styles.nextLabel}>{t("slot.next_session")}</Text>
-                <Text style={styles.nextDate}>
-                  {`${
-                    capitalize(formatDay(t, names, nextDate), locale)
-                  } · ${slot.schedule.time_from}`}
-                </Text>
+          <PressableScale
+            onPress={() => openSession(slot.id, next.date)}
+            accessibilityRole="button"
+            accessibilityLabel={`${t("slot.open_session")}, ${
+              capitalize(formatDay(t, names, nextDate), locale)
+            }`}
+            testID={`slot-card-${slot.id}-session`}
+          >
+            <View style={styles.nextBlock}>
+              <View style={styles.nextRow}>
+                <View style={styles.nextText}>
+                  <Text style={styles.nextLabel}>{t("slot.next_session")}</Text>
+                  <Text style={[styles.nextDate, next.cancelled ? styles.struck : null]}>
+                    {`${
+                      capitalize(formatDay(t, names, nextDate), locale)
+                    } · ${slot.schedule.time_from}`}
+                  </Text>
+                </View>
+                <View style={styles.okCount}>
+                  <Users color={colors.green} size={15} />
+                  <Text style={styles.okCountText}>
+                    {t("slot.ok_of_min", { ok: next.counts.ok, min: next.min_players })}
+                  </Text>
+                </View>
+                <ChevronRight color={colors.muted} size={16} />
               </View>
-              <View style={styles.okCount}>
-                <Users color={colors.green} size={15} />
-                <Text style={styles.okCountText}>
-                  {t("slot.ok_of_min", { ok: next.counts.ok, min: next.min_players })}
-                </Text>
+              <View style={styles.answerRow}>
+                <Text style={styles.answerLabel}>{t("slot.my_answer.label")}</Text>
+                <StatusPill label={t(answer.key)} tone={answer.tone} size="small" />
               </View>
             </View>
-            <View style={styles.answerRow}>
-              <Text style={styles.answerLabel}>{t("slot.my_answer.label")}</Text>
-              <StatusPill label={t(answer.key)} tone={answer.tone} size="small" />
-            </View>
-          </>
+          </PressableScale>
         )
         : <Text style={styles.seasonOver}>{t("slot.season_over")}</Text>}
 
@@ -186,7 +200,8 @@ function SlotCardView({ slot, names }: { slot: SlotCard; names: DateNames }) {
 export default function SlotScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? "en";
   const names = useMemo(() => dateNames(t), [t]);
 
   const mySlots = useMySlots();
@@ -345,13 +360,24 @@ export default function SlotScreen() {
           const { session, isNext } = item;
           const cancelled = session.state === "cancelled";
           return (
-            <View
+            <PressableScale
+              onPress={() => openSession(item.slotId, session.date)}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("slot.open_session")}, ${
+                capitalize(formatDay(t, names, item.date), locale)
+              }${severalSlots ? `, ${item.slotName}` : ""}`}
               style={[styles.sessionRow, isNext ? styles.sessionRowNext : null]}
               testID={`session-row-${item.key}`}
             >
               {/* Date block */}
               <View style={styles.dateBlock}>
-                <Text style={[styles.dateDay, isNext ? styles.dateDayNext : null]}>
+                <Text
+                  style={[
+                    styles.dateDay,
+                    isNext ? styles.dateDayNext : null,
+                    cancelled ? styles.struck : null,
+                  ]}
+                >
                   {item.date.day}
                 </Text>
                 <Text style={[styles.dateDayLabel, isNext ? styles.dateDayLabelNext : null]}>
@@ -365,7 +391,10 @@ export default function SlotScreen() {
                     <Text style={styles.nextBadgeText}>{t("slot.next")}</Text>
                   </View>
                 )}
-                <Text style={styles.sessionMeta} numberOfLines={1}>
+                <Text
+                  style={[styles.sessionMeta, cancelled ? styles.struck : null]}
+                  numberOfLines={1}
+                >
                   {severalSlots ? `${item.slotName} · ${item.timeFrom}` : item.timeFrom}
                 </Text>
               </View>
@@ -380,7 +409,7 @@ export default function SlotScreen() {
                     <Counter color={colors.amber} value={session.counts.dispo} />
                   </View>
                 )}
-            </View>
+            </PressableScale>
           );
         }}
       />
@@ -437,7 +466,10 @@ const makeStyles = (c: Palette) =>
     configInfo: { flex: 1, color: c.ink, fontSize: 14, fontWeight: "700" },
     configVenue: { color: c.muted, fontSize: 13, fontWeight: "600", flex: 1 },
     divider: { height: 1, backgroundColor: c.line },
+    nextBlock: { gap: 10 },
     nextRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    // A date an organizer cancelled stays in the list, struck through.
+    struck: { textDecorationLine: "line-through" },
     nextText: { flex: 1, gap: 2 },
     nextLabel: {
       color: c.muted,

@@ -2,6 +2,7 @@
 // (about 1,500 modules). Importing each icon from its own module ships only the icons below.
 // Add new icons here, and import them from "@/components/icons" rather than the package root.
 export { default as ArrowLeft } from "lucide-react-native/dist/cjs/icons/arrow-left";
+export { default as Ban } from "lucide-react-native/dist/cjs/icons/ban";
 export { default as BellRing } from "lucide-react-native/dist/cjs/icons/bell-ring";
 export { default as CalendarClock } from "lucide-react-native/dist/cjs/icons/calendar-clock";
 export { default as CalendarDays } from "lucide-react-native/dist/cjs/icons/calendar-days";
@@ -22,6 +23,7 @@ export { default as ListOrdered } from "lucide-react-native/dist/cjs/icons/list-
 export { default as Lock } from "lucide-react-native/dist/cjs/icons/lock";
 export { default as LockOpen } from "lucide-react-native/dist/cjs/icons/lock-open";
 export { default as MapPin } from "lucide-react-native/dist/cjs/icons/map-pin";
+export { default as Megaphone } from "lucide-react-native/dist/cjs/icons/megaphone";
 export { default as Minus } from "lucide-react-native/dist/cjs/icons/minus";
 export { default as Monitor } from "lucide-react-native/dist/cjs/icons/monitor";
 export { default as Moon } from "lucide-react-native/dist/cjs/icons/moon";

@@ -968,9 +968,9 @@ Muted falls short of 4.5:1 in light on both surfaces, so the gray text uses plac
 Expo Router tabs. iOS and Android use native tabs (`NativeTabs` from
 `expo-router/unstable-native-tabs`, flagged unstable in SDK 54) in `src/app/(tabs)/_layout.tsx`;
 web uses React Navigation's JS tabs in `src/app/(tabs)/_layout.web.tsx`, which Expo Router picks
-over it on web only. Native tabs show only the routes that have a Trigger, so `index` and `slot`
-are no tabs there; web hides them with `href: null`. Competitions is the first tab: a launch on
-`/` lands on it.
+over it on web only. Native tabs show only the routes that have a Trigger, so `index` is no tab
+there; web hides it with `href: null`. Competitions is the first tab: a launch on `/` lands on it.
+Créneaux (`slot`) comes second on every platform.
 
 iOS: the system tab bar, Liquid Glass on iOS 26.
 
@@ -978,7 +978,8 @@ iOS: the system tab bar, Liquid Glass on iOS 26.
 Active tint:   red (tintColor), the only color set: a background, blur or label color would
                replace the system glass
 Icons:         SF Symbols, outline at rest and filled when selected: trophy, sportscourt,
-               info.circle (each with .fill)
+               info.circle (each with .fill). Créneaux keeps calendar.badge.clock in both
+               states: SF Symbols has no filled variant of it
 Label:         the system's
 Minimize:      the bar shrinks while a screen scrolls down (iOS 26, minimizeBehavior)
 ```
@@ -995,7 +996,8 @@ Ripple:        the ripple token (rippleColor). Without it, react-native-screens 
                itemRippleColor from the Material 3 theme, which does not define it: no ripple
 Label:         12px, weight 700
 Icons:         Material Design Icons rendered to images by VectorIcon: trophy-outline,
-               sword-cross, information-outline (`src/components/android-tab-icon.android.tsx`).
+               calendar-clock-outline, sword-cross, information-outline
+               (`src/components/android-tab-icon.android.tsx`).
                Native tabs take an image or a drawable, not the Lucide SVG components. A
                drawable is an Android resource, which this managed project could only add
                through a config plugin; the images need none
@@ -1722,6 +1724,41 @@ Win:         the green screen: trophy, winner, both scores. "Share" (Share card)
 Device:      the screen stays on while a game is played, not on the win screen (expo-keep-awake,
              the Wake Lock API on web). Haptics on iOS and Android: an impact per point, a
              selection tick per undo, a success on the win
+```
+
+### Slot session — gauge and answers
+
+The session screen (`src/app/(tabs)/slot/session.tsx`, #157): one date of a slot, opened from a
+slot card's next session or from a row of the Créneaux list. The state, the counts and the
+deadline are pik's; the screen computes no state of its own.
+
+```
+State card:    the date and start time (struck through and muted once an organizer cancels
+               the date), the state pill of the Créneaux list (Status Pills), "3/4 OK" 22px
+               weight 900 tabular-nums, the gauge, one sentence 15px weight 700 text ("2 places
+               libres, 2 dispo peuvent compléter"), the deadline with a CalendarClock: red
+               before it, muted after it
+Gauge:         `SessionGauge`, 14px bar with 7px radius on line, drawn with react-native-svg
+               once its width is known. OK answers solid green, Dispo answers amberBg hatched
+               with 2px amber lines at 45°, 6px apart, after the OK ones. The minimum is a 2px
+               ink line 5px above and below the bar, labelled "min 4" (11px weight 800) on the
+               side facing the middle. "6 places" (12px weight 700 placeholder) ends the bar.
+               Up to 16 places, 1.5px card ticks split the bar into places. The arithmetic is
+               `src/features/slots/gauge.ts`
+Answer:        three equal buttons OK, Dispo, KO (flex 1 cells without padding, 8px apart), min
+               height 48px, 14px radius, white with a line border. The selected one takes its
+               legend colors: greenSoft and green, amberBg and amber, redSoft and red. After the
+               deadline only KO stays; the others turn cream with muted text
+Names:         four groups, OK, Dispo, KO, then "Sans réponse", each under an 8px legend dot
+               and an uppercase 12px weight 800 placeholder title with its count; white rows
+               with a line border, 14px radius. The player's own name in weight 900 with the
+               green "Vous" pill. An organizer gets 44px compact answer buttons under each
+               member who never picked their name ("Libre" pill)
+Group chat:    "Relancer" (BellRing) before the deadline, "Prévenir" (Megaphone) for
+               organizers once the game is on or off: white buttons that open the share sheet
+               (Share card is the image of a result, not these messages)
+Organizer:     "Annuler cette date" (Ban) asks for a confirmation in red, as freeing a name
+               does; a cancelled date offers "Rétablir cette date" (Undo2)
 ```
 
 ### Share card

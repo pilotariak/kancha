@@ -33,7 +33,8 @@ Slot data (the Créneaux tab) comes from **[pik](https://github.com/pilotariak/p
 `/api/v1`, apart from Frontis (ADR-0001 in #154):
 
 - `src/api/pik-client.ts` is the client, `src/api/pik.ts` wires it, `src/hooks/use-slots.ts` holds the
-  TanStack Query hooks, and `src/features/slots/` the pure logic (wizard rules, dates, problem messages).
+  TanStack Query hooks, and `src/features/slots/` the pure logic (wizard rules, dates, problem messages,
+  the session gauge and the share messages of ADR-0003).
 - `EXPO_PUBLIC_PIK_URL` is pik's origin, without `/api/v1` (the client appends it):
   `https://pik.pilotariak.com` in production, `http://localhost:8787` in development. The native app
   and the web build both call it. On the web the call is cross-origin with `credentials: "include"`:
