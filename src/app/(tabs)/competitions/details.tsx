@@ -47,10 +47,12 @@ import { StatusPill } from "@/components/StatusPill";
 import type { Palette } from "@/constants/colors";
 import { LEAGUES } from "@/constants/leagues";
 import { finalSummary } from "@/features/competitions/finalSummary";
+import { formatMatchDate } from "@/features/competitions/matchDate";
 import { formatMatchDay, groupByDay, type MatchDay } from "@/features/competitions/matchDays";
 import { matchPhaseLabel, parsePhase, ROUND_ORDER } from "@/features/competitions/matchPhase";
 import { matchProgress } from "@/features/competitions/matchProgress";
 import { parseMatchScore } from "@/features/competitions/matchScore";
+import { groupByPool, type MatchPool } from "@/features/competitions/pools";
 import {
   buildFilterOptions,
   resolveSelection,
@@ -131,29 +133,41 @@ function RoundHeader({ type, count }: { type: PhaseType; count: number }) {
   );
 }
 
-// ─── Match days ───────────────────────────────────────────────────────────────
+// ─── Match days and pools ─────────────────────────────────────────────────────
 
-/** The day header's words: the date in full, or "date to come", and the match count. */
-function useDayTitle(day: MatchDay): { title: string; count: string } {
+/**
+ * A card of the list view: the matches of a day, or, when a pool round splits into its pools,
+ * the matches of a pool.
+ */
+type MatchGroup = MatchDay | MatchPool;
+
+const isPool = (group: MatchGroup): group is MatchPool => "number" in group;
+
+/**
+ * The card header's words: the pool, or the date in full ("date to come" without one), and the
+ * match count.
+ */
+function useGroupTitle(group: MatchGroup): { title: string; count: string } {
   const { t, i18n } = useTranslation();
-  return {
-    // The language the strings resolved to, so a "de" device gets an English date too.
-    title: day.date
-      ? formatMatchDay(day.date, i18n.resolvedLanguage ?? "en")
-      : t("details.date_to_come"),
-    count: t("details.matches_count", { count: day.results.length }),
-  };
+  let title: string;
+  if (isPool(group)) title = t("details.pool", { number: group.number });
+  // The language the strings resolved to, so a "de" device gets an English date too.
+  else if (group.date) title = formatMatchDay(group.date, i18n.resolvedLanguage ?? "en");
+  else title = t("details.date_to_come");
+  return { title, count: t("details.matches_count", { count: group.results.length }) };
 }
 
 const ShareIcon = Platform.OS === "android" ? Share2 : Share;
 
 /**
- * One match of a day card: its phase in a small label, then both teams. A match with a score
- * has a Share button at the end of its phase line, which shares it as an image.
+ * One match of a card: a small label, then both teams. The label is the match's phase in a day
+ * card, its date in a pool card. A match with a score has a Share button at the end of its
+ * label line, which shares it as an image.
  */
 function MatchRow(
-  { result, phaseType, onShare }: {
+  { result, label, phaseType, onShare }: {
     result: Result;
+    label: string;
     phaseType: PhaseType;
     onShare: (result: Result) => void;
   },
@@ -170,7 +184,7 @@ function MatchRow(
     <View style={styles.matchRow} testID={`result-${result.id}`}>
       <View style={styles.matchHead}>
         <Text style={[styles.matchPhase, isFinal && { color: colors.label }]} numberOfLines={1}>
-          {matchPhaseLabel(result.phase, t)}
+          {label}
         </Text>
         {canShareResult(result)
           ? (
@@ -197,32 +211,45 @@ function MatchRow(
 }
 
 /**
- * The matches of one day in one card, under a header that collapses them to one line. Its
- * matches lie `columns` to a row, split by hairlines, so a match keeps a phone card's width in
- * the grid.
+ * The matches of one day or one pool in one card, under a header that collapses them to one
+ * line. Its matches lie `columns` to a row, split by hairlines, so a match keeps a phone card's
+ * width in the grid.
  */
-function DayCard(
-  { day, phaseType, columns, open, onToggle, reduceMotion, cardRef, onShare }: {
-    day: MatchDay;
+function MatchGroupCard(
+  { group, phaseType, columns, open, onToggle, reduceMotion, cardRef, onShare }: {
+    group: MatchGroup;
     phaseType: PhaseType;
     columns: number;
     open: boolean;
     onToggle: () => void;
     reduceMotion: boolean;
-    /** The card, measured to show the day under the pinned filters. */
+    /** The card, measured to show the day or pool under the pinned filters. */
     cardRef: Ref<View>;
     onShare: (result: Result) => void;
   },
 ) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const interaction = useInteractionStyles();
   const phaseColors = usePhaseColors()[phaseType];
   const [hovered, setHovered] = useState(false);
-  const { title, count } = useDayTitle(day);
+  const { title, count } = useGroupTitle(group);
   const isFinal = phaseType === "F";
-  const played = day.results.some((r) => parseMatchScore(r.scores) != null);
+  const played = group.results.some((r) => parseMatchScore(r.scores) != null);
+  const pool = isPool(group);
+  // In a pool card, the matches of several days: each shows its date.
+  const label = (result: Result) =>
+    pool
+      ? formatMatchDate(result.dateMatch, i18n.resolvedLanguage ?? "en")
+        ?? t("details.date_to_come")
+      : matchPhaseLabel(result.phase, t);
+  const testID = pool
+    ? `match-pool-${phaseType}-${group.number}`
+    : `match-day-${phaseType}-${group.key}`;
+  const toggleTestID = pool
+    ? `match-pool-toggle-${phaseType}-${group.number}`
+    : `match-day-toggle-${phaseType}-${group.key}`;
 
   // Opening fades the matches in and turns the chevron over; with reduce motion, both switch
   // at once. Closing removes the matches at once.
@@ -246,8 +273,8 @@ function DayCard(
   );
 
   const rows: Result[][] = [];
-  for (let i = 0; i < day.results.length; i += columns) {
-    rows.push(day.results.slice(i, i + columns));
+  for (let i = 0; i < group.results.length; i += columns) {
+    rows.push(group.results.slice(i, i + columns));
   }
 
   return (
@@ -260,14 +287,14 @@ function DayCard(
         // The Final keeps its red border under the hover shadow.
         hovered && [interaction.hover, isFinal && { borderColor: phaseColors.cardBorder }],
       ]}
-      testID={`match-day-${phaseType}-${day.key}`}
+      testID={testID}
     >
       <Pressable
         onPress={onToggle}
         onHoverIn={() => setHovered(true)}
         onHoverOut={() => setHovered(false)}
         accessibilityRole="button"
-        accessibilityLabel={[title, day.today ? t("details.today") : null, count]
+        accessibilityLabel={[title, group.today ? t("details.today") : null, count]
           .filter(Boolean)
           .join(", ")}
         aria-expanded={open}
@@ -277,13 +304,13 @@ function DayCard(
           state.pressed && styles.dayHeaderPressed,
           showsFocusRing(state) && [interaction.focusRing, styles.dayHeaderFocus],
         ]}
-        testID={`match-day-toggle-${phaseType}-${day.key}`}
+        testID={toggleTestID}
       >
         <Text style={styles.dayTitle}>
           {title}
           <Text style={styles.dayCount}>{` · ${count}`}</Text>
         </Text>
-        {day.today ? <StatusPill label={t("details.today")} tone="green" /> : null}
+        {group.today ? <StatusPill label={t("details.today")} tone="green" /> : null}
         <Animated.View style={{ transform: [{ rotate }] }}>
           <ChevronDown color={colors.muted} size={18} />
         </Animated.View>
@@ -295,7 +322,12 @@ function DayCard(
               <View key={r} style={[styles.dayRow, r > 0 && styles.dayRowLine]}>
                 {row.map((result, c) => (
                   <View key={result.id} style={[styles.dayCell, c > 0 && styles.dayCellLine]}>
-                    <MatchRow result={result} phaseType={phaseType} onShare={onShare} />
+                    <MatchRow
+                      result={result}
+                      label={label(result)}
+                      phaseType={phaseType}
+                      onShare={onShare}
+                    />
                   </View>
                 ))}
                 {Array.from(
@@ -317,13 +349,13 @@ const DAY_STRIP_HEIGHT = 36;
 const DAY_HEADER_INSET = 15;
 
 /**
- * The day being read, under the pinned filters, once its header has scrolled beneath them. It
- * repeats that header, so it takes no touches and screen readers skip it.
+ * The day or pool being read, under the pinned filters, once its header has scrolled beneath
+ * them. It repeats that header, so it takes no touches and screen readers skip it.
  */
-function DayStrip({ day, inset }: { day: MatchDay; inset: ViewStyle }) {
+function DayStrip({ group, inset }: { group: MatchGroup; inset: ViewStyle }) {
   const { t } = useTranslation();
   const styles = useThemedStyles(makeStyles);
-  const { title, count } = useDayTitle(day);
+  const { title, count } = useGroupTitle(group);
 
   return (
     <View style={[styles.dayStrip, inset]} aria-hidden testID="day-strip">
@@ -331,7 +363,7 @@ function DayStrip({ day, inset }: { day: MatchDay; inset: ViewStyle }) {
         {title}
         <Text style={styles.dayCount}>{` · ${count}`}</Text>
       </Text>
-      {day.today ? <StatusPill label={t("details.today")} tone="green" /> : null}
+      {group.today ? <StatusPill label={t("details.today")} tone="green" /> : null}
     </View>
   );
 }
@@ -500,25 +532,33 @@ export default function CompetitionDetailsScreen() {
     )
     : null;
   const rounds = useMemo(() => (results ? groupByRound(results) : []), [results]);
-  // The list view splits each round by match day; the bracket keeps the rounds.
-  const roundDays = useMemo(() => groupByDay(rounds.map((round) => round.results)), [rounds]);
-  const daysByKey = useMemo(
+  // The list view splits each round by match day, and the pool round by pool when it has several;
+  // the bracket keeps the rounds.
+  const roundGroups = useMemo<MatchGroup[][]>(
     () =>
-      new Map<string, MatchDay>(
+      groupByDay(rounds.map((round) => round.results)).map((days, i) =>
+        (rounds[i].type === "P" && groupByPool(days)) || days
+      ),
+    [rounds],
+  );
+  const groupsByKey = useMemo(
+    () =>
+      new Map<string, MatchGroup>(
         rounds.flatMap((round, i) =>
-          roundDays[i].map((day) => [`${round.type}:${day.key}`, day] as const)
+          roundGroups[i].map((group) => [`${round.type}:${group.key}`, group] as const)
         ),
       ),
-    [rounds, roundDays],
+    [rounds, roundGroups],
   );
-  // The days the reader opened or closed, for the pair on screen: another pair starts over.
+  // The days and pools the reader opened or closed, for the pair on screen: another pair starts
+  // over.
   const pairKey = `${storeKey}/${specialtyId}/${categoryId}`;
   const [toggled, setToggled] = useState<{ pair: string; open: Record<string, boolean> }>({
     pair: "",
     open: {},
   });
   const opened = toggled.pair === pairKey ? toggled.open : {};
-  const toggleDay = (key: string, open: boolean) =>
+  const toggleGroup = (key: string, open: boolean) =>
     setToggled((prev) => ({
       pair: pairKey,
       open: { ...(prev.pair === pairKey ? prev.open : {}), [key]: !open },
@@ -638,7 +678,7 @@ export default function CompetitionDetailsScreen() {
       }, done);
     }
   }, [dayCards, pickDay]);
-  const stripDay = viewMode === "list" && currentDay ? daysByKey.get(currentDay) : undefined;
+  const stripGroup = viewMode === "list" && currentDay ? groupsByKey.get(currentDay) : undefined;
 
   const spinner = (
     <View style={styles.centered}>
@@ -771,17 +811,17 @@ export default function CompetitionDetailsScreen() {
           : rounds.map((round, i) => (
             <View key={round.type} style={styles.roundSection}>
               <RoundHeader type={round.type} count={round.results.length} />
-              {roundDays[i].map((day) => {
-                const key = `${round.type}:${day.key}`;
-                const open = opened[key] ?? day.open;
+              {roundGroups[i].map((group) => {
+                const key = `${round.type}:${group.key}`;
+                const open = opened[key] ?? group.open;
                 return (
-                  <DayCard
+                  <MatchGroupCard
                     key={key}
-                    day={day}
+                    group={group}
                     phaseType={round.type}
                     columns={resultColumns}
                     open={open}
-                    onToggle={() => toggleDay(key, open)}
+                    onToggle={() => toggleGroup(key, open)}
                     reduceMotion={reduceMotion}
                     cardRef={(card) => {
                       if (card) dayCards.set(key, card);
@@ -840,10 +880,10 @@ export default function CompetitionDetailsScreen() {
             />
           }
           opacity={barOpacity}
-          strip={stripDay
+          strip={stripGroup
             ? (
               <DayStrip
-                day={stripDay}
+                group={stripGroup}
                 // Over the results only: beside the filter column in that layout.
                 inset={filterColumn
                   ? {

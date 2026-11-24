@@ -79,6 +79,7 @@
     "matches_count_one": "{{count}} match",
     "matches_count_other": "{{count}} matches",
     "date_to_come": "Date to come",
+    "pool": "Pool {{number}}",
     "view_list": "List",
     "view_bracket": "Bracket",
     "view_ranking": "Ranking",

@@ -79,6 +79,7 @@
     "matches_count_one": "{{count}} partie",
     "matches_count_other": "{{count}} parties",
     "date_to_come": "Date à venir",
+    "pool": "Poule {{number}}",
     "view_list": "Liste",
     "view_bracket": "Tableau",
     "view_ranking": "Classement",
