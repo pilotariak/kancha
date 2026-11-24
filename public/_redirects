@@ -3,4 +3,11 @@
 
 # Cloudflare Pages routing: serve pre-rendered HTML files first,
 # fall back to index.html for unmatched paths (handled by Expo Router client-side)
+#
+# The universal link and App Link files rewrite to themselves, above the catch-all: the
+# Pages docs say redirects apply "regardless of whether or not an asset matches", and the
+# first matching rule wins. `wrangler pages dev` serves both files without these lines too,
+# so they only guard against the documented behaviour.
+/.well-known/apple-app-site-association /.well-known/apple-app-site-association 200
+/.well-known/assetlinks.json /.well-known/assetlinks.json 200
 /* /index.html 200

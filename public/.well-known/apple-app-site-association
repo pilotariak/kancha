@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["APPLE_TEAM_ID_PLACEHOLDER.io.pilotariak.kancha"],
+        "components": [
+          { "/": "/slot/join", "comment": "Invite link: /slot/join?code=…" },
+          { "/": "/slot/me", "comment": "Personal link: /slot/me#t=…" },
+          { "/": "/slot/recover", "comment": "Recovery link: /slot/recover#t=…" }
+        ]
+      }
+    ]
+  }
+}

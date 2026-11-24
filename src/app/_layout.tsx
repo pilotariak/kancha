@@ -75,6 +75,8 @@ function RootLayoutNav() {
           animation: "fade",
         }}
       />
+      {/* The slot links (invite, personal, recovery): they open without the Créneaux tab. */}
+      <Stack.Screen name="slot" options={{ headerShown: false }} />
       {/* A route of its own, not a tab: it covers the tab bar during a game. */}
       <Stack.Screen
         name="match"

@@ -228,7 +228,15 @@ export default function NewSlotScreen() {
       }
       return;
     }
-    createSlot.mutate(body, { onSuccess: () => router.replace("/(tabs)/slot") });
+    // The new slot's players and invite link: name the players and a second organizer, then
+    // post the link.
+    createSlot.mutate(body, {
+      onSuccess: (created) =>
+        router.replace({
+          pathname: "/(tabs)/slot/members",
+          params: { id: created.slot_id, created: "1" },
+        }),
+    });
   };
 
   const weekdayLabel = (weekday: IsoWeekday) =>

@@ -34,3 +34,13 @@
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Universal links (iOS) and App Links (Android) for the slot links, /slot/join, /slot/me and
+# /slot/recover. Apple and Google read both files as JSON, and the Apple file has no extension
+# to give its type. Content-Type only: the catch-all rule above adds its headers, and no
+# Cache-Control is joined to it.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+
+/.well-known/assetlinks.json
+  Content-Type: application/json

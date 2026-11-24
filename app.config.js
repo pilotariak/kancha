@@ -24,6 +24,9 @@ module.exports = {
       },
       supportsTablet: false,
       bundleIdentifier: "io.pilotariak.kancha",
+      // Universal links: the slot links of the website open the app (#158). The domain serves
+      // public/.well-known/apple-app-site-association, which names the app by its Team ID.
+      associatedDomains: ["applinks:kancha.pilotariak.com"],
     },
     android: {
       adaptiveIcon: {
@@ -39,6 +42,21 @@ module.exports = {
       // no back preview, and react-native-screens 4.16 has no predictive back for its stack.
       predictiveBackGestureEnabled: false,
       package: "io.pilotariak.kancha",
+      // App Links: the slot links of the website open the app (#158), verified against
+      // public/.well-known/assetlinks.json. Only these paths: any other page of the site stays
+      // in the browser.
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: ["/slot/join", "/slot/me", "/slot/recover"].map((path) => ({
+            scheme: "https",
+            host: "kancha.pilotariak.com",
+            path,
+          })),
+          category: ["BROWSABLE", "DEFAULT"],
+        },
+      ],
     },
     web: {
       bundler: "metro",

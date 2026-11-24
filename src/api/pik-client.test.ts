@@ -286,3 +286,176 @@ describe("slotSessions", () => {
     expect(call(0).url).toBe(`${BASE}/slots/s_1/sessions`);
   });
 });
+
+describe("joining with an invite link", () => {
+  const JOINED = { slot_id: "s_1", member_id: "m_2" };
+
+  it("previews the slot of a code without a token", async () => {
+    const preview = { name: "Mercredi soir", free_names: [], list_closed: false };
+    const { api, call } = client([reply(200, preview)], { tokens: memoryTokens("t1") });
+    await expect(api.previewJoin("K7Q2M9XP")).resolves.toEqual(preview);
+    expect(call(0).url).toBe(`${BASE}/join/K7Q2M9XP`);
+    expect(call(0).init.method).toBe("GET");
+    expect(call(0).headers.Authorization).toBeUndefined();
+  });
+
+  it("claims a free name with the device's token", async () => {
+    const tokens = memoryTokens("t1");
+    const { api, call } = client([reply(200, { ...JOINED, player_token: null })], { tokens });
+    await expect(api.joinSlot("K7Q2M9XP", { memberId: "m_2" })).resolves.toEqual(JOINED);
+    expect(call(0).url).toBe(`${BASE}/join/K7Q2M9XP/claim`);
+    expect(call(0).init.method).toBe("POST");
+    expect(JSON.parse(call(0).init.body as string)).toEqual({ member_id: "m_2" });
+    expect(call(0).headers.Authorization).toBe("Bearer t1");
+    expect(tokens.set).not.toHaveBeenCalled();
+  });
+
+  it("adds the player's own name, and keeps the token of a new player", async () => {
+    const tokens = memoryTokens();
+    const { api, call } = client([reply(201, { ...JOINED, player_token: "t_new" })], { tokens });
+    const joined = await api.joinSlot("K7Q2M9XP", { name: "Peio" });
+    expect(call(0).url).toBe(`${BASE}/join/K7Q2M9XP/members`);
+    expect(JSON.parse(call(0).init.body as string)).toEqual({ name: "Peio" });
+    expect(call(0).headers.Authorization).toBeUndefined();
+    expect(tokens.value()).toBe("t_new");
+    expect(joined).toEqual(JOINED);
+    expect(joined).not.toHaveProperty("player_token");
+  });
+
+  it("never hands the token to the web page, where pik's cookie holds it", async () => {
+    const { api, call } = client([reply(201, { ...JOINED, player_token: "t_new" })]);
+    await expect(api.joinSlot("K7Q2M9XP", { name: "Peio" })).resolves.toEqual(JOINED);
+    expect(call(0).init.credentials).toBe("include");
+  });
+
+  it("throws a name taken meanwhile", async () => {
+    const { api } = client([problem("name-taken", 409)]);
+    await expect(api.joinSlot("K7Q2M9XP", { memberId: "m_2" })).rejects.toMatchObject({
+      failure: "name-taken",
+      status: 409,
+    });
+  });
+});
+
+describe("recovery links", () => {
+  const RECOVERY = "abcdefghijklmnopqrstuvwxyz234567abcdefghijklmnopqrst";
+  const JOINED = { slot_id: "s_1", member_id: "m_2" };
+
+  it("redeems the link in pik's path and keeps the new player's token", async () => {
+    const tokens = memoryTokens();
+    const { api, call } = client([reply(200, { ...JOINED, player_token: "t_new" })], { tokens });
+    await expect(api.redeemRecovery(RECOVERY)).resolves.toEqual(JOINED);
+    expect(call(0).url).toBe(`${BASE}/recover/${RECOVERY}`);
+    expect(call(0).init.method).toBe("POST");
+    expect(tokens.value()).toBe("t_new");
+  });
+
+  it("redeems it again under a new player when pik no longer knows the token", async () => {
+    const tokens = memoryTokens("t_old");
+    const { api, call } = client(
+      [problem("unauthorized", 401), reply(200, { ...JOINED, player_token: "t_new" })],
+      { tokens },
+    );
+    await expect(api.redeemRecovery(RECOVERY)).resolves.toEqual(JOINED);
+    expect(call(0).headers.Authorization).toBe("Bearer t_old");
+    expect(call(1).headers.Authorization).toBeUndefined();
+    expect(tokens.value()).toBe("t_new");
+  });
+
+  it("retries once on the web, whose cookie pik's 401 cleared", async () => {
+    const { api, fetch } = client([problem("unauthorized", 401), reply(200, JOINED)]);
+    await expect(api.redeemRecovery(RECOVERY)).resolves.toEqual(JOINED);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("throws a link used or expired, without retrying", async () => {
+    const { api, fetch } = client([problem("recovery-link-gone", 410)], {
+      tokens: memoryTokens("t1"),
+    });
+    await expect(api.redeemRecovery(RECOVERY)).rejects.toMatchObject({
+      failure: "recovery-link-gone",
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("creates a link with its Idempotency-Key and no body", async () => {
+    const link = { token: RECOVERY, expires_at: "2026-11-25T10:00:00Z" };
+    const { api, call } = client([reply(201, link)], { tokens: memoryTokens("t1") });
+    await expect(api.createRecoveryLink("s_1", "m_2", "key-1")).resolves.toEqual(link);
+    expect(call(0).url).toBe(`${BASE}/slots/s_1/members/m_2/recovery`);
+    expect(call(0).init.method).toBe("POST");
+    expect(call(0).headers["Idempotency-Key"]).toBe("key-1");
+    expect(call(0).init.body).toBeUndefined();
+  });
+});
+
+describe("the personal link", () => {
+  it("reads a link's slots with its own token, without keeping it", async () => {
+    const tokens = memoryTokens("t_device");
+    const { api, call } = client([reply(200, { slots: [] })], { tokens });
+    await expect(api.playerSlots("t_link")).resolves.toEqual({ slots: [] });
+    expect(call(0).url).toBe(`${BASE}/me`);
+    expect(call(0).headers.Authorization).toBe("Bearer t_link");
+    expect(tokens.value()).toBe("t_device");
+  });
+
+  it("keeps the link's token on native, never on the web", async () => {
+    const tokens = memoryTokens("t_device");
+    await expect(client([], { tokens }).api.adoptToken("t_link")).resolves.toBe(true);
+    expect(tokens.value()).toBe("t_link");
+    await expect(client([]).api.adoptToken("t_link")).resolves.toBe(false);
+  });
+
+  it("gives the device's token on native only", async () => {
+    await expect(client([], { tokens: memoryTokens("t1") }).api.deviceToken()).resolves.toBe("t1");
+    await expect(client([]).api.deviceToken()).resolves.toBeNull();
+  });
+});
+
+describe("organizer actions", () => {
+  it("reads a slot with the device's token", async () => {
+    const { api, call } = client([reply(200, { id: "s_1" })], { tokens: memoryTokens("t1") });
+    await api.slot("s_1");
+    expect(call(0).url).toBe(`${BASE}/slots/s_1`);
+    expect(call(0).headers.Authorization).toBe("Bearer t1");
+  });
+
+  it("adds a name, and changes a member's role", async () => {
+    const { api, call } = client([reply(201, {}), reply(200, {})]);
+    await api.addMember("s_1", "Peio");
+    await api.updateMember("s_1", "m_2", { role: "organizer" });
+    expect(call(0).url).toBe(`${BASE}/slots/s_1/members`);
+    expect(JSON.parse(call(0).init.body as string)).toEqual({ name: "Peio" });
+    expect(call(1).url).toBe(`${BASE}/slots/s_1/members/m_2`);
+    expect(call(1).init.method).toBe("PATCH");
+    expect(JSON.parse(call(1).init.body as string)).toEqual({ role: "organizer" });
+  });
+
+  it("frees a name, which pik answers with 204 and no body", async () => {
+    const { api, call } = client([reply(204, "")]);
+    await expect(api.releaseName("s_1", "m_2")).resolves.toBeUndefined();
+    expect(call(0).url).toBe(`${BASE}/slots/s_1/members/m_2/claim`);
+    expect(call(0).init.method).toBe("DELETE");
+  });
+
+  it("rotates the invite code, and closes the list", async () => {
+    const { api, call } = client([
+      reply(200, { invite_code: "N3WC0DE2" }),
+      reply(200, { closed: true }),
+    ]);
+    await expect(api.rotateInviteCode("s_1")).resolves.toEqual({ invite_code: "N3WC0DE2" });
+    await expect(api.setListClosed("s_1", true)).resolves.toEqual({ closed: true });
+    expect(call(0).url).toBe(`${BASE}/slots/s_1/invite-code`);
+    expect(call(0).init.method).toBe("POST");
+    expect(call(1).url).toBe(`${BASE}/slots/s_1/list`);
+    expect(call(1).init.method).toBe("PUT");
+    expect(JSON.parse(call(1).init.body as string)).toEqual({ closed: true });
+  });
+
+  it("throws the last organizer's problem", async () => {
+    const { api } = client([problem("last-organizer", 409)]);
+    await expect(api.updateMember("s_1", "m_1", { role: "player" })).rejects.toMatchObject({
+      failure: "last-organizer",
+    });
+  });
+});

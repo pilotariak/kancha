@@ -11,6 +11,7 @@ import {
   formatDay,
   formatLongDate,
   formatMonthYear,
+  formatSchedule,
   type Translate,
 } from "./format";
 
@@ -67,5 +68,29 @@ describe("capitalize", () => {
   it("raises the first letter only", () => {
     expect(capitalize("mercredi 25 novembre", "fr")).toBe("Mercredi 25 novembre");
     expect(capitalize("", "fr")).toBe("");
+  });
+});
+
+describe("formatSchedule", () => {
+  const t = (key: string) => ({ "slot.interval.weekly": "Every week" })[key] ?? key;
+  const names = {
+    weekdays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+    weekdaysShort: [],
+    months: [],
+    monthsShort: [],
+  };
+
+  it("writes the weekday, the times and the frequency", () => {
+    expect(
+      formatSchedule(t, names, "en", { weekday: 3, time_from: "18:00", interval_weeks: 1 }),
+    ).toBe("Wednesday · 18:00 · Every week");
+    expect(
+      formatSchedule(t, names, "en", {
+        weekday: 1,
+        time_from: "18:00",
+        time_to: "19:30",
+        interval_weeks: 2,
+      }),
+    ).toBe("Monday · 18:00–19:30 · slot.interval.fortnightly");
   });
 });

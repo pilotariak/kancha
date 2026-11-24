@@ -19,6 +19,10 @@ export const SCREEN_TITLE_KEYS: Readonly<Record<string, string>> = {
   profile: "tabs.about",
   slot: "tabs.slot",
   "slot/new": "tabs.slot",
+  "slot/members": "slot.members_screen.eyebrow",
+  "slot/join": "slot.join_flow.title",
+  "slot/me": "slot.me_screen.eyebrow",
+  "slot/recover": "slot.recover_screen.eyebrow",
   modal: "head.club_alerts",
   "+not-found": "head.not_found",
 };
