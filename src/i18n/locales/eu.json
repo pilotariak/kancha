@@ -122,7 +122,7 @@
     "pool_day": "{{matches}}: {{date}}"
   },
   "rounds_match": {
-    "P": "{{number}}. taldea",
+    "P": "Talde fasea",
     "B1T": "1. txandako {{number}}. barragea",
     "B2T": "2. txandako {{number}}. barragea",
     "B3T": "3. txandako {{number}}. barragea",

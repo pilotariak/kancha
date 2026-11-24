@@ -122,7 +122,7 @@
     "pool_day": "{{matches}} le {{date}}"
   },
   "rounds_match": {
-    "P": "Poule {{number}}",
+    "P": "Phase de poules",
     "B1T": "Barrage 1er tour {{number}}",
     "B2T": "Barrage 2e tour {{number}}",
     "B3T": "Barrage 3e tour {{number}}",

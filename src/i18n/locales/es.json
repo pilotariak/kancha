@@ -122,7 +122,7 @@
     "pool_day": "{{matches}} el {{date}}"
   },
   "rounds_match": {
-    "P": "Grupo {{number}}",
+    "P": "Fase de grupos",
     "B1T": "Repechaje 1ª ronda {{number}}",
     "B2T": "Repechaje 2ª ronda {{number}}",
     "B3T": "Repechaje 3ª ronda {{number}}",
