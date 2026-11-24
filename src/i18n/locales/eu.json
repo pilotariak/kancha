@@ -80,6 +80,7 @@
     "matches_count_other": "{{count}} partida",
     "date_to_come": "Data zehazteke",
     "pool": "{{number}}. taldea",
+    "pool_phase": "{{number}}. fasea",
     "view_list": "Zerrenda",
     "view_bracket": "Taula",
     "view_ranking": "Sailkapena",

@@ -4,17 +4,30 @@ import type { ClubLineup, Result } from "@/types/competition";
 import type { MatchDay } from "./matchDays";
 import { parsePhase } from "./matchPhase";
 
-/** What pool grouping reads from a match: its day and score, its number, and who played it. */
+/** What pool grouping reads from a match: its day, score, number and pool, and who played it. */
 export type PoolMatch = Pick<
   Result,
-  "dateMatch" | "scores" | "phase" | "clubA" | "clubB" | "clubALineup" | "clubBLineup"
+  | "dateMatch"
+  | "scores"
+  | "phase"
+  | "pool"
+  | "poolPhase"
+  | "clubA"
+  | "clubB"
+  | "clubALineup"
+  | "clubBLineup"
 >;
 
 export interface MatchPool<T extends PoolMatch = Result> {
-  /** "pool-1": unique among the pools of a round. */
+  /** "pool-1", or "phase-2-pool-1" in a round of several pool phases: unique among its pools. */
   key: string;
-  /** From 1, in the order of the pools' lowest match number. */
+  /**
+   * The league site's number when Frontis sends the pools; else from 1, in the order of the pools'
+   * lowest match number.
+   */
   number: number;
+  /** The pool phase when the round has several, from `Result.poolPhase`; else null. */
+  poolPhase: number | null;
   /** One of its matches is today, in local time. */
   today: boolean;
   /** One of its matches falls on a day that starts open (see `MatchDay.open`). */
@@ -50,10 +63,42 @@ class Teams {
 }
 
 /**
- * Splits the matches of a pool round into its pools. Frontis does not say which pool a match
- * belongs to: its phase ("P 10") numbers the match within the round, not the pool. In a pool
- * every team meets every other one, so the pools are the groups of players linked by the
- * matches they played: the licences of both sides of a match join one group.
+ * The pools Frontis sends: one per pool phase and pool, in the order of those numbers. The pool
+ * phase splits the round only when it takes several values: a pair whose league site names a
+ * single pool phase may still number it.
+ */
+function sourcePools<T extends PoolMatch>(days: readonly MatchDay<T>[]): MatchPool<T>[] | null {
+  const phases = new Set(days.flatMap((day) => day.results.map((r) => r.poolPhase ?? null)));
+  const pools = new Map<string, MatchPool<T>>();
+  for (const day of days) {
+    for (const result of day.results) {
+      const number = result.pool!;
+      const poolPhase = phases.size > 1 ? result.poolPhase ?? null : null;
+      const key = poolPhase === null ? `pool-${number}` : `phase-${poolPhase}-pool-${number}`;
+      const pool = pools.get(key)
+        ?? { key, number, poolPhase, today: false, open: false, results: [] };
+      pool.open ||= day.open;
+      pool.today ||= day.today;
+      pool.results.push(result);
+      pools.set(key, pool);
+    }
+  }
+  if (pools.size < 2) return null;
+  return [...pools.values()].sort((a, b) =>
+    (a.poolPhase ?? 0) - (b.poolPhase ?? 0) || a.number - b.number
+  );
+}
+
+/**
+ * Splits the matches of a pool round into its pools. When Frontis sends the pool of every match
+ * (`Result.pool`, `Result.poolPhase`), the pools are the league site's, split by pool phase
+ * first when there are several. A round where a match has none, as on the rows Frontis stored
+ * before it read the pool, keeps the inference below for every match.
+ *
+ * Otherwise the pools are inferred, as the phase ("P 10") numbers the match within the round,
+ * not the pool. In a pool every team meets every other one, so the pools are the groups of
+ * players linked by the matches they played: the licences of both sides of a match join one
+ * group.
  *
  * A match without a lineup on either side goes to the pool of its clubs, when the teams of
  * that club play in one pool only. A club never links two groups: it may enter a team in
@@ -66,6 +111,11 @@ class Teams {
 export function groupByPool<T extends PoolMatch>(
   days: readonly MatchDay<T>[],
 ): MatchPool<T>[] | null {
+  const matches = days.flatMap((day) => day.results);
+  if (matches.length > 0 && matches.every((result) => result.pool != null)) {
+    return sourcePools(days);
+  }
+
   const teams = new Teams();
   const licences = new Map<T, string[]>();
   for (const day of days) {
@@ -125,6 +175,7 @@ export function groupByPool<T extends PoolMatch>(
     .map((pool, i) => ({
       key: `pool-${i + 1}`,
       number: i + 1,
+      poolPhase: null,
       today: pool.today,
       open: pool.open,
       results: pool.results,

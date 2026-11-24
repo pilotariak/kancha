@@ -144,16 +144,23 @@ type MatchGroup = MatchDay | MatchPool;
 const isPool = (group: MatchGroup): group is MatchPool => "number" in group;
 
 /**
- * The card header's words: the pool, or the date in full ("date to come" without one), and the
- * match count.
+ * The card header's words: the pool, after its pool phase when the round has several, or the
+ * date in full ("date to come" without one), and the match count.
  */
 function useGroupTitle(group: MatchGroup): { title: string; count: string } {
   const { t, i18n } = useTranslation();
   let title: string;
-  if (isPool(group)) title = t("details.pool", { number: group.number });
-  // The language the strings resolved to, so a "de" device gets an English date too.
-  else if (group.date) title = formatMatchDay(group.date, i18n.resolvedLanguage ?? "en");
-  else title = t("details.date_to_come");
+  if (isPool(group)) {
+    const pool = t("details.pool", { number: group.number });
+    title = group.poolPhase === null
+      ? pool
+      : `${t("details.pool_phase", { number: group.poolPhase })}, ${pool}`;
+  } else if (group.date) {
+    // The language the strings resolved to, so a "de" device gets an English date too.
+    title = formatMatchDay(group.date, i18n.resolvedLanguage ?? "en");
+  } else {
+    title = t("details.date_to_come");
+  }
   return { title, count: t("details.matches_count", { count: group.results.length }) };
 }
 
@@ -244,12 +251,10 @@ function MatchGroupCard(
       ? formatMatchDate(result.dateMatch, i18n.resolvedLanguage ?? "en")
         ?? t("details.date_to_come")
       : matchPhaseLabel(result.phase, t);
-  const testID = pool
-    ? `match-pool-${phaseType}-${group.number}`
-    : `match-day-${phaseType}-${group.key}`;
-  const toggleTestID = pool
-    ? `match-pool-toggle-${phaseType}-${group.number}`
-    : `match-day-toggle-${phaseType}-${group.key}`;
+  // By key: a pool's number repeats across pool phases.
+  const kind = pool ? "pool" : "day";
+  const testID = `match-${kind}-${phaseType}-${group.key}`;
+  const toggleTestID = `match-${kind}-toggle-${phaseType}-${group.key}`;
 
   // Opening fades the matches in and turns the chevron over; with reduce motion, both switch
   // at once. Closing removes the matches at once.

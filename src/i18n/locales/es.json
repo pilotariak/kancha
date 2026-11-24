@@ -80,6 +80,7 @@
     "matches_count_other": "{{count}} partidos",
     "date_to_come": "Fecha por confirmar",
     "pool": "Grupo {{number}}",
+    "pool_phase": "Fase {{number}}",
     "view_list": "Lista",
     "view_bracket": "Cuadro",
     "view_ranking": "Clasificación",

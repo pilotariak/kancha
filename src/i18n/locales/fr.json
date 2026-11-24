@@ -80,6 +80,7 @@
     "matches_count_other": "{{count}} parties",
     "date_to_come": "Date à venir",
     "pool": "Poule {{number}}",
+    "pool_phase": "Phase {{number}}",
     "view_list": "Liste",
     "view_bracket": "Tableau",
     "view_ranking": "Classement",
