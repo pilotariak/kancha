@@ -19,6 +19,14 @@ export type SessionSummary = Schemas["SessionSummary"];
 export type SessionState = Schemas["SessionState"];
 export type AnswerStatus = Schemas["AnswerStatus"];
 export type SlotCourt = Schemas["Court"];
+export type JoinPreview = Schemas["JoinPreview"];
+export type FreeName = Schemas["FreeName"];
+export type Joined = Schemas["Joined"];
+export type SlotDetail = Schemas["SlotDetail"];
+export type MemberView = Schemas["MemberView"];
+export type MemberChanges = Schemas["MemberChanges"];
+export type SlotRole = Schemas["Role"];
+export type RecoveryLink = Schemas["RecoveryLink"];
 
 /**
  * The `type` of pik's problem documents, after `https://pik.pilotariak.com/problems/`. pik sends
@@ -166,6 +174,8 @@ export function createPikClient({ fetch, baseUrl, tokens, timeoutMs = 15_000 }: 
       );
       throw new PikError(problem, response.status, retryAfterOf(response));
     }
+    // 204: releasing a name, which answers without a body.
+    if (response.status === 204) return undefined as T;
     try {
       return (await response.json()) as T;
     } catch {
@@ -181,6 +191,22 @@ export function createPikClient({ fetch, baseUrl, tokens, timeoutMs = 15_000 }: 
   async function forget(token: string) {
     if (tokens && (await tokens.get()) === token) await tokens.clear();
   }
+
+  /** The stored token of the native app; null on the web, where pik's cookie carries it. */
+  const stored = () => (tokens ? tokens.get() : Promise.resolve(null));
+
+  /**
+   * Keeps the token of a join or a recovery, when pik issued one: the native app stores it, the
+   * web build already has it in pik's cookie. Callers never see it.
+   */
+  async function keep({ player_token: playerToken, ...joined }: Joined) {
+    if (tokens && playerToken) await tokens.set(playerToken);
+    return joined;
+  }
+
+  const slotPath = (slotId: string) => `/slots/${encodeURIComponent(slotId)}`;
+  const memberPath = (slotId: string, memberId: string) =>
+    `${slotPath(slotId)}/members/${encodeURIComponent(memberId)}`;
 
   return {
     /**
@@ -250,6 +276,134 @@ export function createPikClient({ fetch, baseUrl, tokens, timeoutMs = 15_000 }: 
         `/slots/${encodeURIComponent(slotId)}/sessions${search}`,
         { token },
       );
+    },
+
+    // ── Joining with an invite link (kancha ADR-0002) ─────────────────────────
+
+    /** The slot of an invite code and the names nobody holds yet. Needs no token. */
+    previewJoin(code: string) {
+      return request<JoinPreview>("GET", `/join/${encodeURIComponent(code)}`);
+    },
+
+    /**
+     * Joins a slot: "C'est moi" claims a free name of the preview (`memberId`), "I'm not in the
+     * list" adds the player's own (`name`). The name goes to the device's player, or to a new
+     * one, whose token pik returns. pik takes an unknown token for none here, so a device whose
+     * player was purged joins under a new one.
+     */
+    async joinSlot(
+      code: string,
+      choice: { memberId: string } | { name: string },
+    ): Promise<Omit<Joined, "player_token">> {
+      const path = `/join/${encodeURIComponent(code)}`;
+      const token = await stored();
+      const joined = "memberId" in choice
+        ? await request<Joined>("POST", `${path}/claim`, {
+          body: { member_id: choice.memberId },
+          token,
+        })
+        : await request<Joined>("POST", `${path}/members`, { body: { name: choice.name }, token });
+      return keep(joined);
+    },
+
+    /**
+     * Redeems a recovery link: its member, with their answers, becomes the device's. The link
+     * works once. pik checks the device's token before the link, so after a 401 the link is still
+     * unused: the native app drops the token pik no longer knows, the web build's cookie was
+     * cleared by that 401, and the link is redeemed once more under a new player.
+     */
+    async redeemRecovery(recoveryToken: string): Promise<Omit<Joined, "player_token">> {
+      const send = (token: string | null) =>
+        request<Joined>("POST", `/recover/${encodeURIComponent(recoveryToken)}`, { token });
+      const token = await stored();
+      let joined: Joined;
+      try {
+        joined = await send(token);
+      } catch (error) {
+        if (!isPikFailure(error, "unauthorized")) throw error;
+        if (token) await forget(token);
+        joined = await send(null);
+      }
+      return keep(joined);
+    },
+
+    // ── The personal link (native app only) ───────────────────────────────────
+
+    /**
+     * The device's player token, for the personal link: the native app's, null on the web, where
+     * it stays in pik's cookie. Never log it.
+     */
+    deviceToken: (): Promise<string | null> => stored(),
+
+    /** The slots of the player a personal link holds, without keeping its token: 401 if unknown. */
+    playerSlots(token: string) {
+      return request<MySlots>("GET", "/me", { token });
+    },
+
+    /**
+     * Keeps a personal link's token on this device in place of the stored one. False on the web:
+     * pik sets its cookie only for a token it issues, so a page cannot restore one.
+     */
+    async adoptToken(token: string): Promise<boolean> {
+      if (!tokens) return false;
+      await tokens.set(token);
+      return true;
+    },
+
+    // ── A slot and its list of names ──────────────────────────────────────────
+
+    /** A slot with its members, the caller's member and its upcoming sessions. */
+    async slot(slotId: string) {
+      return request<SlotDetail>("GET", slotPath(slotId), { token: await stored() });
+    },
+
+    /** Adds a name to the list (organizer). Nobody holds it until a player claims it. */
+    async addMember(slotId: string, name: string) {
+      return request<MemberView>("POST", `${slotPath(slotId)}/members`, {
+        body: { name },
+        token: await stored(),
+      });
+    },
+
+    /** Changes a member's role or name (organizer). */
+    async updateMember(slotId: string, memberId: string, changes: MemberChanges) {
+      return request<MemberView>("PATCH", memberPath(slotId, memberId), {
+        body: changes,
+        token: await stored(),
+      });
+    },
+
+    /** Frees a claimed name (organizer): the member keeps their answers, anyone can claim it. */
+    async releaseName(slotId: string, memberId: string): Promise<void> {
+      await request<undefined>("DELETE", `${memberPath(slotId, memberId)}/claim`, {
+        token: await stored(),
+      });
+    },
+
+    /**
+     * Creates a recovery link for a member (organizer): valid once, for 24 hours. A retry with
+     * the same `idempotencyKey` returns the same link with a fresh token.
+     */
+    async createRecoveryLink(slotId: string, memberId: string, idempotencyKey: string) {
+      return request<RecoveryLink>("POST", `${memberPath(slotId, memberId)}/recovery`, {
+        headers: { "Idempotency-Key": idempotencyKey },
+        token: await stored(),
+      });
+    },
+
+    /** Draws a new invite code (organizer): the old link stops working, members stay. */
+    async rotateInviteCode(slotId: string) {
+      return request<Schemas["InviteCodeView"]>("POST", `${slotPath(slotId)}/invite-code`, {
+        token: await stored(),
+      });
+    },
+
+    /** Closes or reopens the list (organizer): a closed list takes no new name by the link. */
+    async setListClosed(slotId: string, closed: boolean) {
+      return request<Schemas["ListState"]>("PUT", `${slotPath(slotId)}/list`, {
+        body: { closed },
+        token: await stored(),
+      });
     },
   };
 }

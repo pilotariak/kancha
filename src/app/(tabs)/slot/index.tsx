@@ -13,7 +13,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import type { SlotCard } from "@/api/pik";
-import { CalendarClock, MapPin, Plus, RotateCcw, Users } from "@/components/icons";
+import {
+  CalendarClock,
+  ChevronRight,
+  MapPin,
+  Plus,
+  RotateCcw,
+  UserPlus,
+  Users,
+} from "@/components/icons";
 import { PressableScale } from "@/components/PressableScale";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { StatusPill } from "@/components/StatusPill";
@@ -155,6 +163,20 @@ function SlotCardView({ slot, names }: { slot: SlotCard; names: DateNames }) {
           </>
         )
         : <Text style={styles.seasonOver}>{t("slot.season_over")}</Text>}
+
+      <View style={styles.divider} />
+      <PressableScale
+        onPress={() => router.push({ pathname: "/(tabs)/slot/members", params: { id: slot.id } })}
+        accessibilityRole="link"
+        accessibilityLabel={`${t("slot.open_members")}, ${slot.name}`}
+        testID={`slot-card-${slot.id}-members`}
+      >
+        <View style={styles.membersLink}>
+          <Users color={colors.red} size={16} />
+          <Text style={styles.membersLinkText}>{t("slot.open_members")}</Text>
+          <ChevronRight color={colors.muted} size={16} />
+        </View>
+      </PressableScale>
     </View>
   );
 }
@@ -254,17 +276,18 @@ export default function SlotScreen() {
                     <Text style={styles.ctaText}>{t("slot.create")}</Text>
                   </View>
                 </PressableScale>
-                {/* Joining from an invite link comes with #158. */}
-                <View
-                  style={[styles.actionCell, styles.ctaButton, styles.ctaDisabled]}
+                {/* The invite link opens /slot/join itself; this asks for its code. */}
+                <PressableScale
+                  style={styles.actionCell}
+                  onPress={() => router.push("/slot/join")}
                   accessibilityRole="button"
-                  accessibilityLabel={`${t("slot.join")}, ${t("common.soon")}`}
-                  aria-disabled
-                  testID="slot-join-button"
+                  accessibilityLabel={t("slot.join")}
                 >
-                  <Text style={[styles.ctaText, styles.ctaTextDisabled]}>{t("slot.join")}</Text>
-                  <StatusPill label={t("common.soon")} tone="soft" size="small" />
-                </View>
+                  <View style={styles.ctaButton} testID="slot-join-button">
+                    <UserPlus color={colors.ink} size={17} />
+                    <Text style={styles.ctaText}>{t("slot.join")}</Text>
+                  </View>
+                </PressableScale>
               </View>
 
               {/* ── The player's slots ── */}
@@ -397,9 +420,7 @@ const makeStyles = (c: Palette) =>
       justifyContent: "center",
       gap: 8,
     },
-    ctaDisabled: { backgroundColor: c.cream },
     ctaText: { color: c.ink, fontSize: 15, fontWeight: "800" },
-    ctaTextDisabled: { color: c.muted },
 
     // Slot card
     slotCard: {
@@ -436,6 +457,8 @@ const makeStyles = (c: Palette) =>
     answerRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     answerLabel: { color: c.muted, fontSize: 13, fontWeight: "600" },
     seasonOver: { color: c.muted, fontSize: 13, fontWeight: "600" },
+    membersLink: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: 8 },
+    membersLinkText: { flex: 1, color: c.ink, fontSize: 14, fontWeight: "700" },
 
     // States
     centered: { paddingVertical: 24, alignItems: "center" },
