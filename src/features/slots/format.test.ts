@@ -8,7 +8,9 @@ import fr from "@/i18n/locales/fr.json";
 import {
   capitalize,
   dateNames,
+  formatClock,
   formatDay,
+  formatDeadline,
   formatLongDate,
   formatMonthYear,
   formatSchedule,
@@ -92,5 +94,60 @@ describe("formatSchedule", () => {
         interval_weeks: 2,
       }),
     ).toBe("Monday · 18:00–19:30 · slot.interval.fortnightly");
+  });
+});
+
+describe("formatClock", () => {
+  it("writes the screen time with two digits and the message time as the language does", () => {
+    const fr = translate("fr");
+    const en = translate("en");
+    expect(formatClock(fr, { hour: 20, minute: 0 }, "screen")).toBe("20:00");
+    expect(formatClock(fr, { hour: 9, minute: 5 }, "screen")).toBe("09:05");
+    expect(formatClock(fr, { hour: 20, minute: 0 }, "message")).toBe("20h");
+    expect(formatClock(fr, { hour: 20, minute: 30 }, "message")).toBe("20h30");
+    expect(formatClock(en, { hour: 20, minute: 0 }, "message")).toBe("20:00");
+  });
+});
+
+describe("formatDeadline", () => {
+  // Thursday 26 November 2026; pik sends the deadline in UTC.
+  const SESSION = { year: 2026, month: 11, day: 26 };
+
+  it("names the weekday and the Paris time, as the issue's examples write them", () => {
+    const t = translate("fr");
+    const names = dateNames(t);
+    // Tuesday 24 November at 20:00 in Paris, 19:00 UTC.
+    expect(formatDeadline(t, names, "2026-11-24T19:00:00Z", SESSION, "screen")).toBe(
+      "mardi 20:00",
+    );
+    // Wednesday 25 November at 20:00 in Paris.
+    expect(formatDeadline(t, names, "2026-11-25T19:00:00Z", SESSION, "message")).toBe(
+      "mercredi 20h",
+    );
+  });
+
+  it("adds the date to a deadline more than six days before the session", () => {
+    const t = translate("fr");
+    expect(formatDeadline(t, dateNames(t), "2026-11-17T19:00:00Z", SESSION, "screen")).toBe(
+      "mar. 17 nov. 20:00",
+    );
+  });
+
+  it.each(
+    [
+      ["en", "Wednesday 20:00"],
+      ["es", "miércoles 20:00"],
+      ["eu", "asteazkena 20:00"],
+    ] as const,
+  )("writes it in %s", (lng, expected) => {
+    const t = translate(lng);
+    expect(formatDeadline(t, dateNames(t), "2026-11-25T19:00:00Z", SESSION, "message")).toBe(
+      expected,
+    );
+  });
+
+  it("is empty without an instant", () => {
+    const t = translate("fr");
+    expect(formatDeadline(t, dateNames(t), "", SESSION, "screen")).toBe("");
   });
 });

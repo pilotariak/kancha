@@ -300,7 +300,8 @@
       ],
       "day": "{{weekday}}, {{day}} {{month}}",
       "long": "{{weekday}}, {{day}} de {{month}} de {{year}}",
-      "month_year": "{{month}} de {{year}}"
+      "month_year": "{{month}} de {{year}}",
+      "day_time": "{{day}} {{time}}"
     },
     "errors": {
       "unauthorized": "Este dispositivo aún no es jugador del horario.",
@@ -457,6 +458,73 @@
       "recovery_message": "{{slot}}: tu enlace para recuperar tu nombre en Kancha (una vez, en 24 horas)",
       "recovery_share": "Enviar en privado",
       "action_error": "No se ha podido guardar el cambio."
+    },
+    "time": {
+      "clock": "{{hh}}:{{mm}}",
+      "message": "{{hh}}:{{mm}}",
+      "message_minutes": "{{hh}}:{{mm}}"
+    },
+    "open_session": "Abrir la sesión",
+    "session_screen": {
+      "eyebrow": "Sesión",
+      "load_error": "No se ha podido cargar la sesión.",
+      "invalid": "Este enlace de sesión está incompleto. Abre la sesión desde la pestaña {{tab}}.",
+      "deadline_until": "Respuestas hasta el {{deadline}}",
+      "deadline_closed": "Respuestas cerradas desde el {{deadline}}",
+      "gauge_label": "OK: {{ok}}, Reserva: {{dispo}}, mínimo {{min}}, {{places}} plazas",
+      "min_marker": "mín. {{count}}",
+      "places_marker_one": "{{count}} plaza",
+      "places_marker_other": "{{count}} plazas",
+      "sentence": {
+        "separator": ", ",
+        "free_places_one": "{{count}} plaza libre",
+        "free_places_other": "{{count}} plazas libres",
+        "full": "completa",
+        "waiting_one": "{{count}} en espera",
+        "waiting_other": "{{count}} en espera",
+        "dispo_can_complete_one": "{{count}} reserva puede completar",
+        "dispo_can_complete_other": "{{count}} reservas pueden completar",
+        "ok_short_one": "falta {{count}} OK",
+        "ok_short_other": "faltan {{count}} OK",
+        "ok_at_deadline": "{{ok}} OK en la fecha límite, hacían falta {{min}}",
+        "cancelled": "un organizador ha anulado esta fecha"
+      },
+      "answer_hint": "Reserva: vienes si falta gente. Solo los OK cuentan para el mínimo.",
+      "ko_only": "La fecha límite ha pasado: aún puedes darte de baja.",
+      "cancelled_notice": "Esta fecha está anulada: las respuestas están cerradas.",
+      "answer_error": "Tu respuesta no se ha guardado.",
+      "answer_for_error": "La respuesta de {{name}} no se ha guardado.",
+      "answers_title": "Respuestas",
+      "no_answer": "Sin respuesta",
+      "nobody": "Nadie",
+      "answer_for": "Responder por {{name}}",
+      "answer_for_hint": "Algunos jugadores aún no han elegido su nombre: puedes responder por ellos.",
+      "share_title": "En el grupo",
+      "remind": "Recordar",
+      "remind_hint": "Comparte en el grupo el número de OK, la fecha límite y el enlace de invitación.",
+      "notify": "Avisar",
+      "notify_hint": "Comparte en el grupo si la sesión se juega.",
+      "copied": "Mensaje copiado",
+      "organizer_title": "Organización",
+      "cancel": "Anular esta fecha",
+      "cancel_hint": "La fecha sigue en la lista, tachada, y los jugadores ya no pueden responder.",
+      "cancel_confirm": "Confirmar: anular la fecha",
+      "cancel_keep": "Mantener la fecha",
+      "restore": "Restablecer esta fecha"
+    },
+    "session_message": {
+      "title": "{{slot}} · {{day}}",
+      "ok_needed": "{{ok}} OK, hacen falta {{min}}",
+      "ok_free_one": "{{ok}} OK, queda {{count}} plaza",
+      "ok_free_other": "{{ok}} OK, quedan {{count}} plazas",
+      "ok_full": "{{ok}} OK, completa",
+      "answer_before": "Responde antes del {{deadline}}:",
+      "on_free_one": "Confirmada: {{ok}} OK, {{count}} plaza libre",
+      "on_free_other": "Confirmada: {{ok}} OK, {{count}} plazas libres",
+      "on_full": "Confirmada: {{ok}} OK, completa",
+      "cancelled_short": "Anulada: {{ok}} OK en la fecha límite",
+      "cancelled": "Anulada",
+      "next": "Próxima sesión: {{day}}"
     }
   },
   "new_slot": {

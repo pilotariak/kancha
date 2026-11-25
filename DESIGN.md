@@ -1724,6 +1724,41 @@ Device:      the screen stays on while a game is played, not on the win screen (
              selection tick per undo, a success on the win
 ```
 
+### Slot session — gauge and answers
+
+The session screen (`src/app/(tabs)/slot/session.tsx`, #157): one date of a slot, opened from a
+slot card's next session or from a row of the Créneaux list. The state, the counts and the
+deadline are pik's; the screen computes no state of its own.
+
+```
+State card:    the date and start time (struck through and muted once an organizer cancels
+               the date), the state pill of the Créneaux list (Status Pills), "3/4 OK" 22px
+               weight 900 tabular-nums, the gauge, one sentence 15px weight 700 text ("2 places
+               libres, 2 dispo peuvent compléter"), the deadline with a CalendarClock: red
+               before it, muted after it
+Gauge:         `SessionGauge`, 14px bar with 7px radius on line, drawn with react-native-svg
+               once its width is known. OK answers solid green, Dispo answers amberBg hatched
+               with 2px amber lines at 45°, 6px apart, after the OK ones. The minimum is a 2px
+               ink line 5px above and below the bar, labelled "min 4" (11px weight 800) on the
+               side facing the middle. "6 places" (12px weight 700 placeholder) ends the bar.
+               Up to 16 places, 1.5px card ticks split the bar into places. The arithmetic is
+               `src/features/slots/gauge.ts`
+Answer:        three equal buttons OK, Dispo, KO (flex 1 cells without padding, 8px apart), min
+               height 48px, 14px radius, white with a line border. The selected one takes its
+               legend colors: greenSoft and green, amberBg and amber, redSoft and red. After the
+               deadline only KO stays; the others turn cream with muted text
+Names:         four groups, OK, Dispo, KO, then "Sans réponse", each under an 8px legend dot
+               and an uppercase 12px weight 800 placeholder title with its count; white rows
+               with a line border, 14px radius. The player's own name in weight 900 with the
+               green "Vous" pill. An organizer gets 44px compact answer buttons under each
+               member who never picked their name ("Libre" pill)
+Group chat:    "Relancer" (BellRing) before the deadline, "Prévenir" (Megaphone) for
+               organizers once the game is on or off: white buttons that open the share sheet
+               (Share card is the image of a result, not these messages)
+Organizer:     "Annuler cette date" (Ban) asks for a confirmation in red, as freeing a name
+               does; a cancelled date offers "Rétablir cette date" (Undo2)
+```
+
 ### Share card
 
 `ShareCard` (`src/components/ShareCard.tsx`): one match as an image to post, 1080 × 1350 px

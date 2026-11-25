@@ -300,7 +300,8 @@
       ],
       "day": "{{month}} {{day}}, {{weekday}}",
       "long": "{{year}}(e)ko {{month}}ren {{day}}(a), {{weekday}}",
-      "month_year": "{{year}}(e)ko {{month}}"
+      "month_year": "{{year}}(e)ko {{month}}",
+      "day_time": "{{day}} {{time}}"
     },
     "errors": {
       "unauthorized": "Gailu hau ez da oraindik ordutegiko jokalaria.",
@@ -457,6 +458,73 @@
       "recovery_message": "{{slot}}: Kanchan zure izena berreskuratzeko esteka (behin, 24 orduren barruan)",
       "recovery_share": "Bidali pribatuan",
       "action_error": "Ezin izan da aldaketa gorde."
+    },
+    "time": {
+      "clock": "{{hh}}:{{mm}}",
+      "message": "{{hh}}:{{mm}}",
+      "message_minutes": "{{hh}}:{{mm}}"
+    },
+    "open_session": "Ireki saioa",
+    "session_screen": {
+      "eyebrow": "Saioa",
+      "load_error": "Ezin izan da saioa kargatu.",
+      "invalid": "Saioaren esteka hau osatu gabe dago. Ireki saioa {{tab}} fitxatik.",
+      "deadline_until": "Erantzunak {{deadline}} arte",
+      "deadline_closed": "Erantzuteko epea amaitu da ({{deadline}})",
+      "gauge_label": "Bai: {{ok}}, Ordezkoa: {{dispo}}, gutxienez {{min}}, {{places}} plaza",
+      "min_marker": "gutx. {{count}}",
+      "places_marker_one": "plaza {{count}}",
+      "places_marker_other": "{{count}} plaza",
+      "sentence": {
+        "separator": ", ",
+        "free_places_one": "plaza {{count}} libre",
+        "free_places_other": "{{count}} plaza libre",
+        "full": "beteta",
+        "waiting_one": "{{count}} zain",
+        "waiting_other": "{{count}} zain",
+        "dispo_can_complete_one": "{{count}} ordezkok osa dezake",
+        "dispo_can_complete_other": "{{count}} ordezkok osa dezakete",
+        "ok_short_one": "{{count}} Bai falta da",
+        "ok_short_other": "{{count}} Bai falta dira",
+        "ok_at_deadline": "{{ok}} Bai epemugan, {{min}} behar ziren",
+        "cancelled": "antolatzaile batek data hau bertan behera utzi du"
+      },
+      "answer_hint": "Ordezkoa: jendea falta bada etorriko zara. Gutxienekorako Bai erantzunak bakarrik zenbatzen dira.",
+      "ko_only": "Epea amaitu da: oraindik atzera egin dezakezu.",
+      "cancelled_notice": "Data hau bertan behera dago: erantzunak itxita daude.",
+      "answer_error": "Zure erantzuna ez da gorde.",
+      "answer_for_error": "{{name}}(r)en erantzuna ez da gorde.",
+      "answers_title": "Erantzunak",
+      "no_answer": "Erantzunik gabe",
+      "nobody": "Inor ez",
+      "answer_for": "Erantzun {{name}}(r)en izenean",
+      "answer_for_hint": "Jokalari batzuek ez dute oraindik beren izena aukeratu: haien izenean erantzun dezakezu.",
+      "share_title": "Taldean",
+      "remind": "Gogorarazi",
+      "remind_hint": "Taldean partekatzen ditu Bai kopurua, epemuga eta gonbidapen-esteka.",
+      "notify": "Abisatu",
+      "notify_hint": "Taldean partekatzen du saioa jokatuko den ala ez.",
+      "copied": "Mezua kopiatuta",
+      "organizer_title": "Antolaketa",
+      "cancel": "Data hau bertan behera utzi",
+      "cancel_hint": "Data zerrendan geratzen da, marratuta, eta jokalariek ezin dute gehiago erantzun.",
+      "cancel_confirm": "Berretsi: data bertan behera utzi",
+      "cancel_keep": "Data mantendu",
+      "restore": "Data hau berrezarri"
+    },
+    "session_message": {
+      "title": "{{slot}} · {{day}}",
+      "ok_needed": "{{ok}} Bai, {{min}} behar dira",
+      "ok_free_one": "{{ok}} Bai, plaza {{count}} geratzen da",
+      "ok_free_other": "{{ok}} Bai, {{count}} plaza geratzen dira",
+      "ok_full": "{{ok}} Bai, beteta",
+      "answer_before": "Erantzun {{deadline}} baino lehen:",
+      "on_free_one": "Ziurtatuta: {{ok}} Bai, plaza {{count}} libre",
+      "on_free_other": "Ziurtatuta: {{ok}} Bai, {{count}} plaza libre",
+      "on_full": "Ziurtatuta: {{ok}} Bai, beteta",
+      "cancelled_short": "Bertan behera: {{ok}} Bai epemugan",
+      "cancelled": "Bertan behera",
+      "next": "Hurrengo saioa: {{day}}"
     }
   },
   "new_slot": {

@@ -11,25 +11,30 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Platform } from "react-native";
 
 import {
+  type AnswerStatus,
   type CreateSlot,
   isPikFailure,
   type JoinPreview,
   type MemberChanges,
   pikApi,
+  type SessionDetail,
   type SessionList,
+  type SessionSummary,
   type SlotCard,
   type SlotDetail,
 } from "@/api/pik";
 import { isTransient } from "@/features/slots/errors";
 import { creationKey, type PendingCreation } from "@/features/slots/idempotency";
 import { candidateSlots, isSlotOfCode, type JoinChoice } from "@/features/slots/join";
-import type { SlotSessions } from "@/features/slots/sessions";
+import { type SlotSessions, withAnswer } from "@/features/slots/sessions";
 
 /** Every pik query starts with "pik", apart from the Frontis ones. */
 export const slotKeys = {
   all: ["pik"] as const,
   mine: ["pik", "me"] as const,
   sessions: (slotId: string) => ["pik", "slots", slotId, "sessions"] as const,
+  /** One session: under the slot's sessions and the slot, so their invalidation reaches it. */
+  session: (slotId: string, date: string) => ["pik", "slots", slotId, "sessions", date] as const,
   slot: (slotId: string) => ["pik", "slots", slotId] as const,
   join: (code: string) => ["pik", "join", code] as const,
 };
@@ -326,4 +331,120 @@ export function useDeviceToken(): string | null {
     };
   }, []);
   return token;
+}
+
+// ── One session and its answers ───────────────────────────────────────────────
+
+/** The sessions of one slot from today on (`GET /slots/:id/sessions`), as the list reads them. */
+export function useSlotSessionList(slotId: string | null) {
+  return useQuery({
+    queryKey: slotKeys.sessions(slotId ?? ""),
+    queryFn: () => pikApi.slotSessions(slotId ?? ""),
+    enabled: !!slotId,
+    staleTime: ALWAYS_STALE,
+  });
+}
+
+/** One session with its answers (`GET /slots/:id/sessions/:date`); off without both. */
+export function useSessionDetail(slotId: string | null, date: string | null) {
+  return useQuery({
+    queryKey: slotKeys.session(slotId ?? "", date ?? ""),
+    queryFn: () => pikApi.session(slotId ?? "", date ?? ""),
+    enabled: !!slotId && !!date,
+    staleTime: ALWAYS_STALE,
+    retry: (failureCount, error) => failureCount < 2 && isTransient(error),
+  });
+}
+
+/** Puts pik's recomputed session into the session screen's data, its names kept. */
+function keepSummary(
+  queryClient: ReturnType<typeof useQueryClient>,
+  key: readonly unknown[],
+  summary: SessionSummary,
+) {
+  queryClient.setQueryData<SessionDetail>(
+    key,
+    (current) => (current ? { ...current, ...summary } : current),
+  );
+}
+
+/**
+ * Every query that shows an answer or a session's state: the slot (its upcoming sessions), the
+ * slot's sessions in the Créneaux list and the session screen, all under `slot(id)`, and /me,
+ * whose cards show the player's own answer and the next session's state.
+ */
+const invalidateSessionViews = (
+  queryClient: ReturnType<typeof useQueryClient>,
+  slotId: string,
+) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: slotKeys.slot(slotId) }),
+    queryClient.invalidateQueries({ queryKey: slotKeys.mine }),
+  ]);
+
+export interface AnswerVariables {
+  status: AnswerStatus;
+  /** The member who answers: the device's own, or the one an organizer answers for. */
+  memberId: string;
+}
+
+/**
+ * Answers for a session (`PUT …/answer`): the player's own answer, or, with `forOthers`, an
+ * organizer's answer for the member the variables name, one who never joined. The name moves at
+ * once (optimistic update); pik's recomputed counts and state replace the session's when it
+ * answers. A refused answer rolls back, and its error is the mutation's, for a translated
+ * message.
+ *
+ * The answers of one hook run one after the other (`scope`), so pik keeps the last tap. The
+ * views are read again once no answer of the session is under way, so that a refetch never
+ * shows an answer that a pending one is about to change.
+ */
+export function useAnswerSession(
+  slotId: string,
+  date: string,
+  { forOthers = false }: { forOthers?: boolean } = {},
+) {
+  const queryClient = useQueryClient();
+  const key = slotKeys.session(slotId, date);
+  const answers = [...key, "answer"] as const;
+  const who = forOthers ? "others" : "me";
+  const pending = () => queryClient.isMutating({ mutationKey: answers });
+  return useMutation({
+    mutationKey: [...answers, who],
+    scope: { id: `pik-answer-${slotId}-${date}-${who}` },
+    mutationFn: ({ status, memberId }: AnswerVariables) =>
+      pikApi.answerSession(slotId, date, status, forOthers ? memberId : undefined),
+    // A PUT: sending it again after a network failure writes the same answer.
+    retry: (failureCount, error) => failureCount < 2 && isTransient(error),
+    onMutate: async ({ status, memberId }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<SessionDetail>(key);
+      if (previous) {
+        queryClient.setQueryData(
+          key,
+          withAnswer(previous, memberId, status, new Date().toISOString()),
+        );
+      }
+      return { previous };
+    },
+    onSuccess: (result) => keepSummary(queryClient, key, result.session),
+    onError: (_error, _variables, context) => {
+      // Another answer is under way: its own update stays, and the refetch settles both.
+      if (context?.previous && pending() <= 1) queryClient.setQueryData(key, context.previous);
+    },
+    onSettled: async () => {
+      if (pending() <= 1) await invalidateSessionViews(queryClient, slotId);
+    },
+  });
+}
+
+/** Cancels a date, or undoes it (organizer, `PATCH …/sessions/:date`). */
+export function useSetSessionCancelled(slotId: string, date: string) {
+  const queryClient = useQueryClient();
+  const key = slotKeys.session(slotId, date);
+  return useMutation({
+    mutationFn: (cancelled: boolean) => pikApi.updateSession(slotId, date, { cancelled }),
+    onSuccess: (summary) => keepSummary(queryClient, key, summary),
+    onSettled: () => invalidateSessionViews(queryClient, slotId),
+  });
 }
