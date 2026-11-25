@@ -12,8 +12,8 @@ interface LaunchScreenProps {
 
 /**
  * The start-up animation, on the solid redFill of the screen header band. The
- * native splash (app.config.js) has the same redFill, light and dark, so the
- * step from one to the other does not show.
+ * native splash (app.config.js) has the same redFill, light and dark, and the
+ * same cream mark, so the step from one to the other does not show.
  */
 export function LaunchScreen({ onFinish }: LaunchScreenProps) {
   const styles = useThemedStyles(makeStyles);
@@ -69,8 +69,9 @@ export function LaunchScreen({ onFinish }: LaunchScreenProps) {
         <Animated.View
           style={{ opacity: iconOpacity, transform: [{ scale: iconScale }] }}
         >
+          {/* The cream mark of the native splash, the same image (assets/splash.svg). */}
           <Image
-            source={require("../../assets/images/icon.png")}
+            source={require("../../assets/images/splash-icon.png")}
             style={{ width: 112, height: 112 }}
           />
         </Animated.View>

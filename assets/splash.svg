@@ -1,18 +1,21 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background: Warm Limestone Cream (matches app.config.js splash.backgroundColor) -->
-  <rect width="1024" height="1024" fill="#F7F4EF"/>
-  <!-- K + pelota mark, centered with generous padding (scale 0.7, translate to center) -->
-  <g transform="translate(147, 147) scale(0.71)">
-    <!-- K: vertical stroke -->
-    <line x1="300" y1="196" x2="300" y2="828" stroke="#C8102E" stroke-width="84" stroke-linecap="round"/>
-    <!-- K: upper diagonal -->
-    <line x1="300" y1="512" x2="722" y2="196" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
-    <!-- K: lower diagonal -->
-    <line x1="300" y1="512" x2="722" y2="828" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
-    <!-- Pelota ball -->
-    <circle cx="784" cy="512" r="70" fill="#C8102E"/>
-    <!-- Pelota seam lines -->
-    <path d="M714 512 Q784 442 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
-    <path d="M714 512 Q784 582 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Native splash image (expo-splash-screen image in app.config.js,
+       assets/images/splash-icon.png), also drawn by the launch screen: the cream mark of
+       icon-square.svg, unscaled, on a transparent background over the splash's redFill
+       (#C8102E light, #B5142F dark). On Android 12 and up, Expo draws the image at imageWidth
+       (200 dp) in the middle of a 288 dp frame, and the system keeps a centred circle 192 dp
+       across: a radius of 1024 × 96 / 200 = 491.5 here. The stem's corner reaches 422 from
+       the centre (414 once rounded), inside it. -->
+  <defs><clipPath id="kbox"><rect x="200" y="196" width="700" height="632"/></clipPath></defs>
+  <g clip-path="url(#kbox)">
+    <!-- K: stem -->
+    <rect x="232" y="196" width="168" height="632" rx="20" fill="#F7F4EF"/>
+    <!-- K: arms, 150 wide, cut flat by the clip at the top and bottom of the stem -->
+    <g stroke="#F7F4EF" stroke-width="150" stroke-linecap="butt">
+      <line x1="330" y1="560" x2="700" y2="170"/>
+      <line x1="330" y1="464" x2="700" y2="854"/>
+    </g>
   </g>
+  <!-- Pelota, in the mouth of the K -->
+  <circle cx="716" cy="512" r="96" fill="#F7F4EF"/>
 </svg>

@@ -1,22 +1,24 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <!-- Maskable variant of icon-square.svg, for the manifest icon with purpose "maskable"
        (docs/how-to/howto-icons.md). The launcher may crop anything outside the safe zone,
        a circle centred on the icon with a radius of 40% of its size: 409.6 here.
-       Unscaled, the end caps of the K's vertical stroke reach 380.5 + 42 = 422.5 from the
-       centre, so the mark is scaled by 0.8 about the centre: 338.0, inside the safe zone. -->
-  <!-- Background: Warm Limestone Cream -->
-  <rect width="1024" height="1024" fill="#F7F4EF"/>
+       Unscaled, the stem's corner reaches 422 from the centre (414 once rounded), so the mark
+       is scaled by 0.8 about the centre: 422 × 0.8 = 338, inside the safe zone. The red still
+       fills the whole square. -->
+  <!-- Background: Basque red -->
+  <rect width="1024" height="1024" fill="#C8102E"/>
+  <defs><clipPath id="kbox"><rect x="200" y="196" width="700" height="632"/></clipPath></defs>
   <g transform="translate(512 512) scale(0.8) translate(-512 -512)">
-    <!-- K: vertical stroke -->
-    <line x1="300" y1="196" x2="300" y2="828" stroke="#C8102E" stroke-width="84" stroke-linecap="round"/>
-    <!-- K: upper diagonal -->
-    <line x1="300" y1="512" x2="722" y2="196" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
-    <!-- K: lower diagonal -->
-    <line x1="300" y1="512" x2="722" y2="828" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
-    <!-- Pelota ball -->
-    <circle cx="784" cy="512" r="70" fill="#C8102E"/>
-    <!-- Pelota seam lines -->
-    <path d="M714 512 Q784 442 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
-    <path d="M714 512 Q784 582 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
+    <g clip-path="url(#kbox)">
+      <!-- K: stem -->
+      <rect x="232" y="196" width="168" height="632" rx="20" fill="#F7F4EF"/>
+      <!-- K: arms, 150 wide, cut flat by the clip at the top and bottom of the stem -->
+      <g stroke="#F7F4EF" stroke-width="150" stroke-linecap="butt">
+        <line x1="330" y1="560" x2="700" y2="170"/>
+        <line x1="330" y1="464" x2="700" y2="854"/>
+      </g>
+    </g>
+    <!-- Pelota, in the mouth of the K -->
+    <circle cx="716" cy="512" r="96" fill="#F7F4EF"/>
   </g>
 </svg>

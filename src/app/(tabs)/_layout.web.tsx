@@ -21,7 +21,7 @@ const LOGO_BOTTOM = 16;
  */
 export default function TabLayout() {
   const { t } = useTranslation();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { rail } = useWebLayout();
 
@@ -50,7 +50,7 @@ export default function TabLayout() {
           // paddingTop moves the tabs below it.
           tabBarBackground: () => (
             <View style={styles.logo}>
-              <KanchaLogo size={LOGO_SIZE} variant={isDark ? "on-dark" : "on-light"} />
+              <KanchaLogo size={LOGO_SIZE} variant="tile" />
             </View>
           ),
           tabBarLabelStyle: { fontSize: 12, fontWeight: "700" },

@@ -84,11 +84,7 @@ export function ShareCard({ data, width }: { data: ShareCardData; width: number 
     <View style={styles.card}>
       <View style={styles.band}>
         <View style={styles.brand}>
-          <View style={styles.logo}>
-            <View style={styles.logoScale}>
-              <KanchaLogo size={LOGO_SIZE} variant="on-dark" />
-            </View>
-          </View>
+          <KanchaLogo size={LOGO_SIZE * unit} variant="mark" />
           <CardText style={styles.wordmark}>Kancha</CardText>
         </View>
         <CardText style={styles.eyebrow} numberOfLines={1}>{data.eyebrow}</CardText>
@@ -211,15 +207,6 @@ function makeStyles(unit: number) {
       borderBottomRightRadius: px(72),
     },
     brand: { flexDirection: "row", alignItems: "center", gap: px(24), marginBottom: px(36) },
-    // KanchaLogo's strokes follow its size: it is drawn at its image size, then scaled, so the
-    // K is as bold at every pixel ratio.
-    logo: { width: px(LOGO_SIZE), height: px(LOGO_SIZE) },
-    logoScale: {
-      width: LOGO_SIZE,
-      height: LOGO_SIZE,
-      transform: [{ scale: unit }],
-      transformOrigin: "top left",
-    },
     wordmark: { color: "#FFFFFF", fontSize: px(44), fontWeight: "900" },
     eyebrow: {
       color: c.onRedStrong,

@@ -1,5 +1,4 @@
 import Constants from "expo-constants";
-import { Image } from "expo-image";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -15,6 +14,7 @@ import {
   Sun,
   SunMoon,
 } from "@/components/icons";
+import { KanchaLogo } from "@/components/KanchaLogo";
 import { LeagueIcon } from "@/components/LeagueIcon";
 import { ListGroup, ListSeparator, ROW_INSET } from "@/components/ListGroup";
 import { ScreenHeader } from "@/components/ScreenHeader";
@@ -174,11 +174,7 @@ export default function AboutScreen() {
           subtitle={t("about.tagline")}
           trailing={
             <View style={styles.logoBox}>
-              <Image
-                source={require("../../../../assets/images/icon.png")}
-                style={styles.logo}
-                contentFit="contain"
-              />
+              <KanchaLogo size={52} variant="tile" />
             </View>
           }
         />
@@ -302,7 +298,6 @@ const makeStyles = (c: Palette) =>
       shadowRadius: 16,
       elevation: 8,
     },
-    logo: { width: 52, height: 52 },
     row: {
       paddingHorizontal: ROW_INSET,
       paddingVertical: 16,

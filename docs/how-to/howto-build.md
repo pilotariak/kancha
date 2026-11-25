@@ -43,8 +43,9 @@ make eas-export-web   # produces dist/
 make cf-deploy-web    # deploys to Cloudflare Pages (kancha-website project)
 ```
 
-The favicon, the home screen icon and the manifest icons are PNG files committed to the repository.
-To regenerate them after a logo change, see [How to regenerate the web icons](howto-icons.md).
+The app icons, the favicon, the home screen icon, the manifest icons and the splash image are PNG
+files committed to the repository.
+To regenerate them after a logo change, see [How to regenerate the icons](howto-icons.md).
 
 ## Submit to stores
 

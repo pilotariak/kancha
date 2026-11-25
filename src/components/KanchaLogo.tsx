@@ -1,93 +1,55 @@
 import React from "react";
-import Svg, { Circle, Defs, Ellipse, Path, RadialGradient, Stop } from "react-native-svg";
+import Svg, { Circle, Path, Rect } from "react-native-svg";
 
 import { KanchaColors } from "@/constants/colors";
 
-type LogoVariant = "on-dark" | "on-light";
+/**
+ * - `tile`: the red tile of the app icon, cream mark, rounded corners. For a cream, white or
+ *   dark surface: the web navigation rail, the About screen. `size` square.
+ * - `mark`: the cream mark alone. For a red surface: the band of `ShareCard`. `size` high, as
+ *   wide as the mark, so it lines up with the text beside and below it.
+ */
+type LogoVariant = "tile" | "mark";
 
 interface KanchaLogoProps {
   size?: number;
   variant?: LogoVariant;
 }
 
-export function KanchaLogo({ size = 96, variant = "on-dark" }: KanchaLogoProps) {
-  const onDark = variant === "on-dark";
+// The arms of the K, 150 units wide in the reference drawing (assets/icon-square.svg), cut flat
+// at the top and bottom of the stem. They are drawn as the outlines of the clipped strokes, so
+// the logo needs no clipPath: its id would be shared by every logo of a web page.
+const UPPER_ARM = "M384.4 611.6L754.4 221.6L727.4 196L572 196L275.6 508.4Z";
+const LOWER_ARM = "M384.4 412.4L754.4 802.4L727.4 828L572 828L275.6 515.6Z";
 
-  // on-light: stronger ring + red-dark K so it reads on cream backgrounds
-  const ballRing = onDark ? "rgba(200,16,46,0.12)" : "rgba(200,16,46,0.28)";
-  const seamColor = KanchaColors.red;
-  const kColor = onDark ? KanchaColors.red : KanchaColors.redDark;
+// The mark spans x 232 (the stem's left edge) to 812 (the ball's right edge) of the 1024 box.
+const MARK_LEFT = 232;
+const MARK_WIDTH = 580;
 
-  const seamW = size * 0.042;
-  const kW = size * 0.065; // slightly lighter than before — avoids overwhelming the seams
+/**
+ * Errebote, the Kancha mark (DESIGN.md, App icon and logo): a heavy K cut like a scoreboard
+ * digit, whose open mouth catches the ball. Drawn in the 1024 viewBox of the app icon, so the
+ * mark has the same height in both variants; `mark` trims the box to the mark's width. Its
+ * colors are the brand's and do not follow the theme, like the app icon.
+ */
+export function KanchaLogo({ size = 96, variant = "tile" }: KanchaLogoProps) {
+  const ink = KanchaColors.cream;
+  const tile = variant === "tile";
 
   return (
-    <Svg width={size} height={size} viewBox="0 0 100 100">
-      <Defs>
-        {
-          /*
-           * Radial gradient offset to top-left simulates a light source, giving
-           * the flat disc a sphere quality without a separate shadow layer.
-           */
-        }
-        <RadialGradient id="ball" cx="38%" cy="32%" r="72%">
-          <Stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
-          <Stop offset="100%" stopColor="#EDE8E2" stopOpacity="1" />
-        </RadialGradient>
-      </Defs>
-
-      {/* Pelota ball — gradient disc + subtle brand ring */}
-      <Circle cx="50" cy="50" r="46" fill="url(#ball)" />
-      <Circle cx="50" cy="50" r="46" fill="none" stroke={ballRing} strokeWidth="2" />
-
-      {/* Specular highlight — reinforces top-left light source */}
-      <Ellipse cx="36" cy="30" rx="12" ry="7" fill="rgba(255,255,255,0.42)" />
-
-      {
-        /*
-         * Seam arcs — quadratic Béziers. Control point (50,50) means each
-         * arc midpoint lands at (38,50) and (62,50), framing the K vertex.
-         */
-      }
-      <Path
-        d="M 26 15 Q 50 50 26 85"
-        fill="none"
-        stroke={seamColor}
-        strokeWidth={seamW}
-        strokeLinecap="round"
-        opacity={0.5}
-      />
-      <Path
-        d="M 74 15 Q 50 50 74 85"
-        fill="none"
-        stroke={seamColor}
-        strokeWidth={seamW}
-        strokeLinecap="round"
-        opacity={0.5}
-      />
-
-      {/* K monogram — three strokes anchored at (40, 50), drawn above seams */}
-      <Path
-        d="M 40 27 L 40 73"
-        fill="none"
-        stroke={kColor}
-        strokeWidth={kW}
-        strokeLinecap="round"
-      />
-      <Path
-        d="M 40 50 L 63 27"
-        fill="none"
-        stroke={kColor}
-        strokeWidth={kW}
-        strokeLinecap="round"
-      />
-      <Path
-        d="M 40 50 L 64 73"
-        fill="none"
-        stroke={kColor}
-        strokeWidth={kW}
-        strokeLinecap="round"
-      />
+    <Svg
+      width={tile ? size : (size * MARK_WIDTH) / 1024}
+      height={size}
+      viewBox={tile ? "0 0 1024 1024" : `${MARK_LEFT} 0 ${MARK_WIDTH} 1024`}
+    >
+      {tile ? <Rect width="1024" height="1024" rx="230" fill={KanchaColors.redFill} /> : null}
+      {/* K: stem */}
+      <Rect x="232" y="196" width="168" height="632" rx="20" fill={ink} />
+      {/* K: arms */}
+      <Path d={UPPER_ARM} fill={ink} />
+      <Path d={LOWER_ARM} fill={ink} />
+      {/* Pelota, in the mouth of the K */}
+      <Circle cx="716" cy="512" r="96" fill={ink} />
     </Svg>
   );
 }

@@ -7,16 +7,20 @@ module.exports = {
     slug: "kancha",
     version,
     orientation: "portrait",
+    // The icons draw the Errebote mark (DESIGN.md, App icon and logo), each PNG generated from
+    // its SVG in assets/ (docs/how-to/howto-icons.md). icon.png is the cream mark on a full-bleed
+    // red square (assets/icon-square.svg).
     icon: "./assets/images/icon.png",
     scheme: "kancha",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      // iOS 18 home screen appearances, both derived from icon.png with no new drawing. Apple
-      // asks for a dark icon on a transparent background, which the system fills, and a
-      // grayscale tinted icon: here the white glyph on opaque black, as Expo fills a tinted
-      // icon's transparency with white. `light` must be set, or the dark image becomes the
-      // default icon.
+      // iOS 18 home screen appearances, both the mark of icon.png recolored. Apple asks for a
+      // dark icon on a transparent background, which the system fills: here the mark in the
+      // dark palette's red (assets/icon-dark.svg). The tinted icon is a grayscale image: here
+      // the white mark on opaque black (assets/icon-tinted.svg), as Expo fills a tinted icon's
+      // transparency with white. `light` must be set, or the dark image becomes the default
+      // icon.
       icon: {
         light: "./assets/images/icon.png",
         dark: "./assets/images/icon-dark.png",
@@ -30,11 +34,13 @@ module.exports = {
     },
     android: {
       adaptiveIcon: {
+        // The cream mark on a transparent background, inside the 66 dp safe zone
+        // (assets/icon-adaptive.svg), over the red of icon.png.
         foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#F7F4EF",
-        // Themed icons (Android 13 and up): the white K of icon.svg on a transparent
-        // background, inside the 66 dp safe zone (assets/icon-monochrome.svg). The launcher
-        // tints it; icon-tinted.png is opaque and cannot serve here.
+        backgroundColor: "#C8102E",
+        // Themed icons (Android 13 and up): the white mark on a transparent background, inside
+        // the 66 dp safe zone (assets/icon-monochrome.svg). The launcher tints it;
+        // icon-tinted.png is opaque and cannot serve here.
         monochromeImage: "./assets/images/icon-monochrome.png",
       },
       // Off, which writes android:enableOnBackInvokedCallback="false": React Native's
@@ -92,6 +98,9 @@ module.exports = {
       [
         // The native splash is the launch screen's redFill (DESIGN.md), light
         // and dark, so start-up shows no cream flash before the red launch screen.
+        // The image is the cream mark on transparency (assets/splash.svg), which the
+        // launch screen also draws. Android 12 and up keeps a circle 192 dp across of
+        // the image drawn 200 dp wide: the mark fits, keep imageWidth at 200.
         "expo-splash-screen",
         {
           image: "./assets/images/splash-icon.png",
