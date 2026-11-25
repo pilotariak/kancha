@@ -968,9 +968,9 @@ Muted falls short of 4.5:1 in light on both surfaces, so the gray text uses plac
 Expo Router tabs. iOS and Android use native tabs (`NativeTabs` from
 `expo-router/unstable-native-tabs`, flagged unstable in SDK 54) in `src/app/(tabs)/_layout.tsx`;
 web uses React Navigation's JS tabs in `src/app/(tabs)/_layout.web.tsx`, which Expo Router picks
-over it on web only. Native tabs show only the routes that have a Trigger, so `index` is no tab
-there; web hides it with `href: null`. Competitions is the first tab: a launch on `/` lands on it.
-Créneaux (`slot`) comes second on every platform.
+over it on web only. Native tabs show only the routes that have a Trigger, so `index` and `slot`
+are no tabs there; web hides them with `href: null`. Competitions is the first tab: a launch on
+`/` lands on it.
 
 iOS: the system tab bar, Liquid Glass on iOS 26.
 
@@ -978,8 +978,7 @@ iOS: the system tab bar, Liquid Glass on iOS 26.
 Active tint:   red (tintColor), the only color set: a background, blur or label color would
                replace the system glass
 Icons:         SF Symbols, outline at rest and filled when selected: trophy, sportscourt,
-               info.circle (each with .fill). Créneaux keeps calendar.badge.clock in both
-               states: SF Symbols has no filled variant of it
+               info.circle (each with .fill)
 Label:         the system's
 Minimize:      the bar shrinks while a screen scrolls down (iOS 26, minimizeBehavior)
 ```
@@ -996,8 +995,7 @@ Ripple:        the ripple token (rippleColor). Without it, react-native-screens 
                itemRippleColor from the Material 3 theme, which does not define it: no ripple
 Label:         12px, weight 700
 Icons:         Material Design Icons rendered to images by VectorIcon: trophy-outline,
-               calendar-clock-outline, sword-cross, information-outline
-               (`src/components/android-tab-icon.android.tsx`).
+               sword-cross, information-outline (`src/components/android-tab-icon.android.tsx`).
                Native tabs take an image or a drawable, not the Lucide SVG components. A
                drawable is an Android resource, which this managed project could only add
                through a config plugin; the images need none

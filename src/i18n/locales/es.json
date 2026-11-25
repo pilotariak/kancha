@@ -365,7 +365,11 @@
         "required": "Escribe tu nombre.",
         "too_long": "{{max}} caracteres como máximo.",
         "in_list": "{{name}} está en la lista: ahora está elegido arriba."
-      }
+      },
+      "joined_title": "Ya estás dentro, {{name}}",
+      "already_title": "Ya estabas dentro, {{name}}",
+      "joined_text": "Este dispositivo responde como {{name}} en {{slot}}.",
+      "done": "Hecho"
     },
     "personal_link": {
       "title": "Tu enlace personal",
@@ -407,7 +411,9 @@
       "invalid_text": "Abre el enlace completo, tal como lo envió el organizador.",
       "error": "No se ha podido usar el enlace de recuperación.",
       "gone_title": "Este enlace ya se ha usado o ha caducado",
-      "gone_text": "Un enlace de recuperación solo sirve una vez, en 24 horas. Pide uno nuevo a un organizador."
+      "gone_text": "Un enlace de recuperación solo sirve una vez, en 24 horas. Pide uno nuevo a un organizador.",
+      "done_title": "Tu nombre ha vuelto",
+      "done_text": "Este dispositivo vuelve a responder con tu nombre, con tus respuestas."
     },
     "members_screen": {
       "eyebrow": "Jugadores",

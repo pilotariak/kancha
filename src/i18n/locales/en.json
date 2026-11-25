@@ -365,7 +365,11 @@
         "required": "Type your name.",
         "too_long": "{{max}} characters at most.",
         "in_list": "{{name}} is in the list: it is now picked above."
-      }
+      },
+      "joined_title": "Welcome, {{name}}",
+      "already_title": "You are already in, {{name}}",
+      "joined_text": "This device answers as {{name}} in {{slot}}.",
+      "done": "Done"
     },
     "personal_link": {
       "title": "Your personal link",
@@ -407,7 +411,9 @@
       "invalid_text": "Open the whole link, as the organizer sent it.",
       "error": "The recovery link could not be used.",
       "gone_title": "This link was used or has expired",
-      "gone_text": "A recovery link works once, within 24 hours. Ask an organizer for a new one."
+      "gone_text": "A recovery link works once, within 24 hours. Ask an organizer for a new one.",
+      "done_title": "Your name is back",
+      "done_text": "This device answers again under your name, with your answers."
     },
     "members_screen": {
       "eyebrow": "Players",

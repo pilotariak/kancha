@@ -1,13 +1,14 @@
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { isPikFailure, type JoinPreview } from "@/api/pik";
 import { CalendarClock, Check, MapPin, UserCheck, UserPlus } from "@/components/icons";
 import {
   Centered,
   Paragraph,
+  PersonalLinkCard,
   SectionTitle,
   SlotButton,
   SlotCardBox,
@@ -21,6 +22,7 @@ import { dateNames, formatDay, formatSchedule } from "@/features/slots/format";
 import {
   canAddName,
   type JoinChoice,
+  myName,
   NAME_MAX,
   nameProblem,
   nothingToPick,
@@ -41,14 +43,17 @@ import { useTheme, useThemedStyles } from "@/hooks/use-theme";
  * ADR-0002). A root route, out of the tabs: the link must open it while the Créneaux tab is
  * hidden on iOS and Android, where native tabs register only the routes that have a tab.
  *
- * Then the Créneaux list, on every platform. A device that is already in the slot goes there at
- * once. The native app offers the personal link on the slot's players screen.
+ * Then: on the web, the Créneaux list. On iOS and Android, where that tab is still hidden (#157
+ * shows it), the screen says the player is in, and offers the personal link.
  */
 export default function JoinSlotScreen() {
   const params = useLocalSearchParams<{ code?: string }>();
   const code = normalizeInviteCode(typeof params.code === "string" ? params.code : null);
   return code ? <JoinFlow key={code} code={code} /> : <CodeEntry typed={params.code} />;
 }
+
+/** Leaves for the Créneaux list where it can show: on the web. */
+const opensSlotList = Platform.OS === "web";
 
 // ── No code: type or paste it ─────────────────────────────────────────────────
 
@@ -120,12 +125,14 @@ function JoinFlow({ code }: { code: string }) {
   const preview = useJoinPreview(code);
   const recognized = useRecognizedSlot(code, preview.data);
   const join = useJoinSlot();
-  const [joined, setJoined] = useState(false);
-  const isIn = joined || !!recognized.slot;
+  const [joinedAs, setJoinedAs] = useState<string | null>(null);
 
-  // The player is in: show their slots.
+  const recognizedName = recognized.slot ? myName(recognized.slot) : null;
+  const isIn = joinedAs !== null || !!recognized.slot;
+
+  // The player is in: the web build shows their slots.
   useEffect(() => {
-    if (isIn) router.replace("/(tabs)/slot");
+    if (opensSlotList && isIn) router.replace("/(tabs)/slot");
   }, [isIn]);
 
   const goneLink = preview.isError && isPikFailure(preview.error, "not-found");
@@ -159,7 +166,33 @@ function JoinFlow({ code }: { code: string }) {
       );
     }
     const slot = preview.data;
-    if (isIn) return <Centered label={t("common.loading")} />;
+    if (isIn) {
+      if (opensSlotList) return <Centered label={t("common.loading")} />;
+      const name = joinedAs ?? recognizedName ?? "";
+      return (
+        <>
+          <SlotNotice
+            tone="success"
+            title={t(
+              joinedAs !== null ? "slot.join_flow.joined_title" : "slot.join_flow.already_title",
+              {
+                name,
+              },
+            )}
+            testID={joinedAs !== null ? "join-joined" : "join-already"}
+          >
+            {t("slot.join_flow.joined_text", { name, slot: slot.name })}
+          </SlotNotice>
+          <PersonalLinkCard testID="join-personal-link" />
+          <SlotButton
+            label={t("slot.join_flow.done")}
+            tone="primary"
+            onPress={() => router.replace("/")}
+            testID="join-done"
+          />
+        </>
+      );
+    }
     return (
       <>
         <PreviewCard preview={slot} names={names} />
@@ -170,8 +203,8 @@ function JoinFlow({ code }: { code: string }) {
               preview={slot}
               busy={join.isPending}
               error={join.error}
-              onJoin={(choice) =>
-                join.mutate({ code, choice }, { onSuccess: () => setJoined(true) })}
+              onJoin={(choice, name) =>
+                join.mutate({ code, choice }, { onSuccess: () => setJoinedAs(name) })}
             />
           )}
       </>
@@ -241,7 +274,7 @@ function WhoAreYou(
     preview: JoinPreview;
     busy: boolean;
     error: unknown;
-    onJoin: (choice: JoinChoice) => void;
+    onJoin: (choice: JoinChoice, name: string) => void;
   },
 ) {
   const { t } = useTranslation();
@@ -278,7 +311,7 @@ function WhoAreYou(
 
   const submit = () => {
     if (freeChoice) {
-      onJoin({ memberId: freeChoice.member_id });
+      onJoin({ memberId: freeChoice.member_id }, freeChoice.name);
       return;
     }
     if (selection !== OWN_NAME) return;
@@ -286,7 +319,7 @@ function WhoAreYou(
     if (problem?.code === "in_list") setSelected(problem.memberId);
     if (problem) return;
     const name = normalizeName(ownName);
-    onJoin({ name });
+    onJoin({ name }, name);
   };
 
   const problemText = problem && checked

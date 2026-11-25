@@ -91,9 +91,9 @@ function RestoreFromLink({ token }: { token: string }) {
           {t("slot.me_screen.restored_text")}
         </SlotNotice>
         <SlotButton
-          label={t("slot.me_screen.to_slots")}
+          label={t("slot.join_flow.done")}
           tone="primary"
-          onPress={() => router.replace("/(tabs)/slot")}
+          onPress={() => router.replace("/")}
           testID="personal-link-done"
         />
       </>

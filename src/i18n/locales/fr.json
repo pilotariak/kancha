@@ -365,7 +365,11 @@
         "required": "Tapez votre nom.",
         "too_long": "{{max}} caractères au plus.",
         "in_list": "{{name}} est dans la liste : ce nom est maintenant choisi ci-dessus."
-      }
+      },
+      "joined_title": "Bienvenue, {{name}}",
+      "already_title": "Vous y êtes déjà, {{name}}",
+      "joined_text": "Cet appareil répond en tant que {{name}} dans {{slot}}.",
+      "done": "Terminé"
     },
     "personal_link": {
       "title": "Votre lien personnel",
@@ -407,7 +411,9 @@
       "invalid_text": "Ouvrez le lien en entier, tel que l'organisateur l'a envoyé.",
       "error": "Le lien de récupération n'a pas pu servir.",
       "gone_title": "Ce lien a déjà servi ou a expiré",
-      "gone_text": "Un lien de récupération ne sert qu'une fois, dans les 24 heures. Demandez-en un nouveau à un organisateur."
+      "gone_text": "Un lien de récupération ne sert qu'une fois, dans les 24 heures. Demandez-en un nouveau à un organisateur.",
+      "done_title": "Votre nom est de retour",
+      "done_text": "Cet appareil répond de nouveau sous votre nom, avec vos réponses."
     },
     "members_screen": {
       "eyebrow": "Joueurs",

@@ -365,7 +365,11 @@
         "required": "Idatzi zure izena.",
         "too_long": "Gehienez {{max}} karaktere.",
         "in_list": "{{name}} zerrendan dago: goian aukeratuta dago orain."
-      }
+      },
+      "joined_title": "Ongi etorri, {{name}}",
+      "already_title": "Barruan zaude jada, {{name}}",
+      "joined_text": "Gailu honek {{name}} gisa erantzuten du {{slot}} ordutegian.",
+      "done": "Eginda"
     },
     "personal_link": {
       "title": "Zure esteka pertsonala",
@@ -407,7 +411,9 @@
       "invalid_text": "Ireki esteka osoa, antolatzaileak bidali zuen bezala.",
       "error": "Ezin izan da berreskuratze-esteka erabili.",
       "gone_title": "Esteka hau erabili da edo iraungi da",
-      "gone_text": "Berreskuratze-esteka batek behin bakarrik balio du, 24 orduren barruan. Eskatu berri bat antolatzaile bati."
+      "gone_text": "Berreskuratze-esteka batek behin bakarrik balio du, 24 orduren barruan. Eskatu berri bat antolatzaile bati.",
+      "done_title": "Zure izena itzuli da",
+      "done_text": "Gailu honek zure izenarekin erantzuten du berriro, zure erantzunekin."
     },
     "members_screen": {
       "eyebrow": "Jokalariak",

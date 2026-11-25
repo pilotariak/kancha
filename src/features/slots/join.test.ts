@@ -5,6 +5,7 @@ import {
   candidateSlots,
   isSlotOfCode,
   memberActions,
+  myName,
   nameKey,
   nameProblem,
   nothingToPick,
@@ -136,6 +137,7 @@ describe("organizer actions", () => {
       { id: "m_peio", name: "Peio", role: "player", claimed: false },
     ]);
     expect(suggestCoOrganizer(alone)).toBe(true);
+    expect(myName(alone)).toBe("Maite");
 
     const two = detail(organizer, [
       { id: "m_maite", name: "Maite", role: "organizer", claimed: true },

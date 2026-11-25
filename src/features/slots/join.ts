@@ -59,6 +59,10 @@ export const candidateSlots = (
 export const isSlotOfCode = (slot: Pick<SlotDetail, "invite_code">, code: string) =>
   slot.invite_code.toUpperCase() === code.toUpperCase();
 
+/** The caller's name in a slot. */
+export const myName = (slot: Pick<SlotDetail, "me" | "members">) =>
+  slot.members.find((member) => member.id === slot.me.member_id)?.name ?? null;
+
 // ── Organizer actions ─────────────────────────────────────────────────────────
 
 export type MemberAction =
