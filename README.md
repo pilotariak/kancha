@@ -12,12 +12,12 @@
 
 Documentation follows the [Diátaxis](https://diataxis.fr/) framework — see [`docs/`](docs/) for the full index.
 
-| Type              | Documents                                                                                                                                                                    |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Tutorials**     | [Getting started](docs/tutorials/getting-started.md)                                                                                                                         |
-| **How-to guides** | [Dev & run](docs/how-to/howto-dev.md) · [Build & deploy](docs/how-to/howto-build.md) · [Add a language](docs/how-to/howto-i18n.md) · [Web icons](docs/how-to/howto-icons.md) |
-| **Reference**     | [Configuration](docs/reference/configuration.md) · [Design system](docs/reference/design-system.md)                                                                          |
-| **Explanation**   | [Architecture](docs/explanation/architecture.md) · [Design philosophy](docs/explanation/design-philosophy.md)                                                                |
+| Type              | Documents                                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Tutorials**     | [Getting started](docs/tutorials/getting-started.md)                                                                                                                     |
+| **How-to guides** | [Dev & run](docs/how-to/howto-dev.md) · [Build & deploy](docs/how-to/howto-build.md) · [Add a language](docs/how-to/howto-i18n.md) · [Icons](docs/how-to/howto-icons.md) |
+| **Reference**     | [Configuration](docs/reference/configuration.md) · [Design system](docs/reference/design-system.md)                                                                      |
+| **Explanation**   | [Architecture](docs/explanation/architecture.md) · [Design philosophy](docs/explanation/design-philosophy.md)                                                            |
 
 ## Contributing
 

@@ -1,17 +1,20 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background: Warm Limestone Cream -->
-  <circle cx="512" cy="512" r="512" fill="#F7F4EF"/>
-  <!-- Subtle inner ring (defines the circle edge on white surfaces) -->
-  <circle cx="512" cy="512" r="505" fill="none" stroke="#E5DED6" stroke-width="10"/>
-  <!-- K: vertical stroke -->
-  <line x1="300" y1="196" x2="300" y2="828" stroke="#C8102E" stroke-width="84" stroke-linecap="round"/>
-  <!-- K: upper diagonal -->
-  <line x1="300" y1="512" x2="722" y2="196" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
-  <!-- K: lower diagonal -->
-  <line x1="300" y1="512" x2="722" y2="828" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
-  <!-- Pelota ball -->
-  <circle cx="784" cy="512" r="70" fill="#C8102E"/>
-  <!-- Pelota seam lines -->
-  <path d="M714 512 Q784 442 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
-  <path d="M714 512 Q784 582 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Round variant of icon-square.svg, for the browser tab (assets/images/favicon.png,
+       docs/how-to/howto-icons.md): the cream mark on a red disc, transparent outside it.
+       Unscaled, the stem's corner reaches 422 from the centre (414 once rounded), 90 units
+       clear of the disc's edge (radius 512). -->
+  <!-- Background: Basque red disc -->
+  <circle cx="512" cy="512" r="512" fill="#C8102E"/>
+  <defs><clipPath id="kbox"><rect x="200" y="196" width="700" height="632"/></clipPath></defs>
+  <g clip-path="url(#kbox)">
+    <!-- K: stem -->
+    <rect x="232" y="196" width="168" height="632" rx="20" fill="#F7F4EF"/>
+    <!-- K: arms, 150 wide, cut flat by the clip at the top and bottom of the stem -->
+    <g stroke="#F7F4EF" stroke-width="150" stroke-linecap="butt">
+      <line x1="330" y1="560" x2="700" y2="170"/>
+      <line x1="330" y1="464" x2="700" y2="854"/>
+    </g>
+  </g>
+  <!-- Pelota, in the mouth of the K -->
+  <circle cx="716" cy="512" r="96" fill="#F7F4EF"/>
 </svg>

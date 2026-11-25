@@ -576,14 +576,61 @@ menu: Open, Share, Copy link. Share and Copy link give the screen's public web a
 (`SITE_URL`, `src/constants/site.ts`), which opens the web app: the app has no universal links.
 Android and web keep the plain card: the ripple on Android, the hover and focus states on web.
 
-### App icon (Android)
+### App icon and logo
+
+Errebote, the Kancha mark: a heavy K cut like a scoreboard digit, whose open mouth catches the
+ball (the rebound). One mark for the app icon, the web icons, the native splash, the launch screen
+and the in-app logo. Its smallest feature is the ball, so it stays sharp at 16 px. The SVG
+sources are in `assets/`, and the PNG files are generated from them
+(`docs/how-to/howto-icons.md`).
 
 ```
-Adaptive icon:  foregroundImage on a #F7F4EF (cream) background
-Themed icon:    monochromeImage, Android 13 and up: the white K and pelota of icon.svg on a
-                transparent background, which the launcher tints. The seams are cut out of the
-                ball. Scaled by 0.72 about the centre to stay inside the 66 dp safe zone of the
-                108 dp layer (assets/icon-monochrome.svg, docs/how-to/howto-icons.md)
+Mark:          1024 viewBox (assets/icon-square.svg). Stem 168 × 632 at (232, 196), 20 radius;
+               two arms 150 wide from the stem, cut flat level with its ends; the ball, radius
+               96, at (716, 512) in the mouth. Farthest point from the centre: the stem's
+               corner, 422 (414 once rounded)
+Colors:        cream (#F7F4EF) mark on red (#C8102E): the light redFill, the red of the native
+               splash and of the launch screen, so opening the app shows no change of color
+```
+
+App icon, from `app.config.js`:
+
+```
+iOS:           icon.png, the red tile, full bleed and opaque. iOS 18 dark: the mark in the dark
+               palette's red (#F5586E) on transparency, which the system fills. iOS 18 tinted:
+               the white mark on opaque black, which the system tints
+Adaptive icon: Android, the cream mark (foregroundImage) on #C8102E (backgroundColor), scaled by
+               0.72 about the centre to stay inside the 66 dp safe zone of the 108 dp layer
+Themed icon:   monochromeImage, Android 13 and up: the white mark on a transparent background,
+               which the launcher tints, scaled by 0.72 like the adaptive icon
+Web:           the red tile for the iOS home screen and the manifest, the mark scaled by 0.8 for
+               the maskable icon, the cream mark on a red disc for the browser tab (favicon)
+```
+
+`KanchaLogo` (`src/components/KanchaLogo.tsx`) draws the mark in the app, as a vector, in the
+icon's 1024 viewBox: the mark has the same height in both variants, 62% of `size`. Its colors are
+the brand's and do not follow the theme.
+
+```
+tile:          the red tile (#C8102E, corner radius 22.5% of its size), cream mark, `size`
+               square. On cream, white or dark surfaces: the web rail (§ Navigation / Tab Bar),
+               and the About screen, 52px in the 64px white box of its header
+mark:          the cream mark alone, `size` high and only as wide as the mark (57% of `size`),
+               so it lines up with the text beside and below it. On red surfaces: the band of
+               the Share card
+```
+
+The launch screen (`src/components/launch-screen.tsx`, iOS and Android; web skips it) follows the
+native splash:
+
+```
+Native splash: expo-splash-screen, redFill (#C8102E light, #B5142F dark), splash-icon.png (the
+               cream mark on transparency) 200 wide in the middle. Android 12 and up keeps a
+               circle 192 dp across of it: the mark fits
+Launch screen: the same redFill and the same cream mark (splash-icon.png) at 112px, springing
+               from 0.72 to 1 as it fades in, then "Kancha" (#FFFFFF 42px weight 900) and
+               "Pilotariak" (onRedSoft 14px weight 700, uppercase, +6px tracking); the version at
+               the bottom, onRedSoft 12px
 ```
 
 ### Cards — Featured / Hero Card
@@ -1019,9 +1066,8 @@ From there, web shows a navigation rail on the left instead:
 ```
 Rail:          128px wide (RAIL_WIDTH), full height, tabBar background, 1px tabBarBorder
                right border, 8px side padding. React Navigation's left tab bar, material variant
-Logo:          KanchaLogo 48px, centered, 20px from the top, 16px above the tabs; on-light in
-               the light theme, on-dark in the dark one. Decorative: it sits on the tab bar's
-               background layer
+Logo:          KanchaLogo tile 48px, centered, 20px from the top, 16px above the tabs; the same
+               red tile in both themes. Decorative: it sits on the tab bar's background layer
 Tab:           24px icon above a 12px weight 700 label, 16px radius
 Active:        red icon and label on a redSoft pill
 Inactive:      text icon and label (not tabIconInactive: the labels need 4.5:1)
@@ -1735,9 +1781,10 @@ Sizes below are image pixels.
 ```
 Canvas:     cream
 Band:       redFill, 80px side padding, 56px top and bottom, 72px bottom corners. KanchaLogo
-            88px (on-dark) and "Kancha" #FFFFFF 44px weight 900, 24px apart. 36px below: the
-            competition (onRedStrong 30px weight 800, uppercase, +4px tracking, one line), the
-            specialty (#FFFFFF 56px weight 900, two lines), the category (onRedStrong 38px 700)
+            mark 88px high (the cream mark alone, 50px wide) and "Kancha" #FFFFFF 44px weight
+            900, 24px apart. 36px below: the competition (onRedStrong 30px weight 800, uppercase,
+            +4px tracking, one line), the specialty (#FFFFFF 56px weight 900, two lines), the
+            category (onRedStrong 38px 700)
 Meta:       48px under the band. The round in a pill: ink 30px weight 800, uppercase, +2px,
             28px × 14px padding, white with a 3px line border; the Final in amberBg with an
             amber border and a Trophy. Then the long date with its year ("Samedi 28 février

@@ -1,18 +1,22 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-  <!-- Full-bleed square variant of icon.svg, for the web icons (docs/how-to/howto-icons.md).
-       Home screens round the corners themselves, so the cream fills the whole square:
-       no circle, no ring. The K and the ball keep the coordinates of icon.svg. -->
-  <!-- Background: Warm Limestone Cream -->
-  <rect width="1024" height="1024" fill="#F7F4EF"/>
-  <!-- K: vertical stroke -->
-  <line x1="300" y1="196" x2="300" y2="828" stroke="#C8102E" stroke-width="84" stroke-linecap="round"/>
-  <!-- K: upper diagonal -->
-  <line x1="300" y1="512" x2="722" y2="196" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
-  <!-- K: lower diagonal -->
-  <line x1="300" y1="512" x2="722" y2="828" stroke="#C8102E" stroke-width="78" stroke-linecap="round"/>
-  <!-- Pelota ball -->
-  <circle cx="784" cy="512" r="70" fill="#C8102E"/>
-  <!-- Pelota seam lines -->
-  <path d="M714 512 Q784 442 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
-  <path d="M714 512 Q784 582 854 512" fill="none" stroke="#F7F4EF" stroke-width="8" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Errebote, the Kancha mark: a heavy K cut like a scoreboard digit, whose open mouth catches
+       the ball. The red tile, full bleed and opaque, for the app icon (assets/images/icon.png)
+       and the web icons (docs/how-to/howto-icons.md): a home screen rounds the corners itself.
+       Every other icon is this mark recolored, scaled about the centre or cut out. Unscaled,
+       the mark's farthest point from the centre (512, 512) is the stem's corner: 422 units
+       without its 20-unit rounding, 414 with it. The ball reaches 300. -->
+  <!-- Background: Basque red, the redFill of the native splash and the launch screen -->
+  <rect width="1024" height="1024" fill="#C8102E"/>
+  <defs><clipPath id="kbox"><rect x="200" y="196" width="700" height="632"/></clipPath></defs>
+  <g clip-path="url(#kbox)">
+    <!-- K: stem -->
+    <rect x="232" y="196" width="168" height="632" rx="20" fill="#F7F4EF"/>
+    <!-- K: arms, 150 wide, cut flat by the clip at the top and bottom of the stem -->
+    <g stroke="#F7F4EF" stroke-width="150" stroke-linecap="butt">
+      <line x1="330" y1="560" x2="700" y2="170"/>
+      <line x1="330" y1="464" x2="700" y2="854"/>
+    </g>
+  </g>
+  <!-- Pelota, in the mouth of the K -->
+  <circle cx="716" cy="512" r="96" fill="#F7F4EF"/>
 </svg>

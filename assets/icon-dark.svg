@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- iOS 18 dark icon (ios.icon.dark, assets/images/icon-dark.png): the mark of
+       icon-square.svg, unscaled, in the red of the dark palette (#F5586E) on a transparent
+       background, which the system fills with its dark backdrop. -->
+  <defs><clipPath id="kbox"><rect x="200" y="196" width="700" height="632"/></clipPath></defs>
+  <g clip-path="url(#kbox)">
+    <!-- K: stem -->
+    <rect x="232" y="196" width="168" height="632" rx="20" fill="#F5586E"/>
+    <!-- K: arms, 150 wide, cut flat by the clip at the top and bottom of the stem -->
+    <g stroke="#F5586E" stroke-width="150" stroke-linecap="butt">
+      <line x1="330" y1="560" x2="700" y2="170"/>
+      <line x1="330" y1="464" x2="700" y2="854"/>
+    </g>
+  </g>
+  <!-- Pelota, in the mouth of the K -->
+  <circle cx="716" cy="512" r="96" fill="#F5586E"/>
+</svg>
