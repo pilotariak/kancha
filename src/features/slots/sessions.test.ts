@@ -17,6 +17,10 @@ const session = (date: string, changes: Partial<SessionSummary> = {}): SessionSu
   ...changes,
 });
 
+/** Slot ids as pik writes them: UUID v7. */
+const SLOT_ID_A = "01a216ce-ea00-7762-b174-5b003c884036";
+const SLOT_ID_B = "01a216ce-ea04-75e1-ac75-6f793b4c6793";
+
 const slot = (id: string, name: string, timeFrom: string) => ({
   id,
   name,
@@ -58,11 +62,11 @@ describe("myAnswerLabel", () => {
 describe("sessionRows", () => {
   const slots: SlotSessions[] = [
     {
-      slot: slot("s_b", "Jeudi", "19:00"),
+      slot: slot(SLOT_ID_B, "Jeudi", "19:00"),
       sessions: [session("2026-11-26"), session("2026-12-03")],
     },
     {
-      slot: slot("s_a", "Mercredi", "18:00"),
+      slot: slot(SLOT_ID_A, "Mercredi", "18:00"),
       sessions: [session("2026-12-03"), session("2026-11-25")],
     },
   ];
@@ -85,7 +89,7 @@ describe("sessionRows", () => {
   it("marks the first session as the next one", () => {
     const next = sessionRows(slots).filter((row) => row.type === "session" && row.isNext);
     expect(next).toHaveLength(1);
-    expect(next[0]).toMatchObject({ slotId: "s_a", timeFrom: "18:00" });
+    expect(next[0]).toMatchObject({ slotId: SLOT_ID_A, timeFrom: "18:00" });
   });
 
   it("gives each row a unique key", () => {

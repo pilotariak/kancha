@@ -59,6 +59,12 @@ describe("list state", () => {
   });
 });
 
+/** Slot ids as pik writes them: UUID v7. */
+const SLOT_ID_1 = "01a216ce-e9ef-702d-af5d-a04307776c1b";
+const SLOT_ID_2 = "01a216ce-e9f6-75ae-85fd-f45ff0cd5526";
+const SLOT_ID_3 = "01a216ce-e9fa-7667-a01e-7b5d3204e6e5";
+const SLOT_ID_4 = "01a216ce-e9fd-740a-9265-2fba94195dcc";
+
 const card = (id: string, name: string, weekday = 3, time = "18:00") =>
   ({
     id,
@@ -76,12 +82,12 @@ describe("recognized slot", () => {
 
   it("narrows the device's slots on the name, the weekday and the time", () => {
     const slots = [
-      card("s_1", "Mercredi soir"),
-      card("s_2", "Mercredi soir", 4),
-      card("s_3", "Mercredi soir", 3, "19:00"),
-      card("s_4", "Jeudi"),
+      card(SLOT_ID_1, "Mercredi soir"),
+      card(SLOT_ID_2, "Mercredi soir", 4),
+      card(SLOT_ID_3, "Mercredi soir", 3, "19:00"),
+      card(SLOT_ID_4, "Jeudi"),
     ];
-    expect(candidateSlots(slots, preview).map((slot) => slot.id)).toEqual(["s_1"]);
+    expect(candidateSlots(slots, preview).map((slot) => slot.id)).toEqual([SLOT_ID_1]);
   });
 
   it("settles on the invite code, in any case", () => {
