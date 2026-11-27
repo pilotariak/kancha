@@ -135,6 +135,18 @@
     "D": "Semifinal {{number}}",
     "F": "Final {{number}}"
   },
+  "rounds_match_unnumbered": {
+    "B1T": "1st Round Playoff",
+    "B2T": "2nd Round Playoff",
+    "B3T": "3rd Round Playoff",
+    "B": "Playoff",
+    "BM": "Relegation Playoff",
+    "S": "Round of 32",
+    "H": "Round of 16",
+    "Q": "Quarterfinal",
+    "D": "Semifinal",
+    "F": "Final"
+  },
   "about": {
     "tagline": "Pelota tournament manager",
     "version": "Version",

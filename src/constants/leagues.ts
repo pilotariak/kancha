@@ -12,4 +12,5 @@ export const LEAGUES: League[] = [
   { id: "cbp", name: "Comité du Béarn de Pelote", code: "BÉ", supported: false },
   { id: "llpb", name: "Comité des Landes de Pelote Basque", code: "LA", supported: true },
   { id: "lidfpb", name: "Ligue d'Île-de-France de Pelote Basque", code: "IDF", supported: true },
+  { id: "ffpb", name: "Fédération Française de Pelote Basque", code: "FR", supported: true },
 ];

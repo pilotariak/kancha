@@ -135,6 +135,18 @@
     "D": "Demi-finale {{number}}",
     "F": "Finale {{number}}"
   },
+  "rounds_match_unnumbered": {
+    "B1T": "Barrage 1er tour",
+    "B2T": "Barrage 2e tour",
+    "B3T": "Barrage 3e tour",
+    "B": "Barrage",
+    "BM": "Barrage maintien",
+    "S": "Seizième de finale",
+    "H": "Huitième de finale",
+    "Q": "Quart de finale",
+    "D": "Demi-finale",
+    "F": "Finale"
+  },
   "about": {
     "tagline": "Gestionnaire de tournois de pelote",
     "version": "Version",
