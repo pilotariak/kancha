@@ -135,6 +135,18 @@
     "D": "{{number}}. erdifinala",
     "F": "Finala {{number}}"
   },
+  "rounds_match_unnumbered": {
+    "B1T": "1. txandako barragea",
+    "B2T": "2. txandako barragea",
+    "B3T": "3. txandako barragea",
+    "B": "Barragea",
+    "BM": "Mailari eusteko barragea",
+    "S": "Hamaseirena",
+    "H": "Zortzirena",
+    "Q": "Laurdenfinala",
+    "D": "Erdifinala",
+    "F": "Finala"
+  },
   "about": {
     "tagline": "Pilota txapelketa kudeatzailea",
     "version": "Bertsioa",

@@ -287,6 +287,37 @@ describe("groupByPool with the pools from Frontis", () => {
     expect(pools(round)).toBeNull();
   });
 
+  it("reads the pools of FFPB from Result.pool, not from the phase", () => {
+    // ffpb competition 17, Front Place Libre Main Nue par équipes, M12 (Frontis specialty 28,
+    // category 2), as Frontis returned it on 2026-11-27: the phase names the pool ("Poule 2"),
+    // without a match number, and the pools alternate. Zaharrer Segi has a team in each pool.
+    const ZAHARRER = ["5", "ZAHARRER SEGI - ST E. BAIGORRY"] as const;
+    const ffpb = {
+      stPee: side("2", "ST PEE UNION CLUB - ST PEE S/ NIVELLE", "104282", "106114"),
+      zaharrer1: side(...ZAHARRER, "109046", "107346"),
+      steMarie: side("150", "SAINTE MARIE SPORTS", "109168", "111226"),
+      itsasu: side("149", "ITSASUARRAK - ITXASSOU", "105042", "105043"),
+      zaharrer2: side(...ZAHARRER, "109666", "107733"),
+      saubusse: side("151", "SAUBUSSE SPORTS", "106528", "108794"),
+    };
+    const round = (pool: (phasePool: number) => number) => [
+      row("170", "Poule 1", "05/07/2026", "30/18", ffpb.stPee, ffpb.zaharrer1, pool(1)),
+      row("171", "Poule 2", "05/07/2026", "21/30", ffpb.itsasu, ffpb.zaharrer2, pool(2)),
+      row("172", "Poule 1", "12/07/2026", "30/9", ffpb.zaharrer1, ffpb.steMarie, pool(1)),
+      row("173", "Poule 2", "12/07/2026", "30/0", ffpb.zaharrer2, ffpb.saubusse, pool(2)),
+      row("174", "Poule 1", "19/07/2026", "0/30", ffpb.steMarie, ffpb.stPee, pool(1)),
+      row("175", "Poule 2", "19/07/2026", "10/30", ffpb.saubusse, ffpb.itsasu, pool(2)),
+    ];
+
+    const result = pools(round((n) => n));
+    expect(keys(result)).toEqual([["pool-1", null, 1], ["pool-2", null, 2]]);
+    expect(ids(result)).toEqual([["170", "172", "174"], ["171", "173", "175"]]);
+
+    // Were Result.pool to disagree with the phase, the pools would follow Result.pool.
+    const swapped = pools(round((n) => 3 - n));
+    expect(ids(swapped)).toEqual([["171", "173", "175"], ["170", "172", "174"]]);
+  });
+
   it("keeps the inference without pools, though it mixes the pool phases", () => {
     // Without the pools, the players who go on from one phase to the next join its pools.
     const result = pools(ctpbPhases().map((m) => ({ ...m, pool: null, poolPhase: null })));

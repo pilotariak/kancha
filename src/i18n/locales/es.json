@@ -135,6 +135,18 @@
     "D": "Semifinal {{number}}",
     "F": "Final {{number}}"
   },
+  "rounds_match_unnumbered": {
+    "B1T": "Repechaje 1ª ronda",
+    "B2T": "Repechaje 2ª ronda",
+    "B3T": "Repechaje 3ª ronda",
+    "B": "Repechaje",
+    "BM": "Repechaje de permanencia",
+    "S": "Dieciseisavo de final",
+    "H": "Octavo de final",
+    "Q": "Cuarto de final",
+    "D": "Semifinal",
+    "F": "Final"
+  },
   "about": {
     "tagline": "Gestor de torneos de pelota",
     "version": "Versión",

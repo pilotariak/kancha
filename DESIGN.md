@@ -505,7 +505,7 @@ Logo:      an official league logo, once a committee provides one, replaces the 
 ```
 
 Codes come from `League.code` (`src/constants/leagues.ts`): CA (lcapb), PB (ctpb), BÉ (cbp), LA
-(llpb), IDF (lidfpb). They are proposals, still to be confirmed by each committee. Keep a code
+(llpb), IDF (lidfpb), FR (ffpb). They are proposals, still to be confirmed by each committee. Keep a code
 precomposed (NFC): "BÉ" written as E + U+0301 can take its accent from a fallback font on web.
 
 | Pair                                        | Light  | Dark (Ikurriña) |
