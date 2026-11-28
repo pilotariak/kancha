@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.10.0](https://github.com/pilotariak/kancha/compare/v0.9.0...v0.10.0) (2026-11-28)
+
+
+### 🚀 Features
+
+* **details:** pick the category from a select field ([#175](https://github.com/pilotariak/kancha/issues/175)) ([51fdb50](https://github.com/pilotariak/kancha/commit/51fdb5021d67898ee462aa8f998e3c2594db7781))
+* **details:** read the pool of each match from Frontis ([#168](https://github.com/pilotariak/kancha/issues/168)) ([c413126](https://github.com/pilotariak/kancha/commit/c413126ee05bdfc324b789a70e41c0eb0b6e40a7))
+* **icon:** replace the K and pelota logo with Errebote ([#170](https://github.com/pilotariak/kancha/issues/170)) ([5ef3d91](https://github.com/pilotariak/kancha/commit/5ef3d9165a6629cd5e6220263412cdab0ea0f98e)), closes [#169](https://github.com/pilotariak/kancha/issues/169)
+* **league:** enable the ffpb league and read its round names ([#174](https://github.com/pilotariak/kancha/issues/174)) ([02f0a66](https://github.com/pilotariak/kancha/commit/02f0a66ba82d0b9140c3f929390de4811943bd14)), closes [#173](https://github.com/pilotariak/kancha/issues/173)
+* **players:** redesign the player page with matches and honours ([#161](https://github.com/pilotariak/kancha/issues/161)) ([63a72a0](https://github.com/pilotariak/kancha/commit/63a72a05f4418becc5e6ef0daf2987cdf95957c8))
+* **slot:** connect the slot wizard and the Créneaux list to pik ([#163](https://github.com/pilotariak/kancha/issues/163)) ([357581c](https://github.com/pilotariak/kancha/commit/357581c95c5f33228e65a4d29dadd1375d371b98)), closes [#155](https://github.com/pilotariak/kancha/issues/155)
+* **slot:** join a slot from an invite link, without an account ([#164](https://github.com/pilotariak/kancha/issues/164)) ([b9b300f](https://github.com/pilotariak/kancha/commit/b9b300ffab424acdacb9ccee3cb2b40d15bc11ad)), closes [#158](https://github.com/pilotariak/kancha/issues/158)
+* **slot:** use UUID v7 slot ids in test fixtures ([#171](https://github.com/pilotariak/kancha/issues/171)) ([19c1c54](https://github.com/pilotariak/kancha/commit/19c1c548ac5f19f230347e80b0705e985b414359))
+
+
+### 📚 Documentation
+
+* **adr:** record the slots service decisions ([#154](https://github.com/pilotariak/kancha/issues/154)) ([e08b07c](https://github.com/pilotariak/kancha/commit/e08b07c32d6e23bfcaeecfc4aff6dbd1457b0a32))
+
 ## [0.9.0](https://github.com/pilotariak/kancha/compare/v0.8.0...v0.9.0) (2026-11-22)
 
 
