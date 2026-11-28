@@ -88,6 +88,7 @@
     "progress_other": "{{played}} / {{count}} partida jokatuta",
     "finished": "Amaituta",
     "specialty_hint": "Espezialitateen zerrenda irekitzen du",
+    "category_hint": "Kategorien zerrenda irekitzen du",
     "today": "Gaur",
     "winner": "Irabazlea"
   },

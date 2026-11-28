@@ -88,6 +88,7 @@
     "progress_other": "{{played}} / {{count}} parties jouées",
     "finished": "Terminé",
     "specialty_hint": "Ouvre la liste des spécialités",
+    "category_hint": "Ouvre la liste des catégories",
     "today": "Aujourd'hui",
     "winner": "Vainqueur"
   },
