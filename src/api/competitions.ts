@@ -58,7 +58,7 @@ export const competitionsApi = {
     graphqlRequest<ResultFiltersData, { id: string }>(LIST_RESULT_FILTERS, { id }).then((d) => {
       const pairs = new Map<string, SpecialtyCategory>();
       for (const { specialty, category } of d.competition?.results ?? []) {
-        // A result without a category cannot be picked from the category chips.
+        // A result without a category cannot be picked from the category select.
         if (!category) continue;
         pairs.set(`${specialty.id}/${category.id}`, {
           specialtyId: specialty.id,

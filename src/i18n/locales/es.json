@@ -88,6 +88,7 @@
     "progress_other": "{{played}} / {{count}} partidos jugados",
     "finished": "Finalizado",
     "specialty_hint": "Abre la lista de especialidades",
+    "category_hint": "Abre la lista de categorías",
     "today": "Hoy",
     "winner": "Ganador"
   },

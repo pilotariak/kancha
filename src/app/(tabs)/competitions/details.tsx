@@ -23,7 +23,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BracketView, RoundGroup, TeamRows, usePhaseColors } from "@/components/BracketView";
-import { FilterChips } from "@/components/FilterChips";
 import { FinalSummaryCard } from "@/components/FinalSummaryCard";
 import { FollowButton } from "@/components/FollowButton";
 import {
@@ -732,7 +731,7 @@ export default function CompetitionDetailsScreen() {
     : listed
     ? <ResultsProgress results={listed} />
     : null;
-  const select = specialtyOptions.length > 0
+  const specialtySelect = specialtyOptions.length > 0
     ? (
       <SelectField
         label={t("specialty.title")}
@@ -753,16 +752,17 @@ export default function CompetitionDetailsScreen() {
       />
     )
     : null;
-  const chips = categoryOptions.length > 0
+  // A select as for the specialty: a competition can have nine categories with long names
+  // ("Vétéran 55 Séniors A"), which took several lines of chips.
+  const categorySelect = categoryOptions.length > 0
     ? (
-      <FilterChips
-        accessibilityLabel={t("category.title")}
+      <SelectField
+        label={t("category.title")}
+        hint={t("details.category_hint")}
         options={categoryOptions}
         value={categoryId}
         onChange={(next) => router.setParams({ categoryId: next })}
-        // Every category in view: the chips never scroll.
-        wrap
-        testID="category-chips"
+        testID="category-select"
       />
     )
     : null;
@@ -775,24 +775,24 @@ export default function CompetitionDetailsScreen() {
     />
   );
 
-  // The filters pinned under the bar: on a phone, three rows (the select, the chips, then the
+  // The filters pinned under the bar: on a phone, three rows (the two selects, then the
   // labelled view switch); in the grid, the filter bar. The filter column is not pinned: it is
   // sticky beside the results, under the bar.
   let pinnedFilters: ReactNode = null;
   if (!grid) {
     pinnedFilters = (
       <View style={styles.filters}>
-        {select}
-        {chips}
+        {specialtySelect}
+        {categorySelect}
         {viewSwitch}
       </View>
     );
   } else if (filterBar) {
-    // Each filter gets its own width.
+    // Each filter is a cell wide.
     pinnedFilters = (
       <View style={styles.filterBar}>
-        {select ? <View style={cell}>{select}</View> : null}
-        {chips ? <View style={styles.barChips}>{chips}</View> : null}
+        {specialtySelect ? <View style={cell}>{specialtySelect}</View> : null}
+        {categorySelect ? <View style={cell}>{categorySelect}</View> : null}
         <View style={cell}>{viewSwitch}</View>
       </View>
     );
@@ -913,8 +913,8 @@ export default function CompetitionDetailsScreen() {
             ? (
               <>
                 <View style={[styles.filters, styles.filterColumn, cell]}>
-                  {select}
-                  {chips}
+                  {specialtySelect}
+                  {categorySelect}
                   {viewSwitch}
                   {headline}
                 </View>
@@ -975,10 +975,9 @@ const makeStyles = (c: Palette) =>
     },
     resultsBesideFilters: { flex: 1, minWidth: 0, gap: 12 },
     // Two columns, and the bracket: the filters on a line above the results (two when the
-    // window is narrow). The field and the segments are a cell wide. The progress follows,
-    // with the results, as it is not pinned.
+    // window is narrow). The two fields and the segments are a cell wide. The progress
+    // follows, with the results, as it is not pinned.
     filterBar: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: GRID_GAP },
-    barChips: { flexGrow: 1, flexBasis: 200 },
 
     // States
     centered: { paddingVertical: 40, alignItems: "center" },

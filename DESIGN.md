@@ -1078,8 +1078,8 @@ Focus:         the browser's default focus ring on the tab link
 
 ### Select Field
 
-`SelectField` (`src/components/SelectField.tsx`): one choice among long names, such as the
-specialty on the results screen.
+`SelectField` (`src/components/SelectField.tsx`): one choice among long names or many options,
+such as the specialty and the category on the results screen.
 
 ```
 Field:     #FFFFFF (white), 1px solid #E5DED6 (line), 16px radius, min height 44px, 16px sides,
@@ -1156,8 +1156,10 @@ component or point its `PICTOGRAMS` key at another: no screen changes.
 
 ### Filter Chip
 
-`FilterChips` (`src/components/FilterChips.tsx`): one choice among short names, such as the
-category on the results screen.
+`FilterChips` (`src/components/FilterChips.tsx`): one choice among a few short names, such as
+the target on the score screen or the season on the player page. Many options, or long names,
+take a Select Field instead: the categories of a competition can be nine ("Vétéran 55 Séniors
+A"), several lines of chips.
 
 ```
 Row:       horizontal scroll that bleeds over the 20px gutter (content padded 20px), 8px gap
@@ -1171,11 +1173,10 @@ Web:       hover gives an unselected chip a lineStrong border; keyboard focus th
            row gains 4px above and below inside the scroll view (and loses it outside), so the
            ring is not clipped
 Wrap:      `wrap` prop: the chips flow onto several lines inside the gutter, with no scrolling,
-           no bleed and no fade. The results screen always wraps them, on a phone too, so no
-           category hides off screen
+           no bleed and no fade. The score screen's targets and the player page's seasons
+           always wrap, so no chip hides off screen
 Bleed:     `bleed="start"`: the row bleeds over the left gutter only and ends where the control
-           after it starts, the fade at that end. No screen uses it since the results screen
-           wraps its chips
+           after it starts, the fade at that end. No screen uses it
 ```
 
 ### Segmented Control
@@ -1379,14 +1380,15 @@ collapsed:
 
 ```
 Row 1:     SelectField, full width: the court above the discipline (SpecialtyLabel)
-Row 2:     FilterChips (wrap), full width: every category in view, on a second line when they
-           do not fit (three séries at 320px)
+Row 2:     SelectField, full width: the category, one line ("Vétéran 55 Séniors A")
 Row 3:     SegmentedControl, full width, with its labels (Liste, Tableau, Classement)
 ```
 
-A view switch beside the chips, icons only, left them 185px of a 375px screen: the third série
-sat entirely past the edge (0 of 103px at 375 and 390px), behind a cut second chip and the edge
-fade. Each further line of chips adds 42px to the pinned block.
+The category was a row of wrapping chips, which kept every category in view but grew 42px a
+line: the nine categories of the Championnat de France 2026 (ffpb 17, specialty 31) took five
+lines (202px) at 390px and eight (328px) at 320px, where the pinned filters ended at 632px of a
+640px screen. The field is 44px whatever their number; the sheet holds the nine without
+scrolling at 390 × 844.
 
 The pinned block (`PinnedHeader` in `details.tsx`) is the ScrollView's second child, pinned by
 `stickyHeaderIndices` on iOS and Android and by `position: sticky` on web (react-native-web
@@ -1396,7 +1398,7 @@ filters.
 From three columns, the list and the ranking give the filters the first grid column:
 
 ```
-Filters:   one cell wide, 12px from the results: SelectField, FilterChips (wrap),
+Filters:   one cell wide, 12px from the results: the specialty and category SelectFields,
            SegmentedControl, ResultsProgress or, once finished, the Final Summary card.
            position: sticky, 68px from the top (the 52px
            collapsed bar and 16px): they stay in view under the bar while the matches scroll.
@@ -1408,10 +1410,10 @@ With two columns, and always for the bracket, which needs the whole width to fit
 the filters sit in a bar above the results, and the results get every column:
 
 ```
-Filter bar: one wrapping row, 12px gap: SelectField (a cell wide), FilterChips (wrap, the
-            rest of the line, 200px at least), SegmentedControl (a cell wide), pinned under the
-            collapsed bar as on a phone. ResultsProgress on its own line under them, with the
-            results. When the line is too short, the segmented control drops to a second line
+Filter bar: one wrapping row, 12px gap: the specialty and category SelectFields and the
+            SegmentedControl, each a cell wide, pinned under the collapsed bar as on a phone.
+            ResultsProgress on its own line under them, with the results. When the line is too
+            short (two columns), the segmented control drops to a second line
 Results:    the match grid, the ranking table (712px at most) or the fit bracket
 ```
 
